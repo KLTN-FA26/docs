@@ -1,0 +1,228 @@
+# Bảng thuật ngữ (Glossary)
+
+Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlowCommerce. Sắp xếp theo nhóm để dễ tra; trong mỗi nhóm theo thứ tự bảng chữ cái tiếng Anh.
+
+---
+
+## 1. Thuật ngữ chung về hàng hoá & tồn kho
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Áo thun – Đỏ – Size M") là một SKU riêng. |
+| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Áo thun" có nhiều màu/size). |
+| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (màu × size × chất liệu…), tương ứng một SKU. |
+| **UoM** (Unit of Measure) | Đơn vị tính (cái, hộp, kg, mét…). |
+| **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
+| **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
+| **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
+| **Inventory / Tồn kho** | Số lượng hàng hoá đang có, luôn gắn với **vị trí** hoặc trạng thái quá cảnh. |
+| **Available stock / Tồn khả dụng** | Tồn có thể bán/xuất được (đã trừ phần bị giữ, khoá, cách ly). |
+| **ATP** (Available To Promise) | Số lượng có thể "hứa giao" cho khách = tồn khả dụng − phần đã đặt/giữ. |
+| **On-order / Incoming stock** | Hàng đã đặt qua PO nhưng **chưa về kho**. |
+| **In-Transit / Đang quá cảnh** | Hàng đã rời kho nguồn nhưng chưa tới kho đích (trong luồng chuyển kho). |
+| **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. |
+| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán. |
+| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng. |
+| **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do, phê duyệt) khi phát hiện chênh lệch. |
+| **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một số vị trí theo lịch, không dừng toàn kho. |
+| **FIFO** (First-In-First-Out) | Nhập trước xuất trước. |
+| **FEFO** (First-Expired-First-Out) | Hạn dùng gần thì xuất trước. |
+| **ABC / XYZ analysis** | Phân loại SKU theo mức độ quan trọng (ABC: theo giá trị/tần suất xuất; XYZ: theo độ ổn định nhu cầu). |
+
+---
+
+## 2. Thuật ngữ mua hàng & nhập kho (Procurement / Inbound)
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **Procurement / Mua hàng** | Quy trình mua hàng từ nhà cung cấp về kho. |
+| **Supplier / Vendor / Nhà cung cấp (NCC)** | Đối tác bán hàng hoá cho doanh nghiệp. |
+| **PO** (Purchase Order) — **Đơn đặt hàng** | Chứng từ cam kết mua: SKU nào, số lượng, giá, giao về kho nào, khi nào. |
+| **PO line / Dòng hàng PO** | Một dòng trong PO: một SKU + số lượng + đơn giá. |
+| **Open quantity / Số lượng còn chờ nhận** | SL đặt − SL đã nhận của một dòng PO. |
+| **PO revision / amendment** | Bản chỉnh sửa PO sau khi đã `Confirmed` (tăng version, có log). |
+| **MOQ** (Minimum Order Quantity) | Số lượng đặt hàng tối thiểu NCC yêu cầu. |
+| **Lead time / Thời gian giao** | Khoảng thời gian từ khi đặt đến khi hàng về. |
+| **Receipt / Goods Receipt — Nhận hàng** | Ghi nhận hàng thực tế về kho theo PO: kiểm đếm, QC, ghi lô. |
+| **Delivery note / Packing slip / Phiếu giao hàng** | Chứng từ NCC gửi kèm lô hàng, liệt kê nội dung giao. |
+| **QC** (Quality Control) — **Kiểm tra chất lượng** | Đánh giá hàng nhận: đạt (Accepted) / cách ly (Quarantine) / từ chối (Rejected). |
+| **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng, chưa cho vào tồn khả dụng. |
+| **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
+| **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt. |
+| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. |
+| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. |
+| **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
+| **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
+| **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
+| **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu nhận (inbound) lên vị trí lưu trữ chính thức. |
+| **Inbound area / Staging area / Khu chờ cất** | Khu tạm chứa hàng vừa nhận, chờ putaway. |
+
+---
+
+## 3. Thuật ngữ vận hành kho (Warehouse Operations)
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **WMS** (Warehouse Management System) | Hệ thống quản lý kho. |
+| **Warehouse Map / Bản đồ kho** | Mô hình không gian kho (2D mặt bằng / 3D khối kệ) kèm trạng thái lấp đầy. |
+| **Zone / Aisle / Rack / Level / Bin (Slot)** | Phân cấp không gian: Khu vực → Dãy → Kệ → Tầng → Ô chứa. |
+| **Location / Bin / Vị trí** | Điểm chứa hàng nhỏ nhất, có mã vạch (location barcode) riêng. |
+| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng. |
+| **Capacity / Sức chứa** | Giới hạn của một vị trí: theo thể tích, khối lượng, hoặc số ô. |
+| **Slotting / Slotting Suggestion / Gợi ý vị trí** | Đề xuất vị trí lưu trữ tối ưu cho một SKU dựa trên quy tắc & dữ liệu. |
+| **Putaway recommendation** | Tên gọi khác của gợi ý vị trí khi cất hàng. |
+| **Re-slotting / Tối ưu vị trí** | Sắp xếp lại vị trí SKU định kỳ khi nhu cầu/tần suất xuất thay đổi. |
+| **Golden zone** | Khu vực dễ với tay nhất (ngang hông–vai), ưu tiên cho hàng bán chạy. |
+| **Honeycombing** | Tình trạng vị trí bị chiếm dở dang, còn trống nhưng không dùng được → lãng phí chỗ. |
+| **Velocity / Tần suất xuất** | Mức độ một SKU được lấy ra để giao (nhanh/chậm). |
+| **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm (nhiệt độ, hazmat, sức chứa, single-SKU/lot). |
+| **Compatibility rule / Quy tắc tương thích** | Cặp SKU/nhóm phải để gần nhau hoặc cấm để chung. |
+| **Hazmat** (Hazardous materials) | Hàng nguy hiểm, có khu vực & quy tắc lưu trữ riêng. |
+| **Picking / Lấy hàng** | Lấy hàng từ các vị trí để gom thành đơn chuẩn bị giao. |
+| **Pick list / Danh sách lấy hàng** | Danh sách SKU–vị trí–số lượng cần lấy cho một hoặc nhiều đơn. |
+| **Pick task / Nhiệm vụ lấy hàng** | Đơn vị công việc picking giao cho một NV kho. |
+| **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. |
+| **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một khu; đơn đi qua nhiều khu. |
+| **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. |
+| **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. |
+| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick, chờ đóng gói / bàn giao vận chuyển. |
+| **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại vị trí lưu trữ. |
+| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ vùng dự trữ (reserve) xuống vùng picking khi sắp cạn. |
+| **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
+| **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. |
+| **Packing slip / Phiếu đóng gói** | Phiếu liệt kê nội dung kiện, đặt kèm trong hoặc ngoài kiện. |
+| **Dimensional weight / Khối lượng quy đổi** | Khối lượng tính cước theo thể tích kiện (khi hàng cồng kềnh nhẹ cân). |
+| **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao kiện cho hãng vận chuyển ngoài để giao đến khách. |
+| **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận). |
+| **AWB** (Air Waybill) / **Shipping label** / **Vận đơn / Nhãn vận chuyển** | Chứng từ + nhãn dán lên kiện, chứa mã theo dõi. |
+| **Tracking number / Mã theo dõi** | Mã để tra cứu hành trình kiện hàng. |
+| **Manifest / Bảng kê bàn giao** | Danh sách kiện giao cho hãng vận chuyển trong một lần, hai bên ký. |
+| **POD** (Proof of Delivery) — **Bằng chứng giao hàng** | Chữ ký/ảnh/thời gian xác nhận đã giao. |
+| **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện không giao được, quay về kho gửi. |
+| **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái & lịch sử tracking chung. |
+| **Inter-warehouse Transfer / Chuyển kho** | Di chuyển tồn giữa hai kho khác địa điểm. |
+| **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. |
+| **Transfer Order (TO) / Lệnh chuyển kho** | Chứng từ yêu cầu chuyển hàng giữa/trong kho. |
+| **Transfer discrepancy / Chênh lệch chuyển kho** | Sai khác giữa số xuất ở kho nguồn và số nhận ở kho đích. |
+
+---
+
+## 4. Thuật ngữ sàn TMĐT (E-commerce / Storefront)
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **Storefront** | Mặt tiền bán hàng online mà khách nhìn thấy. |
+| **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày để khách duyệt & mua. |
+| **PLP** (Product Listing Page) — **Trang danh sách sản phẩm** | Trang liệt kê nhiều sản phẩm (có lọc, sắp xếp). |
+| **PDP** (Product Detail Page) — **Trang chi tiết sản phẩm** | Trang một sản phẩm: hình ảnh, mô tả, chọn biến thể, giá, tình trạng còn hàng. |
+| **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. |
+| **Print-on-demand / In theo yêu cầu** | Sản phẩm chỉ được in/sản xuất sau khi có đơn của khách. |
+| **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. |
+| **Print area / Vùng in** | Khu vực cho phép in nội dung trên sản phẩm. |
+| **Safe area / Vùng an toàn** | Phần bên trong vùng in, tránh bị xén khi sản xuất. |
+| **Bleed / Vùng tràn lề** | Phần mở rộng ngoài mép để tránh viền trắng khi cắt. |
+| **DPI** (Dots Per Inch) | Độ phân giải in; DPI thấp → ảnh in bị mờ/vỡ. |
+| **RGB / CMYK** | Hệ màu màn hình (RGB) vs hệ màu in (CMYK); cần chuyển đổi khi in. |
+| **Live 3D Preview / Xem trước 3D trực tiếp** | Hiển thị thiết kế 2D "dán" lên mô hình 3D, cập nhật realtime khi khách chỉnh. |
+| **Design draft / Thiết kế nháp** | Bản thiết kế đang chỉnh, lưu tạm. |
+| **Design snapshot / artifact / Bản thiết kế chốt** | Bản mô tả đầy đủ & **bất biến** của thiết kế khách đã xác nhận, đi kèm đơn để sản xuất. |
+| **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). |
+| **Print-ready file / File sẵn sàng in** | File xuất bản in đúng chuẩn kỹ thuật cho xưởng. |
+| **Cart / Giỏ hàng** | Nơi tạm gom sản phẩm trước khi đặt hàng. |
+| **Cart line / Dòng giỏ hàng** | Một mục trong giỏ: SKU + số lượng (+ design snapshot nếu tùy chỉnh). |
+| **Checkout / Thanh toán (bước đặt hàng)** | Quy trình biến giỏ hàng thành đơn hàng: địa chỉ, vận chuyển, thanh toán. |
+| **Abandoned cart / Giỏ hàng bị bỏ** | Giỏ quá hạn không thao tác, chưa chuyển thành đơn. |
+| **Order / Đơn hàng** | Chứng từ bán hàng chính thức sau khi khách đặt. |
+| **Order number / Mã đơn hàng** | Mã định danh duy nhất của đơn. |
+| **Order line / Dòng đơn hàng** | Một mục hàng trong đơn với giá đã chốt. |
+| **Price lock / Chốt giá** | Cố định giá dòng hàng vào đơn tại thời điểm đặt; không đổi theo giá catalog sau đó. |
+| **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn confirmed đến khi giao hàng cho khách (pick–pack–ship). |
+| **Fulfillment sourcing / Chọn kho xuất** | Quyết định đơn được giao từ kho nào. |
+| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt / từ nhiều kho. |
+| **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
+| **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
+| **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). |
+| **Authorize / Capture / Void** | Giữ tiền (authorize) → trừ tiền (capture); huỷ khoản đã giữ chưa trừ (void). |
+| **COD** (Cash On Delivery) — **Thanh toán khi nhận hàng** | Khách trả tiền cho người giao khi nhận hàng. |
+| **Prepaid / Trả trước** | Khách thanh toán trước khi hàng được giao. |
+| **Deposit / Partial payment — Đặt cọc / Trả một phần** | Trả trước một phần (thường % giá trị đơn) để đơn vào sản xuất. |
+| **Refund / Hoàn tiền** | Trả lại tiền cho khách (toàn phần / một phần). |
+| **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. |
+| **Reconciliation / Đối soát** | So khớp giao dịch hệ thống với báo cáo của cổng thanh toán / hãng vận chuyển. |
+| **Settlement report** | Báo cáo quyết toán tiền từ cổng thanh toán về doanh nghiệp. |
+| **COD remittance** | Tiền hãng vận chuyển thu hộ (COD) chuyển trả về doanh nghiệp. |
+| **PCI-DSS** | Bộ tiêu chuẩn bảo mật dữ liệu thẻ thanh toán. |
+| **Order Management / Quản lý đơn hàng** | Lớp điều phối & theo dõi vòng đời đơn (không tự pick/pack/ship). |
+| **Order timeline / Dòng thời gian đơn** | Chuỗi sự kiện của đơn theo thời gian. |
+| **Order amendment / Sửa đơn** | Thay đổi nội dung đơn sau khi tạo (theo quy tắc trạng thái). |
+| **RMA** (Return Merchandise Authorization) — **Phiếu cho phép trả hàng** | Chứng từ chấp thuận & hướng dẫn khách trả hàng. |
+| **Exchange / Đổi hàng** | Trả hàng cũ + nhận hàng mới (thường xử lý như trả + đơn mới). |
+| **Sales Chat / Messaging / Nhắn tin với Sale** | Kênh hội thoại trực tiếp khách ↔ nhân viên Sale. |
+| **Conversation / Thread / Hội thoại** | Một chuỗi tin nhắn giữa khách và Sale, gắn ngữ cảnh (sản phẩm/đơn/thiết kế). |
+| **Routing / Định tuyến** | Gán hội thoại đến agent phù hợp (kỹ năng, tải, lịch sử). |
+| **SLA** (Service Level Agreement) | Cam kết mức dịch vụ (ví dụ thời gian phản hồi tối đa). |
+| **FRT** (First Response Time) — **Thời gian phản hồi đầu tiên** | Khoảng thời gian từ khi khách nhắn đến khi Sale trả lời lần đầu. |
+| **CSAT** (Customer Satisfaction) — **Mức hài lòng khách hàng** | Điểm khách chấm sau khi được hỗ trợ. |
+| **Escalate / Chuyển cấp** | Đưa vấn đề vượt thẩm quyền lên Supervisor/Manager. |
+| **Internal note / Ghi chú nội bộ** | Ghi chú chỉ nhân viên thấy, khách không thấy. |
+| **Customer profile / Hồ sơ khách hàng** | Bộ dữ liệu về một khách: định danh, địa chỉ, lịch sử, phân khúc, rủi ro. |
+| **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. |
+| **Address book / Sổ địa chỉ** | Danh sách địa chỉ giao & xuất hoá đơn của khách. |
+| **Segment / Nhóm khách / Phân khúc** | Nhóm khách theo tiêu chí (VIP, doanh nghiệp, mới, rủi ro…) để áp giá/ưu đãi. |
+| **Consent / Đồng ý (nhận tin)** | Sự cho phép của khách để gửi marketing, có lưu thời điểm. |
+| **Right to be forgotten / Quyền được xoá** | Quyền của khách yêu cầu xoá/ẩn danh dữ liệu cá nhân. |
+| **Anonymize / Ẩn danh** | Tách bỏ thông tin cá nhân khỏi dữ liệu, giữ lại phần chứng từ bắt buộc. |
+| **Merge / Hợp nhất hồ sơ** | Gộp hai hồ sơ khách trùng thành một. |
+| **Risk profile / blacklist — Hồ sơ rủi ro / danh sách chặn** | Đánh dấu khách có rủi ro (chargeback, gian lận, RTO cao). |
+
+---
+
+## 5. Thuật ngữ trạng thái thường gặp
+
+| Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
+|------------|-------------|--------------|
+| `Draft` | PO, Receipt, Invoice, TO, Design | Bản nháp, sửa tự do, chưa có hiệu lực |
+| `Pending Approval` | PO, TO | Chờ phê duyệt |
+| `Confirmed` | PO, Order | Đã chốt / đã được xác nhận, khoá sửa nội dung chính |
+| `Partially Received` | PO, TO | Đã nhận một phần |
+| `Received` | PO, TO | Đã nhận đủ |
+| `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
+| `Cancelled` | Hầu hết chứng từ | Bị huỷ trước khi hoàn tất |
+| `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
+| `Allocated` / `Reserved` | Tồn kho | Đã giữ cho một đơn cụ thể |
+| `In-Transit` | Transfer, Shipment | Đang trên đường |
+| `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
+| `Paid` | Order (payment_status) | Đã thu đủ tiền |
+| `In Production` | Order | Đang sản xuất/in (đơn tùy chỉnh) |
+| `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý |
+| `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
+| `Refunded` / `Partially Refunded` | Order, Payment | Đã hoàn tiền toàn phần / một phần |
+
+---
+
+## 6. Từ viết tắt nhanh
+
+| Viết tắt | Đầy đủ | Nghĩa |
+|----------|--------|-------|
+| WMS | Warehouse Management System | Hệ thống quản lý kho |
+| SKU | Stock Keeping Unit | Đơn vị lưu kho |
+| PO | Purchase Order | Đơn đặt hàng NCC |
+| TO | Transfer Order | Lệnh chuyển kho |
+| RMA | Return Merchandise Authorization | Phiếu cho phép trả hàng |
+| ATP | Available To Promise | Số lượng có thể hứa giao |
+| UoM | Unit of Measure | Đơn vị tính |
+| MOQ | Minimum Order Quantity | Số lượng đặt tối thiểu |
+| QC | Quality Control | Kiểm tra chất lượng |
+| RTV | Return To Vendor | Trả hàng nhà cung cấp |
+| RTO | Return To Origin | Hoàn hàng về kho |
+| POD | Proof of Delivery | Bằng chứng giao hàng |
+| AWB | Air Waybill | Vận đơn |
+| COD | Cash On Delivery | Thanh toán khi nhận hàng |
+| AP | Accounts Payable | Công nợ phải trả |
+| FIFO / FEFO | First-In / First-Expired-First-Out | Nhập trước / hết hạn trước, xuất trước |
+| PLP / PDP | Product Listing / Detail Page | Trang danh sách / chi tiết sản phẩm |
+| DPI | Dots Per Inch | Độ phân giải in |
+| SLA | Service Level Agreement | Cam kết mức dịch vụ |
+| FRT | First Response Time | Thời gian phản hồi đầu |
+| CSAT | Customer Satisfaction | Mức hài lòng khách hàng |
+| PCI-DSS | Payment Card Industry Data Security Standard | Tiêu chuẩn bảo mật dữ liệu thẻ |
