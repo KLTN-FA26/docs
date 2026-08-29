@@ -6,15 +6,24 @@ Di chuyển hàng hoá từ **khu vực chờ cất (inbound / staging area)** s
 
 Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp đến hiệu suất [Picking](../07-picking/README.md), mật độ lưu trữ, và an toàn kho. Module dựa vào **[Gợi ý vị trí (Slotting Suggestion)](../06-warehouse-map-slotting/README.md)** để đề xuất vị trí tối ưu.
 
+Về nghiệp vụ, Putaway được thiết kế theo mô hình WMS phổ biến như Odoo/MISA: **Receipt/nhận hàng** đưa hàng vào khu chờ, sau đó **Putaway/nhập kho nội bộ** mới đưa hàng lên bin chính thức. Thuật toán chỉ là lớp gợi ý; quyết định cuối cùng vẫn được xác nhận bằng thao tác quét thực tế tại kho.
+
+> Nguyên tắc dữ liệu: thao tác vật lý thường xử lý theo **thùng/kiện/pallet** (handling unit), nhưng tồn kho hệ thống vẫn ghi nhận theo **đơn vị cơ sở của SKU**. Ví dụ: nhận 4 thùng x 50 cái thì task có thể hướng dẫn theo 4 thùng, còn `InventoryStock` lưu 200 cái.
+
 ---
 
 ## 2. Actor liên quan
 
 | Actor | Vai trò |
 |-------|---------|
-| **Nhân viên kho (Warehouse Staff / Putaway Operator)** | Nhận nhiệm vụ putaway, di chuyển hàng, quét xác nhận vị trí đặt |
-| **Hệ thống (Slotting Engine)** | Sinh gợi ý vị trí dựa trên quy tắc |
-| **Quản lý kho (Warehouse Manager)** | Ghi đè gợi ý, xử lý trường hợp không còn chỗ, cấu hình quy tắc slotting |
+| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, bàn giao phần hàng `Accepted` ở inbound/staging cho luồng putaway, nhận nhiệm vụ putaway, di chuyển hàng, quét mã hàng/kiện/vị trí, xác nhận số lượng thực cất |
+| **Nhân viên QC** (nếu có) | Xác nhận hàng `Accepted` / `Quarantine` / `Rejected`; chỉ hàng `Accepted` được đưa vào vùng lưu trữ khả dụng |
+| **Quản lý kho (Warehouse Manager / Thủ kho)** | Phân công, ưu tiên task, xử lý hết chỗ/lệch tồn, duyệt override đặc biệt, mở/khoá vị trí |
+| **Admin / System Config** | Khai báo kho, zone, bin, capacity, barcode, compatibility group, quy tắc single-SKU/single-lot |
+| **Hệ thống (WMS / Slotting Engine)** | Sinh gợi ý vị trí, kiểm tra ràng buộc cứng, khoá mềm vị trí khi task được nhận, tạo movement log |
+| **Inventory Controller** (nếu có) | Kiểm kê vị trí, xử lý sai lệch tồn phát hiện trong/ sau putaway |
+
+> Trong MVP, `Warehouse Staff` là role vận hành chính cho cả nhận hàng và putaway. `QC` và `Inventory Controller` chỉ tách riêng nếu kho cần kiểm soát chất lượng/kiểm kê độc lập.
 
 ---
 
@@ -25,11 +34,14 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
 | Nhiệm vụ putaway (putaway task) | Sinh từ Receipt `Confirmed` (phần hàng `Accepted`) | Có |
-| SKU, số lượng, lô/hạn dùng/serial | Từ Receipt | Có |
+| SKU, số lượng cơ sở, lô/hạn dùng/serial | Từ Receipt; số lượng lưu theo đơn vị cơ sở của SKU | Có |
+| Quy cách xử lý (handling unit) | Thùng/kiện/pallet, số lượng mỗi kiện, kích thước, khối lượng | Có nếu quản lý theo kiện |
 | Vị trí nguồn (from location) | Thường là inbound/staging bin | Có |
 | Vị trí đích gợi ý (suggested to location) | Từ Slotting Engine | Không (nếu tắt gợi ý thì nhập tay) |
 | Vị trí đích thực tế (actual to location) | NV kho quét khi đặt hàng | Có |
-| Thiết bị nâng hạ / ràng buộc khu vực | (ví dụ hàng nặng chỉ để tầng thấp) | Không |
+| Ràng buộc lưu trữ | Zone, nhiệt độ, hàng dễ vỡ/nguy hiểm, compatibility group, single-SKU/single-lot | Có nếu SKU/vị trí có cấu hình |
+| Thiết bị nâng hạ / ràng buộc thao tác | Ví dụ hàng nặng chỉ để tầng thấp, cần xe nâng, không đưa vào lối hẹp | Không |
+| Mã lý do override | Bắt buộc khi vị trí thực tế khác vị trí gợi ý | Có nếu override |
 
 ### Output
 
@@ -37,26 +49,41 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 |---------|----------|
 | **Cập nhật tồn kho theo vị trí** (location inventory) | 06 Map, 07 Picking, báo cáo tồn |
 | **Tồn khả dụng để bán (available stock)** tăng lên | 13 Catalog / 14 Order (ATP) |
-| **Putaway task `Completed`** + lịch sử di chuyển (movement log) | Truy vết, 03 Receipt (đóng phiếu) |
+| **Putaway task `Completed`** + lịch sử di chuyển (StockMovement / movement log) | Truy vết, 03 Receipt (đóng phiếu) |
 | **Cảnh báo chênh lệch gợi ý vs thực tế** | 06 Slotting (feedback loop) |
+| **Exception / On Hold reason** nếu không thể cất hàng | Manager, Inventory Controller |
 
 ---
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-1. **Sinh nhiệm vụ putaway** — sau khi [Receipt](../03-receipt/README.md) `Confirmed`, hệ thống tạo putaway task cho từng dòng hàng `Accepted` (có thể gộp/tách theo SKU, lô, kiện).
-2. **Gợi ý vị trí (slotting suggestion)** — [Slotting Engine](../06-warehouse-map-slotting/README.md) đề xuất vị trí đích tối ưu dựa trên: nhóm hàng, tần suất xuất (velocity/ABC), kích thước & khối lượng SKU, chỗ trống, quy tắc gần nhau/tránh xa (compatibility), FIFO/FEFO theo lô.
-3. **Phân công & ưu tiên** — task được đẩy vào hàng đợi của NV kho; ưu tiên hàng bán chạy, hàng có hạn dùng gần, hàng chặn lối đi.
-4. **Lấy hàng ở inbound area** — NV kho quét mã task / SKU / lô tại vị trí nguồn để xác nhận đúng hàng và đúng số lượng.
-5. **Di chuyển đến vị trí đích** — theo gợi ý hoặc theo lộ trình.
-6. **Đặt hàng & quét xác nhận vị trí** — quét mã vị trí (location barcode). Hệ thống kiểm tra:
+1. **Sinh nhiệm vụ putaway** — sau khi [Receipt](../03-receipt/README.md) `Confirmed`, hệ thống tạo putaway task cho từng phần hàng `Accepted`. Task có thể tách theo SKU, lô, serial, kiện hoặc pallet để khớp thao tác thực tế.
+2. **Chuẩn hoá số lượng xử lý** — hệ thống quy đổi giữa đơn vị vận hành và đơn vị tồn kho: ví dụ `quantityBase = 200 cái`, `packageQty = 50 cái/thùng`, `handlingUnits = 4 thùng`.
+3. **Gợi ý vị trí (slotting suggestion)** — [Slotting Engine](../06-warehouse-map-slotting/README.md) đề xuất vị trí đích dựa trên:
+   - Ràng buộc cứng: zone, loại hàng, sức chứa, kích thước, trọng lượng, single-SKU/single-lot, compatibility group.
+   - Tiêu chí mềm: gom cùng SKU/lô, velocity/ABC, khoảng cách đến khu picking/packing, FEFO/FIFO, cân bằng tải, độ lấp đầy.
+4. **Phân công & ưu tiên** — task được đẩy vào hàng đợi hoặc gán cho Warehouse Staff. Manager có thể ưu tiên hàng bán chạy, hàng sắp hết hạn, hàng đang chặn dock/lối đi.
+5. **Nhận task & khoá mềm vị trí** — khi nhân viên nhận task hoặc chấp nhận gợi ý, hệ thống giữ tạm sức chứa của vị trí trong một khoảng thời gian để tránh hai task song song cùng dùng một bin.
+6. **Lấy hàng ở inbound area** — nhân viên quét mã task, mã vị trí nguồn, mã SKU/lô/kiện và xác nhận số lượng lấy khỏi staging.
+7. **Di chuyển đến vị trí đích** — đi theo vị trí/lộ trình được gợi ý; với kho lớn có thể qua nhiều chặng trung gian.
+8. **Đặt hàng & quét xác nhận vị trí** — quét mã vị trí (location barcode). Hệ thống kiểm tra:
    - Vị trí có phù hợp SKU/khu vực không.
    - Còn sức chứa (capacity) không.
    - Có vi phạm quy tắc (ví dụ trộn lô khác hạn dùng trong cùng bin nếu cấm) không.
-7. **Xử lý sai lệch vị trí** — nếu NV kho đặt khác vị trí gợi ý: cho phép kèm **lý do** (hết chỗ, hàng cồng kềnh…); ghi nhận để Slotting Engine học.
-8. **Cập nhật tồn kho** — số lượng chuyển từ *inbound* sang *storage location*; tồn khả dụng để bán tăng tương ứng (trừ phần cấu hình cần bước kích hoạt thêm).
-9. **Hoàn tất task** — putaway task `Completed`. Khi mọi task của một Receipt xong → Receipt có thể `Closed`.
-10. **Putaway nhiều chặng (multi-step)** — với kho lớn: chặng 1 đưa từ dock ra khu tạm gần khu lưu trữ, chặng 2 cất lên kệ; mỗi chặng là một task con.
+9. **Xử lý sai lệch vị trí** — nếu đặt khác vị trí gợi ý, hệ thống chỉ cho xác nhận khi vị trí mới không vi phạm ràng buộc cứng. Nhân viên phải chọn mã lý do như: vị trí thực tế đã đầy, kệ đang bảo trì, hàng không vừa, ưu tiên gom lô, hoặc chỉ đạo từ Manager.
+10. **Cập nhật tồn kho bằng movement** — hệ thống không sửa trực tiếp số `onHand`; phải tạo movement từ `Inbound/Staging` sang `Storage Bin`. Tồn khả dụng để bán tăng sau khi hàng đã nằm ở vị trí cho phép picking.
+11. **Hoàn tất task** — putaway task `Completed`. Khi mọi task của một Receipt đã xử lý xong, Receipt có thể chuyển `Closed`.
+12. **Putaway nhiều chặng (multi-step)** — với kho lớn: chặng 1 đưa từ dock ra staging gần zone, chặng 2 cất lên kệ/bin cuối. Mỗi chặng nên là task con hoặc `PutawayTaskLeg` để truy vết người làm, thời gian và vị trí.
+
+### Các luồng biến thể
+
+| Luồng | Khi dùng | Cách xử lý |
+|-------|----------|------------|
+| **Luồng chuẩn 2 bước** | Kho nhỏ/vừa | Receipt vào staging → Putaway lên bin chính thức |
+| **Có QC/cách ly** | Hàng cần kiểm chất lượng | `Accepted` sinh putaway; `Quarantine` vào khu cách ly; `Rejected` trả NCC/huỷ |
+| **Override vị trí** | Gợi ý không đúng thực tế | Cho chọn vị trí khác nếu không vi phạm ràng buộc cứng, bắt buộc mã lý do |
+| **Không có bin hợp lệ** | Kho đầy, sai cấu hình, hàng quá khổ | Task `On Hold`, cảnh báo Manager, mở overflow/bulk zone hoặc tạo transfer |
+| **Split nhiều vị trí** | Một bin không chứa đủ toàn bộ kiện | Hệ thống có thể đề xuất tách qua nhiều bin hợp lệ; đây là năng lực nâng cao của hệ thống, không nên coi là mặc định của mọi WMS |
 
 ---
 
@@ -68,8 +95,9 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 |------------|---------|-------------|----|
 | `Pending` | Đã sinh, chờ phân công | → `Assigned`, → `Cancelled` | System |
 | `Assigned` | Đã giao cho NV kho | → `In Progress`, → `Pending` (trả lại) | Warehouse Staff / Manager |
-| `In Progress` | NV kho đang di chuyển hàng | → `Completed`, → `On Hold` | Warehouse Staff |
-| `On Hold` | Tạm dừng (không còn chỗ, chờ QC, chờ Manager) | → `In Progress`, → `Cancelled` | Warehouse Staff / Manager |
+| `In Progress` | NV kho đang xử lý; vị trí có thể đã được khoá mềm | → `Partially Completed`, → `Completed`, → `On Hold` | Warehouse Staff |
+| `Partially Completed` | Đã cất xong một phần dòng/kiện, còn phần chưa xử lý | → `In Progress`, → `On Hold`, → `Completed` | Warehouse Staff |
+| `On Hold` | Tạm dừng do exception: không còn chỗ, chờ QC, lệch số lượng, chờ Manager | → `In Progress`, → `Cancelled` | Warehouse Staff / Manager |
 | `Completed` | Đã đặt hàng vào vị trí, tồn đã cập nhật | *(cuối)* | Warehouse Staff |
 | `Cancelled` | Huỷ (hàng chuyển sang quy trình khác, ví dụ trả NCC) | *(cuối)* | Manager |
 
@@ -81,6 +109,15 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 | `In Putaway` | Đang di chuyển (in-transit nội bộ) |
 | `Available` | Đã ở vị trí lưu trữ, **khả dụng** để picking/bán |
 | `Blocked` | Ở vị trí nhưng bị khoá (QC lại, kiểm kê) |
+
+### Dữ liệu tối thiểu cần lưu
+
+| Thực thể | Trường chính |
+|----------|--------------|
+| `PutawayTask` | `taskNo`, `receiptId`, `warehouseId`, `status`, `priority`, `assignedTo`, `startedAt`, `completedAt`, `holdReason` |
+| `PutawayTaskLine` | `skuId`, `lotId`, `serialIds`, `quantityBase`, `handlingUnitType`, `handlingUnitQty`, `fromLocationId`, `suggestedLocationId`, `actualLocationId`, `overrideReason` |
+| `StockMovement` | `sourceDocument`, `movementType = PUTAWAY`, `fromLocationId`, `toLocationId`, `skuId`, `lotId`, `quantityBase`, `performedBy`, `performedAt` |
+| `SlottingFeedback` | `suggestedLocationId`, `actualLocationId`, `score`, `reasonCode`, `acceptedSuggestion`, `createdAt` |
 
 ---
 
@@ -95,18 +132,36 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 - **BR-05:** Với SKU FEFO (First-Expired-First-Out), gợi ý vị trí phải giúp lô hạn dùng gần được picking trước; không "chôn" lô cũ sau lô mới.
 - **BR-06:** Putaway task đã `Completed` không sửa; điều chỉnh vị trí sau đó phải dùng [Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md).
 - **BR-07:** Sai lệch giữa vị trí gợi ý và vị trí thực tế phải kèm lý do (mã lý do chuẩn hoá).
+- **BR-08:** Khi nhân viên chấp nhận gợi ý, sức chứa vị trí nên được khoá mềm trong thời hạn cấu hình; quá hạn hoặc huỷ task thì giải phóng.
+- **BR-09:** Override chỉ được phép với tiêu chí mềm. Ràng buộc cứng như sai zone, quá tải, cấm trộn hàng, hàng nguy hiểm/nhiệt độ không phù hợp phải bị chặn.
+- **BR-10:** Split một task qua nhiều bin được phép nếu cấu hình hỗ trợ, nhưng mỗi phần split vẫn phải có dòng/movement riêng để truy vết.
+- **BR-11:** Nếu phát hiện lệch số lượng tại staging hoặc tại bin đích, không tự sửa task đã chốt; tạo adjustment/cycle count có phê duyệt.
+- **BR-12:** Available-to-promise chỉ tăng khi hàng đã putaway vào vị trí được phép xuất bán; hàng ở inbound, quarantine, blocked hoặc đang di chuyển không được bán.
+
+### Đối chiếu chuẩn tham chiếu
+
+| Chủ đề | Cách thiết kế trong hệ thống | Ghi chú so với Odoo/MISA |
+|--------|------------------------------|---------------------------|
+| Nhập kho nhiều bước | Receipt vào staging → Putaway lên bin | Khớp mô hình nhiều bước của WMS; MISA cũng hỗ trợ quy trình nhập/xuất nhiều bước |
+| Gợi ý vị trí | Slotting Engine lọc ràng buộc cứng, sau đó chấm điểm tiêu chí mềm | Tương tự tinh thần Odoo Putaway Rules/Storage Categories; công thức điểm là thiết kế riêng |
+| Capacity | Kiểm tra thể tích, trọng lượng, số ô, loại kiện | Odoo có storage category/capacity; hệ thống cần tự định nghĩa rõ cách tính phần còn trống |
+| Override thủ công | Cho phép đổi vị trí nếu không vi phạm ràng buộc cứng và có lý do | Phù hợp thực tế vận hành barcode/WMS: người làm kho xác nhận theo thực địa |
+| Split nhiều bin | Có thể hỗ trợ khi một bin không đủ chứa | Đây là năng lực nâng cao của hệ thống; không nên mô tả là hành vi mặc định của Odoo |
+| FIFO/FEFO | Putaway phải hỗ trợ picking đúng FIFO/FEFO về sau | Khớp chiến lược xuất kho phổ biến trong Odoo/MISA |
 
 ### Edge case
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
 | Vị trí gợi ý đã bị chiếm (do task song song) | Slotting Engine gợi ý lại vị trí thay thế; hoặc NV kho chọn vị trí hợp lệ khác + lý do |
-| Không còn chỗ cho SKU (kho đầy) | Task `On Hold`; cảnh báo Manager; xem xét [Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) hoặc mở khu vực tràn (overflow) |
+| Không còn chỗ cho SKU (kho đầy) | Task `On Hold` kèm reason; cảnh báo Manager; xem xét [Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) hoặc mở khu vực tràn (overflow) |
 | Hàng cồng kềnh không vừa vị trí tiêu chuẩn | Đặt khu vực bulk/oversize; ghi đè gợi ý |
 | Kiện hỗn hợp nhiều SKU | Tách task theo SKU; hoặc dùng vị trí "mixed" nếu cho phép |
 | Mất mát/hư hỏng phát hiện khi putaway | Điều chỉnh giảm số lượng task + inventory adjustment + ghi log; thông báo Manager |
 | Đặt nhầm vị trí và đã confirm | Sửa bằng Intra-warehouse Transfer, không sửa trực tiếp task |
 | Hàng Quarantine sau đó `Accepted` | Sinh putaway task mới từ vùng cách ly vào vùng lưu trữ |
+| Gợi ý hết hạn trước khi nhân viên tới kệ | Tính lại gợi ý theo tồn/capacity hiện tại trước khi cho xác nhận |
+| Hàng phải putaway theo pallet nhưng app đang chia theo cái | Hiển thị task theo handling unit, movement vẫn ghi `quantityBase` để tồn kho chính xác |
 
 ---
 
@@ -115,7 +170,7 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 | Module | Quan hệ |
 |--------|---------|
 | [03 · Receipt](../03-receipt/README.md) | Receipt `Confirmed` sinh putaway task; putaway xong → Receipt `Closed` |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Cung cấp gợi ý vị trí; nhận feedback khi thực tế lệch gợi ý |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Cung cấp gợi ý vị trí, kiểm tra hard constraints, khoá mềm capacity, nhận feedback khi thực tế lệch gợi ý |
 | [01 · Product Creation](../01-product-creation/README.md) | Kích thước/khối lượng/quy cách SKU là đầu vào cho quy tắc slotting |
 | [07 · Picking](../07-picking/README.md) | Chất lượng putaway (vị trí hợp lý, FEFO đúng) quyết định hiệu suất & độ chính xác picking |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Công cụ để sửa/tối ưu vị trí sau khi putaway đã hoàn tất |
