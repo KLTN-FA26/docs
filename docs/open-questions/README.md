@@ -10,7 +10,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module liên quan |
 |---|---------|-------------------|-----------|------------------|
-| A1 | Hệ thống hỗ trợ **đa công ty / đa pháp nhân (multi-entity)** hay chỉ một doanh nghiệp với nhiều kho? | Một doanh nghiệp, **nhiều kho (multi-warehouse)** | 🔴 | 00, 10, 04, 15 |
+| A1 | Hệ thống hỗ trợ **đa công ty / đa pháp nhân (multi-entity)** hay chỉ một doanh nghiệp với nhiều kho? | ✅ **Đã chốt 2026-08-29:** một pháp nhân duy nhất, **nhiều kho vật lý (multi-warehouse)**. Không hỗ trợ multi-entity. Chuyển kho là luân chuyển tồn nội bộ, không phát sinh hoá đơn/công nợ nội bộ. | 🟢 | 00, 10, 04, 15 |
 | A2 | Mô hình **phân quyền (RBAC)** chi tiết: danh sách vai trò chuẩn, một người có được nhiều vai trò, phạm vi dữ liệu theo kho/nhóm khách? | Có RBAC; một tài khoản có thể mang nhiều vai trò; quyền theo tối thiểu | 🔴 | Tất cả |
 | A3 | Có **quy trình maker–checker (tạo / duyệt)** cho master data (sản phẩm, NCC, danh mục) không, hay Admin toàn quyền? | Có bước duyệt; tổ chức nhỏ có thể gộp | 🟡 | 01 |
 | A4 | **Đơn vị tiền tệ**: chỉ một loại (VND) hay đa tiền tệ (mua ngoại tệ, bán ngoại tệ)? | Chủ yếu VND; PO theo tiền của NCC | 🟡 | 02, 04, 15 |
@@ -114,7 +114,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 
 Nhóm câu hỏi nên được trả lời **trước tiên** vì ảnh hưởng kiến trúc nhiều module:
 
-1. **A1, A2, G2, G3** — phạm vi hệ thống (đa pháp nhân, phân quyền, có sàn bên thứ ba không, nguồn sự thật tồn kho).
+1. **A2, G2, G3** — phạm vi hệ thống (phân quyền, có sàn bên thứ ba không, nguồn sự thật tồn kho). *(A1 — phạm vi đa kho/đa pháp nhân — đã chốt.)*
 2. **B1** — có module Sản xuất/In riêng không (ảnh hưởng toàn bộ luồng Fulfillment cho sản phẩm chủ lực).
 3. **C1, C3** — tiêu chí slotting & cách tính ATP (ảnh hưởng vận hành kho + hiển thị bán hàng).
 4. **D1, E1** — danh sách phương thức thanh toán & hãng vận chuyển tích hợp (ảnh hưởng thiết kế tích hợp).
