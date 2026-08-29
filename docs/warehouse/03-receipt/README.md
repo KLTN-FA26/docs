@@ -18,7 +18,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho (Warehouse Staff / Receiver)** | Kiểm đếm, quét mã, nhập số lượng thực nhận, ghi lô/hạn dùng, chụp ảnh bằng chứng |
-| **Nhân viên QC** (nếu có) | Kiểm tra chất lượng, đánh dấu đạt/không đạt (accept / reject / quarantine) |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng, đánh dấu đạt/không đạt (accept / reject / quarantine) |
 | **Quản lý kho (Warehouse Manager)** | Xử lý chênh lệch (discrepancy), duyệt nhận vượt/thiếu ngoài dung sai |
 | **Nhân viên mua hàng (Procurement)** | Được thông báo khi có chênh lệch để làm việc với NCC |
 

@@ -13,10 +13,10 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên mua hàng (Procurement Staff)** | Tạo, chỉnh sửa PO ở trạng thái `Draft`; gửi NCC |
-| **Trưởng bộ phận mua hàng / Người duyệt (Approver)** | Phê duyệt PO vượt hạn mức; từ chối kèm lý do |
+| **Người giữ quyền duyệt PO (Approver)** | Phê duyệt PO vượt hạn mức; từ chối kèm lý do — là quyền phê duyệt theo [Role Registry](../../00-system-overview/README.md), không phải chức danh riêng |
 | **Nhà cung cấp (Supplier)** | Nhận PO, xác nhận khả năng cung ứng (có thể ngoài hệ thống: email/portal) |
 | **Nhân viên kho (Warehouse Staff)** | Tham chiếu PO đang `Confirmed` để chuẩn bị nhận hàng |
-| **Kế toán (Accounting)** | Tham chiếu PO khi đối chiếu công nợ & hoá đơn |
+| **Kế toán (Accountant)** | Tham chiếu PO khi đối chiếu công nợ & hoá đơn |
 
 ---
 

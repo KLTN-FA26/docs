@@ -15,8 +15,8 @@ Payment quyết định thời điểm đơn hàng được [xác nhận](../14-
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng** | Chọn phương thức, thực hiện thanh toán, yêu cầu hoàn tiền |
-| **Nhân viên Sale** | Gửi link thanh toán, xác nhận đã nhận chuyển khoản thủ công, hỗ trợ xử lý lỗi thanh toán qua [chat](../16-sales-chat/README.md) |
-| **Kế toán / Tài chính** | Đối soát giao dịch với cổng thanh toán & hãng vận chuyển (COD), duyệt hoàn tiền vượt hạn mức |
+| **Nhân viên Sale (Sales Staff)** | Gửi link thanh toán, xác nhận đã nhận chuyển khoản thủ công, hỗ trợ xử lý lỗi thanh toán qua [chat](../16-sales-chat/README.md) |
+| **Kế toán (Accountant)** | Đối soát giao dịch với cổng thanh toán & hãng vận chuyển (COD), duyệt hoàn tiền vượt hạn mức |
 | **Hệ thống (Payment Service + Gateway integration)** | Tạo giao dịch, gọi cổng, nhận webhook kết quả, ghi sổ giao dịch, xử lý refund |
 | **Đơn vị vận chuyển (Carrier)** | Thu hộ tiền COD, chuyển tiền về (đối soát với [09 Shipping](../../warehouse/09-shipping/README.md)) |
 

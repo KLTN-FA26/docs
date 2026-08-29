@@ -13,8 +13,8 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng (Customer / Guest)** | Duyệt, tìm kiếm, lọc, xem chi tiết, so sánh, thêm vào giỏ / bắt đầu thiết kế |
-| **Admin / Merchandiser** | Cấu hình danh mục, thứ tự hiển thị, sản phẩm nổi bật, nội dung PDP, giá & khuyến mãi hiển thị |
-| **Nhân viên Sale** | Gửi link sản phẩm cho khách qua [chat](../16-sales-chat/README.md); tư vấn lựa chọn biến thể |
+| **Quản trị sàn (E-commerce Admin)** | Cấu hình danh mục, thứ tự hiển thị, sản phẩm nổi bật, nội dung PDP, giá & khuyến mãi hiển thị |
+| **Nhân viên Sale (Sales Staff)** | Gửi link sản phẩm cho khách qua [chat](../16-sales-chat/README.md); tư vấn lựa chọn biến thể |
 | **Hệ thống (Search/Indexing, Pricing, Inventory feed)** | Đánh chỉ mục tìm kiếm, tính giá hiển thị, cập nhật tình trạng còn hàng |
 
 ---
@@ -28,7 +28,7 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 | Sản phẩm & biến thể | Sản phẩm `Published`, danh sách SKU, thuộc tính biến thể, hình ảnh, mô tả, thuộc tính lọc | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
 | Giá bán | Giá niêm yết, giá khuyến mãi, quy tắc giá theo nhóm khách / số lượng | Cấu hình Pricing |
 | Tồn kho khả dụng (ATP) | Tổng tồn `Available` (có thể theo kho / khu vực giao) | Mảng kho vận (05 Putaway, 07 Picking, 10 Transfer) |
-| Cấu hình hiển thị | Danh mục, cây phân loại, bộ lọc, sắp xếp, sản phẩm nổi bật, SEO | Admin / Merchandiser |
+| Cấu hình hiển thị | Danh mục, cây phân loại, bộ lọc, sắp xếp, sản phẩm nổi bật, SEO | Quản trị sàn |
 | Cấu hình sản phẩm tùy chỉnh | Cờ "customizable", điểm vào trình thiết kế | [01](../../warehouse/01-product-creation/README.md) |
 
 ### Output
@@ -45,10 +45,10 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-### 4.1. Xuất bản & duy trì catalog (Admin)
+### 4.1. Xuất bản & duy trì catalog (Quản trị sàn)
 
 1. Sản phẩm ở [01](../../warehouse/01-product-creation/README.md) chuyển `Published` → xuất hiện trong nguồn dữ liệu catalog.
-2. Merchandiser gán sản phẩm vào danh mục, đặt thứ tự, chọn ảnh đại diện, hoàn thiện mô tả & thuộc tính lọc.
+2. Quản trị sàn gán sản phẩm vào danh mục, đặt thứ tự, chọn ảnh đại diện, hoàn thiện mô tả & thuộc tính lọc.
 3. Cấu hình giá hiển thị & khuyến mãi (thời hạn, điều kiện).
 4. Hệ thống đánh chỉ mục tìm kiếm (search index) & cache.
 5. Kiểm tra hiển thị (preview) rồi cho public.

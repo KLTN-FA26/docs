@@ -14,9 +14,9 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng (Customer / Guest)** | Thêm/sửa/xoá dòng giỏ, áp voucher, chọn địa chỉ & vận chuyển, đặt hàng |
-| **Nhân viên Sale** | Tạo/sửa đơn hộ khách (assisted order), áp ưu đãi trong hạn mức, chốt đơn qua [chat](../16-sales-chat/README.md) |
+| **Nhân viên Sale (Sales Staff)** | Tạo/sửa đơn hộ khách (assisted order), áp ưu đãi trong hạn mức, chốt đơn qua [chat](../16-sales-chat/README.md) |
 | **Hệ thống (Pricing, Promotion, Inventory, Tax, Shipping rate)** | Tính giá, kiểm tồn, tính thuế & phí ship, giữ hàng (reservation) |
-| **Admin** | Cấu hình quy tắc giỏ (thời hạn giữ, số lượng tối đa), khuyến mãi, chính sách đặt trước |
+| **Quản trị sàn (E-commerce Admin)** | Cấu hình quy tắc giỏ (thời hạn giữ, số lượng tối đa), khuyến mãi, chính sách đặt trước |
 
 ---
 

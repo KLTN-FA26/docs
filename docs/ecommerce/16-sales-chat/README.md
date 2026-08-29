@@ -13,8 +13,8 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng** | Mở hội thoại, gửi câu hỏi/ảnh/link thiết kế, nhận tư vấn & link hành động |
-| **Nhân viên Sale (Agent)** | Trả lời, tư vấn, chỉnh thiết kế hộ, tạo đơn hộ, gửi báo giá & link thanh toán, chuyển tiếp nội bộ |
-| **Trưởng nhóm Sale / Supervisor** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate |
+| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn, chỉnh thiết kế hộ, tạo đơn hộ, gửi báo giá & link thanh toán, chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
+| **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản trị sàn hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
 | **Hệ thống (Routing + Notification)** | Định tuyến hội thoại đến agent phù hợp/rảnh; nhắc SLA; lưu lịch sử; (tuỳ chọn) chatbot trả lời câu hỏi cơ bản |
 
 > ⚠️ Giả định: Phạm vi là **chat 1–1 khách ↔ Sale trong nội bộ storefront**. Việc tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI chưa được đề bài xác định — xem [open-questions](../../open-questions/README.md).
@@ -36,10 +36,10 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Conversation / thread** — lịch sử tin nhắn, người tham gia, ngữ cảnh, trạng thái | Sale, khách, Supervisor |
+| **Conversation / thread** — lịch sử tin nhắn, người tham gia, ngữ cảnh, trạng thái | Sale, khách, người giám sát chat |
 | **Hành động phát sinh:** link thiết kế đã chỉnh, giỏ/đơn tạo hộ, link thanh toán, phiếu yêu cầu đổi/huỷ | 12, 14, 15, 17 |
-| **Ghi chú nội bộ (internal note)** — chỉ Sale thấy | Sale, Supervisor |
-| **Chỉ số:** thời gian phản hồi đầu (FRT), thời gian xử lý, mức hài lòng (CSAT) | Supervisor, báo cáo |
+| **Ghi chú nội bộ (internal note)** — chỉ Sale thấy | Sale, người giám sát chat |
+| **Chỉ số:** thời gian phản hồi đầu (FRT), thời gian xử lý, mức hài lòng (CSAT) | Người giám sát chat, báo cáo |
 | **Lịch sử tương tác** gắn hồ sơ khách | [18 Customer Information](../18-customer-information/README.md) |
 
 ---
@@ -57,7 +57,7 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
    - Khách tự đặt: agent hướng dẫn; hoặc
    - **Đặt hộ (assisted order):** agent tạo giỏ/đơn ([14](../14-cart-and-order/README.md)), gắn thiết kế đã chốt, áp ưu đãi trong hạn mức, gửi khách **link thanh toán** ([15](../15-payment/README.md)) hoặc xác nhận COD.
 6. **Hỗ trợ sau bán** — khách nhắn về đơn đang giao / bị lỗi: agent tra [Order Management](../17-order-management/README.md), chia sẻ tracking, tạo **yêu cầu đổi/huỷ/hoàn** hoặc **yêu cầu thay đổi thiết kế** (nếu chưa sản xuất).
-7. **Escalate** — vấn đề vượt thẩm quyền (giảm giá lớn, bồi thường): chuyển Supervisor; thread ghi nhận lý do & người xử lý tiếp.
+7. **Escalate** — vấn đề vượt thẩm quyền (giảm giá lớn, bồi thường): chuyển người giám sát chat; thread ghi nhận lý do & người xử lý tiếp.
 8. **Kết thúc & đánh giá** — agent đóng thread khi giải quyết xong; gửi khảo sát CSAT. Thread có thể **mở lại (reopen)** nếu khách nhắn tiếp trong thời hạn.
 9. **Lưu vết** — toàn bộ hội thoại + hành động gắn vào [hồ sơ khách](../18-customer-information/README.md) và (nếu có) vào đơn liên quan.
 
@@ -75,7 +75,7 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 | `Active` | Đang trao đổi | → `Waiting on Customer`, → `Waiting on Internal`, → `Resolved` | Agent |
 | `Waiting on Customer` | Chờ khách phản hồi | → `Active`, → `Auto-Closed` (quá hạn im lặng) | System |
 | `Waiting on Internal` | Chờ bộ phận khác (kho, kỹ thuật, sản xuất) | → `Active` | Agent |
-| `Escalated` | Đã chuyển Supervisor | → `Active`, → `Resolved` | Supervisor |
+| `Escalated` | Đã chuyển người giám sát chat | → `Active`, → `Resolved` | Người giám sát chat |
 | `Resolved` | Đã xử lý xong | → `Reopened`, → `Closed` | Agent |
 | `Reopened` | Khách nhắn lại sau khi resolved | → `Active` | System |
 | `Closed` | Đóng vĩnh viễn (hết thời hạn reopen) | *(cuối)* | System |
@@ -105,7 +105,7 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 | Khách gửi file quá lớn / định dạng lạ | Giới hạn dung lượng & loại file; hướng dẫn nén hoặc dùng trình thiết kế |
 | Khách yêu cầu điều không thể (đổi thiết kế khi đã in) | Agent giải thích chính sách; ghi nhận; đề xuất phương án (đơn mới, chiết khấu) |
 | Tranh chấp "đã hứa giảm giá qua chat" | Lịch sử thread là bằng chứng; ưu đãi phải được ghi nhận chính thức trên đơn mới có hiệu lực |
-| Spam / lạm dụng | Chặn/blacklist theo tài khoản/thiết bị; cảnh báo Supervisor |
+| Spam / lạm dụng | Chặn/blacklist theo tài khoản/thiết bị; cảnh báo người giám sát chat |
 
 ---
 

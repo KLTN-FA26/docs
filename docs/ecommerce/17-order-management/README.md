@@ -12,10 +12,10 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
 | Actor | Vai trò |
 |-------|---------|
-| **Nhân viên Sale / CSKH** | Tra cứu đơn, xử lý yêu cầu khách (sửa/huỷ/đổi/trả), liên hệ khách |
-| **Điều phối đơn hàng (Order Coordinator / OPS)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn |
-| **Nhân viên kho** | Nhận lệnh xuất; cập nhật picked/packed/shipped |
-| **Kế toán** | Đối soát thanh toán/COD/hoàn tiền theo đơn |
+| **Nhân viên Sale (Sales Staff)** | Tra cứu đơn, xử lý yêu cầu khách (sửa/huỷ/đổi/trả), liên hệ khách (CSKH) |
+| **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn |
+| **Nhân viên kho (Warehouse Staff)** | Nhận lệnh xuất; cập nhật picked/packed/shipped |
+| **Kế toán (Accountant)** | Đối soát thanh toán/COD/hoàn tiền theo đơn |
 | **Khách hàng** | Xem trạng thái & lịch sử đơn, gửi yêu cầu (huỷ/đổi/trả) qua storefront hoặc [chat](../16-sales-chat/README.md) |
 | **Hệ thống** | Hợp nhất trạng thái từ Payment/Picking/Packing/Shipping; áp quy tắc chuyển trạng thái; thông báo |
 

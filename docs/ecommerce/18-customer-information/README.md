@@ -13,8 +13,8 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng** | Tự quản lý hồ sơ, địa chỉ, phương thức thanh toán, mật khẩu, tuỳ chọn nhận tin; yêu cầu tải/xoá dữ liệu |
-| **Nhân viên Sale / CSKH** | Xem hồ sơ (theo quyền) để tư vấn & xử lý đơn; cập nhật thông tin thay khách khi được yêu cầu; thêm ghi chú |
-| **Admin** | Quản lý nhóm khách, phân khúc, chính sách dữ liệu, hợp nhất hồ sơ trùng, phân quyền truy cập |
+| **Nhân viên Sale (Sales Staff)** | Xem hồ sơ (theo quyền) để tư vấn & xử lý đơn; cập nhật thông tin thay khách khi được yêu cầu; thêm ghi chú |
+| **Quản trị sàn (E-commerce Admin)** | Quản lý nhóm khách, phân khúc, chính sách dữ liệu, hợp nhất hồ sơ trùng; phân quyền truy cập hồ sơ (phối hợp System Admin) |
 | **Hệ thống** | Xác thực, chống trùng, gắn dữ liệu đơn/tương tác vào hồ sơ, đánh giá rủi ro, thực thi yêu cầu quyền riêng tư |
 
 ---
@@ -41,7 +41,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 | **Phân khúc / nhóm khách** (VIP, doanh nghiệp, khách mới…) | Pricing, khuyến mãi ([13](../13-catalog/README.md)), routing chat ([16](../16-sales-chat/README.md)) |
 | **Hồ sơ rủi ro / blacklist** | 15 Payment, 17 Order Management |
 | **Bản xuất dữ liệu cá nhân / xác nhận đã xoá** (theo yêu cầu quyền riêng tư) | Khách |
-| **Lịch sử hoạt động (activity log)** của hồ sơ | Admin, CSKH |
+| **Lịch sử hoạt động (activity log)** của hồ sơ | Quản trị sàn, Sales Staff |
 
 ---
 
@@ -64,7 +64,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 8. **Gắn lịch sử** — mỗi đơn ([17](../17-order-management/README.md)), mỗi hội thoại ([16](../16-sales-chat/README.md)), mỗi thiết kế lưu ([12](../12-product-design/README.md)) tự động liên kết hồ sơ.
 9. **Tính chỉ số** — tổng chi tiêu, số đơn, giá trị đơn trung bình, lần mua gần nhất, tỷ lệ huỷ/hoàn.
-10. **Phân khúc / nhóm** — hệ thống/Admin gán nhóm (VIP theo chi tiêu, khách doanh nghiệp, khách mới, khách rủi ro). Nhóm ảnh hưởng giá, ưu đãi, ưu tiên chăm sóc.
+10. **Phân khúc / nhóm** — hệ thống/Quản trị sàn gán nhóm (VIP theo chi tiêu, khách doanh nghiệp, khách mới, khách rủi ro). Nhóm ảnh hưởng giá, ưu đãi, ưu tiên chăm sóc.
 11. **Hồ sơ rủi ro** — cập nhật khi có chargeback, gian lận, tỷ lệ RTO cao, khiếu nại bất thường → cảnh báo cho [Payment](../15-payment/README.md) & [Order Management](../17-order-management/README.md).
 
 ### 4.4. Quyền riêng tư dữ liệu (Data privacy)
@@ -76,7 +76,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 ### 4.5. Hợp nhất hồ sơ trùng (Merge)
 
-16. Phát hiện trùng (cùng email/SĐT/địa chỉ) → Admin xem xét → **merge**: giữ một hồ sơ chính, gộp địa chỉ/đơn/tương tác, giữ log merge.
+16. Phát hiện trùng (cùng email/SĐT/địa chỉ) → Quản trị sàn xem xét → **merge**: giữ một hồ sơ chính, gộp địa chỉ/đơn/tương tác, giữ log merge.
 
 ---
 
@@ -89,10 +89,10 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 | `Guest` | Hồ sơ nhẹ từ guest checkout, chưa có tài khoản | → `Active` (đăng ký cùng email) | Khách |
 | `Pending Verification` | Đã đăng ký, chưa xác thực email/SĐT | → `Active` | Khách |
 | `Active` | Bình thường | → `Suspended`, → `Closed`, → `Anonymized` | — |
-| `Suspended` | Tạm khoá (gian lận, vi phạm) — không đăng nhập/mua | → `Active`, → `Closed` | Admin |
-| `Closed` | Khách yêu cầu đóng tài khoản; dữ liệu còn theo nghĩa vụ lưu trữ | → `Anonymized` | Khách / Admin |
+| `Suspended` | Tạm khoá (gian lận, vi phạm) — không đăng nhập/mua | → `Active`, → `Closed` | Quản trị sàn |
+| `Closed` | Khách yêu cầu đóng tài khoản; dữ liệu còn theo nghĩa vụ lưu trữ | → `Anonymized` | Khách / Quản trị sàn |
 | `Anonymized` | Đã ẩn danh dữ liệu cá nhân theo yêu cầu xoá | *(cuối)* | Hệ thống |
-| `Merged` | Đã gộp vào hồ sơ khác | *(cuối)* | Admin |
+| `Merged` | Đã gộp vào hồ sơ khác | *(cuối)* | Quản trị sàn |
 
 ---
 
@@ -102,7 +102,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 - **BR-01:** Email (hoặc SĐT) là khoá định danh chính; không cho hai hồ sơ `Active` trùng khoá định danh.
 - **BR-02:** **Không lưu** dữ liệu thẻ nhạy cảm; chỉ lưu token & 4 số cuối / thương hiệu thẻ (qua [Payment](../15-payment/README.md), tuân thủ PCI-DSS).
-- **BR-03:** Truy cập hồ sơ khách theo **quyền tối thiểu**: Sale/CSKH chỉ xem dữ liệu cần cho công việc; mọi truy cập nhạy cảm được log.
+- **BR-03:** Truy cập hồ sơ khách theo **quyền tối thiểu**: Sales Staff chỉ xem dữ liệu cần cho công việc; mọi truy cập nhạy cảm được log.
 - **BR-04:** Marketing chỉ gửi khi có **consent còn hiệu lực**; lưu mốc thời gian & nguồn consent.
 - **BR-05:** Xoá dữ liệu: chứng từ đơn hàng/thanh toán phải giữ theo thời hạn luật định → thực hiện **ẩn danh** (tách thông tin cá nhân khỏi chứng từ), không xoá chứng từ.
 - **BR-06:** Hồ sơ `Suspended`/`Closed` không thể tạo đơn mới; đơn đang chạy vẫn xử lý tới khi kết thúc.
@@ -118,7 +118,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 | Hai người cùng nhà dùng chung email | Địa chỉ & người nhận tách theo từng đơn; hồ sơ vẫn là một |
 | Yêu cầu xoá dữ liệu khi còn đơn đang giao / còn công nợ | Hoãn ẩn danh phần liên quan tới khi đơn đóng & công nợ tất toán; ẩn danh phần còn lại |
 | Nghi tài khoản bị chiếm (login lạ) | Buộc đổi mật khẩu, thu hồi phiên, tạm `Suspended` nếu cần |
-| Trùng hồ sơ nhưng lịch sử mâu thuẫn (địa chỉ/tên khác) | Admin review thủ công trước khi merge; giữ cả hai bộ địa chỉ |
+| Trùng hồ sơ nhưng lịch sử mâu thuẫn (địa chỉ/tên khác) | Quản trị sàn review thủ công trước khi merge; giữ cả hai bộ địa chỉ |
 | Khách doanh nghiệp nhiều người đặt hàng | Hồ sơ công ty + danh sách người liên hệ/đặt hàng; phân quyền theo người |
 | Chargeback từ một khách "VIP theo chi tiêu" | Cập nhật hồ sơ rủi ro; nhóm phân khúc có thể bị hạ; cảnh báo OPS |
 

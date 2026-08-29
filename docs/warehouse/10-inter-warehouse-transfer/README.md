@@ -12,8 +12,8 @@ Di chuyển tồn kho **từ kho này sang kho khác** (khác địa điểm v�
 
 | Actor | Vai trò |
 |-------|---------|
-| **Quản lý kho / Kế hoạch tồn kho (Inventory Planner)** | Đề xuất & tạo lệnh chuyển kho, xác định số lượng, kho nguồn/đích |
-| **Người duyệt (Approver)** | Phê duyệt lệnh chuyển vượt giá trị/ngưỡng |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Đề xuất & tạo lệnh chuyển kho, xác định số lượng, kho nguồn/đích (có thể do Quản lý kho kiêm nhiệm) |
+| **Người giữ quyền duyệt TO (Approver)** | Phê duyệt lệnh chuyển vượt giá trị/ngưỡng — là quyền phê duyệt theo [Role Registry](../../00-system-overview/README.md), không phải chức danh riêng |
 | **Nhân viên kho nguồn** | Pick & đóng gói hàng chuyển đi, xác nhận xuất |
 | **Đơn vị vận chuyển nội bộ / hãng vận chuyển** | Vận chuyển giữa hai kho |
 | **Nhân viên kho đích** | Nhận, kiểm đếm, putaway hàng chuyển đến |

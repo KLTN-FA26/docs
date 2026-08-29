@@ -163,7 +163,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **SLA** (Service Level Agreement) | Cam kết mức dịch vụ (ví dụ thời gian phản hồi tối đa). |
 | **FRT** (First Response Time) — **Thời gian phản hồi đầu tiên** | Khoảng thời gian từ khi khách nhắn đến khi Sale trả lời lần đầu. |
 | **CSAT** (Customer Satisfaction) — **Mức hài lòng khách hàng** | Điểm khách chấm sau khi được hỗ trợ. |
-| **Escalate / Chuyển cấp** | Đưa vấn đề vượt thẩm quyền lên Supervisor/Manager. |
+| **Escalate / Chuyển cấp** | Đưa vấn đề vượt thẩm quyền lên người giữ quyền giám sát chat / cấp quản lý. |
 | **Internal note / Ghi chú nội bộ** | Ghi chú chỉ nhân viên thấy, khách không thấy. |
 | **Customer profile / Hồ sơ khách hàng** | Bộ dữ liệu về một khách: định danh, địa chỉ, lịch sử, phân khúc, rủi ro. |
 | **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. |
@@ -226,3 +226,24 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | FRT | First Response Time | Thời gian phản hồi đầu |
 | CSAT | Customer Satisfaction | Mức hài lòng khách hàng |
 | PCI-DSS | Payment Card Industry Data Security Standard | Tiêu chuẩn bảo mật dữ liệu thẻ |
+
+---
+
+## 7. Vai trò (Roles)
+
+Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00 System Overview §2](../00-system-overview/README.md).
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm. |
+| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO, làm việc với nhà cung cấp, xử lý tranh chấp hoá đơn. |
+| **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
+| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ. |
+| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn. |
+| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in (accept / reject / quarantine). |
+| **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền. |
+| **E-commerce Admin / Quản trị sàn** | Quản lý catalog, giá, khuyến mãi, nội dung, chính sách; cấu hình template thiết kế & kiểm tra file in (prepress). |
+| **Sales Staff / Nhân viên Sale** | Tư vấn & chăm sóc khách hàng (CSKH) qua chat, tạo đơn hộ, chốt thiết kế, xử lý khiếu nại. |
+| **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn. |
+| **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
+| **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |

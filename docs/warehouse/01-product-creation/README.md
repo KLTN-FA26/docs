@@ -14,11 +14,11 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 
 | Actor | Vai trò trong module |
 |-------|----------------------|
-| **Admin** | Tạo mới, phê duyệt, xuất bản (publish) sản phẩm; cấu hình danh mục, thuộc tính, quy tắc sinh SKU |
-| **Nhân viên danh mục / Merchandiser** (nếu có) | Nhập nội dung mô tả, hình ảnh, thông tin marketing; đề xuất tạo sản phẩm |
+| **Quản trị hệ thống (System Admin)** | Tạo mới, phê duyệt, xuất bản (publish) sản phẩm; cấu hình danh mục, thuộc tính, quy tắc sinh SKU |
+| **Quản trị sàn (E-commerce Admin)** | Nhập nội dung mô tả, hình ảnh, thông tin marketing; đề xuất tạo sản phẩm |
 | **Nhân viên mua hàng (Procurement)** | Tham chiếu (read-only) để lập PO; có thể yêu cầu bổ sung thông tin nhà cung cấp/đơn vị mua |
 
-> ⚠️ Giả định: Có quy trình phê duyệt (maker–checker) giữa người tạo và người xuất bản. Nếu tổ chức nhỏ, Admin làm cả hai vai. Xem [open-questions](../../open-questions/README.md).
+> ⚠️ Giả định: Có quy trình phê duyệt (maker–checker) giữa người tạo và người xuất bản. Nếu tổ chức nhỏ, System Admin làm cả hai vai. Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -49,7 +49,7 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-1. **Khởi tạo bản nháp (Create draft)** — Admin/Merchandiser nhập thông tin định danh + danh mục. Sản phẩm ở trạng thái `Draft`.
+1. **Khởi tạo bản nháp (Create draft)** — System Admin / Quản trị sàn nhập thông tin định danh + danh mục. Sản phẩm ở trạng thái `Draft`.
 2. **Khai báo thuộc tính biến thể** — chọn các trục biến thể (ví dụ: Size × Color). Hệ thống sinh **ma trận biến thể**; người dùng chọn tổ hợp hợp lệ để tạo SKU.
 3. **Sinh mã SKU** — theo quy tắc cấu hình (prefix danh mục + mã thuộc tính + số thứ tự) hoặc nhập tay. Mỗi SKU phải **duy nhất toàn hệ thống**.
 4. **Nhập thông số logistics** cho từng SKU (hoặc kế thừa từ sản phẩm cha): khối lượng, kích thước, pack size, UoM.
@@ -74,11 +74,11 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 |------------|---------|----------------------|--------------|
 | `Draft` | Đang soạn, chưa đầy đủ | → `Pending Approval` | Người tạo |
 | `Pending Approval` | Chờ phê duyệt | → `Approved` / → `Draft` (từ chối) | Người duyệt |
-| `Approved` | Đã duyệt, chưa dùng | → `Active` | Người duyệt / Admin |
-| `Active` | Dùng được cho nghiệp vụ nội bộ (kho, mua hàng) | → `Published`, → `Inactive` | Admin |
-| `Published` | Đang hiển thị trên catalog TMĐT | → `Active` (ẩn khỏi catalog), → `Inactive` | Admin TMĐT |
-| `Inactive` | Tạm ngừng, không hiển thị, không PO mới | → `Active` | Admin |
-| `Discontinued` | Ngừng vĩnh viễn | *(trạng thái cuối)* | Admin |
+| `Approved` | Đã duyệt, chưa dùng | → `Active` | Người duyệt / System Admin |
+| `Active` | Dùng được cho nghiệp vụ nội bộ (kho, mua hàng) | → `Published`, → `Inactive` | System Admin |
+| `Published` | Đang hiển thị trên catalog TMĐT | → `Active` (ẩn khỏi catalog), → `Inactive` | Quản trị sàn |
+| `Inactive` | Tạm ngừng, không hiển thị, không PO mới | → `Active` | System Admin |
+| `Discontinued` | Ngừng vĩnh viễn | *(trạng thái cuối)* | System Admin |
 
 ### 5.2. Trạng thái SKU
 

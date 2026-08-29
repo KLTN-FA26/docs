@@ -13,8 +13,8 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng (Customer)** | Tạo/sửa thiết kế, tải ảnh, nhập text, chọn phông/màu, xem preview 3D, lưu & chốt thiết kế |
-| **Nhân viên Sale** | Hỗ trợ khách qua [chat](../16-sales-chat/README.md): tinh chỉnh thiết kế hộ, kiểm tra tính khả thi in ấn, chốt cùng khách |
-| **Admin / Nhân viên chuẩn bị file in (Prepress)** | Cấu hình template, print area, ràng buộc kỹ thuật; kiểm tra file trước sản xuất |
+| **Nhân viên Sale (Sales Staff)** | Hỗ trợ khách qua [chat](../16-sales-chat/README.md): tinh chỉnh thiết kế hộ, kiểm tra tính khả thi in ấn, chốt cùng khách |
+| **Quản trị sàn (E-commerce Admin)** | Cấu hình template, print area, ràng buộc kỹ thuật; kiểm tra file trước sản xuất (prepress) |
 | **Hệ thống (Design Engine + 3D Renderer)** | Kiểm tra ràng buộc (DPI, tràn lề, vùng an toàn), sinh preview 3D, xuất file in (print-ready) |
 
 ---
@@ -37,8 +37,8 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 | **Design draft** | Thiết kế đang chỉnh, lưu tạm theo tài khoản khách | Khách, Sale |
 | **3D preview** | Ảnh/scene 3D render nội dung lên mô hình sản phẩm, cập nhật realtime | Khách (ra quyết định mua) |
 | **Design snapshot / artifact** | Bản chốt bất biến: layout, tài nguyên (ảnh, font), thông số print area, phiên bản, hash | [14 Cart & Order](../14-cart-and-order/README.md), [08 Packing](../../warehouse/08-packing/README.md), xưởng in |
-| **Print-ready file** | File xuất bản in (PDF/CMYK, đúng bleed & DPI) | Xưởng in / Prepress |
-| **Preflight report** | Kết quả kiểm tra kỹ thuật (đạt / cảnh báo / lỗi) | Khách, Prepress |
+| **Print-ready file** | File xuất bản in (PDF/CMYK, đúng bleed & DPI) | Xưởng in / Quản trị sàn (prepress) |
+| **Preflight report** | Kết quả kiểm tra kỹ thuật (đạt / cảnh báo / lỗi) | Khách, Quản trị sàn |
 
 ---
 

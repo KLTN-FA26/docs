@@ -11,7 +11,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module liên quan |
 |---|---------|-------------------|-----------|------------------|
 | A1 | Hệ thống hỗ trợ **đa công ty / đa pháp nhân (multi-entity)** hay chỉ một doanh nghiệp với nhiều kho? | ✅ **Đã chốt 2026-08-29:** một pháp nhân duy nhất, **nhiều kho vật lý (multi-warehouse)**. Không hỗ trợ multi-entity. Chuyển kho là luân chuyển tồn nội bộ, không phát sinh hoá đơn/công nợ nội bộ. | 🟢 | 00, 10, 04, 15 |
-| A2 | Mô hình **phân quyền (RBAC)** chi tiết: danh sách vai trò chuẩn, một người có được nhiều vai trò, phạm vi dữ liệu theo kho/nhóm khách? | Có RBAC; một tài khoản có thể mang nhiều vai trò; quyền theo tối thiểu | 🔴 | Tất cả |
+| A2 | Mô hình **phân quyền (RBAC)** chi tiết: danh sách vai trò chuẩn, một người có được nhiều vai trò, phạm vi dữ liệu theo kho/nhóm khách? | ✅ **Đã chốt một phần 2026-08-29:** danh sách **10 role chuẩn** + quyền theo ngữ cảnh (phê duyệt PO/TO/chi, giám sát chat) — xem [Role Registry](../00-system-overview/README.md); một tài khoản có thể mang nhiều vai trò. **Còn mở:** phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể, phân bổ quyền mặc định | 🔴 | Tất cả |
 | A3 | Có **quy trình maker–checker (tạo / duyệt)** cho master data (sản phẩm, NCC, danh mục) không, hay Admin toàn quyền? | Có bước duyệt; tổ chức nhỏ có thể gộp | 🟡 | 01 |
 | A4 | **Đơn vị tiền tệ**: chỉ một loại (VND) hay đa tiền tệ (mua ngoại tệ, bán ngoại tệ)? | Chủ yếu VND; PO theo tiền của NCC | 🟡 | 02, 04, 15 |
 | A5 | Phạm vi **tích hợp kế toán**: hệ thống chỉ đối chiếu & đề nghị thanh toán, hay hạch toán sổ cái đầy đủ? | Chỉ AP matching + đề nghị thanh toán; sổ cái ở hệ thống ngoài | 🔴 | 04, 15 |
@@ -24,7 +24,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module |
 |---|---------|-------------------|-----------|--------|
-| B1 | Có **module Sản xuất/In (production / print job)** riêng giữa Order và Picking không? Ai vận hành (xưởng nội bộ / gia công ngoài)? Trạng thái & năng lực (capacity) sản xuất quản lý thế nào? | Có bước sản xuất; đơn in ấn qua trạng thái `In Production` trước khi picking thành phẩm | 🔴 | 07, 14, 17, 12 |
+| B1 | Có **module Sản xuất/In (production / print job)** riêng giữa Order và Picking không? Ai vận hành (xưởng nội bộ / gia công ngoài)? Trạng thái & năng lực (capacity) sản xuất quản lý thế nào? | Có bước sản xuất; đơn in ấn qua trạng thái `In Production` trước khi picking thành phẩm; **QC Staff** kiểm tra chất lượng thành phẩm in trước khi fulfill (chi tiết phụ thuộc thiết kế module này) | 🔴 | 07, 14, 17, 12, 03 |
 | B2 | Picking cho đơn in ấn: pick **vật tư/phôi** cho xưởng in, hay chỉ pick **thành phẩm** sau khi in xong, hay cả hai? | Chủ yếu pick thành phẩm sau sản xuất; có thể pick phôi cho xưởng | 🟡 | 07, 01 |
 | B3 | **Công thức tính giá** sản phẩm tùy chỉnh: theo diện tích phủ mực, số màu, kỹ thuật in, số lượng? Nguồn công thức? | Giá dòng phụ thuộc thông số in; công thức khai báo ở [01](../warehouse/01-product-creation/README.md) | 🟡 | 12, 14, 01 |
 | B4 | Chính sách **đổi/trả với sản phẩm cá nhân hoá**: chỉ nhận khi lỗi sản xuất, hay có cho đổi ý trong X ngày? | Không đổi/trả vì đổi ý; chỉ nhận khi lỗi sản xuất | 🟡 | 17, 16 |

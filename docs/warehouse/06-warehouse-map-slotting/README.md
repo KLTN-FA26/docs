@@ -17,7 +17,7 @@ Mục tiêu: giảm quãng đường di chuyển, tăng mật độ lưu trữ h
 
 | Actor | Vai trò |
 |-------|---------|
-| **Admin / Quản lý kho** | Khai báo cấu trúc kho, thuộc tính vị trí, cấu hình quy tắc slotting & trọng số |
+| **Quản trị hệ thống (System Admin) / Quản lý kho** | Khai báo cấu trúc kho, thuộc tính vị trí, cấu hình quy tắc slotting & trọng số |
 | **Hệ thống (Slotting Engine)** | Tính toán và trả về gợi ý theo thời điểm putaway/transfer |
 | **Nhân viên kho** | Xem map để định vị; nhận & xác nhận (hoặc ghi đè) gợi ý |
 | **Quản lý kho** | Chạy phân tích tối ưu định kỳ (re-slotting), duyệt di chuyển tối ưu hoá |
@@ -30,11 +30,11 @@ Mục tiêu: giảm quãng đường di chuyển, tăng mật độ lưu trữ h
 
 | Nhóm | Dữ liệu | Nguồn |
 |------|---------|-------|
-| **Cấu trúc kho** | Khu vực (zone), dãy (aisle), kệ (rack), tầng (level), ô (bin/slot); toạ độ; loại vị trí (picking / bulk / cold / hazmat / oversize) | Admin khai báo |
-| **Thuộc tính vị trí** | Sức chứa (thể tích, khối lượng tối đa, số ô), chiều cao lọt, quy tắc single-SKU/single-lot, độ ưu tiên picking (khoảng cách đến khu đóng gói) | Admin |
+| **Cấu trúc kho** | Khu vực (zone), dãy (aisle), kệ (rack), tầng (level), ô (bin/slot); toạ độ; loại vị trí (picking / bulk / cold / hazmat / oversize) | System Admin khai báo |
+| **Thuộc tính vị trí** | Sức chứa (thể tích, khối lượng tối đa, số ô), chiều cao lọt, quy tắc single-SKU/single-lot, độ ưu tiên picking (khoảng cách đến khu đóng gói) | System Admin |
 | **Thuộc tính SKU** | Kích thước, khối lượng, quy cách đóng gói, nhóm hàng, phân loại nhiệt độ, dễ vỡ/nguy hiểm | [01 Product Creation](../01-product-creation/README.md) |
 | **Dữ liệu vận hành** | Tần suất xuất (order frequency / velocity), phân loại ABC/XYZ, tồn hiện tại theo vị trí, lô & hạn dùng | 03, 05, 07, tồn kho |
-| **Ràng buộc tương thích** | Cặp SKU/nhóm phải để gần / cấm để chung (ví dụ thực phẩm ≠ hoá chất) | Admin |
+| **Ràng buộc tương thích** | Cặp SKU/nhóm phải để gần / cấm để chung (ví dụ thực phẩm ≠ hoá chất) | System Admin |
 
 ### Output
 
@@ -51,7 +51,7 @@ Mục tiêu: giảm quãng đường di chuyển, tăng mật độ lưu trữ h
 
 ### 4.1. Thiết lập & duy trì bản đồ kho
 
-1. Admin khai báo phân cấp không gian: Kho → Zone → Aisle → Rack → Level → Bin. Mỗi bin có mã (location barcode) duy nhất.
+1. System Admin khai báo phân cấp không gian: Kho → Zone → Aisle → Rack → Level → Bin. Mỗi bin có mã (location barcode) duy nhất.
 2. Gán thuộc tính cho từng loại vị trí: sức chứa, loại hàng cho phép, quy tắc trộn, độ ưu tiên picking.
 3. Sinh mô hình 2D (mặt bằng) và 3D (khối kệ) từ toạ độ đã khai báo.
 4. Duy trì: thêm/khoá vị trí khi thay đổi layout; đánh dấu vị trí bảo trì/hỏng.

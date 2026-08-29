@@ -82,13 +82,20 @@ Mỗi module (`README.md` trong mỗi thư mục) được viết theo **templat
 
 ## 3. Đối tượng người dùng (Personas)
 
+Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](00-system-overview/README.md).
+
 | Persona | Mô tả | Module thường dùng |
 |---------|-------|--------------------|
-| **Admin / Quản trị hệ thống** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý danh mục | 01, 06, 13, 17, 18 |
-| **Nhân viên mua hàng (Procurement / Purchasing Staff)** | Lập PO, làm việc với nhà cung cấp, đối chiếu hoá đơn | 02, 03, 04 |
-| **Nhân viên kho (Warehouse Staff / Operator)** | Nhận hàng, cất hàng, lấy hàng, đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
+| **Quản trị hệ thống (System Admin)** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý dữ liệu gốc sản phẩm | 01, 06 |
+| **Nhân viên mua hàng (Procurement Staff)** | Lập PO, làm việc với nhà cung cấp, đối chiếu hoá đơn | 02, 03, 04 |
+| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng, đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
 | **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho | 05, 06, 10, 11 |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Cân bằng tồn giữa các kho, tạo lệnh chuyển kho | 10 |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in | 03 |
+| **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, đối soát thanh toán/COD | 04, 15, 17 |
+| **Quản trị sàn (E-commerce Admin)** | Quản lý catalog, giá, khuyến mãi, nội dung, template thiết kế | 12, 13, 14, 18 |
 | **Nhân viên Sale (Sales Staff)** | Tư vấn khách qua chat, hỗ trợ tạo/sửa đơn, xử lý đơn hàng | 16, 17, 18 |
+| **Điều phối đơn hàng (Order Coordinator)** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất | 17 |
 | **Khách hàng (Customer / Buyer)** | Thiết kế sản phẩm, xem catalog, đặt hàng, thanh toán, theo dõi đơn | 12, 13, 14, 15, 16 |
 
 ---

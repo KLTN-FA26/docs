@@ -15,26 +15,71 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 
 ---
 
-## 2. Đối tượng người dùng (Actors)
+## 2. Vai trò & đối tượng người dùng (Role Registry)
 
-### 2.1. Nhóm back-office (kho vận)
+Đây là **sổ đăng ký vai trò chuẩn** — nguồn tham chiếu duy nhất về tên vai trò trong toàn bộ tài liệu. Mọi module chỉ dùng tên trong danh sách này.
 
-| Actor | Trách nhiệm chính | Quyền hạn tiêu biểu |
-|-------|-------------------|---------------------|
-| **Admin** | Cấu hình hệ thống, khai báo kho & khu vực, phân quyền, quản lý danh mục sản phẩm | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
+### 2.1. Vai trò nội bộ (role đăng nhập)
+
+#### Nhóm kho vận (back-office)
+
+| Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
+|------|-------------------|---------------------|
+| **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
 | **Nhân viên mua hàng (Procurement Staff)** | Tạo & theo dõi PO, làm việc với NCC, đối chiếu hoá đơn (invoice matching) | Tạo/sửa PO ở trạng thái Draft; xác nhận PO; tạo Invoice |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** khi nhận (accept / reject / quarantine) và **hàng sản xuất/in** trước khi fulfill | Ghi kết quả QC trên phiếu nhận; chuyển hàng vào/ra Quarantine |
+| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
 
-### 2.2. Nhóm storefront (sàn TMĐT)
+> ⚠️ Giả định: phạm vi QC bao gồm cả **hàng sản xuất/in** (đơn tùy chỉnh) — hệ thống chưa có module Sản xuất/In riêng (câu hỏi B1). Xem [open-questions](../open-questions/README.md).
 
-| Actor | Trách nhiệm chính | Quyền hạn tiêu biểu |
-|-------|-------------------|---------------------|
-| **Khách hàng (Customer)** | Duyệt catalog, thiết kế sản phẩm, đặt hàng, thanh toán, theo dõi đơn, chat với Sale | Quản lý giỏ hàng, đơn hàng và hồ sơ của chính mình |
-| **Nhân viên Sale (Sales Staff)** | Tư vấn qua chat, hỗ trợ tạo/sửa đơn hộ khách, chốt thiết kế, xử lý yêu cầu thay đổi/huỷ | Xem & thao tác đơn của khách được phân công; tạo đơn hộ; áp khuyến mãi trong hạn mức |
-| **Admin (TMĐT)** | Quản lý catalog hiển thị, giá, khuyến mãi, nội dung, chính sách | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán & vận chuyển |
+#### Nhóm sàn TMĐT (storefront)
 
-> ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) chưa được đề bài xác định — xem [open-questions](../open-questions/README.md).
+| Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
+|------|-------------------|---------------------|
+| **Quản trị sàn (E-commerce Admin)** | Quản lý catalog hiển thị, giá, khuyến mãi, nội dung, chính sách; cấu hình template thiết kế & kiểm tra file in (prepress) | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán & vận chuyển |
+| **Nhân viên Sale (Sales Staff)** | Tư vấn & chăm sóc khách hàng (CSKH) qua chat, hỗ trợ tạo/sửa đơn hộ khách, chốt thiết kế, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác đơn của khách được phân công; tạo đơn hộ; áp khuyến mãi trong hạn mức |
+| **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn | Thao tác trên mọi đơn; ghi đè kho xuất |
+
+### 2.2. Vai thao tác (operational hat — không phải role riêng)
+
+Warehouse Staff được gọi theo công đoạn được phân công. Đây chỉ là **cách gọi theo ngữ cảnh**, không phải role đăng nhập riêng:
+
+| Vai thao tác | Công đoạn | Module |
+|--------------|-----------|--------|
+| Receiver | Nhận hàng, kiểm đếm | [03](../warehouse/03-receipt/README.md) |
+| Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
+| Picker | Lấy hàng theo pick list | [07](../warehouse/07-picking/README.md) |
+| Packer | Đóng gói, dán nhãn | [08](../warehouse/08-packing/README.md) |
+| Dispatch Staff | Gom chuyến, bàn giao vận chuyển | [09](../warehouse/09-shipping/README.md) |
+| NV kho nguồn / kho đích | Xuất & nhận hàng chuyển kho | [10](../warehouse/10-inter-warehouse-transfer/README.md) |
+
+### 2.3. Quyền theo ngữ cảnh (permission — không phải role)
+
+Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, không phải chức danh riêng. Trong tài liệu, "Người duyệt (Approver)" là cách gọi tắt của *người giữ quyền phê duyệt tương ứng*.
+
+| Quyền | Nội dung | Gán mặc định cho |
+|-------|----------|------------------|
+| Duyệt PO vượt hạn mức | Phê duyệt / từ chối PO | Quản lý kho hoặc System Admin |
+| Duyệt TO vượt ngưỡng | Phê duyệt / từ chối lệnh chuyển kho | Quản lý kho |
+| Duyệt chi / hoàn tiền vượt hạn mức | Phê duyệt thanh toán, refund | Kế toán (mức cao hơn: System Admin) |
+| Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị sàn hoặc Sales Staff được chỉ định |
+
+> ⚠️ Giả định: phân bổ quyền mặc định ở trên do tài liệu đề xuất, chưa được đề bài xác nhận — thuộc câu hỏi A2 (RBAC). Xem [open-questions](../open-questions/README.md).
+
+### 2.4. Đối tác ngoài & actor hệ thống
+
+| Actor | Vai trò |
+|-------|---------|
+| **Khách hàng (Customer / Guest)** | Duyệt catalog, thiết kế sản phẩm, đặt hàng, thanh toán, theo dõi đơn, chat với Sale; quản lý giỏ hàng, đơn hàng và hồ sơ của chính mình |
+| **Nhà cung cấp (Supplier / NCC)** | Nhận & xác nhận PO, giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
+| **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận kiện, vận chuyển, cập nhật tracking, thu hộ COD, xử lý hoàn (RTO) — tích hợp qua API |
+
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Carrier Integration, Design Engine + 3D Renderer, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+
+> ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) — phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể — chưa được đề bài xác định, xem [open-questions](../open-questions/README.md).
 
 ---
 

@@ -18,9 +18,9 @@ Mục tiêu: **chỉ thanh toán cho hàng đã thực nhận, đúng giá đã 
 
 | Actor | Vai trò |
 |-------|---------|
-| **Kế toán công nợ (AP Accountant)** | Nhập/nhận hoá đơn NCC, chạy đối chiếu, xử lý chênh lệch, đề nghị thanh toán |
+| **Kế toán (Accountant)** | Nhập/nhận hoá đơn NCC, chạy đối chiếu, xử lý chênh lệch, đề nghị thanh toán |
 | **Nhân viên mua hàng (Procurement)** | Xác nhận/điều chỉnh giá, xử lý tranh chấp giá với NCC, phê duyệt chênh lệch trong hạn mức |
-| **Người duyệt chi (Finance Approver)** | Phê duyệt thanh toán vượt hạn mức |
+| **Người giữ quyền duyệt chi (Finance Approver)** | Phê duyệt thanh toán vượt hạn mức — là quyền phê duyệt theo [Role Registry](../../00-system-overview/README.md), không phải chức danh riêng |
 | **Nhà cung cấp (Supplier)** | Phát hành hoá đơn; nhận thông báo tranh chấp (dispute) |
 
 ---
@@ -81,7 +81,7 @@ Mục tiêu: **chỉ thanh toán cho hàng đã thực nhận, đúng giá đã 
 | `Matched` | Ba chiều khớp trong dung sai | → `Approved for Payment` | AP |
 | `Exception` | Có chênh lệch cần xử lý | → `Matched` (đã giải quyết), → `Disputed`, → `Approved for Payment` (duyệt ngoại lệ) | AP / Procurement |
 | `Disputed` | Đang tranh chấp với NCC | → `Matched` (NCC gửi credit note / hoá đơn sửa), → `Cancelled` | Procurement |
-| `Approved for Payment` | Đã duyệt chi | → `Paid`, → `Exception` (phát hiện lỗi trước khi chi) | Finance Approver |
+| `Approved for Payment` | Đã duyệt chi | → `Paid`, → `Exception` (phát hiện lỗi trước khi chi) | Người giữ quyền duyệt chi |
 | `Paid` | Đã thanh toán | *(cuối)* | AP / hệ thống chi tiền |
 | `Cancelled` | Huỷ (nhập nhầm, NCC thu hồi hoá đơn) | *(cuối)* | AP |
 

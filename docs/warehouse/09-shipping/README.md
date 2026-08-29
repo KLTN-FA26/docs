@@ -15,7 +15,7 @@ Bàn giao các kiện hàng đã [đóng gói](../08-packing/README.md) cho **đ
 | **Nhân viên kho / Dispatch Staff** | Quét kiện, gom chuyến, bàn giao cho tài xế hãng vận chuyển, ký nhận manifest |
 | **Hệ thống (Carrier Integration)** | Kết nối API hãng vận chuyển: tạo nhãn, lấy tracking, nhận webhook cập nhật trạng thái |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận hàng, vận chuyển, cập nhật trạng thái, giao cho khách, xử lý hoàn |
-| **Nhân viên Sale / CSKH** | Theo dõi đơn trễ, xử lý khiếu nại giao hàng, liên hệ khách |
+| **Nhân viên Sale (Sales Staff)** | Theo dõi đơn trễ, xử lý khiếu nại giao hàng (CSKH), liên hệ khách |
 | **Khách hàng** | Nhận hàng; theo dõi tracking; xác nhận nhận (hoặc từ chối) |
 
 ---
