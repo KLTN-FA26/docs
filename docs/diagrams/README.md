@@ -225,15 +225,15 @@ flowchart TD
     TO_APPROVE -- Có --> TO_PENDING[Pending Approval] --> TO_APPROVED[Approved]
     TO_APPROVE -- Không --> TO_APPROVED
 
-    TO_APPROVED --> SRC_PICK[Kho nguồn: reserve tồn + pick\n(FEFO theo lô)]
+    TO_APPROVED --> SRC_PICK["Kho nguồn: reserve tồn + pick\n(FEFO theo lô)"]
     SRC_PICK --> SRC_PACK[Đóng kiện, ghi khối lượng]
     SRC_PACK --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
 
-    DISPATCH --> TRANSPORT[Vận chuyển giữa 2 kho\n(có/không tracking)]
+    DISPATCH --> TRANSPORT["Vận chuyển giữa 2 kho\n(có/không tracking)"]
     TRANSPORT --> DST_RECV[Kho đích: tạo phiếu nhận\ntham chiếu Transfer Order]
     DST_RECV --> DST_COUNT[Kiểm đếm SL thực nhận + tình trạng]
     DST_COUNT --> DISCREPANCY{Khớp SL xuất?}
-    DISCREPANCY -- Lệch --> INVESTIGATE[Ghi transfer discrepancy\nĐiều tra / claim hãng VC\nĐiều chỉnh In-Transit]
+    DISCREPANCY -- Lệch --> INVESTIGATE["Ghi transfer discrepancy\nĐiều tra / claim hãng VC\nĐiều chỉnh In-Transit"]
     DISCREPANCY -- Khớp --> DST_PA
     INVESTIGATE --> DST_PA[Sinh Putaway task tại kho đích]
 
@@ -292,7 +292,7 @@ flowchart TD
     KIND -- Có --> DESIGN[Product Design 2D\n+ Live 3D Preview]
     DESIGN --> PREFLIGHT{Preflight đạt?}
     PREFLIGHT -- Fail --> DESIGN
-    PREFLIGHT -- Pass/Warning --> CONFIRM_DSN[Chốt thiết kế\n→ Design snapshot]
+    PREFLIGHT -- Pass/Warning --> CONFIRM_DSN["Chốt thiết kế\n→ Design snapshot"]
     CONFIRM_DSN --> ADDCART
     KIND -- Không --> ADDCART[Thêm vào giỏ]
 
@@ -300,12 +300,12 @@ flowchart TD
     CART --> CHECKOUT[Checkout: kiểm tra lần cuối\ntồn / giá / voucher]
     CHECKOUT --> ADDR[Địa chỉ giao + phương thức vận chuyển]
     ADDR --> TOTALS[Chốt giá cuối\n= subtotal + ship + thuế − giảm giá]
-    TOTALS --> RESERVE[Giữ hàng (reservation)]
+    TOTALS --> RESERVE["Giữ hàng (reservation)"]
     RESERVE --> CREATE_ORDER[Tạo Order: Pending Payment]
     CREATE_ORDER --> PAY[Payment: chọn phương thức]
 
     PAY --> METHOD{Loại thanh toán}
-    METHOD -- Online gateway/ví/thẻ --> ONLINE[Xác thực qua cổng\n(webhook + verify)]
+    METHOD -- Online gateway/ví/thẻ --> ONLINE["Xác thực qua cổng\n(webhook + verify)"]
     METHOD -- Chuyển khoản --> BANK[Awaiting Confirmation\nKế toán đối chiếu sao kê]
     METHOD -- COD --> CODCHK{Đủ điều kiện COD?}
     METHOD -- Đặt cọc --> DEPOSIT[Thu cọc → Partially Paid]
@@ -329,7 +329,7 @@ flowchart TD
     MON[Giám sát tồn tại vị trí picking] --> LOW{Vị trí picking ≤ ngưỡng min?}
     LOW -- Không --> MON
     LOW -- Có --> GEN[Sinh replenishment task\nReserve → Picking bin, đưa về mức max]
-    GEN --> ASSIGN[Phân công NV kho\n(ưu tiên cao nếu đang chặn picking)]
+    GEN --> ASSIGN["Phân công NV kho\n(ưu tiên cao nếu đang chặn picking)"]
     ASSIGN --> EXEC[Quét vị trí nguồn → SKU/lô →\nsố lượng → vị trí đích]
     EXEC --> CHK{Số đặt vào = số lấy ra?}
     CHK -- Lệch --> DISC[Ghi Discrepancy\nCycle count 2 vị trí + adjustment]
