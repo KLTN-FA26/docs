@@ -21,6 +21,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **On-order / Incoming stock** | Hàng đã đặt qua PO nhưng **chưa về kho**. |
 | **In-Transit / Đang quá cảnh** | Hàng đã rời kho nguồn nhưng chưa tới kho đích (trong luồng chuyển kho). |
 | **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. |
+| **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. |
 | **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán. |
 | **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng. |
 | **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do, phê duyệt) khi phát hiện chênh lệch. |
@@ -183,7 +184,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 |------------|-------------|--------------|
 | `Draft` | PO, Receipt, Invoice, TO, Design | Bản nháp, sửa tự do, chưa có hiệu lực |
 | `Pending Approval` | PO, TO | Chờ phê duyệt |
-| `Confirmed` | PO, Order | Đã chốt / đã được xác nhận, khoá sửa nội dung chính |
+| `Confirmed` | PO, Order | Đã chốt nội bộ, khoá sửa nội dung chính |
 | `Partially Received` | PO, TO | Đã nhận một phần |
 | `Received` | PO, TO | Đã nhận đủ |
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
@@ -236,10 +237,10 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm. |
-| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO, làm việc với nhà cung cấp, xử lý tranh chấp hoá đơn. |
+| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO, chốt PO, xử lý tranh chấp hoá đơn. |
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
 | **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ. |
-| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn. |
+| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO. |
 | **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in (accept / reject / quarantine). |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền. |
 | **E-commerce Admin / Quản trị sàn** | Quản lý catalog, giá, khuyến mãi, nội dung, chính sách; cấu hình template thiết kế & kiểm tra file in (prepress). |
