@@ -26,10 +26,10 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
-| **Nhân viên mua hàng (Procurement Staff)** | Tạo & theo dõi PO, làm việc với NCC, đối chiếu hoá đơn (invoice matching) | Tạo/sửa PO ở trạng thái Draft; xác nhận PO; tạo Invoice |
+| **Nhân viên mua hàng (Procurement Staff)** | Tạo & theo dõi PO, làm việc với NCC, đối chiếu hoá đơn (invoice matching) | Tạo/sửa PO ở trạng thái Draft; chốt PO; tạo Invoice |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** khi nhận (accept / reject / quarantine) và **hàng sản xuất/in** trước khi fulfill | Ghi kết quả QC trên phiếu nhận; chuyển hàng vào/ra Quarantine |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
 
@@ -74,7 +74,7 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng (Customer / Guest)** | Duyệt catalog, thiết kế sản phẩm, đặt hàng, thanh toán, theo dõi đơn, chat với Sale; quản lý giỏ hàng, đơn hàng và hồ sơ của chính mình |
-| **Nhà cung cấp (Supplier / NCC)** | Nhận & xác nhận PO, giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
+| **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận kiện, vận chuyển, cập nhật tracking, thu hộ COD, xử lý hoàn (RTO) — tích hợp qua API |
 
 Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Carrier Integration, Design Engine + 3D Renderer, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
@@ -156,7 +156,8 @@ Luồng "hạnh phúc" (happy path) từ lúc tạo sản phẩm đến lúc gia
 
 ```mermaid
 flowchart LR
-    A[Tạo sản phẩm\nProduct Creation] --> B[Lập PO\nPurchase Order]
+    A[Tạo sản phẩm\nProduct Creation] --> A1[Hoạch định nhu cầu\nReplenishment Proposal]
+    A1 --> B[Lập PO\nPurchase Order]
     B --> C[Nhận hàng\nReceipt]
     C --> D[Đối chiếu hoá đơn\nInvoice matching]
     C --> E[Cất hàng vào kho\nPutaway]
@@ -191,7 +192,7 @@ flowchart LR
 
 | Luồng | Chuỗi module | Chứng từ xuyên suốt | Sơ đồ chi tiết |
 |-------|--------------|---------------------|----------------|
-| **Procurement** | PO → Receipt → Invoice → Putaway | PO number liên kết Receipt & Invoice; Receipt liên kết Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
+| **Procurement** | Hoạch định nhu cầu → PO → Receipt → Invoice → Putaway | PO number liên kết Receipt & Invoice; Receipt liên kết Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
 | **Fulfillment** | Order → Picking → Packing → Shipping | Order number liên kết Pick List, Package, Shipment | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
 | **Transfer** | Transfer Order → (xuất kho nguồn) → (vận chuyển) → (nhận kho đích) → Putaway | Transfer Order number | [diagrams §3](../diagrams/README.md#3-luồng-transfer-giữa-các-kho) |
 | **Storefront checkout** | Design/Catalog → Cart → Order → Payment | Cart ID → Order number → Payment transaction | — |
