@@ -87,10 +87,10 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 | Persona | Mô tả | Module thường dùng |
 |---------|-------|--------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý dữ liệu gốc sản phẩm | 01, 06 |
-| **Nhân viên mua hàng (Procurement Staff)** | Lập PO, làm việc với nhà cung cấp, đối chiếu hoá đơn | 02, 03, 04 |
+| **Nhân viên mua hàng (Procurement Staff)** | Lập & chốt PO, đối chiếu hoá đơn | 02, 03, 04 |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng, đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
 | **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho | 05, 06, 10, 11 |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Cân bằng tồn giữa các kho, tạo lệnh chuyển kho | 10 |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho | 02, 10 |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in | 03 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, đối soát thanh toán/COD | 04, 15, 17 |
 | **Quản trị sàn (E-commerce Admin)** | Quản lý catalog, giá, khuyến mãi, nội dung, template thiết kế | 12, 13, 14, 18 |
