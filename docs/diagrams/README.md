@@ -17,11 +17,13 @@ Mục lục:
 
 ```mermaid
 flowchart TD
-    START([Nhu cầu bổ sung tồn kho]) --> PO_CREATE[Tạo PO – Draft]
+    START([Nhu cầu bổ sung tồn kho]) --> MRP[MRP đối soát tồn\nsinh Replenishment Proposal]
+    MRP --> PLAN_REV[Planner đánh giá\nConvert to Draft PO]
+    PLAN_REV --> PO_CREATE[Tạo PO – Draft]
     PO_CREATE --> PO_APPROVE{Vượt hạn mức?}
     PO_APPROVE -- Có --> PO_PENDING[Pending Approval] --> PO_APPROVED[Approved]
     PO_APPROVE -- Không --> PO_APPROVED
-    PO_APPROVED --> PO_CONFIRM[Gửi NCC & NCC xác nhận\nPO: Confirmed]
+    PO_APPROVED --> PO_CONFIRM[Chốt PO\nPO: Confirmed]
     PO_CONFIRM --> WAIT[Chờ hàng về]
 
     WAIT --> RC_CREATE[Tạo Receipt tham chiếu PO]
@@ -74,8 +76,7 @@ sequenceDiagram
 
     PROC->>PO: Tạo PO (Draft) + dòng hàng
     PO->>PO: Duyệt (nếu vượt hạn mức) → Approved
-    PO->>VENDOR: Gửi PO
-    VENDOR-->>PO: Xác nhận → Confirmed
+    PO->>PO: Chốt PO → Confirmed
     VENDOR->>WH: Giao hàng + phiếu giao
     WH->>RC: Tạo Receipt tham chiếu PO
     WH->>RC: Kiểm đếm, ghi lô/hạn dùng, QC
