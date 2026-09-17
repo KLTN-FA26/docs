@@ -59,7 +59,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
 | **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
 | **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu nhận (inbound) lên vị trí lưu trữ chính thức. |
-| **Inbound area / Staging area / Khu chờ cất** | Khu tạm chứa hàng vừa nhận, chờ putaway. |
+| **Inbound area / Staging area / Khu chờ cất** | Khu tạm chứa hàng vừa nhận, chờ putaway — Area loại `RECEIVING`. |
 
 ---
 
@@ -69,29 +69,39 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 |-----------|--------------------------|
 | **WMS** (Warehouse Management System) | Hệ thống quản lý kho. |
 | **Warehouse Map / Bản đồ kho** | Mô hình không gian kho (2D mặt bằng / 3D khối kệ) kèm trạng thái lấp đầy. |
-| **Zone / Aisle / Rack / Level / Bin (Slot)** | Phân cấp không gian: Khu vực → Dãy → Kệ → Tầng → Ô chứa. |
-| **Location / Bin / Vị trí** | Điểm chứa hàng nhỏ nhất, có mã vạch (location barcode) riêng. |
-| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng. |
-| **Capacity / Sức chứa** | Giới hạn của một vị trí: theo thể tích, khối lượng, hoặc số ô. |
+| **Phân cấp không gian kho** | **Kho (Warehouse) → Kệ (Shelf) → Tầng kệ (Shelf Level) → Ô (Bin)**; kệ và khu vực có thể thuộc một **Zone** (tùy chọn). Hàng trên sàn nằm ở **Area**. Không khai báo dãy/lối đi riêng. |
+| **Zone** | Nhóm logic **tùy chọn** gom kệ/khu vực (có màu hiển thị), dùng cho hiển thị và zone picking; không mang quy tắc lưu trữ. |
+| **Shelf / Kệ** | Khối kệ đặt trên bản đồ kho (toạ độ, kích thước, góc xoay), có mặt lấy hàng và lớp lưu trữ mặc định. |
+| **Shelf Level / Tầng kệ** | Một tầng của kệ; có cao độ, chiều cao lọt và tải trọng tối đa. |
+| **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; có sức chứa theo đơn vị, cờ cho phép lấy hàng / cất hàng, loại ô, lớp lưu trữ ghi đè. |
+| **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ, phải bổ sung sang bin picking trước khi lấy. |
+| **Area / Khu vực** | Vùng trên sàn không phải kệ: `RECEIVING` (khu nhận), `QUARANTINE` (cách ly), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
+| **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
+| **Obstacle / Vật cản** | Kệ hoặc khu vực đánh dấu không đi xuyên được khi tính đường đi. |
+| **Pick face / Mặt lấy hàng** | Phía của kệ (bắc/đông/nam/tây) mà NV kho tiếp cận để lấy/cất hàng. |
+| **Storage class / Lớp lưu trữ** | Phân loại điều kiện lưu trữ: `NORMAL`, `COLD`, `HAZMAT`, `FRAGILE`, `OVERSIZE`. SKU chỉ được cất vào bin có lớp lưu trữ hiệu lực trùng lớp của SKU. |
+| **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin** hoặc một **Area chứa hàng**. |
+| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng; với bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`). |
+| **Warehouse prefix / Tiền tố kho** | Mã ngắn duy nhất của kho, dùng làm tiền tố cho mã vị trí và mã chứng từ phát sinh tại kho. |
+| **Capacity / Sức chứa** | Giới hạn của vị trí: số đơn vị tối đa của bin; tải trọng tối đa & chiều cao lọt của tầng kệ. |
 | **Slotting / Slotting Suggestion / Gợi ý vị trí** | Đề xuất vị trí lưu trữ tối ưu cho một SKU dựa trên quy tắc & dữ liệu. |
 | **Putaway recommendation** | Tên gọi khác của gợi ý vị trí khi cất hàng. |
 | **Re-slotting / Tối ưu vị trí** | Sắp xếp lại vị trí SKU định kỳ khi nhu cầu/tần suất xuất thay đổi. |
 | **Golden zone** | Khu vực dễ với tay nhất (ngang hông–vai), ưu tiên cho hàng bán chạy. |
 | **Honeycombing** | Tình trạng vị trí bị chiếm dở dang, còn trống nhưng không dùng được → lãng phí chỗ. |
 | **Velocity / Tần suất xuất** | Mức độ một SKU được lấy ra để giao (nhanh/chậm). |
-| **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm (nhiệt độ, hazmat, sức chứa, single-SKU/lot). |
-| **Compatibility rule / Quy tắc tương thích** | Cặp SKU/nhóm phải để gần nhau hoặc cấm để chung. |
+| **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm khi cất hàng: trạng thái vị trí, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng. |
 | **Hazmat** (Hazardous materials) | Hàng nguy hiểm, có khu vực & quy tắc lưu trữ riêng. |
 | **Picking / Lấy hàng** | Lấy hàng từ các vị trí để gom thành đơn chuẩn bị giao. |
 | **Pick list / Danh sách lấy hàng** | Danh sách SKU–vị trí–số lượng cần lấy cho một hoặc nhiều đơn. |
 | **Pick task / Nhiệm vụ lấy hàng** | Đơn vị công việc picking giao cho một NV kho. |
 | **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. |
-| **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một khu; đơn đi qua nhiều khu. |
+| **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. |
 | **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. |
 | **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. |
-| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick, chờ đóng gói / bàn giao vận chuyển. |
+| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
 | **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại vị trí lưu trữ. |
-| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ vùng dự trữ (reserve) xuống vùng picking khi sắp cạn. |
+| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. |
 | **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
 | **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. |
 | **Packing slip / Phiếu đóng gói** | Phiếu liệt kê nội dung kiện, đặt kèm trong hoặc ngoài kiện. |

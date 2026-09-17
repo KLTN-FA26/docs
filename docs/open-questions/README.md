@@ -45,13 +45,15 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | C3 | Tồn khả dụng để bán (**ATP**) tính theo **tổng toàn hệ thống** hay theo **kho phục vụ khu vực giao** của khách? | Cấu hình được; mặc định tổng toàn hệ thống | 🔴 | 13, 14, 10 |
 | C4 | Tồn **In-Transit** (chuyển kho) có được tính vào ATP của kho đích để bán trước không? | Không tính cho tới khi nhận & putaway | 🟡 | 10, 13, 14 |
 | C5 | Tồn khả dụng cộng **ngay khi Receipt** hay **chỉ sau Putaway**? | Chỉ sau Putaway (`Inbound` chưa khả dụng) | 🟡 | 03, 05, 13 |
-| C6 | Mức độ chi tiết vị trí: quản lý tới **ô/bin** hay tới **kệ/khu**? Có bắt buộc quét mã vị trí mọi thao tác? | Quản lý tới bin; bắt buộc quét mã vị trí | 🟡 | 05, 06, 07, 11 |
+| C6 | Mức độ chi tiết vị trí: quản lý tới **ô/bin** hay tới **kệ/khu**? Có bắt buộc quét mã vị trí mọi thao tác? | ✅ **Đã chốt một phần 2026-09-17:** quản lý tới **bin** trên tầng kệ (Kho → Kệ → Tầng → Bin, Zone tùy chọn); hàng trên sàn gắn với **Area**; mô hình chi tiết ở [06](../warehouse/06-warehouse-map-slotting/README.md). Bỏ các quy tắc single-SKU/single-lot, nhóm tương thích, sức chứa theo thể tích. **Còn mở:** có bắt buộc quét mã vị trí mọi thao tác (giả định: có) | 🟡 | 05, 06, 07, 11 |
 | C7 | **Định giá tồn kho** (costing): FIFO, bình quân gia quyền, hay đích danh? Chi phí vận chuyển chuyển kho có cộng vào giá vốn? | Theo chính sách kế toán, cấu hình hệ thống | 🟡 | 03, 10, 04 |
 | C8 | Có nghiệp vụ **kiểm kê (cycle count / stocktake)** trong phạm vi sản phẩm không? | Có nhắc tới như công cụ xử lý chênh lệch; chưa mô tả module riêng | 🟡 | 05, 07, 11 |
 | C9 | Quy tắc **over-receipt tolerance** và **price/quantity tolerance** ở Invoice: theo hệ thống, theo NCC, hay theo SKU? | Theo hệ thống, có thể override theo NCC | 🟢 | 02, 03, 04 |
 | C10 | Xử lý **hàng Quarantine/Rejected**: quy trình trả NCC (RTV), tiêu huỷ, hồ sơ chất lượng NCC — chi tiết đến đâu? | Có trạng thái & hướng xử lý chung; chưa có module RTV riêng | 🟡 | 03 |
 | C11 | Có áp dụng **tồn an toàn (safety stock)** — giữ lại một lượng không bán — không? Cấu hình theo SKU hay theo kho? | Không áp dụng; ATP = tồn khả dụng − phần giữ hàng. Nếu áp dụng, ATP trừ thêm safety stock | 🟡 | 01, 13, 14 |
 | C12 | SKU có phải **gán kho kinh doanh** trước khi dùng (PO, Receipt, bán) không, hay SKU `Active` dùng được ở mọi kho? | Không cần gán; SKU `Active` dùng được ở mọi kho | 🟡 | 01, 02, 03, 17 |
+| C13 | **Loại ô (`Bin.type`: STANDARD / PALLET / SMALL_PARTS)** là ràng buộc cứng (hàng pallet chỉ vào ô `PALLET`) hay chỉ để mô tả & ưu tiên? | Chỉ mô tả & ưu tiên (soft scoring), không chặn | 🟢 | 06, 05, 11 |
+| C14 | Chứng từ liên quan **hai kho** (Transfer Order) dùng **prefix** của kho nào? | Prefix của kho nguồn | 🟢 | 00, 10 |
 
 ---
 

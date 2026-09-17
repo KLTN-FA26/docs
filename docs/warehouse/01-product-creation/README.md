@@ -41,6 +41,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | **Thuộc tính biến thể (variant attributes)** | Variant | Kích cỡ, màu sắc, chất liệu… → tổ hợp sinh ra các **SKU** | Có (ít nhất 1 SKU) |
 | **Thông số vật lý (logistics data)** | Inventory Item | Khối lượng, kích thước (D×R×C), đơn vị tính (UoM), quy cách đóng gói (pack size) | Có (phục vụ slotting, packing, tính phí ship) |
 | **Thông tin mua hàng** | Inventory Item | Nhà cung cấp mặc định, giá mua tham chiếu, lead time, MOQ | Không (khuyến nghị) |
+| **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` / `COLD` / `HAZMAT` / `FRAGILE` / `OVERSIZE` — quyết định loại bin được phép cất (xem [06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |
 | **Kiểm soát tồn kho** | Inventory Item | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
 | **Dữ liệu TMĐT** | Product / Variant | Mô tả, hình ảnh, giá bán, thuộc tính SEO, trạng thái hiển thị | Không (bắt buộc trước khi publish lên catalog) |
 | **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
