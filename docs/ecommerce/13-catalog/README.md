@@ -27,7 +27,7 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 |------|---------|-------|
 | Sản phẩm & biến thể | Sản phẩm `Published`, danh sách SKU, thuộc tính biến thể, hình ảnh, mô tả, thuộc tính lọc | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
 | Giá bán | Giá niêm yết, giá khuyến mãi, quy tắc giá theo nhóm khách / số lượng | Cấu hình Pricing |
-| Tồn kho khả dụng (ATP) | Tổng tồn `Available` (có thể theo kho / khu vực giao) | Mảng kho vận (05 Putaway, 07 Picking, 10 Transfer) |
+| Tồn kho khả dụng (ATP) | ATP = tồn `Available` − phần đang giữ hàng (reservation), tính trên Inventory Item của SKU; theo kho hoặc toàn hệ thống (xem BR-06) | Mảng kho vận (05 Putaway, 07 Picking, 10 Transfer) |
 | Cấu hình hiển thị | Danh mục, cây phân loại, bộ lọc, sắp xếp, sản phẩm nổi bật, SEO | Quản trị sàn |
 | Cấu hình sản phẩm tùy chỉnh | Cờ "customizable", điểm vào trình thiết kế | [01](../../warehouse/01-product-creation/README.md) |
 
@@ -93,7 +93,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 
 - **BR-01:** Chỉ sản phẩm `Published` mới hiển thị. Biến thể (SKU) `Blocked`/`Obsolete` bị ẩn khỏi lựa chọn.
 - **BR-02:** Giá hiển thị luôn lấy từ nguồn Pricing tại thời điểm xem; giá trong giỏ được "chốt" theo quy tắc của [14](../14-cart-and-order/README.md) (xem module đó).
-- **BR-03:** Tình trạng còn hàng phản ánh **ATP** — tổng tồn `Available` trừ phần đã đặt/allocate — cập nhật gần thời gian thực.
+- **BR-03:** Tình trạng còn hàng phản ánh **ATP = tồn `Available` − phần đang giữ hàng (reservation)** (định nghĩa ở [Glossary](../../glossary/README.md)). Hàng đã `Allocated` không thuộc tồn `Available` nên không bị trừ lại. Cập nhật gần thời gian thực.
 - **BR-04:** Sản phẩm tùy chỉnh **không cho thêm thẳng vào giỏ** nếu chưa có design snapshot `Confirmed`.
 - **BR-05:** Khuyến mãi hiển thị phải trong thời hạn & đúng điều kiện; hết hạn tự ẩn.
 - **BR-06:** ATP có thể tính theo **kho phục vụ khu vực giao của khách** nếu bật bán theo vùng; nếu không, tính tổng toàn hệ thống.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).

@@ -8,6 +8,15 @@ Khai báo và duy trì **dữ liệu gốc về sản phẩm (product master dat
 
 Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **khả năng cá nhân hoá** (customization capability): vùng in (print area), chất liệu, khung 3D dùng để xem trước, các tuỳ chọn biến thể.
 
+Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo từng SKU:
+
+| Lớp dữ liệu | Nội dung | Phục vụ chủ yếu |
+|-------------|----------|-----------------|
+| **Sản phẩm & Biến thể (Product / Variant)** | Thông tin để bán: định danh, danh mục, thuộc tính biến thể, nội dung TMĐT, giá bán, cấu hình tùy chỉnh | 12 Product Design, 13 Catalog, 14 Cart & Order |
+| **Hàng tồn kho (Inventory Item)** | Thông tin hàng vật lý: đơn vị tính, thông số logistics, kiểm soát lô/hạn dùng/serial, ngưỡng tồn, thông tin mua hàng | 02 → 11 (mảng kho vận) |
+
+> ⚠️ Giả định: Với sản phẩm tùy chỉnh, Inventory Item của SKU là **phôi** (hàng chưa in). Thiết kế của khách đi kèm dòng đơn dưới dạng design snapshot, không sinh SKU/Inventory Item mới; tồn và ATP hiển thị trên catalog tính theo phôi. Xem [open-questions](../../open-questions/README.md).
+
 ---
 
 ## 2. Actor liên quan
@@ -26,22 +35,23 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 
 ### Input
 
-| Nhóm | Trường dữ liệu (ví dụ) | Bắt buộc |
-|------|------------------------|----------|
-| **Định danh** | Tên sản phẩm, mã sản phẩm nội bộ (product code), danh mục (category), thương hiệu | Có |
-| **Thuộc tính biến thể (variant attributes)** | Kích cỡ, màu sắc, chất liệu… → tổ hợp sinh ra các **SKU** | Có (ít nhất 1 SKU) |
-| **Thông số vật lý (logistics data)** | Khối lượng, kích thước (D×R×C), đơn vị tính (UoM), quy cách đóng gói (pack size) | Có (phục vụ slotting, packing, tính phí ship) |
-| **Thông tin mua hàng** | Nhà cung cấp mặc định, giá mua tham chiếu, lead time, MOQ | Không (khuyến nghị) |
-| **Kiểm soát tồn kho** | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
-| **Dữ liệu TMĐT** | Mô tả, hình ảnh, giá bán, thuộc tính SEO, trạng thái hiển thị | Không (bắt buộc trước khi publish lên catalog) |
-| **Dữ liệu tùy chỉnh (personalization)** | Vùng in (print areas) & toạ độ, chất liệu in, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
+| Nhóm | Lớp dữ liệu | Trường dữ liệu (ví dụ) | Bắt buộc |
+|------|-------------|------------------------|----------|
+| **Định danh** | Product | Tên sản phẩm, mã sản phẩm nội bộ (product code), danh mục (category), thương hiệu | Có |
+| **Thuộc tính biến thể (variant attributes)** | Variant | Kích cỡ, màu sắc, chất liệu… → tổ hợp sinh ra các **SKU** | Có (ít nhất 1 SKU) |
+| **Thông số vật lý (logistics data)** | Inventory Item | Khối lượng, kích thước (D×R×C), đơn vị tính (UoM), quy cách đóng gói (pack size) | Có (phục vụ slotting, packing, tính phí ship) |
+| **Thông tin mua hàng** | Inventory Item | Nhà cung cấp mặc định, giá mua tham chiếu, lead time, MOQ | Không (khuyến nghị) |
+| **Kiểm soát tồn kho** | Inventory Item | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
+| **Dữ liệu TMĐT** | Product / Variant | Mô tả, hình ảnh, giá bán, thuộc tính SEO, trạng thái hiển thị | Không (bắt buộc trước khi publish lên catalog) |
+| **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
 
 ### Output
 
 | Kết quả | Mô tả | Được dùng bởi |
 |---------|-------|---------------|
 | **Product record** (bản ghi sản phẩm) | Thực thể sản phẩm + danh sách SKU con | Toàn hệ thống |
-| **SKU** | Mã hàng hoá nhỏ nhất để quản lý tồn & giao dịch | 02 PO, 03 Receipt, 05 Putaway, 07 Picking, 10/11 Transfer |
+| **SKU (Variant)** | Biến thể bán được; mã hàng hoá nhỏ nhất dùng trên mọi chứng từ | 02 PO, 03 Receipt, 05 Putaway, 07 Picking, 10/11 Transfer, 12 Design, 13 Catalog, 14 Order |
+| **Inventory Item** | Hồ sơ hàng vật lý của SKU (1:1), hệ thống **tạo tự động** khi sinh SKU; là đối tượng được theo dõi tồn theo vị trí | 03, 05, 06, 07, 08, 10, 11; 13 Catalog (ATP) |
 | **Cấu hình tùy chỉnh** | Bộ tham số cho trình thiết kế 2D + preview 3D | 12 Product Design |
 | **Bản nháp catalog** | Nội dung hiển thị chờ publish | 13 Catalog |
 
@@ -51,9 +61,9 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 
 1. **Khởi tạo bản nháp (Create draft)** — System Admin / Quản trị sàn nhập thông tin định danh + danh mục. Sản phẩm ở trạng thái `Draft`.
 2. **Khai báo thuộc tính biến thể** — chọn các trục biến thể (ví dụ: Size × Color). Hệ thống sinh **ma trận biến thể**; người dùng chọn tổ hợp hợp lệ để tạo SKU.
-3. **Sinh mã SKU** — theo quy tắc cấu hình (prefix danh mục + mã thuộc tính + số thứ tự) hoặc nhập tay. Mỗi SKU phải **duy nhất toàn hệ thống**.
-4. **Nhập thông số logistics** cho từng SKU (hoặc kế thừa từ sản phẩm cha): khối lượng, kích thước, pack size, UoM.
-5. **Cấu hình kiểm soát tồn kho** — bật/tắt theo lô, hạn dùng, serial; đặt ngưỡng min/max phục vụ cảnh báo bổ sung tồn (reorder).
+3. **Sinh mã SKU** — theo quy tắc cấu hình (prefix danh mục + mã thuộc tính + số thứ tự) hoặc nhập tay. Mỗi SKU phải **duy nhất toàn hệ thống**. Với mỗi SKU, hệ thống **tự động tạo một Inventory Item** tương ứng; người dùng không tạo thủ công.
+4. **Nhập thông số logistics** vào Inventory Item của từng SKU (hoặc kế thừa từ sản phẩm cha): khối lượng, kích thước, pack size, UoM.
+5. **Cấu hình kiểm soát tồn kho** trên Inventory Item — bật/tắt theo lô, hạn dùng, serial; đặt ngưỡng min/max phục vụ cảnh báo bổ sung tồn (reorder).
 6. **(Sản phẩm in ấn) Cấu hình tùy chỉnh** — tải template 2D, model 3D, khai báo print area, ràng buộc file thiết kế.
 7. **Nhập dữ liệu TMĐT** — mô tả, hình ảnh, giá bán, thuộc tính hiển thị.
 8. **Gửi duyệt (Submit for review)** — chuyển sang `Pending Approval`.
@@ -99,7 +109,9 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 - **BR-03:** Thông số logistics (khối lượng, kích thước) là **bắt buộc trước khi** SKU được đưa vào Receipt/Putaway — vì module 06 Slotting và 08 Packing phụ thuộc dữ liệu này.
 - **BR-04:** Chỉ sản phẩm `Published` mới hiển thị trên catalog; chỉ sản phẩm `Active`/`Published` mới được đưa vào PO.
 - **BR-05:** Với sản phẩm in ấn, **bắt buộc** có ít nhất một print area và một template preview (2D hoặc 3D) trước khi `Published`.
-- **BR-06:** Giá bán TMĐT và giá mua là hai trường độc lập; module này chỉ lưu, không tính margin.
+- **BR-06:** Giá bán TMĐT (thuộc Variant) và giá mua tham chiếu (thuộc Inventory Item) là hai trường độc lập; module này chỉ lưu, không tính margin.
+- **BR-07:** Mỗi SKU có **đúng một** Inventory Item (quan hệ 1:1), tạo tự động khi sinh SKU. Hệ thống **không bán combo / bundle**, nên không có SKU nào ứng với nhiều Inventory Item. Do quan hệ 1:1, chứng từ kho ghi theo SKU tương đương ghi theo Inventory Item.
+- **BR-08:** Inventory Item chỉ chứa dữ liệu hàng vật lý & kiểm soát tồn; **không** chứa nội dung bán hàng (mô tả, hình ảnh, SEO, giá bán).
 
 ### Edge case cần lưu ý
 
@@ -123,5 +135,5 @@ Với sản phẩm **tùy chỉnh / in ấn**, module này còn khai báo **kh�
 | [05 · Putaway](../05-putaway/README.md) & [06 · Slotting](../06-warehouse-map-slotting/README.md) | Dùng thông số kích thước/khối lượng SKU để gợi ý vị trí phù hợp |
 | [07 · Picking](../07-picking/README.md) / [08 · Packing](../08-packing/README.md) | Pack size & kích thước SKU ảnh hưởng gợi ý thùng và cách đóng gói |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Lấy template 2D, model 3D, định nghĩa print area & ràng buộc thiết kế từ đây |
-| [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, giá bán, trạng thái `Published` |
+| [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, giá bán, trạng thái `Published`; ATP tính trên Inventory Item của SKU |
 | [10/11 · Transfer](../10-inter-warehouse-transfer/README.md) | Giao dịch chuyển kho tham chiếu SKU |

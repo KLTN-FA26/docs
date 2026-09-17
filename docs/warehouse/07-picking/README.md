@@ -46,7 +46,7 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
 1. **Nhận yêu cầu xuất** — [Order Management](../../ecommerce/17-order-management/README.md) chuyển các đơn `Confirmed` / `Ready to Fulfill` sang kho.
-2. **Phân bổ tồn (Allocation / Reservation)** — hệ thống giữ (reserve) số lượng cần lấy tại vị trí & lô cụ thể theo FEFO/FIFO. Tồn được đánh dấu `Allocated`, không khả dụng cho đơn khác.
+2. **Phân bổ tồn (Allocation)** — hệ thống phân bổ số lượng cần lấy tại vị trí & lô cụ thể theo FEFO/FIFO. Tồn chuyển `Available` → `Allocated`, không khả dụng cho đơn khác. Phần giữ hàng (reservation) của đơn từ [14](../../ecommerce/14-cart-and-order/README.md) được chuyển thành allocation ở bước này.
 3. **Lập đợt lấy hàng (Wave / Batch planning)** — gom nhiều đơn theo tiêu chí (khu vực, hạn giao, loại đóng gói); sinh **pick list** và **lộ trình tối ưu** (giảm quãng đường).
 4. **Chọn chiến lược:**
    | Chiến lược | Mô tả |
@@ -85,7 +85,7 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 | Trạng thái | Ý nghĩa |
 |------------|---------|
 | `Available` | Khả dụng, chưa gán đơn |
-| `Allocated` / `Reserved` | Đã giữ cho một đơn cụ thể, còn ở vị trí |
+| `Allocated` | Đã phân bổ cho một đơn/lệnh cụ thể tại vị trí & lô, còn ở vị trí |
 | `Picked` | Đã lấy khỏi vị trí, đang trên đường ra staging |
 | `Staged` | Đã ở khu đóng gói, chờ Packing |
 

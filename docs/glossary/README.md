@@ -11,19 +11,22 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Áo thun – Đỏ – Size M") là một SKU riêng. |
 | **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Áo thun" có nhiều màu/size). |
 | **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (màu × size × chất liệu…), tương ứng một SKU. |
+| **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, lô/hạn dùng/serial, ngưỡng tồn, thông tin mua hàng. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
 | **UoM** (Unit of Measure) | Đơn vị tính (cái, hộp, kg, mét…). |
 | **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
 | **Inventory / Tồn kho** | Số lượng hàng hoá đang có, luôn gắn với **vị trí** hoặc trạng thái quá cảnh. |
-| **Available stock / Tồn khả dụng** | Tồn có thể bán/xuất được (đã trừ phần bị giữ, khoá, cách ly). |
-| **ATP** (Available To Promise) | Số lượng có thể "hứa giao" cho khách = tồn khả dụng − phần đã đặt/giữ. |
+| **On-hand / Tồn thực tế** | Tổng số lượng vật lý đang nằm trong kho ở mọi trạng thái (`Inbound`, `Available`, `Allocated`, `Blocked`, `Quarantine`…); không gồm hàng `In-Transit` (thuộc lệnh chuyển kho). |
+| **Inventory Level / Tồn theo kho** | Số lượng tồn của một Inventory Item tại **một kho**, **tổng hợp** từ tồn các vị trí trong kho đó (theo từng trạng thái). Là số tính ra, không nhập/sửa trực tiếp; tồn toàn hệ thống = tổng các kho. |
+| **Available stock / Tồn khả dụng** | Tồn ở trạng thái `Available`: đã putaway vào vị trí được phép xuất, **chưa phân bổ** (allocate) cho đơn/lệnh nào, không bị khoá/cách ly. **Chưa trừ** phần giữ hàng (reservation). |
+| **ATP** (Available To Promise) | Số lượng có thể "hứa bán" cho khách: **ATP = Tồn khả dụng − Phần đang giữ hàng (reservation)**. Không trừ thêm phần đã phân bổ vì hàng `Allocated` không nằm trong tồn khả dụng. Phạm vi: toàn hệ thống hoặc theo kho (câu hỏi C3). |
 | **On-order / Incoming stock** | Hàng đã đặt qua PO nhưng **chưa về kho**. |
 | **In-Transit / Đang quá cảnh** | Hàng đã rời kho nguồn nhưng chưa tới kho đích (trong luồng chuyển kho). |
 | **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. |
 | **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. |
-| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán. |
-| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng. |
+| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán, **chưa gắn vị trí/lô**. Làm giảm ATP; hết hạn thì giải phóng; khi đơn được phân bổ thì chuyển thành allocation. |
+| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng. Số lượng chuyển trạng thái `Available` → `Allocated`. |
 | **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do, phê duyệt) khi phát hiện chênh lệch. |
 | **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một số vị trí theo lịch, không dừng toàn kho. |
 | **FIFO** (First-In-First-Out) | Nhập trước xuất trước. |
@@ -190,7 +193,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
 | `Cancelled` | Hầu hết chứng từ | Bị huỷ trước khi hoàn tất |
 | `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
-| `Allocated` / `Reserved` | Tồn kho | Đã giữ cho một đơn cụ thể |
+| `Reserved` | Order (giữ hàng) | Đã giữ số lượng cho đơn, chưa gắn vị trí/lô; làm giảm ATP |
+| `Allocated` | Tồn kho (theo vị trí) | Đã phân bổ tồn ở vị trí & lô cho một đơn/lệnh cụ thể |
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
 | `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
 | `Paid` | Order (payment_status) | Đã thu đủ tiền |

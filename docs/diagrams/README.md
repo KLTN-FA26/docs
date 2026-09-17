@@ -226,7 +226,7 @@ flowchart TD
     TO_APPROVE -- Có --> TO_PENDING[Pending Approval] --> TO_APPROVED[Approved]
     TO_APPROVE -- Không --> TO_APPROVED
 
-    TO_APPROVED --> SRC_PICK["Kho nguồn: reserve tồn + pick\n(FEFO theo lô)"]
+    TO_APPROVED --> SRC_PICK["Kho nguồn: phân bổ tồn + pick\n(FEFO theo lô)"]
     SRC_PICK --> SRC_PACK[Đóng kiện, ghi khối lượng]
     SRC_PACK --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
 
@@ -262,7 +262,7 @@ sequenceDiagram
     PLAN->>TO: Tạo TO (Draft) – nguồn/đích + SKU/SL
     TO->>INV_SRC: Kiểm tra tồn Available tại kho nguồn
     TO->>TO: Duyệt (nếu vượt ngưỡng) → Approved
-    TO->>SRC: Yêu cầu pick (reserve tồn, FEFO)
+    TO->>SRC: Yêu cầu pick (phân bổ tồn, FEFO)
     SRC->>INV_SRC: Lấy hàng khỏi vị trí
     SRC->>TRANS: Xuất kho nguồn (Dispatch)
     INV_SRC->>INV_SRC: Giảm tồn → trạng thái In-Transit (gắn TO)
