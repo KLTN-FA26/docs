@@ -75,14 +75,15 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Shelf Level / Tầng kệ** | Một tầng của kệ; có cao độ, chiều cao lọt và tải trọng tối đa. |
 | **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; có sức chứa theo đơn vị, cờ cho phép lấy hàng / cất hàng, loại ô, lớp lưu trữ ghi đè. |
 | **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ, phải bổ sung sang bin picking trước khi lấy. |
-| **Area / Khu vực** | Vùng trên sàn không phải kệ: `RECEIVING` (khu nhận), `QUARANTINE` (cách ly), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
+| **Bin autogenerate / Tự sinh bin** | Tạo hàng loạt bin cho các tầng kệ chưa có bin bằng cách chia đều mặt kệ theo số hàng × số cột; mã bin đặt theo kiểu `SEQUENTIAL` (`01`, `02`…) hoặc `ROW_LETTER_COLUMN` (`A01`, `B01`…). |
+| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUARANTINE` (cách ly), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
 | **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
 | **Obstacle / Vật cản** | Kệ hoặc khu vực đánh dấu không đi xuyên được khi tính đường đi. |
 | **Pick face / Mặt lấy hàng** | Phía của kệ (bắc/đông/nam/tây) mà NV kho tiếp cận để lấy/cất hàng. |
 | **Storage class / Lớp lưu trữ** | Phân loại điều kiện lưu trữ: `NORMAL`, `COLD`, `HAZMAT`, `FRAGILE`, `OVERSIZE`. SKU chỉ được cất vào bin có lớp lưu trữ hiệu lực trùng lớp của SKU. |
 | **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin** hoặc một **Area chứa hàng**. |
-| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng; với bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`). |
-| **Warehouse prefix / Tiền tố kho** | Mã ngắn duy nhất của kho, dùng làm tiền tố cho mã vị trí và mã chứng từ phát sinh tại kho. |
+| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng, do hệ thống ghép khi tạo vị trí và không đổi: bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`); khu vực = prefix kho + mã khu vực (ví dụ `HN-RCV01`). Duy nhất toàn hệ thống. |
+| **Warehouse prefix / Tiền tố kho** | Mã ngắn duy nhất của kho, dùng làm tiền tố cho mã vị trí và mã chứng từ phát sinh tại kho. Không sửa được sau khi tạo. |
 | **Capacity / Sức chứa** | Giới hạn của vị trí: số đơn vị tối đa của bin; tải trọng tối đa & chiều cao lọt của tầng kệ. |
 | **Slotting / Slotting Suggestion / Gợi ý vị trí** | Đề xuất vị trí lưu trữ tối ưu cho một SKU dựa trên quy tắc & dữ liệu. |
 | **Putaway recommendation** | Tên gọi khác của gợi ý vị trí khi cất hàng. |
