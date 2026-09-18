@@ -29,6 +29,7 @@ Bàn giao các kiện hàng đã [đóng gói](../08-packing/README.md) cho **đ
 | Kiện đã `Packed` | Package ID, khối lượng, kích thước, nội dung, giá trị khai báo | Có |
 | Phương thức / dịch vụ vận chuyển | Khách chọn khi đặt, hoặc rule chọn hãng | Có |
 | Địa chỉ giao & người nhận | Từ đơn hàng | Có |
+| Địa chỉ gửi & địa chỉ hoàn hàng | Địa chỉ của kho xuất; địa chỉ hoàn hàng lấy `return_address` của kho, nếu không khai báo thì dùng địa chỉ kho (xem [06](../06-warehouse-map-slotting/README.md)) | Có |
 | Điều khoản thu hộ (COD amount) nếu có | | Không |
 | Tài khoản hãng vận chuyển & cấu hình dịch vụ | API key, hợp đồng giá | Có (cấu hình hệ thống) |
 | Lịch lấy hàng (pickup schedule) / điểm gửi | | Không |

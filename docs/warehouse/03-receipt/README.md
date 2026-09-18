@@ -2,7 +2,7 @@
 
 ## 1. Mục đích (Purpose)
 
-Ghi nhận việc **hàng hoá thực tế về đến kho** theo một [PO](../02-purchase-order/README.md): kiểm đếm số lượng, kiểm tra chất lượng sơ bộ, ghi nhận thông tin lô/hạn dùng/serial (nếu SKU yêu cầu), và đưa hàng vào **khu vực chờ cất (staging / inbound area)**.
+Ghi nhận việc **hàng hoá thực tế về đến kho** theo một [PO](../02-purchase-order/README.md): kiểm đếm số lượng, kiểm tra chất lượng sơ bộ, ghi nhận thông tin lô/hạn dùng/serial (nếu SKU yêu cầu), và đưa hàng vào **khu vực chờ cất (staging / inbound area — Area `RECEIVING`)**.
 
 Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát của kho** và là căn cứ để:
 - Cập nhật tiến độ PO (đã nhận / còn chờ).
@@ -31,7 +31,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
 | PO tham chiếu | Một hoặc nhiều PO của cùng NCC | Có (trừ trường hợp nhận không PO — xem edge case) |
-| Kho & khu vực nhận (dock / inbound zone) | | Có |
+| Kho & khu nhận hàng | Area loại `RECEIVING` của kho (xem [06](../06-warehouse-map-slotting/README.md)) | Có |
 | Phiếu giao hàng NCC (delivery note / packing slip) | Số phiếu, ngày | Không (khuyến nghị) |
 | **Dòng nhận (receipt lines)** | SKU, số lượng thực nhận, đơn vị | Có |
 | Thông tin lô (batch/lot), hạn sử dụng, serial | Bắt buộc nếu SKU được cấu hình theo dõi (module 01) | Có/Không tuỳ SKU |
@@ -44,7 +44,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 |---------|----------|
 | **Receipt number** (mã phiếu nhận) | 04 Invoice, 05 Putaway, truy vết |
 | **Cập nhật PO**: SL đã nhận, open quantity, trạng thái PO | 02 PO |
-| **Tồn ở inbound area** (theo SKU + lô + trạng thái QC) | 05 Putaway |
+| **Tồn ở khu nhận hàng** (Area `RECEIVING`; hàng cách ly ở Area `QUARANTINE`) theo SKU + lô + trạng thái QC | 05 Putaway |
 | **Nhiệm vụ Putaway** (putaway task) | 05 Putaway |
 | **Bản ghi chênh lệch (discrepancy record)** nếu có | Procurement, Warehouse Manager |
 
@@ -63,7 +63,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
    - Nhận **thừa ngoài dung sai** / sai SKU: cần Warehouse Manager duyệt ngoại lệ hoặc từ chối phần vượt.
 7. **Xác nhận phiếu nhận (Confirm receipt)** — chốt số liệu. Hệ thống:
    - Cập nhật *SL đã nhận* & trạng thái PO (`Partially Received` / `Received`).
-   - Ghi tồn vào **inbound area** theo (SKU, lô, trạng thái QC).
+   - Ghi tồn vào **inbound area** (Area `RECEIVING`; phần `Quarantine` vào Area `QUARANTINE`) theo (SKU, lô, trạng thái QC).
    - Sinh **nhiệm vụ Putaway** cho phần `Accepted`.
 8. **Bàn giao cho Putaway** — hàng nằm ở inbound area chờ NV kho thực hiện [Putaway](../05-putaway/README.md).
 9. **Thông báo Invoice matching** — Receipt trở thành một vế trong three-way matching với [Invoice](../04-invoice/README.md).

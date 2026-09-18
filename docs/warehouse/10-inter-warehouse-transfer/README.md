@@ -49,7 +49,7 @@ Di chuyển tồn kho **từ kho này sang kho khác** (khác địa điểm v�
 1. **Tạo lệnh chuyển kho (Create Transfer Order)** — Planner chọn kho nguồn, kho đích, thêm dòng SKU & số lượng. TO ở `Draft`.
 2. **Kiểm tra khả dụng tại kho nguồn** — số lượng yêu cầu ≤ tồn `Available` tại kho nguồn (không tính hàng đã allocate cho đơn khách).
 3. **Gửi duyệt (Submit)** — nếu vượt ngưỡng → `Pending Approval`; duyệt → `Approved`.
-4. **Phân bổ & pick tại kho nguồn** — hệ thống reserve tồn theo vị trí/lô (FEFO); sinh pick task nội bộ. NV kho nguồn lấy hàng.
+4. **Phân bổ & pick tại kho nguồn** — hệ thống phân bổ (allocate) tồn theo vị trí/lô (FEFO); sinh pick task nội bộ. NV kho nguồn lấy hàng.
 5. **Đóng gói & xuất kho nguồn (Ship from source)** — đóng kiện, ghi khối lượng; xác nhận **Dispatch**. Tồn kho nguồn **giảm**, chuyển sang trạng thái **`In-Transit`** gắn với TO.
 6. **Vận chuyển** — theo dõi hành trình (nếu qua hãng vận chuyển: có tracking; nếu xe nội bộ: cập nhật thủ công).
 7. **Nhận tại kho đích (Receive at destination)** — NV kho đích tạo phiếu nhận tham chiếu **TO** (không phải PO): kiểm đếm số lượng thực nhận, kiểm tra tình trạng.

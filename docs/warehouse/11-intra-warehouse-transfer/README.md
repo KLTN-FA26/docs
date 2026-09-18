@@ -2,9 +2,9 @@
 
 ## 1. Mục đích (Purpose)
 
-Di chuyển tồn kho **giữa các vị trí trong cùng một kho** (bin → bin) mà **không thay đổi tổng tồn của kho**. Các mục đích chính:
+Di chuyển tồn kho **giữa các vị trí trong cùng một kho** (bin hoặc khu vực chứa hàng → bin hoặc khu vực chứa hàng) mà **không thay đổi tổng tồn của kho**. Các mục đích chính:
 
-- **Bổ sung khu vực lấy hàng (Replenishment):** chuyển hàng từ vùng dự trữ (reserve / bulk) xuống vùng picking khi vị trí picking sắp cạn.
+- **Bổ sung khu vực lấy hàng (Replenishment):** chuyển hàng từ bin dự trữ (bin không cho phép lấy hàng, `is_pickable` = false) sang bin picking (`is_pickable` = true) khi bin picking sắp cạn.
 - **Tối ưu vị trí (Re-slotting):** đưa SKU bán chạy ra gần khu đóng gói theo đề xuất của [Slotting](../06-warehouse-map-slotting/README.md).
 - **Gom hàng (Consolidation):** gộp nhiều vị trí lẻ của cùng SKU/lô để giải phóng bin.
 - **Sửa vị trí sai sau Putaway** hoặc dọn vị trí đang bảo trì.
@@ -31,7 +31,7 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
 | Kho (một kho duy nhất) | | Có |
-| Vị trí nguồn (from bin) & vị trí đích (to bin) | Trong cùng kho | Có |
+| Vị trí nguồn & vị trí đích | Bin hoặc khu vực chứa hàng (Area), trong cùng kho | Có |
 | SKU, số lượng, (lô/serial nếu áp dụng) | | Có |
 | Lý do di chuyển | Replenishment / re-slotting / consolidation / fix / unblock | Không (khuyến nghị) |
 | Nguồn phát sinh | Auto (ngưỡng min) / Manual / Đề xuất Slotting | Có |
@@ -52,7 +52,7 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 ### 4.1. Bổ sung vùng picking (Replenishment) — thường tự động
 
 1. Hệ thống giám sát tồn tại các vị trí picking so với ngưỡng min/max cấu hình.
-2. Khi một vị trí picking ≤ ngưỡng min (hoặc dự báo sẽ cạn theo wave picking sắp tới) → sinh **replenishment task**: chuyển từ vị trí reserve của cùng SKU (ưu tiên FEFO) đến vị trí picking đó, số lượng đưa về mức max.
+2. Khi một vị trí picking ≤ ngưỡng min (hoặc dự báo sẽ cạn theo wave picking sắp tới) → sinh **replenishment task**: chuyển từ bin dự trữ của cùng SKU (ưu tiên FEFO) đến bin picking đó, số lượng đưa về mức max.
 3. Task vào hàng đợi NV kho; ưu tiên cao nếu đang chặn picking.
 4. NV kho: quét vị trí nguồn → quét SKU/lô → nhập số lượng lấy → di chuyển → quét vị trí đích → xác nhận số lượng đặt vào.
 5. Tồn cập nhật; task `Completed`.
@@ -67,7 +67,7 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 ### 4.3. Di chuyển thủ công (Manual)
 
 1. NV kho / Manager tạo move task: chọn vị trí nguồn, SKU, số lượng, vị trí đích (có thể lấy gợi ý từ Slotting).
-2. Hệ thống kiểm tra hard constraints của vị trí đích (loại hàng, sức chứa, single-SKU/lot).
+2. Hệ thống kiểm tra hard constraints của vị trí đích (trạng thái, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng) — xem [06](../06-warehouse-map-slotting/README.md).
 3. Thực hiện & xác nhận bằng quét mã.
 
 ### 4.4. Xử lý chênh lệch
@@ -99,11 +99,11 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 
 - **BR-01:** Vị trí nguồn và đích phải **cùng một kho**. Khác kho → dùng [Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md).
 - **BR-02:** Tổng tồn kho của kho **không thay đổi** sau intra-transfer; chỉ phân bố theo vị trí thay đổi.
-- **BR-03:** Không vi phạm hard constraints của vị trí đích (loại hàng, sức chứa, single-SKU/lot, cặp cấm-để-chung).
+- **BR-03:** Không vi phạm hard constraints của vị trí đích (trạng thái, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng).
 - **BR-04:** Không di chuyển hàng đang `Allocated` cho một pick task đang chạy trừ khi hủy phân bổ trước (tránh picker tới vị trí trống).
 - **BR-05:** Di chuyển hàng `Quarantine`/`Blocked` chỉ khi đã có kết luận & quyền phù hợp; ghi rõ lý do unblock.
 - **BR-06:** Mọi di chuyển để lại movement record (nguồn, đích, SKU, lô, số lượng, người, thời gian, lý do).
-- **BR-07:** FEFO: khi bổ sung vùng picking, ưu tiên lấy lô hạn dùng gần nhất từ vùng reserve.
+- **BR-07:** FEFO: khi bổ sung bin picking, ưu tiên lấy lô hạn dùng gần nhất từ bin dự trữ.
 
 ### Edge case
 

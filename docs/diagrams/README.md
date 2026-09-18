@@ -17,11 +17,13 @@ Mục lục:
 
 ```mermaid
 flowchart TD
-    START([Nhu cầu bổ sung tồn kho]) --> PO_CREATE[Tạo PO – Draft]
+    START([Nhu cầu bổ sung tồn kho]) --> MRP[MRP đối soát tồn\nsinh Replenishment Proposal]
+    MRP --> PLAN_REV[Planner đánh giá\nConvert to Draft PO]
+    PLAN_REV --> PO_CREATE[Tạo PO – Draft]
     PO_CREATE --> PO_APPROVE{Vượt hạn mức?}
     PO_APPROVE -- Có --> PO_PENDING[Pending Approval] --> PO_APPROVED[Approved]
     PO_APPROVE -- Không --> PO_APPROVED
-    PO_APPROVED --> PO_CONFIRM[Gửi NCC & NCC xác nhận\nPO: Confirmed]
+    PO_APPROVED --> PO_CONFIRM[Chốt PO\nPO: Confirmed]
     PO_CONFIRM --> WAIT[Chờ hàng về]
 
     WAIT --> RC_CREATE[Tạo Receipt tham chiếu PO]
@@ -74,8 +76,7 @@ sequenceDiagram
 
     PROC->>PO: Tạo PO (Draft) + dòng hàng
     PO->>PO: Duyệt (nếu vượt hạn mức) → Approved
-    PO->>VENDOR: Gửi PO
-    VENDOR-->>PO: Xác nhận → Confirmed
+    PO->>PO: Chốt PO → Confirmed
     VENDOR->>WH: Giao hàng + phiếu giao
     WH->>RC: Tạo Receipt tham chiếu PO
     WH->>RC: Kiểm đếm, ghi lô/hạn dùng, QC
@@ -225,7 +226,7 @@ flowchart TD
     TO_APPROVE -- Có --> TO_PENDING[Pending Approval] --> TO_APPROVED[Approved]
     TO_APPROVE -- Không --> TO_APPROVED
 
-    TO_APPROVED --> SRC_PICK["Kho nguồn: reserve tồn + pick\n(FEFO theo lô)"]
+    TO_APPROVED --> SRC_PICK["Kho nguồn: phân bổ tồn + pick\n(FEFO theo lô)"]
     SRC_PICK --> SRC_PACK[Đóng kiện, ghi khối lượng]
     SRC_PACK --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
 
@@ -261,7 +262,7 @@ sequenceDiagram
     PLAN->>TO: Tạo TO (Draft) – nguồn/đích + SKU/SL
     TO->>INV_SRC: Kiểm tra tồn Available tại kho nguồn
     TO->>TO: Duyệt (nếu vượt ngưỡng) → Approved
-    TO->>SRC: Yêu cầu pick (reserve tồn, FEFO)
+    TO->>SRC: Yêu cầu pick (phân bổ tồn, FEFO)
     SRC->>INV_SRC: Lấy hàng khỏi vị trí
     SRC->>TRANS: Xuất kho nguồn (Dispatch)
     INV_SRC->>INV_SRC: Giảm tồn → trạng thái In-Transit (gắn TO)

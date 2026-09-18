@@ -54,7 +54,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 5. **Cân & đo** — nhập khối lượng thực và kích thước kiện (hoặc lấy từ cân tích hợp). Hệ thống tính **khối lượng quy đổi (dimensional weight)**.
 6. **Chọn dịch vụ vận chuyển & tạo nhãn** — theo phương thức khách chọn / rule chọn hãng rẻ-nhanh; gọi [Shipping](../09-shipping/README.md) để lấy **tracking number + shipping label**. In & dán nhãn lên kiện.
 7. **Niêm phong & xác nhận** — dán nhãn, niêm phong; xác nhận `Packed`. Mỗi kiện có mã kiện (package ID) và tracking riêng.
-8. **Chuyển sang khu chờ giao (dispatch area / outbound dock)** — bàn giao cho bước [Shipping](../09-shipping/README.md).
+8. **Chuyển sang khu chờ giao (Area `DISPATCH`)** — bàn giao cho bước [Shipping](../09-shipping/README.md).
 9. **Xử lý đơn nhiều kiện (multi-package)** — một đơn có thể tách nhiều kiện; mỗi kiện có nội dung & tracking riêng, cùng thuộc một shipment.
 
 ---

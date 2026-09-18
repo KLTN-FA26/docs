@@ -46,21 +46,21 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
 1. **Nhận yêu cầu xuất** — [Order Management](../../ecommerce/17-order-management/README.md) chuyển các đơn `Confirmed` / `Ready to Fulfill` sang kho.
-2. **Phân bổ tồn (Allocation / Reservation)** — hệ thống giữ (reserve) số lượng cần lấy tại vị trí & lô cụ thể theo FEFO/FIFO. Tồn được đánh dấu `Allocated`, không khả dụng cho đơn khác.
-3. **Lập đợt lấy hàng (Wave / Batch planning)** — gom nhiều đơn theo tiêu chí (khu vực, hạn giao, loại đóng gói); sinh **pick list** và **lộ trình tối ưu** (giảm quãng đường).
+2. **Phân bổ tồn (Allocation)** — hệ thống phân bổ số lượng cần lấy tại bin & lô cụ thể theo FEFO/FIFO, chỉ từ bin cho phép lấy hàng (`is_pickable`). Tồn chuyển `Available` → `Allocated`, không khả dụng cho đơn khác. Phần giữ hàng (reservation) của đơn từ [14](../../ecommerce/14-cart-and-order/README.md) được chuyển thành allocation ở bước này.
+3. **Lập đợt lấy hàng (Wave / Batch planning)** — gom nhiều đơn theo tiêu chí (khu vực, hạn giao, loại đóng gói); sinh **pick list** và **lộ trình tối ưu** (giảm quãng đường). Lộ trình tính trên [bản đồ kho](../06-warehouse-map-slotting/README.md): không đi xuyên tường, kệ hay vật cản; chỉ qua cửa đang mở; tiếp cận kệ từ mặt lấy hàng.
 4. **Chọn chiến lược:**
    | Chiến lược | Mô tả |
    |------------|-------|
    | Discrete / single-order | Một picker lấy trọn một đơn |
    | Batch picking | Lấy nhiều đơn cùng lúc, tách ra sau |
-   | Zone picking | Mỗi picker phụ trách một khu; đơn đi qua nhiều khu |
+   | Zone picking | Mỗi picker phụ trách một zone; đơn đi qua nhiều zone (chỉ áp dụng cho kệ đã gán zone) |
    | Wave picking | Thả đợt theo lịch (theo chuyến xe của hãng vận chuyển) |
 5. **Phân công picker** — pick task vào hàng đợi của từng NV.
 6. **Đi lấy hàng theo lộ trình** — tại mỗi chặng: quét **mã vị trí** → quét **SKU/lô** → nhập/quét **số lượng lấy** → đặt vào tote/thùng. Hệ thống kiểm tra khớp phân bổ.
 7. **Xử lý thiếu hàng (Short pick)** — nếu vị trí không đủ:
    - Hệ thống thử **phân bổ lại** từ vị trí/lô khác.
    - Nếu vẫn thiếu: ghi nhận short pick; đơn chuyển trạng thái chờ (backorder) hoặc giao một phần (partial) theo chính sách; thông báo Order Management & Manager; kích hoạt kiểm kê vị trí lệch.
-8. **Gom về khu đóng gói (Staging)** — picker mang hàng đã lấy đến khu outbound staging; quét bàn giao. Hàng chuyển trạng thái `Picked` → `Staged`.
+8. **Gom về khu đóng gói (Staging)** — picker mang hàng đã lấy đến khu đóng gói (Area `PACKING`); quét bàn giao. Hàng chuyển trạng thái `Picked` → `Staged`.
 9. **Đóng pick task** — khi mọi dòng đã lấy đủ (hoặc chốt short). Sinh/nối tiếp **Packing task** cho đơn.
 
 ---
@@ -85,7 +85,7 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 | Trạng thái | Ý nghĩa |
 |------------|---------|
 | `Available` | Khả dụng, chưa gán đơn |
-| `Allocated` / `Reserved` | Đã giữ cho một đơn cụ thể, còn ở vị trí |
+| `Allocated` | Đã phân bổ cho một đơn/lệnh cụ thể tại vị trí & lô, còn ở vị trí |
 | `Picked` | Đã lấy khỏi vị trí, đang trên đường ra staging |
 | `Staged` | Đã ở khu đóng gói, chờ Packing |
 
@@ -126,5 +126,5 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Điều kiện thanh toán quyết định đơn có được release để pick hay không |
 | [05 · Putaway](../05-putaway/README.md) / [06 · Slotting](../06-warehouse-map-slotting/README.md) | Vị trí & FEFO do putaway/slotting quyết định; velocity từ picking phản hồi lại slotting |
 | [08 · Packing](../08-packing/README.md) | Nhận hàng đã pick tại staging; pick task hoàn tất → packing task |
-| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Replenishment: bổ sung hàng từ vùng dự trữ (reserve) xuống vùng picking khi cạn |
+| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Replenishment: bổ sung hàng từ bin dự trữ sang bin picking (`is_pickable`) khi cạn |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 1 của luồng Fulfillment |
