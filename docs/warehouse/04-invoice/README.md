@@ -110,7 +110,7 @@ stateDiagram-v2
 ### Business rules
 
 - **BR-01:** Không `Approved for Payment` khi còn chênh lệch chưa được duyệt hoặc chưa giải quyết.
-- **BR-02:** Số lượng trên hoá đơn không vượt số lượng đã `Receipt` (`Accepted`) và chưa bị hoá đơn khác "tiêu thụ" (matched-against). Vượt → `Exception: over-invoice`.
+- **BR-02:** Số lượng trên hoá đơn không vượt số lượng đã `Receipt` trừ phần QC kết luận `Rejected` (với SKU yêu cầu QC, phần này chỉ chốt sau khi QC tại khu kiểm tra chất lượng có kết luận) và chưa bị hoá đơn khác "tiêu thụ" (matched-against). Vượt → `Exception: over-invoice`.
 - **BR-03:** Dung sai giá (price tolerance) và dung sai số lượng cấu hình theo hệ thống hoặc theo NCC; ngoài dung sai bắt buộc `Exception`.
 - **BR-04:** Số hoá đơn NCC là **duy nhất theo từng NCC** — chặn nhập trùng (chống thanh toán hai lần).
 - **BR-05:** Một Receipt có thể được đối chiếu bởi nhiều hoá đơn (giao nhiều đợt, hoá đơn từng phần) nhưng tổng không vượt SL đã nhận.

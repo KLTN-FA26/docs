@@ -30,7 +30,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
-| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** khi nhận (accept / reject / quarantine) và **hàng sản xuất/in** trước khi fulfill | Ghi kết quả QC trên phiếu nhận; chuyển hàng vào/ra Quarantine |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine) và **hàng sản xuất/in** trước khi fulfill | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
 
 > ⚠️ Giả định: phạm vi QC bao gồm cả **hàng sản xuất/in** (đơn tùy chỉnh) — hệ thống chưa có module Sản xuất/In riêng (câu hỏi B1). Xem [open-questions](../open-questions/README.md).
@@ -161,6 +161,8 @@ flowchart LR
     B --> C[Nhận hàng\nReceipt]
     C --> D[Đối chiếu hoá đơn\nInvoice matching]
     C --> E[Cất hàng vào kho\nPutaway]
+    C --> C1[Kiểm tra chất lượng\nQC - nếu SKU yêu cầu]
+    C1 --> E
     E --> F[(Tồn kho khả dụng\nAvailable stock)]
 
     G[Khách thiết kế sản phẩm\nProduct Design 2D/3D] --> H[Thêm vào giỏ\nCart]
@@ -192,7 +194,7 @@ flowchart LR
 
 | Luồng | Chuỗi module | Chứng từ xuyên suốt | Sơ đồ chi tiết |
 |-------|--------------|---------------------|----------------|
-| **Procurement** | Hoạch định nhu cầu → PO → Receipt → Invoice → Putaway | PO number liên kết Receipt & Invoice; Receipt liên kết Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
+| **Procurement** | Hoạch định nhu cầu → PO → Receipt (WH/Input) → QC (WH/Quality Control, nếu SKU yêu cầu) → Putaway (WH/Stock); Invoice song song | PO number liên kết Receipt & Invoice; Receipt liên kết nhiệm vụ chuyển QC, kết quả QC & Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
 | **Fulfillment** | Order → Picking → Packing → Shipping | Order number liên kết Pick List, Package, Shipment | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
 | **Transfer** | Transfer Order → (xuất kho nguồn) → (vận chuyển) → (nhận kho đích) → Putaway | Transfer Order number | [diagrams §3](../diagrams/README.md#3-luồng-transfer-giữa-các-kho) |
 | **Storefront checkout** | Design/Catalog → Cart → Order → Payment | Cart ID → Order number → Payment transaction | — |

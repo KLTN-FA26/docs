@@ -28,19 +28,25 @@ flowchart TD
 
     WAIT --> RC_CREATE[Tạo Receipt tham chiếu PO]
     RC_CREATE --> RC_COUNT[Kiểm đếm & quét mã\nGhi lô/hạn dùng/serial]
-    RC_COUNT --> RC_QC{Kiểm tra chất lượng}
-    RC_QC -- Rejected --> RTV[Trả NCC / huỷ]
-    RC_QC -- Quarantine --> QUAR[Cách ly chờ xử lý]
-    RC_QC -- Accepted --> RC_CONFIRM[Xác nhận Receipt\nCập nhật SL đã nhận trên PO]
+    RC_COUNT --> RC_CONFIRM[Xác nhận Receipt\nCập nhật SL đã nhận trên PO\nTồn Inbound tại WH/Input - RECEIVING]
 
     RC_CONFIRM --> PO_STATUS{PO đã nhận đủ?}
     PO_STATUS -- Chưa --> PO_PARTIAL[PO: Partially Received] --> WAIT
     PO_STATUS -- Đủ --> PO_RECEIVED[PO: Received]
 
-    RC_CONFIRM --> PA_TASK[Sinh Putaway task\ncho hàng Accepted]
+    RC_CONFIRM --> RC_NEEDQC{SKU yêu cầu QC?}
+    RC_NEEDQC -- Không, 2 bước --> PA_TASK
+    RC_NEEDQC -- Có, 3 bước --> QC_MOVE[Chuyển hàng sang\nWH/Quality Control - QUALITY_CONTROL]
+    QC_MOVE --> RC_QC{Kiểm tra chất lượng}
+    RC_QC -- Rejected --> RTV[Chuyển sang khu QUARANTINE\nTồn Blocked, chờ trả NCC]
+    RC_QC -- Quarantine --> QUAR[Chuyển sang khu QUARANTINE\nCách ly chờ kết luận]
+    QUAR -- Kết luận Accepted --> PA_TASK
+    QUAR -- Kết luận Rejected --> RTV
+    RC_QC -- Accepted --> PA_TASK[Sinh Putaway task\ntừ khu chờ cất]
+
     PA_TASK --> PA_SUGGEST[Slotting Engine gợi ý vị trí]
     PA_SUGGEST --> PA_MOVE[NV kho di chuyển & quét vị trí đích]
-    PA_MOVE --> PA_DONE[Putaway Completed\nTồn: Inbound → Available]
+    PA_MOVE --> PA_DONE[Putaway Completed - WH/Stock\nTồn: Inbound → Available]
     PA_DONE --> RC_CLOSE[Receipt: Closed]
 
     RC_CONFIRM --> INV_MATCH
@@ -68,6 +74,7 @@ sequenceDiagram
     participant PO as Purchase Order
     actor VENDOR as Nhà cung cấp
     actor WH as NV kho
+    actor QC as NV QC
     participant RC as Receipt
     participant SLOT as Slotting Engine
     participant INVSYS as Inventory
@@ -79,12 +86,18 @@ sequenceDiagram
     PO->>PO: Chốt PO → Confirmed
     VENDOR->>WH: Giao hàng + phiếu giao
     WH->>RC: Tạo Receipt tham chiếu PO
-    WH->>RC: Kiểm đếm, ghi lô/hạn dùng, QC
+    WH->>RC: Kiểm đếm, ghi lô/hạn dùng, xác nhận
+    RC->>INVSYS: Ghi tồn Inbound tại WH/Input (RECEIVING)
     RC->>PO: Cập nhật SL đã nhận / open qty
-    RC->>WH: Sinh Putaway task (hàng Accepted)
+    opt SKU yêu cầu QC (luồng 3 bước)
+        WH->>INVSYS: Chuyển hàng WH/Input → WH/Quality Control
+        QC->>RC: Kết luận Accepted / Quarantine / Rejected
+        RC->>INVSYS: Phần Quarantine / Rejected → khu QUARANTINE
+    end
+    RC->>WH: Sinh Putaway task (hàng Accepted / không cần QC)
     WH->>SLOT: Yêu cầu gợi ý vị trí
     SLOT-->>WH: Danh sách vị trí xếp hạng
-    WH->>INVSYS: Đặt hàng vào vị trí → tồn Available
+    WH->>INVSYS: Đặt hàng vào bin (WH/Stock) → tồn Available
     RC->>RC: Closed
     VENDOR->>AP: Gửi hoá đơn
     AP->>INV: Nhập hoá đơn, chọn PO/Receipt

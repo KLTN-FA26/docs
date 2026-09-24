@@ -20,7 +20,7 @@ Mục tiêu: giảm quãng đường di chuyển, tăng mật độ lưu trữ h
 | **Kệ (Shelf)** | Kho, Zone (tùy chọn) | Khối kệ đặt trên mặt bằng (toạ độ, kích thước, góc xoay); khai báo **mặt lấy hàng** (bắc/đông/nam/tây) và **lớp lưu trữ mặc định** |
 | **Tầng kệ (Shelf Level)** | Kệ | Tầng thứ n của kệ; cao độ, chiều cao lọt, tải trọng tối đa (phục vụ 3D & kiểm tra tải) |
 | **Ô (Bin)** | Tầng kệ | Điểm chứa hàng nhỏ nhất trên kệ; toạ độ tương đối trong kệ, sức chứa theo số đơn vị, cờ cho phép lấy hàng / cho phép cất hàng, loại ô, lớp lưu trữ ghi đè |
-| **Khu vực (Area)** | Kho, Zone (tùy chọn) | Vùng trên sàn **không phải kệ**, có mã khu vực riêng: khu nhận, cách ly, đóng gói, chờ giao, khu tràn, hoặc khu không chứa hàng |
+| **Khu vực (Area)** | Kho, Zone (tùy chọn) | Vùng trên sàn **không phải kệ**, có mã khu vực riêng: khu nhận, kiểm tra chất lượng, cách ly, đóng gói, chờ giao, khu tràn, hoặc khu không chứa hàng |
 | **Ranh giới (Boundary)** | Kho | Đoạn **tường (WALL)** hoặc **cửa (DOOR)**; cho biết có đi qua được không — dùng tính đường đi |
 
 **Vị trí tồn kho (location)** = một **Bin** hoặc một **Area chứa hàng**; mỗi vị trí có một **mã vị trí đầy đủ** duy nhất toàn hệ thống (BR-10). Lối đi không khai báo thành thực thể: là phần sàn trống giữa kệ, khu vực vật cản và tường.
@@ -130,8 +130,9 @@ Kệ ở trạng thái khác `Active` kéo theo mọi bin của kệ đó không
 
 | Trường | Giá trị | Ý nghĩa |
 |--------|---------|---------|
-| **Loại khu vực (`Area.type`)** | `RECEIVING` | Khu nhận hàng / chờ cất (inbound staging) |
-| | `QUARANTINE` | Khu cách ly hàng chờ kết luận chất lượng |
+| **Loại khu vực (`Area.type`)** | `RECEIVING` | Khu nhận hàng (WH/Input, inbound staging): hàng vừa nhận, chờ chuyển sang khu QC hoặc chờ cất |
+| | `QUALITY_CONTROL` | Khu kiểm tra chất lượng (WH/Quality Control): hàng đã nhận, đang chờ QC kiểm — chặng giữa của luồng nhập kho 3 bước |
+| | `QUARANTINE` | Khu cách ly hàng **sau khi QC**: hàng `Quarantine` chờ kết luận lại và hàng `Rejected` chờ trả NCC |
 | | `PACKING` | Khu đóng gói, gồm chỗ gom hàng đã pick chờ đóng gói |
 | | `DISPATCH` | Khu chờ giao / bàn giao hãng vận chuyển (outbound dock) |
 | | `OVERFLOW` | Khu tràn cho hàng quá khổ hoặc khi hết chỗ trên kệ |
@@ -180,7 +181,7 @@ Trường có dấu `?` là tùy chọn; nếu để trống thì hệ thống *
   - Khu vực = **prefix kho + mã khu vực**, ví dụ `HN-RCV01`.
 
   Prefix kho duy nhất toàn hệ thống; mã kệ và mã khu vực duy nhất trong kho; thứ tự tầng duy nhất trong kệ; mã bin duy nhất trong tầng. Mỗi thành phần mã chỉ gồm chữ in hoa và chữ số (`A–Z`, `0–9`), **không chứa dấu `-`** vì dấu `-` dùng để nối các thành phần — nhờ đó hai vị trí khác nhau không thể ghép ra cùng một mã. Chữ thường được tự chuyển thành chữ hoa.
-- **BR-11:** Tồn chỉ được gắn vào **bin** hoặc **khu vực chứa hàng** (`RECEIVING`, `QUARANTINE`, `PACKING`, `DISPATCH`, `OVERFLOW`); khu `NON_STORAGE` không chứa tồn. Khu vực không có sức chứa khai báo và không phải đích gợi ý putaway mặc định; `OVERFLOW` chỉ dùng khi Manager chỉ định.
+- **BR-11:** Tồn chỉ được gắn vào **bin** hoặc **khu vực chứa hàng** (`RECEIVING`, `QUALITY_CONTROL`, `QUARANTINE`, `PACKING`, `DISPATCH`, `OVERFLOW`); khu `NON_STORAGE` không chứa tồn. Khu vực không có sức chứa khai báo và không phải đích gợi ý putaway mặc định; `OVERFLOW` chỉ dùng khi Manager chỉ định.
 - **BR-12:** Picking chỉ lấy từ bin `is_pickable`; bin không cho phép lấy hàng là **bin dự trữ**, hàng phải được bổ sung (replenishment) sang bin picking trước.
 - **BR-13:** Các thành phần tạo nên mã vị trí — **prefix kho, mã kệ, thứ tự tầng, mã bin, mã khu vực** — **không sửa được** sau khi tạo, vì mã vị trí đã được in trên nhãn, ghi trong tồn kho và lịch sử di chuyển. Tạo nhầm thì chuyển vị trí sang `Inactive` rồi tạo vị trí mới với mã đúng; mã của vị trí `Inactive` vẫn được giữ và không cấp lại cho vị trí khác. Các thuộc tính còn lại (tên, mô tả, toạ độ, kích thước, góc xoay, zone, lớp lưu trữ, sức chứa, mặt lấy hàng, trạng thái) sửa được.
 - **BR-14:** Tự sinh bin (autogenerate):
@@ -212,10 +213,10 @@ Trường có dấu `?` là tùy chọn; nếu để trống thì hệ thống *
 
 | Module | Quan hệ |
 |--------|---------|
-| [05 · Putaway](../05-putaway/README.md) | Nhận gợi ý vị trí khi cất hàng; khu `RECEIVING` là vị trí nguồn; gửi lại kết quả thực tế |
+| [05 · Putaway](../05-putaway/README.md) | Nhận gợi ý vị trí khi cất hàng; khu `QUALITY_CONTROL` / `RECEIVING` là vị trí nguồn; gửi lại kết quả thực tế |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Nhận gợi ý vị trí đích khi di chuyển nội bộ / re-slotting; replenishment từ bin dự trữ sang bin picking |
 | [07 · Picking](../07-picking/README.md) | Cung cấp quãng đường đi thực tế cho lộ trình picking; chỉ lấy từ bin `is_pickable`; zone dùng cho zone picking; velocity từ picking là đầu vào re-slotting |
-| [03 · Receipt](../03-receipt/README.md) / [08 · Packing](../08-packing/README.md) | Hàng nhận nằm ở khu `RECEIVING`; hàng chờ đóng gói ở khu `PACKING`, chờ giao ở khu `DISPATCH` |
+| [03 · Receipt](../03-receipt/README.md) / [08 · Packing](../08-packing/README.md) | Hàng nhận nằm ở khu `RECEIVING`, hàng chờ QC ở khu `QUALITY_CONTROL`, hàng cách ly/không đạt ở khu `QUARANTINE`; hàng chờ đóng gói ở khu `PACKING`, chờ giao ở khu `DISPATCH` |
 | [09 · Shipping](../09-shipping/README.md) | Dùng địa chỉ kho & địa chỉ hoàn hàng khi tạo vận đơn |
 | [01 · Product Creation](../01-product-creation/README.md) | Cung cấp lớp lưu trữ yêu cầu, kích thước/khối lượng của SKU (Inventory Item) |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Khi kho hết chỗ, đề xuất chuyển bớt sang kho khác |

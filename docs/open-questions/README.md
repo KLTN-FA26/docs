@@ -49,11 +49,12 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | C7 | **Định giá tồn kho** (costing): FIFO, bình quân gia quyền, hay đích danh? Chi phí vận chuyển chuyển kho có cộng vào giá vốn? | Theo chính sách kế toán, cấu hình hệ thống | 🟡 | 03, 10, 04 |
 | C8 | Có nghiệp vụ **kiểm kê (cycle count / stocktake)** trong phạm vi sản phẩm không? | Có nhắc tới như công cụ xử lý chênh lệch; chưa mô tả module riêng | 🟡 | 05, 07, 11 |
 | C9 | Quy tắc **over-receipt tolerance** và **price/quantity tolerance** ở Invoice: theo hệ thống, theo NCC, hay theo SKU? | Theo hệ thống, có thể override theo NCC | 🟢 | 02, 03, 04 |
-| C10 | Xử lý **hàng Quarantine/Rejected**: quy trình trả NCC (RTV), tiêu huỷ, hồ sơ chất lượng NCC — chi tiết đến đâu? | Có trạng thái & hướng xử lý chung; chưa có module RTV riêng | 🟡 | 03 |
+| C10 | Xử lý **hàng Quarantine/Rejected**: quy trình trả NCC (RTV), tiêu huỷ, hồ sơ chất lượng NCC — chi tiết đến đâu? | ✅ **Đã chốt một phần 2026-09-23:** hàng `Quarantine` và `Rejected` được chuyển sang khu cách ly (Area `QUARANTINE`); hàng `Rejected` giữ tồn trạng thái `Blocked` tới khi xuất trả NCC. **Còn mở:** quy trình RTV chi tiết, tiêu huỷ, hồ sơ chất lượng NCC; chưa có module RTV riêng | 🟡 | 03 |
 | C11 | Có áp dụng **tồn an toàn (safety stock)** — giữ lại một lượng không bán — không? Cấu hình theo SKU hay theo kho? | Không áp dụng; ATP = tồn khả dụng − phần giữ hàng. Nếu áp dụng, ATP trừ thêm safety stock | 🟡 | 01, 13, 14 |
 | C12 | SKU có phải **gán kho kinh doanh** trước khi dùng (PO, Receipt, bán) không, hay SKU `Active` dùng được ở mọi kho? | Không cần gán; SKU `Active` dùng được ở mọi kho | 🟡 | 01, 02, 03, 17 |
 | C13 | **Loại ô (`Bin.type`: STANDARD / PALLET / SMALL_PARTS)** là ràng buộc cứng (hàng pallet chỉ vào ô `PALLET`) hay chỉ để mô tả & ưu tiên? | Chỉ mô tả & ưu tiên (soft scoring), không chặn | 🟢 | 06, 05, 11 |
 | C14 | Chứng từ liên quan **hai kho** (Transfer Order) dùng **prefix** của kho nào? | Prefix của kho nguồn | 🟢 | 00, 10 |
+| C15 | Hàng nghi hỏng khi kiểm đếm (thùng móp, nghi hụt) của **SKU không bật cờ Yêu cầu QC** có bắt buộc đi qua khu kiểm tra chất lượng không? | Có — dòng nhận có điều kiện luôn đi luồng 3 bước, bất kể cờ của SKU | 🟢 | 03, 05 |
 
 ---
 
