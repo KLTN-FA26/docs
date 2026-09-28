@@ -67,7 +67,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 12. **Kết quả thanh toán:**
     - **Thành công** (hoặc COD hợp lệ) → Order `Confirmed`; reservation chuyển thành allocation; gửi xác nhận cho khách; đẩy sang [Order Management](../17-order-management/README.md) → [Fulfillment](../../warehouse/07-picking/README.md).
     - **Thất bại / hết hạn** → Order `Payment Failed` / `Cancelled`; giải phóng reservation.
-13. **Đơn có sản phẩm tùy chỉnh** → sau `Confirmed`, design snapshot `Locked`; nếu có bước sản xuất/in thì đơn qua trạng thái sản xuất trước khi picking (⚠️ Giả định — xem [open-questions](../../open-questions/README.md)).
+13. **Đơn có sản phẩm tùy chỉnh** → sau `Confirmed`, design snapshot `Locked`; mỗi dòng tùy chỉnh sinh một **lệnh sản xuất** tại xưởng in nội bộ và đơn chuyển `In Production` (xem [19 Production](../../warehouse/19-production/README.md)).
 
 ### 4.3. Đặt hàng hộ (Assisted order — Sale)
 
@@ -93,8 +93,8 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 | `Pending Payment` | Đơn đã tạo, chờ thanh toán | → `Confirmed`, → `Payment Failed`, → `Cancelled` | 15 Payment |
 | `Payment Failed` | Thanh toán không thành công | → `Pending Payment` (thử lại), → `Cancelled` | 15 Payment |
 | `Confirmed` | Đã thanh toán / COD hợp lệ; hàng đã giữ | → `In Production` (nếu in ấn) / `Ready to Fulfill`, → `Cancelled` | System |
-| `In Production` | Đang sản xuất/in (đơn tùy chỉnh) | → `Ready to Fulfill` | Sản xuất |
-| `Ready to Fulfill` | Sẵn sàng cho kho xử lý | → `Picking` … | 07 Picking |
+| `In Production` | Đang sản xuất/in (đơn tùy chỉnh) | → `Ready to Fulfill` (mọi lệnh sản xuất `Completed`) | 19 Production |
+| `Ready to Fulfill` | Sẵn sàng cho kho xử lý | → `Picking` …, → `Packed` (đơn chỉ gồm hàng tùy chỉnh — không qua picking thành phẩm) | 07 Picking / 08 Packing |
 | `Picking` / `Packed` / `Shipped` / `In Transit` / `Delivered` | Theo luồng Fulfillment | | 07/08/09 |
 | `Completed` | Giao xong & (nếu COD) đã thu tiền | *(cuối)* | 17 Order Management |
 | `Cancelled` | Huỷ (trước khi giao) | *(cuối)* | Khách / Sale / System |
@@ -109,9 +109,12 @@ stateDiagram-v2
     PaymentFailed --> Cancelled
     Confirmed --> InProduction: Đơn in ấn
     Confirmed --> ReadyToFulfill: Đơn hàng sẵn
-    InProduction --> ReadyToFulfill
+    InProduction --> ReadyToFulfill: Mọi lệnh sản xuất xong
     ReadyToFulfill --> Picking
-    Picking --> Packed --> Shipped --> Delivered
+    ReadyToFulfill --> Packed: Đơn chỉ gồm hàng tùy chỉnh
+    Picking --> Packed
+    Packed --> Shipped
+    Shipped --> Delivered
     Delivered --> Completed
     Confirmed --> Cancelled
     Delivered --> Returned
@@ -146,7 +149,7 @@ stateDiagram-v2
 | Khách đóng trình duyệt sau khi tạo Order `Pending Payment` | Giữ đơn theo thời hạn; gửi link thanh toán qua email; hết hạn → huỷ & giải phóng hàng |
 | Thanh toán thành công nhưng tạo đơn lỗi kỹ thuật | Đối soát giao dịch; tạo đơn thủ công hoặc hoàn tiền; không để "mất đơn/mất tiền" |
 | Guest checkout rồi tạo tài khoản sau | Gắn đơn vào tài khoản qua email khớp |
-| Đơn hỗn hợp: hàng thường + hàng in ấn | Phần hàng thường có thể fulfill trước; phần in ấn chờ sản xuất — theo chính sách giao gộp/tách |
+| Đơn hỗn hợp: hàng thường + hàng in ấn | Phần hàng thường được pick song song trong lúc in và chờ tại khu đóng gói; mặc định đóng gói khi đủ cả hai phần, hoặc tách giao theo chính sách giao gộp/tách |
 | Sale áp giảm giá vượt hạn mức | Cần Manager duyệt; đơn giữ ở trạng thái chờ duyệt ưu đãi |
 
 ---
@@ -160,5 +163,6 @@ stateDiagram-v2
 | [15 · Payment](../15-payment/README.md) | Order `Pending Payment` chuyển sang thanh toán; kết quả quyết định `Confirmed`/`Failed` |
 | [17 · Order Management](../17-order-management/README.md) | Theo dõi & thao tác đơn suốt vòng đời sau khi tạo |
 | [07 · Picking](../../warehouse/07-picking/README.md) | Reservation → allocation; đơn `Ready to Fulfill` chuyển vào kho |
+| [19 · Production](../../warehouse/19-production/README.md) | Dòng tùy chỉnh sinh lệnh sản xuất; đơn ở `In Production` cho tới khi mọi lệnh `Completed` |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Đặt hàng hộ (assisted order); gửi link thanh toán |
 | [18 · Customer Information](../18-customer-information/README.md) | Sổ địa chỉ, thông tin người nhận, lịch sử mua |

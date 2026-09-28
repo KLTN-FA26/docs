@@ -45,7 +45,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | **Kiểm soát tồn kho** | Inventory Item | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
 | **Yêu cầu QC khi nhận (QC required)** | Inventory Item | Bật → hàng nhận đi luồng 3 bước qua khu kiểm tra chất lượng trước khi putaway; tắt → luồng 2 bước (xem [03](../03-receipt/README.md)) | Không (mặc định: không yêu cầu) |
 | **Dữ liệu TMĐT** | Product / Variant | Mô tả, hình ảnh, giá bán, thuộc tính SEO, trạng thái hiển thị | Không (bắt buộc trước khi publish lên catalog) |
-| **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
+| **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, **kỹ thuật in (print method** — DTG, in lụa, UV, sublimation…; dùng để chọn trạm in ở [19](../19-production/README.md)**)**, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
 
 ### Output
 
@@ -66,7 +66,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 3. **Sinh mã SKU** — theo quy tắc cấu hình (prefix danh mục + mã thuộc tính + số thứ tự) hoặc nhập tay. Mỗi SKU phải **duy nhất toàn hệ thống**. Với mỗi SKU, hệ thống **tự động tạo một Inventory Item** tương ứng; người dùng không tạo thủ công.
 4. **Nhập thông số logistics** vào Inventory Item của từng SKU (hoặc kế thừa từ sản phẩm cha): khối lượng, kích thước, pack size, UoM.
 5. **Cấu hình kiểm soát tồn kho** trên Inventory Item — bật/tắt theo lô, hạn dùng, serial; bật/tắt **Yêu cầu QC khi nhận**; đặt ngưỡng min/max phục vụ cảnh báo bổ sung tồn (reorder).
-6. **(Sản phẩm in ấn) Cấu hình tùy chỉnh** — tải template 2D, model 3D, khai báo print area, ràng buộc file thiết kế.
+6. **(Sản phẩm in ấn) Cấu hình tùy chỉnh** — tải template 2D, model 3D, khai báo print area, kỹ thuật in, ràng buộc file thiết kế.
 7. **Nhập dữ liệu TMĐT** — mô tả, hình ảnh, giá bán, thuộc tính hiển thị.
 8. **Gửi duyệt (Submit for review)** — chuyển sang `Pending Approval`.
 9. **Phê duyệt (Approve)** — người có quyền kiểm tra tính đầy đủ & đúng đắn → `Approved`. Nếu không đạt → trả về `Draft` kèm lý do.
@@ -137,5 +137,6 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | [05 · Putaway](../05-putaway/README.md) & [06 · Slotting](../06-warehouse-map-slotting/README.md) | Dùng thông số kích thước/khối lượng SKU để gợi ý vị trí phù hợp |
 | [07 · Picking](../07-picking/README.md) / [08 · Packing](../08-packing/README.md) | Pack size & kích thước SKU ảnh hưởng gợi ý thùng và cách đóng gói |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Lấy template 2D, model 3D, định nghĩa print area & ràng buộc thiết kế từ đây |
+| [19 · Production](../19-production/README.md) | Kỹ thuật in quyết định trạm in nhận lệnh sản xuất; Inventory Item của SKU tùy chỉnh là phôi được cấp cho xưởng |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, giá bán, trạng thái `Published`; ATP tính trên Inventory Item của SKU |
 | [10/11 · Transfer](../10-inter-warehouse-transfer/README.md) | Giao dịch chuyển kho tham chiếu SKU |

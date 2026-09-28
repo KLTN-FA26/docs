@@ -25,8 +25,8 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 
 | Nhóm | Dữ liệu | Nguồn |
 |------|---------|-------|
-| **Template & khung sản phẩm** | Model 3D, template 2D, danh sách **print area** (vị trí, kích thước, hình dạng), vùng an toàn (safe area), bleed | [01 Product Creation](../01-product-creation/README.md) |
-| **Ràng buộc kỹ thuật** | DPI tối thiểu, hệ màu (RGB/CMYK), định dạng & dung lượng file cho phép, số màu in tối đa (nếu in lụa), font được phép nhúng | [01 Product Creation](../01-product-creation/README.md) |
+| **Template & khung sản phẩm** | Model 3D, template 2D, danh sách **print area** (vị trí, kích thước, hình dạng), vùng an toàn (safe area), bleed | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
+| **Ràng buộc kỹ thuật** | DPI tối thiểu, hệ màu (RGB/CMYK), định dạng & dung lượng file cho phép, số màu in tối đa (nếu in lụa), font được phép nhúng | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
 | **Nội dung khách đưa vào** | Ảnh tải lên, chữ (text) + phông + màu + hiệu ứng, hình khối, clipart có sẵn, layout | Khách hàng |
 | **Lựa chọn biến thể** | Màu sản phẩm, kích cỡ, chất liệu (ảnh hưởng preview & vùng in) | Khách hàng / [13 Catalog](../13-catalog/README.md) |
 
@@ -36,8 +36,8 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 |---------|-------|----------|
 | **Design draft** | Thiết kế đang chỉnh, lưu tạm theo tài khoản khách | Khách, Sale |
 | **3D preview** | Ảnh/scene 3D render nội dung lên mô hình sản phẩm, cập nhật realtime | Khách (ra quyết định mua) |
-| **Design snapshot / artifact** | Bản chốt bất biến: layout, tài nguyên (ảnh, font), thông số print area, phiên bản, hash | [14 Cart & Order](../14-cart-and-order/README.md), [08 Packing](../../warehouse/08-packing/README.md), xưởng in |
-| **Print-ready file** | File xuất bản in (PDF/CMYK, đúng bleed & DPI) | Xưởng in / Quản trị sàn (prepress) |
+| **Design snapshot / artifact** | Bản chốt bất biến: layout, tài nguyên (ảnh, font), thông số print area, phiên bản, hash | [14 Cart & Order](../14-cart-and-order/README.md), [19 Production](../../warehouse/19-production/README.md), [08 Packing](../../warehouse/08-packing/README.md) |
+| **Print-ready file** | File xuất bản in (PDF/CMYK, đúng bleed & DPI) | [19 Production](../../warehouse/19-production/README.md) (lệnh sản xuất) / Quản trị sàn (prepress) |
 | **Preflight report** | Kết quả kiểm tra kỹ thuật (đạt / cảnh báo / lỗi) | Khách, Quản trị sàn |
 
 ---
@@ -60,7 +60,7 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
    - Sinh **design snapshot** bất biến (đóng băng tài nguyên & thông số) + phiên bản.
 10. **Đưa vào giỏ** — thiết kế đã chốt gắn với dòng sản phẩm trong [Cart](../14-cart-and-order/README.md). Giá có thể phụ thuộc thông số in (số màu, diện tích in, kỹ thuật).
 11. **Khoá sau khi đặt hàng** — khi [Order](../14-cart-and-order/README.md) `Confirmed`, design snapshot **không thể sửa**; muốn đổi phải huỷ/tạo dòng mới hoặc quy trình yêu cầu thay đổi có kiểm soát.
-12. **Xuất file cho sản xuất** — hệ thống sinh print-ready file từ snapshot cho xưởng in; [Packing](../../warehouse/08-packing/README.md) dùng preview để đối chiếu thành phẩm.
+12. **Xuất file cho sản xuất** — hệ thống sinh print-ready file từ snapshot và gắn vào **lệnh sản xuất** của dòng đơn ([19 Production](../../warehouse/19-production/README.md)); E-commerce Admin kiểm file (prepress) ở bước `Created` của lệnh. QC xưởng và [Packing](../../warehouse/08-packing/README.md) dùng preview để đối chiếu thành phẩm.
 
 ---
 
@@ -101,7 +101,8 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 |------------|-------------|
 | Ảnh khách tải lên độ phân giải thấp | Cảnh báo `Warning`; cho phép tiếp tục nếu khách chấp nhận, ghi nhận đã cảnh báo |
 | Khách chốt thiết kế rồi muốn sửa trước khi thanh toán | Tạo phiên bản mới; bản cũ `Superseded`; cập nhật dòng giỏ |
-| Khách muốn sửa sau khi đơn đã `Confirmed` | Không sửa snapshot; qua quy trình "yêu cầu thay đổi": nếu chưa sản xuất → huỷ dòng + tạo lại; nếu đã sản xuất → tính phí/từ chối theo chính sách |
+| Khách muốn sửa sau khi đơn đã `Confirmed` | Không sửa snapshot; qua quy trình "yêu cầu thay đổi": nếu lệnh sản xuất chưa tới `In Progress` → huỷ dòng + tạo lại; nếu đã in → tính phí/từ chối theo chính sách |
+| Prepress phát hiện file in lỗi sau khi đặt | Lệnh sản xuất `On Hold`; Sale liên hệ khách qua chat để sửa theo quy trình yêu cầu thay đổi |
 | Font khách dùng không có quyền nhúng | Chặn hoặc thay bằng font tương đương; ghi rõ trong preflight |
 | Model 3D của sản phẩm lỗi/thiếu | Cho thiết kế 2D + preview 2D phẳng; đánh dấu preview 3D không khả dụng |
 | Khách bỏ giữa chừng | Lưu `Draft` tự động; khôi phục khi quay lại |
@@ -118,6 +119,7 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 | [13 · Catalog](../13-catalog/README.md) | Điểm vào: khách chọn sản phẩm tùy chỉnh từ catalog để thiết kế |
 | [14 · Cart & Order](../14-cart-and-order/README.md) | Design snapshot gắn vào dòng giỏ/đơn; ảnh hưởng giá dòng hàng |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Kênh phối hợp khách – Sale để tinh chỉnh & chốt thiết kế |
+| [19 · Production](../../warehouse/19-production/README.md) | Nhận design snapshot & print-ready file để sinh lệnh sản xuất; prepress; QC thành phẩm theo snapshot |
 | [08 · Packing](../../warehouse/08-packing/README.md) | Dùng preview/snapshot để đối chiếu thành phẩm in ấn khi đóng gói |
 | [17 · Order Management](../17-order-management/README.md) | Quản lý yêu cầu thay đổi thiết kế sau khi đặt; liên kết file sản xuất |
 | [18 · Customer Information](../18-customer-information/README.md) | Thiết kế nháp lưu theo hồ sơ khách hàng |

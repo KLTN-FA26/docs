@@ -31,7 +31,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 | [15 Payment](../15-payment/README.md) | `payment_status`, giao dịch, kết quả refund |
 | [07](../../warehouse/07-picking/README.md)/[08](../../warehouse/08-packing/README.md)/[09](../../warehouse/09-shipping/README.md) | Cập nhật picked/short, packed, shipped/in-transit/delivered/returned |
 | Khách / Sale | Yêu cầu sửa đơn, huỷ, đổi/trả, đổi địa chỉ |
-| Sản xuất/in (nếu có) | Trạng thái `In Production` → `Production Done` |
+| [19 Production](../../warehouse/19-production/README.md) | Trạng thái lệnh sản xuất, ngày xong dự kiến; sự kiện "mọi lệnh sản xuất của đơn `Completed`" |
 
 ### Output
 
@@ -39,6 +39,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 |---------|----------|
 | **Trạng thái đơn hợp nhất** + dòng thời gian sự kiện (order timeline) | Khách, Sale, kho, kế toán |
 | **Lệnh xuất kho (fulfillment order / release)** | 07 Picking |
+| **Dòng đơn tùy chỉnh cần sản xuất** (kèm kho xuất đã chọn) | 19 Production |
 | **Phiếu huỷ / RMA (Return Merchandise Authorization) / yêu cầu hoàn tiền** | 15 Payment, kho (nhận trả) |
 | **Phân bổ kho xuất** (đơn giao từ kho nào) | Mảng kho vận |
 | **Thông báo khách** (xác nhận, đang giao, giao thành công, hoàn tiền) | Khách |
@@ -56,9 +57,12 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
 ### 4.2. Phân bổ & release fulfillment
 
-4. **Chọn kho xuất (fulfillment sourcing)** — theo tồn khả dụng, khoảng cách đến khách, tải kho, chính sách vùng. Có thể tách đơn giao từ nhiều kho (split fulfillment).
-5. **Đơn in ấn / hỗn hợp:** phần cần in chuyển bước **sản xuất** (`In Production`); phần hàng sẵn có thể release song song hoặc chờ gộp (theo chính sách).
-6. **Release** — chuyển các dòng đã sẵn sàng thành **lệnh xuất** → [Picking](../../warehouse/07-picking/README.md). Đơn → `Ready to Fulfill` → `Picking`.
+4. **Chọn kho xuất (fulfillment sourcing)** — theo tồn khả dụng, khoảng cách đến khách, tải kho, chính sách vùng. Có thể tách đơn giao từ nhiều kho (split fulfillment). Dòng tùy chỉnh chỉ được giao cho kho có **khu xưởng in (`PRODUCTION`) và trạm in `Active` đúng kỹ thuật in** của sản phẩm.
+   > ⚠️ Giả định: xưởng in đặt trong kho, nên kho không có xưởng không xuất được dòng tùy chỉnh. Xem [open-questions](../../open-questions/README.md).
+5. **Đơn in ấn / hỗn hợp:** mỗi dòng tùy chỉnh sinh một **lệnh sản xuất** tại kho xuất ([19 Production](../../warehouse/19-production/README.md)); đơn → `In Production`. Dòng hàng thường của đơn hỗn hợp được release pick **song song** và chờ tại khu `PACKING`.
+6. **Release** — khi **mọi lệnh sản xuất** của đơn đã `Completed` (hoặc đơn không có dòng tùy chỉnh) → đơn `Ready to Fulfill`:
+   - Còn dòng hàng thường chưa pick → release **lệnh xuất** → [Picking](../../warehouse/07-picking/README.md); đơn → `Picking`.
+   - Mọi dòng đã ở khu `PACKING` (đơn chỉ gồm hàng tùy chỉnh, hoặc hàng thường đã pick song song) → sinh packing task ngay; đơn đi thẳng `Ready to Fulfill` → `Packed`, **không qua `Picking`**.
 7. **Theo dõi Fulfillment** — hợp nhất cập nhật: `Picking` → `Packed` → `Shipped` → `In Transit` → `Delivered`. Xử lý short pick (backorder / giao một phần).
 
 ### 4.3. Hoàn tất & đóng đơn
@@ -74,7 +78,8 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
     | Đơn đang ở | Cho phép sửa gì |
     |-----------|-----------------|
     | `Pending Payment` | Gần như tự do (thực chất quay lại giỏ) |
-    | `Confirmed` / `In Production` (chưa in) | Đổi địa chỉ; đổi số lượng/dòng kèm điều chỉnh thanh toán (thu thêm/hoàn bớt); huỷ |
+    | `Confirmed` / `In Production` (lệnh sản xuất chưa tới `In Progress`) | Đổi địa chỉ; đổi số lượng/dòng kèm điều chỉnh thanh toán (thu thêm/hoàn bớt); huỷ |
+    | `In Production` (lệnh sản xuất đã `In Progress` trở đi) | Đổi địa chỉ; không đổi dòng tùy chỉnh đã in; huỷ theo chính sách tính phí sản xuất |
     | `Ready to Fulfill` / `Picking` | Hạn chế: đổi địa chỉ nếu chưa tạo nhãn; huỷ cần dừng pick + put-back |
     | `Packed` / `Shipped` | Không sửa nội dung; chỉ can thiệp qua carrier (đổi địa chỉ nếu hãng hỗ trợ) hoặc xử lý sau giao |
 13. Sửa có ảnh hưởng tiền → tạo giao dịch thu thêm / refund tương ứng ([15](../15-payment/README.md)).
@@ -103,9 +108,9 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 | `Pending Payment` | Chờ thanh toán | → `Confirmed`, → `Payment Failed`, → `Cancelled` | 15 |
 | `Payment Failed` | Thanh toán lỗi | → `Pending Payment`, → `Cancelled` | 15 |
 | `Confirmed` | Đã thanh toán/COD hợp lệ, hàng đã giữ | → `In Production`, → `Ready to Fulfill`, → `On Hold`, → `Cancelled` | System |
-| `In Production` | Đang sản xuất/in (đơn tùy chỉnh) | → `Ready to Fulfill`, → `Cancelled` | Sản xuất |
+| `In Production` | Đang sản xuất/in (đơn tùy chỉnh) | → `Ready to Fulfill` (mọi lệnh sản xuất `Completed`), → `Cancelled` | 19 |
 | `On Hold` | Tạm giữ (nghi gian lận, thiếu hàng, chờ khách xác nhận sửa) | → `Confirmed`/`Ready to Fulfill`, → `Cancelled` | OPS |
-| `Ready to Fulfill` | Đã release cho kho | → `Picking` | 17 → 07 |
+| `Ready to Fulfill` | Đã release cho kho | → `Picking`, → `Packed` (mọi dòng đã ở khu `PACKING` — đơn chỉ gồm hàng tùy chỉnh hoặc hàng thường đã pick song song) | 17 → 07 / 08 |
 | `Picking` | Kho đang lấy hàng | → `Partially Fulfilled`, → `Packed` | 07 |
 | `Partially Fulfilled` | Giao một phần, phần còn lại backorder | → `Packed` (phần còn lại), → `Completed` (chốt) | 07/08 |
 | `Packed` | Đã đóng gói | → `Shipped` | 08 |
@@ -127,14 +132,17 @@ stateDiagram-v2
     PendingPayment --> Cancelled
     Confirmed --> InProduction: đơn in ấn
     Confirmed --> ReadyToFulfill
-    InProduction --> ReadyToFulfill
+    InProduction --> ReadyToFulfill: mọi lệnh sản xuất xong
     Confirmed --> OnHold
     OnHold --> ReadyToFulfill
     ReadyToFulfill --> Picking
+    ReadyToFulfill --> Packed: mọi dòng đã ở khu PACKING
     Picking --> Packed
     Picking --> PartiallyFulfilled
     PartiallyFulfilled --> Packed
-    Packed --> Shipped --> InTransit --> Delivered
+    Packed --> Shipped
+    Shipped --> InTransit
+    InTransit --> Delivered
     InTransit --> DeliveryFailed
     DeliveryFailed --> InTransit
     DeliveryFailed --> Returned
@@ -171,7 +179,10 @@ stateDiagram-v2
 | Thanh toán OK nhưng hết hàng khi phân bổ | `On Hold`; liên hệ khách: chờ nhập/đổi biến thể/huỷ + hoàn tiền |
 | Khách đổi địa chỉ khi đơn đã `Shipped` | Nhờ carrier chuyển hướng nếu hỗ trợ; nếu không → chờ giao thất bại/RTO rồi gửi lại |
 | Short pick → chỉ giao được một phần | `Partially Fulfilled`; phần còn lại backorder hoặc huỷ + hoàn tiền phần thiếu |
-| Khách huỷ khi đang `In Production` (đã in) | Theo chính sách: từ chối huỷ hoặc huỷ có tính phí sản xuất |
+| Khách huỷ khi đang `In Production` (lệnh sản xuất chưa `In Progress`) | Huỷ lệnh sản xuất, put-back phôi về bin, hoàn tiền theo 15 |
+| Khách huỷ khi đang `In Production` (đã in) | Theo chính sách: từ chối huỷ hoặc huỷ có tính phí sản xuất; thành phẩm cá nhân hoá xuất huỷ |
+| Lệnh sản xuất `On Hold` vì thiếu phôi / vượt ngưỡng in lại | Xử lý như thiếu hàng: liên hệ khách chờ, đổi biến thể, hoặc huỷ dòng + hoàn tiền |
+| Ngày xong dự kiến của lệnh sản xuất trễ so với cam kết | Thông báo khách ngày giao mới qua Sale; đề nghị xưởng nâng ưu tiên |
 | Giao `Delivered` nhưng khách khiếu nại không nhận | Trạng thái tranh chấp; đối chiếu POD; xử lý CSKH; không auto-close |
 | Hàng trả về không nguyên vẹn | Nhập `Quarantine`; hoàn một phần / từ chối hoàn theo chính sách; ghi hồ sơ khách |
 | Trùng đơn (khách bấm đặt 2 lần) | Phát hiện theo giỏ/khoảng thời gian; gộp hoặc huỷ 1 đơn + hoàn tiền |
@@ -187,6 +198,7 @@ stateDiagram-v2
 | [14 · Cart & Order](../14-cart-and-order/README.md) | Nguồn đơn; sửa đơn ở `Pending Payment` ~ quay lại giỏ |
 | [15 · Payment](../15-payment/README.md) | Đồng bộ `payment_status`; khởi tạo thu thêm / refund / void |
 | [07 Picking](../../warehouse/07-picking/README.md) / [08 Packing](../../warehouse/08-packing/README.md) / [09 Shipping](../../warehouse/09-shipping/README.md) | Nhận lệnh xuất; đẩy cập nhật trạng thái fulfillment về |
+| [19 · Production](../../warehouse/19-production/README.md) | Dòng tùy chỉnh sinh lệnh sản xuất tại kho xuất có xưởng; nhận trạng thái & ngày xong dự kiến; đơn rời `In Production` khi mọi lệnh `Completed` |
 | [03 · Receipt](../../warehouse/03-receipt/README.md) | Hàng trả (return/RTO) nhập lại kho qua Receipt trước khi hoàn tiền |
 | [12 · Product Design](../12-product-design/README.md) | Quản lý yêu cầu thay đổi thiết kế; liên kết file sản xuất cho đơn in ấn |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Kênh tiếp nhận yêu cầu khách; tra cứu & chia sẻ trạng thái đơn |

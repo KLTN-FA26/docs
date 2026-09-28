@@ -7,7 +7,7 @@ Nền tảng hợp nhất **Quản lý kho vận (WMS)** và **Sàn thương m�
 Toàn bộ tài liệu nghiệp vụ (Business Requirement Document) nằm trong thư mục [`docs/`](docs/README.md):
 
 - [Tổng quan hệ thống](docs/00-system-overview/README.md) — mục tiêu, đối tượng người dùng, sơ đồ luồng tổng thể
-- [Mảng Kho vận](docs/warehouse/) — Product Creation → PO → Receipt → Invoice → Putaway → Slotting → Picking → Packing → Shipping → Transfer
+- [Mảng Kho vận](docs/warehouse/) — Product Creation → PO → Receipt → Invoice → Putaway → Slotting → Picking → Packing → Shipping → Transfer, và Production (sản xuất / in theo đơn tại xưởng nội bộ)
 - [Mảng Sàn TMĐT](docs/ecommerce/) — Product Design → Catalog → Cart & Order → Payment → Sales Chat → Order Management → Customer Information
 - [Sơ đồ luồng & trạng thái (Mermaid)](docs/diagrams/README.md)
 - [Bảng thuật ngữ](docs/glossary/README.md)

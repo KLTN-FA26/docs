@@ -11,7 +11,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module liên quan |
 |---|---------|-------------------|-----------|------------------|
 | A1 | Hệ thống hỗ trợ **đa công ty / đa pháp nhân (multi-entity)** hay chỉ một doanh nghiệp với nhiều kho? | ✅ **Đã chốt 2026-08-29:** một pháp nhân duy nhất, **nhiều kho vật lý (multi-warehouse)**. Không hỗ trợ multi-entity. Chuyển kho là luân chuyển tồn nội bộ, không phát sinh hoá đơn/công nợ nội bộ. | 🟢 | 00, 10, 04, 15 |
-| A2 | Mô hình **phân quyền (RBAC)** chi tiết: danh sách vai trò chuẩn, một người có được nhiều vai trò, phạm vi dữ liệu theo kho/nhóm khách? | ✅ **Đã chốt một phần 2026-08-29:** danh sách **10 role chuẩn** + quyền theo ngữ cảnh (phê duyệt PO/TO/chi, giám sát chat) — xem [Role Registry](../00-system-overview/README.md); một tài khoản có thể mang nhiều vai trò. **Còn mở:** phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể, phân bổ quyền mặc định | 🔴 | Tất cả |
+| A2 | Mô hình **phân quyền (RBAC)** chi tiết: danh sách vai trò chuẩn, một người có được nhiều vai trò, phạm vi dữ liệu theo kho/nhóm khách? | ✅ **Đã chốt một phần 2026-08-29:** danh sách **10 role chuẩn** (bổ sung role thứ 11 **Production Staff** ngày 2026-09-28, cùng module [19](../warehouse/19-production/README.md)) + quyền theo ngữ cảnh (phê duyệt PO/TO/chi, giám sát chat) — xem [Role Registry](../00-system-overview/README.md); một tài khoản có thể mang nhiều vai trò. **Còn mở:** phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể, phân bổ quyền mặc định | 🔴 | Tất cả |
 | A3 | Có **quy trình maker–checker (tạo / duyệt)** cho master data (sản phẩm, NCC, danh mục) không, hay Admin toàn quyền? | Có bước duyệt; tổ chức nhỏ có thể gộp | 🟡 | 01 |
 | A4 | **Đơn vị tiền tệ**: chỉ một loại (VND) hay đa tiền tệ (mua ngoại tệ, bán ngoại tệ)? | Chủ yếu VND; PO theo tiền của NCC | 🟡 | 02, 04, 15 |
 | A5 | Phạm vi **tích hợp kế toán**: hệ thống chỉ đối chiếu & đề nghị thanh toán, hay hạch toán sổ cái đầy đủ? | Chỉ AP matching + đề nghị thanh toán; sổ cái ở hệ thống ngoài | 🔴 | 04, 15 |
@@ -24,15 +24,17 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module |
 |---|---------|-------------------|-----------|--------|
-| B1 | Có **module Sản xuất/In (production / print job)** riêng giữa Order và Picking không? Ai vận hành (xưởng nội bộ / gia công ngoài)? Trạng thái & năng lực (capacity) sản xuất quản lý thế nào? | Có bước sản xuất; đơn in ấn qua trạng thái `In Production` trước khi picking thành phẩm; **QC Staff** kiểm tra chất lượng thành phẩm in trước khi fulfill (chi tiết phụ thuộc thiết kế module này) | 🔴 | 07, 14, 17, 12, 03 |
-| B2 | Picking cho đơn in ấn: pick **vật tư/phôi** cho xưởng in, hay chỉ pick **thành phẩm** sau khi in xong, hay cả hai? | Chủ yếu pick thành phẩm sau sản xuất; có thể pick phôi cho xưởng | 🟡 | 07, 01 |
+| B1 | Có **module Sản xuất/In (production / print job)** riêng giữa Order và Picking không? Ai vận hành (xưởng nội bộ / gia công ngoài)? Trạng thái & năng lực (capacity) sản xuất quản lý thế nào? | ✅ **Đã chốt 2026-09-28:** có module [19 · Production](../warehouse/19-production/README.md). **Xưởng in nội bộ**, không gia công ngoài. Mỗi dòng đơn tùy chỉnh = **một lệnh sản xuất**. Quản lý **hàng đợi + trạm in** theo kỹ thuật in, có công suất/ngày để ước tính ngày xong (không lập lịch tự động). Thêm role **Production Staff**; Warehouse Manager điều phối xưởng; QC Staff kiểm thành phẩm | 🔴 | 19, 07, 08, 14, 17, 12 |
+| B2 | Picking cho đơn in ấn: pick **vật tư/phôi** cho xưởng in, hay chỉ pick **thành phẩm** sau khi in xong, hay cả hai? | ✅ **Đã chốt 2026-09-28:** chỉ **pick phôi** từ bin lên khu `PRODUCTION`; thành phẩm đạt QC được **chuyển thẳng sang khu `PACKING`**, không cất lại lên bin và không pick thành phẩm. Đơn chỉ gồm hàng tùy chỉnh đi `Ready to Fulfill` → `Packed`, không qua `Picking` | 🟡 | 07, 08, 19 |
 | B3 | **Công thức tính giá** sản phẩm tùy chỉnh: theo diện tích phủ mực, số màu, kỹ thuật in, số lượng? Nguồn công thức? | Giá dòng phụ thuộc thông số in; công thức khai báo ở [01](../warehouse/01-product-creation/README.md) | 🟡 | 12, 14, 01 |
 | B4 | Chính sách **đổi/trả với sản phẩm cá nhân hoá**: chỉ nhận khi lỗi sản xuất, hay có cho đổi ý trong X ngày? | Không đổi/trả vì đổi ý; chỉ nhận khi lỗi sản xuất | 🟡 | 17, 16 |
 | B5 | **Yêu cầu thay đổi thiết kế sau khi đặt hàng**: cho phép tới mốc nào (trước khi vào sản xuất)? Có tính phí? | Cho tới khi bắt đầu sản xuất; sau đó từ chối hoặc tính phí | 🟡 | 12, 17 |
 | B6 | **Kiểm duyệt nội dung** khách tải lên (bản quyền, nội dung không phù hợp): tự động, thủ công, hay kết hợp? Ai chịu trách nhiệm? | Kiểm tra cơ bản (định dạng/dung lượng) + rà nội dung theo chính sách | 🟡 | 12 |
 | B7 | **Live 3D Preview**: render phía client (WebGL) hay server? Yêu cầu thiết bị tối thiểu? Fallback khi không render được? | Client-side, có fallback ảnh tĩnh render server | 🟢 | 12 |
 | B8 | Nguồn **model 3D & template**: doanh nghiệp tự dựng cho từng sản phẩm, hay có thư viện dùng chung? | Khai báo theo sản phẩm ở [01](../warehouse/01-product-creation/README.md) | 🟢 | 01, 12 |
-| B9 | **Tồn kho của sản phẩm tùy chỉnh** theo dõi trên **phôi** (hàng chưa in) hay trên thành phẩm? Mỗi thiết kế của khách có sinh SKU mới không? (liên quan B2) | Inventory Item của SKU là phôi; thiết kế đi kèm dòng đơn (design snapshot), không sinh SKU mới; ATP trên catalog tính theo phôi | 🟡 | 01, 12, 13, 07 |
+| B9 | **Tồn kho của sản phẩm tùy chỉnh** theo dõi trên **phôi** (hàng chưa in) hay trên thành phẩm? Mỗi thiết kế của khách có sinh SKU mới không? (liên quan B2) | Inventory Item của SKU là phôi; thiết kế đi kèm dòng đơn (design snapshot), không sinh SKU mới; ATP trên catalog tính theo phôi | 🟡 | 01, 12, 13, 07, 19 |
+| B10 | Kho **không có xưởng in** có được chọn làm kho xuất cho dòng tùy chỉnh không (ví dụ in ở kho A rồi chuyển sang kho B giao)? | Không — dòng tùy chỉnh chỉ giao từ kho có khu `PRODUCTION` và trạm in `Active` đúng kỹ thuật in | 🟡 | 17, 19, 10 |
+| B11 | **Ngưỡng in lại (rework)** của một lệnh sản xuất là bao nhiêu lần trước khi phải dừng chờ Manager? Cấu hình theo hệ thống hay theo sản phẩm? | Cấu hình theo hệ thống; vượt ngưỡng → lệnh `On Hold` | 🟢 | 19 |
 
 ---
 
@@ -121,8 +123,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 
 Nhóm câu hỏi nên được trả lời **trước tiên** vì ảnh hưởng kiến trúc nhiều module:
 
-1. **A2, G2, G3** — phạm vi hệ thống (phân quyền, có sàn bên thứ ba không, nguồn sự thật tồn kho). *(A1 — phạm vi đa kho/đa pháp nhân — đã chốt.)*
-2. **B1** — có module Sản xuất/In riêng không (ảnh hưởng toàn bộ luồng Fulfillment cho sản phẩm chủ lực).
-3. **C1, C3** — tiêu chí slotting & cách tính ATP (ảnh hưởng vận hành kho + hiển thị bán hàng).
-4. **D1, E1** — danh sách phương thức thanh toán & hãng vận chuyển tích hợp (ảnh hưởng thiết kế tích hợp).
-5. **A5** — ranh giới với kế toán (ảnh hưởng phạm vi module Invoice & Payment).
+1. **A2, G2, G3** — phạm vi hệ thống (phân quyền, có sàn bên thứ ba không, nguồn sự thật tồn kho). *(A1 — phạm vi đa kho/đa pháp nhân — và B1 — module Sản xuất/In — đã chốt.)*
+2. **C1, C3** — tiêu chí slotting & cách tính ATP (ảnh hưởng vận hành kho + hiển thị bán hàng).
+3. **D1, E1** — danh sách phương thức thanh toán & hãng vận chuyển tích hợp (ảnh hưởng thiết kế tích hợp).
+4. **A5** — ranh giới với kế toán (ảnh hưởng phạm vi module Invoice & Payment).

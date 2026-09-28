@@ -15,7 +15,7 @@ Hệ thống gồm hai mảng lớn:
 
 | Mảng | Tên gọi | Vai trò chính |
 |------|---------|---------------|
-| **A. Kho vận** | Warehouse / Back-office | Tạo sản phẩm, nhập hàng, lưu kho, vận hành kho, xuất kho, chuyển kho |
+| **A. Kho vận** | Warehouse / Back-office | Tạo sản phẩm, nhập hàng, lưu kho, vận hành kho, sản xuất / in theo đơn, xuất kho, chuyển kho |
 | **B. Sàn TMĐT** | E-commerce / Storefront | Thiết kế sản phẩm in ấn, catalog, giỏ hàng, đặt hàng, thanh toán, chăm sóc khách hàng |
 
 Hai mảng gặp nhau tại **Tồn kho (Inventory)**: kho vận là nơi *cung* hàng hoá, sàn TMĐT là nơi *phát sinh nhu cầu* xuất hàng.
@@ -25,6 +25,8 @@ Hai mảng gặp nhau tại **Tồn kho (Inventory)**: kho vận là nơi *cung*
 ## 2. Cách đọc tài liệu
 
 Tài liệu được tổ chức theo **thứ tự luồng nghiệp vụ** (business flow order). Đọc tuần tự từ `00` → `18` sẽ đi hết vòng đời một sản phẩm: từ lúc khai báo → nhập kho → khách đặt → xuất kho → giao hàng.
+
+> Module `19-production` được bổ sung sau, nên số thứ tự không theo luồng: về nghiệp vụ, **Sản xuất / In theo đơn** nằm giữa `17` (Order Management) và `07`/`08` (Picking / Packing) cho các dòng đơn tùy chỉnh.
 
 ```
 docs/
@@ -42,7 +44,8 @@ docs/
 │   ├── 08-packing/                        Đóng gói
 │   ├── 09-shipping/                       Giao cho đơn vị vận chuyển
 │   ├── 10-inter-warehouse-transfer/       Chuyển hàng giữa các kho
-│   └── 11-intra-warehouse-transfer/       Chuyển hàng trong nội bộ một kho
+│   ├── 11-intra-warehouse-transfer/       Chuyển hàng trong nội bộ một kho
+│   └── 19-production/                     Sản xuất / In theo đơn (xưởng in nội bộ)
 │
 ├── ecommerce/                             MẢNG B — SÀN TMĐT
 │   ├── 12-product-design/                 Thiết kế 2D + Xem trước 3D trực tiếp
@@ -88,12 +91,13 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 |---------|-------|--------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý dữ liệu gốc sản phẩm | 01, 06 |
 | **Nhân viên mua hàng (Procurement Staff)** | Lập & chốt PO, đối chiếu hoá đơn | 02, 03, 04 |
-| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng, đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
-| **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho | 05, 06, 10, 11 |
+| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng (kể cả cấp phôi cho xưởng), đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
+| **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, điều phối xưởng in | 05, 06, 10, 11, 19 |
+| **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in: in theo lệnh sản xuất, báo số lượng đạt / hỏng | 19 |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho | 02, 10 |
-| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in | 03 |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập & thành phẩm in | 03, 19 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, đối soát thanh toán/COD | 04, 15, 17 |
-| **Quản trị sàn (E-commerce Admin)** | Quản lý catalog, giá, khuyến mãi, nội dung, template thiết kế | 12, 13, 14, 18 |
+| **Quản trị sàn (E-commerce Admin)** | Quản lý catalog, giá, khuyến mãi, nội dung, template thiết kế; kiểm file in trước sản xuất (prepress) | 12, 13, 14, 18, 19 |
 | **Nhân viên Sale (Sales Staff)** | Tư vấn khách qua chat, hỗ trợ tạo/sửa đơn, xử lý đơn hàng | 16, 17, 18 |
 | **Điều phối đơn hàng (Order Coordinator)** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất | 17 |
 | **Khách hàng (Customer / Buyer)** | Thiết kế sản phẩm, xem catalog, đặt hàng, thanh toán, theo dõi đơn | 12, 13, 14, 15, 16 |
