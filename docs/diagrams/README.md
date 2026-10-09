@@ -5,7 +5,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 Mục lục:
 
 1. [Luồng Procurement: PO → Receipt → Invoice → Putaway](#1-luồng-procurement)
-2. [Luồng Fulfillment: Order → Picking → Packing → Shipping](#2-luồng-fulfillment)
+2. [Luồng Fulfillment: Order → (Production) → Picking → Packing → Shipping](#2-luồng-fulfillment) — kèm vòng đời lệnh sản xuất (§2.3)
 3. [Luồng Transfer giữa các kho](#3-luồng-transfer-giữa-các-kho)
 4. [Phụ lục: Luồng Storefront checkout & luồng Transfer nội bộ kho](#4-phụ-lục)
 
@@ -28,19 +28,25 @@ flowchart TD
 
     WAIT --> RC_CREATE[Tạo Receipt tham chiếu PO]
     RC_CREATE --> RC_COUNT[Kiểm đếm & quét mã\nGhi lô/hạn dùng/serial]
-    RC_COUNT --> RC_QC{Kiểm tra chất lượng}
-    RC_QC -- Rejected --> RTV[Trả NCC / huỷ]
-    RC_QC -- Quarantine --> QUAR[Cách ly chờ xử lý]
-    RC_QC -- Accepted --> RC_CONFIRM[Xác nhận Receipt\nCập nhật SL đã nhận trên PO]
+    RC_COUNT --> RC_CONFIRM[Xác nhận Receipt\nCập nhật SL đã nhận trên PO\nTồn Inbound tại WH/Input - RECEIVING]
 
     RC_CONFIRM --> PO_STATUS{PO đã nhận đủ?}
     PO_STATUS -- Chưa --> PO_PARTIAL[PO: Partially Received] --> WAIT
     PO_STATUS -- Đủ --> PO_RECEIVED[PO: Received]
 
-    RC_CONFIRM --> PA_TASK[Sinh Putaway task\ncho hàng Accepted]
+    RC_CONFIRM --> RC_NEEDQC{SKU yêu cầu QC?}
+    RC_NEEDQC -- Không, 2 bước --> PA_TASK
+    RC_NEEDQC -- Có, 3 bước --> QC_MOVE[Chuyển hàng sang\nWH/Quality Control - QUALITY_CONTROL]
+    QC_MOVE --> RC_QC{Kiểm tra chất lượng}
+    RC_QC -- Rejected --> RTV[Chuyển sang khu QUARANTINE\nTồn Blocked, chờ trả NCC]
+    RC_QC -- Quarantine --> QUAR[Chuyển sang khu QUARANTINE\nCách ly chờ kết luận]
+    QUAR -- Kết luận Accepted --> PA_TASK
+    QUAR -- Kết luận Rejected --> RTV
+    RC_QC -- Accepted --> PA_TASK[Sinh Putaway task\ntừ khu chờ cất]
+
     PA_TASK --> PA_SUGGEST[Slotting Engine gợi ý vị trí]
     PA_SUGGEST --> PA_MOVE[NV kho di chuyển & quét vị trí đích]
-    PA_MOVE --> PA_DONE[Putaway Completed\nTồn: Inbound → Available]
+    PA_MOVE --> PA_DONE[Putaway Completed - WH/Stock\nTồn: Inbound → Available]
     PA_DONE --> RC_CLOSE[Receipt: Closed]
 
     RC_CONFIRM --> INV_MATCH
@@ -68,6 +74,7 @@ sequenceDiagram
     participant PO as Purchase Order
     actor VENDOR as Nhà cung cấp
     actor WH as NV kho
+    actor QC as NV QC
     participant RC as Receipt
     participant SLOT as Slotting Engine
     participant INVSYS as Inventory
@@ -79,12 +86,18 @@ sequenceDiagram
     PO->>PO: Chốt PO → Confirmed
     VENDOR->>WH: Giao hàng + phiếu giao
     WH->>RC: Tạo Receipt tham chiếu PO
-    WH->>RC: Kiểm đếm, ghi lô/hạn dùng, QC
+    WH->>RC: Kiểm đếm, ghi lô/hạn dùng, xác nhận
+    RC->>INVSYS: Ghi tồn Inbound tại WH/Input (RECEIVING)
     RC->>PO: Cập nhật SL đã nhận / open qty
-    RC->>WH: Sinh Putaway task (hàng Accepted)
+    opt SKU yêu cầu QC (luồng 3 bước)
+        WH->>INVSYS: Chuyển hàng WH/Input → WH/Quality Control
+        QC->>RC: Kết luận Accepted / Quarantine / Rejected
+        RC->>INVSYS: Phần Quarantine / Rejected → khu QUARANTINE
+    end
+    RC->>WH: Sinh Putaway task (hàng Accepted / không cần QC)
     WH->>SLOT: Yêu cầu gợi ý vị trí
     SLOT-->>WH: Danh sách vị trí xếp hạng
-    WH->>INVSYS: Đặt hàng vào vị trí → tồn Available
+    WH->>INVSYS: Đặt hàng vào bin (WH/Stock) → tồn Available
     RC->>RC: Closed
     VENDOR->>AP: Gửi hoá đơn
     AP->>INV: Nhập hoá đơn, chọn PO/Receipt
@@ -109,13 +122,31 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    ORDER([Order: Confirmed]) --> PRINT{Có sản phẩm in ấn?}
-    PRINT -- Có --> PROD[In / Sản xuất\nOrder: In Production]
-    PROD --> READY
-    PRINT -- Không --> READY[Order: Ready to Fulfill]
+    ORDER([Order: Confirmed]) --> SOURCE[Order Mgmt chọn kho xuất\ndòng tùy chỉnh: kho có xưởng in]
+    SOURCE --> PRINT{Có dòng tùy chỉnh?}
+    PRINT -- Không --> READY[Order: Ready to Fulfill\nrelease lệnh xuất]
 
-    READY --> SOURCE[Order Mgmt chọn kho xuất\n& release lệnh xuất]
-    SOURCE --> ALLOC[Phân bổ tồn theo vị trí & lô\nTồn: Available → Allocated]
+    PRINT -- Có --> MO[Sinh lệnh sản xuất / dòng\nOrder: In Production]
+    MO --> PREPRESS{Prepress file in đạt?}
+    PREPRESS -- Không --> MO_HOLD[Lệnh On Hold\nSale liên hệ khách sửa file]
+    MO_HOLD --> PREPRESS
+    PREPRESS -- Có --> BLANK[Lấy phôi từ bin\n→ khu PRODUCTION]
+    BLANK --> QUEUE[Hàng đợi → gán trạm in\ncùng kỹ thuật in]
+    QUEUE --> PRINTING[Production Staff in\nbáo SL đạt / hỏng]
+    PRINTING --> PQC{QC thành phẩm\nđủ SL đạt?}
+    PQC -- Không --> REWORK[Phần hỏng xuất huỷ\nLệnh Rework]
+    REWORK --> BLANK
+    PQC -- Có --> TO_PACK[Thành phẩm → khu PACKING\nLệnh Completed]
+    TO_PACK --> ALL_DONE{Mọi lệnh của đơn\nđã Completed?}
+    ALL_DONE -- Chưa --> WAIT_MO[Chờ các lệnh còn lại]
+    WAIT_MO --> ALL_DONE
+    ALL_DONE -- Rồi --> READY_P[Order: Ready to Fulfill]
+    MO -. đơn hỗn hợp: dòng hàng thường\npick song song .-> ALLOC
+    READY_P --> HAS_STD{Còn dòng hàng thường\nchưa pick?}
+    HAS_STD -- Có --> ALLOC
+    HAS_STD -- Không --> PACK_CHECK
+
+    READY --> ALLOC[Phân bổ tồn theo vị trí & lô\nTồn: Available → Allocated]
     ALLOC --> WAVE[Lập wave / batch\nSinh pick list + lộ trình]
     WAVE --> PICK[Picker lấy hàng\nquét vị trí + SKU/lô + số lượng]
 
@@ -131,9 +162,9 @@ flowchart TD
     PACK_DESIGN -- Có --> PACK_VERIFY[Đối chiếu thành phẩm\nvới design snapshot]
     PACK_DESIGN -- Không --> PACK_BOX
     PACK_VERIFY --> PACK_FAIL{Khớp?}
-    PACK_FAIL -- Không --> INVESTIGATE[Verification Failed →\nđiều tra sản xuất / re-pick]
+    PACK_FAIL -- Không --> INVESTIGATE[Verification Failed →\nxuất huỷ thành phẩm lỗi,\nlệnh sản xuất Rework]
     PACK_FAIL -- Có --> PACK_BOX[Chọn thùng, đóng gói,\ncân & đo]
-    INVESTIGATE --> PACK_BOX
+    INVESTIGATE --> REWORK
 
     PACK_BOX --> LABEL[Gọi Carrier API\nTạo shipping label + tracking]
     LABEL --> LABEL_OK{Tạo nhãn OK?}
@@ -164,7 +195,10 @@ sequenceDiagram
     actor CUST as Khách hàng
     participant OM as Order Management
     participant PAY as Payment
-    participant PROD as Sản xuất/In
+    participant PROD as Production (19)
+    actor ADMIN as E-commerce Admin
+    actor OPER as Production Staff
+    actor QC as NV QC
     actor PICKER as Picker
     participant INVSYS as Inventory
     actor PACKER as Packer
@@ -173,19 +207,30 @@ sequenceDiagram
 
     CUST->>PAY: Thanh toán đơn
     PAY-->>OM: payment_status = Paid / COD hợp lệ → Confirmed
-    opt Đơn in ấn
-        OM->>PROD: Chuyển sản xuất (In Production)
-        PROD-->>OM: Production Done
+    OM->>OM: Chọn kho xuất (dòng tùy chỉnh: kho có xưởng in)
+    opt Đơn có dòng tùy chỉnh
+        OM->>PROD: Sinh lệnh sản xuất / dòng (Order: In Production)
+        ADMIN->>PROD: Prepress file in → Waiting Material
+        PROD->>PICKER: Lệnh lấy phôi (đích khu PRODUCTION)
+        PICKER->>INVSYS: Lấy phôi, bàn giao khu PRODUCTION (Allocated)
+        OPER->>PROD: In tại trạm, báo SL đạt / hỏng → QC Pending
+        QC->>PROD: QC thành phẩm
+        alt Thiếu SL đạt
+            PROD->>INVSYS: Xuất huỷ phần hỏng
+            PROD->>PICKER: Cấp phôi phần thiếu (Rework)
+        end
+        PROD->>INVSYS: Thành phẩm → khu PACKING (Staged)
+        PROD-->>OM: Mọi lệnh Completed → Ready to Fulfill
     end
-    OM->>INVSYS: Chọn kho xuất + phân bổ tồn (Allocated)
-    OM->>PICKER: Release lệnh xuất / pick list
+    OM->>INVSYS: Phân bổ tồn dòng hàng thường (Allocated)
+    OM->>PICKER: Release lệnh xuất / pick list (nếu còn dòng hàng thường)
     PICKER->>INVSYS: Lấy hàng (quét vị trí + SKU/lô)
     alt Thiếu hàng
         PICKER->>INVSYS: Re-allocate lô/vị trí khác
         PICKER-->>OM: Short pick → backorder/partial
     end
     PICKER->>PACKER: Bàn giao hàng đã pick (Staged)
-    PACKER->>PACKER: Kiểm đơn + (đơn in ấn) đối chiếu design snapshot
+    PACKER->>PACKER: Kiểm đơn + (dòng tùy chỉnh) đối chiếu thành phẩm với design snapshot
     PACKER->>SHIP: Yêu cầu tạo nhãn vận đơn
     SHIP->>CARRIER: Tạo label (API)
     CARRIER-->>SHIP: Tracking number + label
@@ -208,6 +253,37 @@ sequenceDiagram
             OM->>PAY: Khởi tạo refund
         end
     end
+```
+
+### 2.3. Vòng đời lệnh sản xuất (Production Order)
+
+Chi tiết trạng thái & điều kiện chuyển xem [19 · Production §5](../warehouse/19-production/README.md).
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created
+    Created --> WaitingMaterial: Prepress đạt
+    Created --> OnHold: File lỗi
+    WaitingMaterial --> Queued: Phôi đã lên khu PRODUCTION
+    WaitingMaterial --> OnHold: Thiếu phôi
+    Queued --> Assigned: Gán trạm in
+    Assigned --> Queued: Gán lại
+    Assigned --> InProgress: Bắt đầu in
+    InProgress --> QCPending: Báo SL đạt / hỏng
+    QCPending --> Completed: Đủ SL đạt → khu PACKING
+    QCPending --> Rework: Thiếu SL đạt
+    Rework --> WaitingMaterial: Cấp phôi mới phần thiếu
+    Rework --> OnHold: Vượt ngưỡng in lại
+    OnHold --> Created
+    OnHold --> WaitingMaterial
+    OnHold --> Queued
+    Created --> Cancelled
+    WaitingMaterial --> Cancelled
+    Queued --> Cancelled
+    Assigned --> Cancelled
+    OnHold --> Cancelled
+    Completed --> [*]
+    Cancelled --> [*]
 ```
 
 ---
@@ -345,4 +421,4 @@ flowchart TD
 
 - Các trạng thái viết hoa kiểu `Confirmed`, `In Transit`… là trạng thái chứng từ/nhiệm vụ, khớp với bảng vòng đời trong từng module.
 - Sơ đồ mô tả **happy path + các nhánh ngoại lệ chính**; edge case chi tiết xem phần "Ràng buộc nghiệp vụ & Edge case" của module tương ứng.
-- Các bước "Sản xuất/In" trong luồng Fulfillment là **giả định** cho sản phẩm print-on-demand — xem [open-questions](../open-questions/README.md).
+- Các bước "Sản xuất/In" trong luồng Fulfillment mô tả xưởng in nội bộ của [19 · Production](../warehouse/19-production/README.md) cho dòng đơn tùy chỉnh.

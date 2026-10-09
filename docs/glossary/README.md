@@ -8,11 +8,15 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Áo thun – Đỏ – Size M") là một SKU riêng. |
-| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Áo thun" có nhiều màu/size). |
-| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (màu × size × chất liệu…), tương ứng một SKU. |
+| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Ly PP 500 ml – miệng 95 – trong") là một SKU riêng. |
+| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Ly nhựa PP" có nhiều dung tích). |
+| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (dung tích × chất liệu × đường kính miệng…), tương ứng một SKU. |
 | **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, lô/hạn dùng/serial, ngưỡng tồn, thông tin mua hàng. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
-| **UoM** (Unit of Measure) | Đơn vị tính (cái, hộp, kg, mét…). |
+| **UoM** (Unit of Measure) | Đơn vị tính (cái, cây, thùng…). |
+| **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
+| **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
+| **Purchase UoM / Đơn vị mua** | Đơn vị quy đổi dùng mặc định khi đặt hàng NCC trên PO (thường là *thùng*). |
+| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt trên storefront, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi; giá bán niêm yết theo đơn vị bán. |
 | **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
@@ -47,10 +51,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **PO revision / amendment** | Bản chỉnh sửa PO sau khi đã `Confirmed` (tăng version, có log). |
 | **MOQ** (Minimum Order Quantity) | Số lượng đặt hàng tối thiểu NCC yêu cầu. |
 | **Lead time / Thời gian giao** | Khoảng thời gian từ khi đặt đến khi hàng về. |
-| **Receipt / Goods Receipt — Nhận hàng** | Ghi nhận hàng thực tế về kho theo PO: kiểm đếm, QC, ghi lô. |
+| **Receipt / Goods Receipt — Nhận hàng** | Ghi nhận hàng thực tế về kho theo PO: kiểm đếm, ghi lô, đưa vào khu nhận hàng; với SKU yêu cầu QC thì chuyển sang khu QC và ghi kết quả QC. |
 | **Delivery note / Packing slip / Phiếu giao hàng** | Chứng từ NCC gửi kèm lô hàng, liệt kê nội dung giao. |
-| **QC** (Quality Control) — **Kiểm tra chất lượng** | Đánh giá hàng nhận: đạt (Accepted) / cách ly (Quarantine) / từ chối (Rejected). |
-| **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng, chưa cho vào tồn khả dụng. |
+| **QC** (Quality Control) — **Kiểm tra chất lượng** | Đánh giá hàng nhận tại khu kiểm tra chất lượng: đạt (Accepted) / cách ly (Quarantine) / từ chối (Rejected). Chỉ áp dụng cho SKU bật cờ **Yêu cầu QC khi nhận**. |
+| **Nhập kho 2 bước / 3 bước (2-step / 3-step reception)** | 3 bước: NCC → khu nhận hàng (WH/Input) → khu kiểm tra chất lượng (WH/Quality Control) → bin (WH/Stock), cho SKU yêu cầu QC. 2 bước: NCC → khu nhận hàng → bin, cho SKU không yêu cầu QC. |
+| **QC area / Khu kiểm tra chất lượng** | Khu chứa hàng đã nhận đang chờ QC kiểm — Area loại `QUALITY_CONTROL`. Khác khu cách ly (`QUARANTINE`) là nơi chứa hàng **sau khi** QC kết luận cách ly hoặc không đạt. |
+| **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng lại, chưa cho vào tồn khả dụng; hàng nằm ở Area loại `QUARANTINE`. |
 | **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
 | **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt. |
 | **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. |
@@ -58,8 +64,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
 | **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
 | **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
-| **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu nhận (inbound) lên vị trí lưu trữ chính thức. |
-| **Inbound area / Staging area / Khu chờ cất** | Khu tạm chứa hàng vừa nhận, chờ putaway — Area loại `RECEIVING`. |
+| **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu chờ cất (khu QC với hàng đạt QC, hoặc khu nhận hàng với SKU không yêu cầu QC) lên vị trí lưu trữ chính thức. |
+| **Inbound area / Staging area / Khu nhận hàng** | Khu tạm chứa hàng vừa nhận (WH/Input), chờ chuyển sang khu QC hoặc chờ putaway — Area loại `RECEIVING`. |
 
 ---
 
@@ -76,7 +82,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; có sức chứa theo đơn vị, cờ cho phép lấy hàng / cất hàng, loại ô, lớp lưu trữ ghi đè. |
 | **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ, phải bổ sung sang bin picking trước khi lấy. |
 | **Bin autogenerate / Tự sinh bin** | Tạo hàng loạt bin cho các tầng kệ chưa có bin bằng cách chia đều mặt kệ theo số hàng × số cột; mã bin đặt theo kiểu `SEQUENTIAL` (`01`, `02`…) hoặc `ROW_LETTER_COLUMN` (`A01`, `B01`…). |
-| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUARANTINE` (cách ly), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
+| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUALITY_CONTROL` (kiểm tra chất lượng), `QUARANTINE` (cách ly), `PRODUCTION` (xưởng in), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
 | **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
 | **Obstacle / Vật cản** | Kệ hoặc khu vực đánh dấu không đi xuyên được khi tính đường đi. |
 | **Pick face / Mặt lấy hàng** | Phía của kệ (bắc/đông/nam/tây) mà NV kho tiếp cận để lấy/cất hàng. |
@@ -100,7 +106,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. |
 | **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. |
 | **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. |
-| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
+| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
 | **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại vị trí lưu trữ. |
 | **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. |
 | **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
@@ -119,6 +125,22 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. |
 | **Transfer Order (TO) / Lệnh chuyển kho** | Chứng từ yêu cầu chuyển hàng giữa/trong kho. |
 | **Transfer discrepancy / Chênh lệch chuyển kho** | Sai khác giữa số xuất ở kho nguồn và số nhận ở kho đích. |
+
+---
+
+## 3a. Thuật ngữ sản xuất / in theo đơn (Production)
+
+| Thuật ngữ | Tiếng Việt / Giải thích |
+|-----------|--------------------------|
+| **Blank / Phôi** | Hàng chưa in của sản phẩm tùy chỉnh (ly trơn, túi giấy trơn…); là Inventory Item của SKU tùy chỉnh, được cấp cho xưởng theo lệnh sản xuất. |
+| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); quyết định trạm in được nhận lệnh. |
+| **Print Station / Trạm in** | Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái (`Active` / `Maintenance` / `Inactive`). |
+| **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
+| **Production Order (MO) / Lệnh sản xuất** | Chứng từ sản xuất sinh từ **một dòng đơn tùy chỉnh**: SKU phôi, số lượng, design snapshot, print-ready file, kỹ thuật in, trạm in, hạn cần xong. Mã theo prefix kho, ví dụ `HN-MO-000123`. Xem [19](../warehouse/19-production/README.md). |
+| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh đã có phôi, chờ gán trạm; ưu tiên theo hạn giao rồi thời điểm xác nhận đơn. |
+| **Prepress / Kiểm file trước sản xuất** | E-commerce Admin kiểm print-ready file của lệnh sản xuất trước khi cấp phôi. Khác *Preflight* (kiểm tự động khi khách thiết kế). |
+| **Rework / In lại** | Cấp phôi mới và in lại **phần còn thiếu** khi in hỏng hoặc QC thành phẩm không đạt. |
+| **Scrap / Xuất huỷ** | Giảm tồn phôi in hỏng / thành phẩm lỗi bằng chứng từ điều chỉnh có lệnh sản xuất làm nguồn. |
 
 ---
 
@@ -203,13 +225,18 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Received` | PO, TO | Đã nhận đủ |
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
 | `Cancelled` | Hầu hết chứng từ | Bị huỷ trước khi hoàn tất |
+| `In QC` | Receipt | Còn dòng hàng cần QC chưa có kết luận |
 | `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
 | `Reserved` | Order (giữ hàng) | Đã giữ số lượng cho đơn, chưa gắn vị trí/lô; làm giảm ATP |
 | `Allocated` | Tồn kho (theo vị trí) | Đã phân bổ tồn ở vị trí & lô cho một đơn/lệnh cụ thể |
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
 | `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
 | `Paid` | Order (payment_status) | Đã thu đủ tiền |
-| `In Production` | Order | Đang sản xuất/in (đơn tùy chỉnh) |
+| `In Production` | Order | Đang sản xuất/in (đơn tùy chỉnh); rời trạng thái khi mọi lệnh sản xuất của đơn `Completed` |
+| `Waiting Material` | Production Order | Đã qua prepress, chờ cấp phôi lên khu `PRODUCTION` |
+| `Queued` / `Assigned` | Production Order | Chờ gán trạm in / đã gán trạm |
+| `QC Pending` | Production Order | In xong, chờ QC thành phẩm |
+| `Rework` | Production Order | Thiếu thành phẩm đạt, cần cấp phôi in lại phần thiếu |
 | `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
 | `Refunded` / `Partially Refunded` | Order, Payment | Đã hoàn tiền toàn phần / một phần |
@@ -224,6 +251,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | SKU | Stock Keeping Unit | Đơn vị lưu kho |
 | PO | Purchase Order | Đơn đặt hàng NCC |
 | TO | Transfer Order | Lệnh chuyển kho |
+| MO | Manufacturing / Production Order | Lệnh sản xuất |
 | RMA | Return Merchandise Authorization | Phiếu cho phép trả hàng |
 | ATP | Available To Promise | Số lượng có thể hứa giao |
 | UoM | Unit of Measure | Đơn vị tính |
@@ -254,9 +282,10 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm. |
 | **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO, chốt PO, xử lý tranh chấp hoá đơn. |
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
-| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ. |
+| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên). |
+| **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: in theo lệnh sản xuất, báo số lượng đạt / hỏng, bàn giao thành phẩm cho QC. |
 | **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO. |
-| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập & hàng sản xuất/in (accept / reject / quarantine). |
+| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine) & thành phẩm in tại xưởng (đạt / không đạt). |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền. |
 | **E-commerce Admin / Quản trị sàn** | Quản lý catalog, giá, khuyến mãi, nội dung, chính sách; cấu hình template thiết kế & kiểm tra file in (prepress). |
 | **Sales Staff / Nhân viên Sale** | Tư vấn & chăm sóc khách hàng (CSKH) qua chat, tạo đơn hộ, chốt thiết kế, xử lý khiếu nại. |

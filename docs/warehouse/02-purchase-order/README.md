@@ -31,7 +31,7 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 | Kho nhận (ship-to warehouse) | Kho vật lý sẽ nhận hàng | Có |
 | Ngày đặt / Ngày giao dự kiến (expected date) | | Có |
 | Điều khoản (payment terms, incoterms) | Kế thừa từ hồ sơ NCC, cho phép ghi đè | Không |
-| **Dòng hàng (PO lines)** | SKU, số lượng đặt, đơn giá, thuế, chiết khấu, đơn vị tính | Có (≥ 1 dòng) |
+| **Dòng hàng (PO lines)** | SKU, số lượng đặt, **đơn vị mua** (mặc định lấy từ [01](../01-product-creation/README.md), ví dụ *thùng*), đơn giá theo đơn vị mua, thuế, chiết khấu; hệ thống lưu kèm số lượng quy về đơn vị cơ sở | Có (≥ 1 dòng) |
 | Ghi chú / điều kiện đặc biệt | | Không |
 | Chứng từ đính kèm | Báo giá, hợp đồng khung | Không |
 
@@ -51,7 +51,7 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 1. **Hệ thống sinh đề xuất (Replenishment Proposal)** — MRP định kỳ đối soát (Tồn thực tế + Hàng đang về − Hàng chờ xuất); khi dưới ngưỡng reorder point → sinh Bảng Đề xuất liệt kê SKU cần bổ sung.
 2. **Planner đánh giá & chuyển PO (Review & Convert)** — Inventory Planner phân tích sức mua / sức chứa kho, chỉnh số lượng, bấm "Convert to Draft PO" → tạo Draft PO và thông báo sang bộ phận Thu mua.
 3. **Tạo PO nháp (Create draft)** — Procurement chọn NCC, kho nhận, ngày giao dự kiến. PO ở `Draft`. Hoặc mở Draft PO do Planner chuyển sang.
-4. **Thêm dòng hàng** — chọn SKU (`Active`), nhập số lượng & đơn giá. Hệ thống có thể gợi ý SKU cần bổ sung dựa trên ngưỡng tồn tối thiểu (reorder point) từ [module 01](../01-product-creation/README.md).
+4. **Thêm dòng hàng** — chọn SKU (`Active`), chọn đơn vị mua (ví dụ *thùng*), nhập số lượng & đơn giá; hệ thống quy đổi số lượng về đơn vị cơ sở để so với tồn và nhận hàng. Hệ thống có thể gợi ý SKU cần bổ sung dựa trên ngưỡng tồn tối thiểu (reorder point) từ [module 01](../01-product-creation/README.md).
 5. **Kiểm tra ràng buộc NCC** — MOQ (số lượng đặt tối thiểu), bội số đóng gói, danh mục SKU mà NCC cung cấp.
 6. **Tính tổng tiền** — subtotal, thuế, chiết khấu, phí vận chuyển (nếu nhập) → tổng giá trị PO.
 7. **Gửi duyệt (Submit)** — nếu tổng giá trị vượt hạn mức của người tạo → `Pending Approval`; nếu không → có thể tự chuyển tiếp.

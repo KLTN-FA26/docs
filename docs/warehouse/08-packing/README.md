@@ -2,7 +2,7 @@
 
 ## 1. Mục đích (Purpose)
 
-Kiểm tra lần cuối hàng đã [pick](../07-picking/README.md), **đóng gói thành kiện (package/parcel)** phù hợp, gắn nhãn, và chuẩn bị chứng từ để bàn giao [Shipping](../09-shipping/README.md).
+Kiểm tra lần cuối hàng đã [pick](../07-picking/README.md) và thành phẩm in do [xưởng](../19-production/README.md) bàn giao, **đóng gói thành kiện (package/parcel)** phù hợp, gắn nhãn, và chuẩn bị chứng từ để bàn giao [Shipping](../09-shipping/README.md).
 
 Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng – đóng gói an toàn – có nhãn vận chuyển hợp lệ**. Đây là **chốt kiểm soát chất lượng cuối** trước khi hàng rời kho.
 
@@ -25,7 +25,8 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Hàng đã pick (staged) theo đơn | SKU, số lượng, lô/serial | Có |
+| Hàng đã pick (staged) theo đơn | SKU, số lượng, lô/serial | Có (với dòng hàng thường) |
+| Thành phẩm in đạt QC (với dòng tùy chỉnh) | Xưởng bàn giao tại khu `PACKING`, gắn lệnh sản xuất & design snapshot (xem [19](../19-production/README.md)) | Có (nếu áp dụng) |
 | Thông tin đơn hàng | Địa chỉ giao, phương thức vận chuyển, yêu cầu đặc biệt (quà tặng, hoá đơn kèm) | Có |
 | Vật liệu đóng gói khả dụng | Danh mục thùng/túi + kích thước + khối lượng bì | Có |
 | **Design artifact** (với sản phẩm in ấn) | Bản in thành phẩm / nhãn kiểm cho đúng thiết kế khách chốt | Có (nếu áp dụng) |
@@ -39,13 +40,13 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 | **Packing slip** (phiếu đóng gói) & hoá đơn bán hàng kèm (nếu chính sách yêu cầu) | Khách hàng, 17 Order Management |
 | **Yêu cầu tạo nhãn vận đơn** (shipping label request) | 09 Shipping / Carrier |
 | **Cập nhật trạng thái đơn** → `Packed` | 17 Order Management |
-| Bản ghi sai lệch / hư hỏng khi đóng gói | Manager, 07 Picking (điều tra) |
+| Bản ghi sai lệch / hư hỏng khi đóng gói | Manager, 07 Picking / 19 Production (điều tra) |
 
 ---
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-1. **Nhận hàng tại bàn đóng gói** — Packer quét mã đơn / tote để nạp danh sách dòng hàng cần đóng.
+1. **Nhận hàng tại bàn đóng gói** — Packer quét mã đơn / tote để nạp danh sách dòng hàng cần đóng. Packing task chỉ sinh khi **mọi dòng** của đơn đã ở khu `PACKING`: dòng hàng thường đã pick (`Staged`) và dòng tùy chỉnh đã có thành phẩm đạt QC do xưởng bàn giao ([19](../19-production/README.md)). Đơn chỉ gồm hàng tùy chỉnh đi thẳng từ sản xuất sang packing, không qua picking thành phẩm.
 2. **Kiểm đơn (verification / check)** — quét từng SKU & số lượng đối chiếu đơn:
    - Với sản phẩm in ấn: đối chiếu **thành phẩm với thiết kế đã chốt** (mã design, hình ảnh preview) — đảm bảo đúng nội dung khách đặt.
    - Với SKU serial: quét serial để gắn vào đơn.
@@ -65,7 +66,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp | Ai |
 |------------|---------|-------------|----|
-| `Pending` | Hàng đã staged, chờ đóng gói | → `In Progress`, → `Cancelled` | System |
+| `Pending` | Hàng đã staged / thành phẩm đã bàn giao, chờ đóng gói | → `In Progress`, → `Cancelled` | System |
 | `In Progress` | Packer đang kiểm & đóng | → `Verification Failed`, → `Packed`, → `On Hold` | Packer |
 | `Verification Failed` | Kiểm đơn lệch (thiếu/thừa/sai SKU/sai thiết kế) | → `In Progress` (đã bổ sung/sửa), → `On Hold` | Packer / Manager |
 | `On Hold` | Chờ xử lý (hết thùng, chờ re-pick, chờ Manager) | → `In Progress`, → `Cancelled` | Manager |
@@ -80,7 +81,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 ### Business rules
 
 - **BR-01:** Không `Packed` nếu kiểm đơn chưa khớp 100% (đúng SKU, đủ số lượng, đúng serial, đúng thiết kế).
-- **BR-02:** Với sản phẩm in ấn, thành phẩm phải khớp **design snapshot đã chốt** của đơn; không khớp → `Verification Failed`, chuyển điều tra sản xuất.
+- **BR-02:** Với sản phẩm in ấn, thành phẩm phải khớp **design snapshot đã chốt** của đơn; không khớp → `Verification Failed`; thành phẩm lỗi được xuất huỷ và lệnh sản xuất tương ứng mở lại ở `Rework` để in bù (xem [19](../19-production/README.md)).
 - **BR-03:** Khối lượng & kích thước kiện phải nằm trong giới hạn của dịch vụ vận chuyển được chọn; vượt → tách kiện hoặc đổi dịch vụ.
 - **BR-04:** Mỗi kiện chỉ thuộc một đơn (không gộp nhiều đơn vào một kiện) — trừ khi có tính năng "consolidated shipment" được bật.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
 - **BR-05:** Nhãn vận đơn đã tạo mà đơn bị huỷ → phải **void label** với hãng vận chuyển (tránh bị tính phí).
@@ -105,6 +106,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 | Module | Quan hệ |
 |--------|---------|
 | [07 · Picking](../07-picking/README.md) | Nhận hàng đã pick tại staging; báo ngược khi kiểm đơn phát hiện lệch |
+| [19 · Production](../19-production/README.md) | Nhận thành phẩm in đạt QC tại khu `PACKING`; báo ngược khi thành phẩm sai thiết kế (lệnh `Rework`) |
 | [09 · Shipping](../09-shipping/README.md) | Gửi yêu cầu tạo nhãn vận đơn; bàn giao kiện đã đóng cho bước giao vận |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Cập nhật trạng thái `Packed`; nhận yêu cầu sửa địa chỉ / xử lý huỷ |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot để đối chiếu thành phẩm in ấn |

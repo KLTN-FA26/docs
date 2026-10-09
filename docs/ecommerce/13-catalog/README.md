@@ -26,7 +26,7 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 | Nhóm | Dữ liệu | Nguồn |
 |------|---------|-------|
 | Sản phẩm & biến thể | Sản phẩm `Published`, danh sách SKU, thuộc tính biến thể, hình ảnh, mô tả, thuộc tính lọc | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
-| Giá bán | Giá niêm yết, giá khuyến mãi, quy tắc giá theo nhóm khách / số lượng | Cấu hình Pricing |
+| Giá bán | Giá niêm yết theo **đơn vị bán**, giá khuyến mãi, quy tắc giá theo nhóm khách / số lượng | Cấu hình Pricing; đơn vị bán & hệ số quy đổi từ [01](../../warehouse/01-product-creation/README.md) |
 | Tồn kho khả dụng (ATP) | ATP = tồn `Available` − phần đang giữ hàng (reservation), tính trên Inventory Item của SKU; theo kho hoặc toàn hệ thống (xem BR-06) | Mảng kho vận (05 Putaway, 07 Picking, 10 Transfer) |
 | Cấu hình hiển thị | Danh mục, cây phân loại, bộ lọc, sắp xếp, sản phẩm nổi bật, SEO | Quản trị sàn |
 | Cấu hình sản phẩm tùy chỉnh | Cờ "customizable", điểm vào trình thiết kế | [01](../../warehouse/01-product-creation/README.md) |
@@ -56,8 +56,8 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 ### 4.2. Khách duyệt & chọn hàng
 
 1. Khách vào storefront: xem trang chủ, danh mục, hoặc dùng ô tìm kiếm.
-2. **Trang danh sách (PLP):** lọc theo thuộc tính (loại, màu, chất liệu, giá, đánh giá…), sắp xếp (mới nhất, giá, phổ biến).
-3. **Trang chi tiết (PDP):** hình ảnh/gallery, mô tả, chọn biến thể (size/màu). Khi chọn biến thể → hiển thị **giá** và **tình trạng còn hàng** của SKU tương ứng.
+2. **Trang danh sách (PLP):** lọc theo thuộc tính (nhóm hàng — ly / bao bì mang đi; dung tích, chất liệu, đường kính miệng, giá…), sắp xếp (mới nhất, giá, phổ biến).
+3. **Trang chi tiết (PDP):** hình ảnh/gallery, mô tả, chọn biến thể (dung tích/chất liệu) và **đơn vị bán** (ví dụ *thùng 1.000 cái*). Khi chọn → hiển thị **giá theo đơn vị bán** (kèm đơn giá quy ra đơn vị cơ sở) và **tình trạng còn hàng** của SKU tương ứng.
 4. **Tình trạng còn hàng:**
    | Hiển thị | Điều kiện (mặc định giả định) |
    |----------|------------------------------|
@@ -97,6 +97,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 - **BR-04:** Sản phẩm tùy chỉnh **không cho thêm thẳng vào giỏ** nếu chưa có design snapshot `Confirmed`.
 - **BR-05:** Khuyến mãi hiển thị phải trong thời hạn & đúng điều kiện; hết hạn tự ẩn.
 - **BR-06:** ATP có thể tính theo **kho phục vụ khu vực giao của khách** nếu bật bán theo vùng; nếu không, tính tổng toàn hệ thống.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
+- **BR-07:** ATP tính theo đơn vị cơ sở; số lượng còn hàng hiển thị theo đơn vị bán = **phần nguyên của (ATP ÷ hệ số quy đổi)**. Ví dụ ATP 2.500 cái, đơn vị bán *thùng* = 1.000 cái → còn 2 thùng.
 
 ### Edge case
 
@@ -106,6 +107,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 | Sản phẩm bị `Unpublished` khi khách có link trực tiếp | Trả trang "sản phẩm không còn khả dụng" + gợi ý sản phẩm tương tự |
 | Giá thay đổi giữa lúc xem và lúc thêm vào giỏ | Giỏ áp giá theo quy tắc module 14; thông báo nếu lệch |
 | Nhiều biến thể, một số hết hàng | Cho chọn biến thể còn hàng; biến thể hết hàng hiển thị mờ / "hết hàng" |
+| Tồn còn lẻ, không đủ một đơn vị bán (ví dụ còn 600 cái, bán theo thùng 1.000) | Đơn vị bán đó hiển thị "hết hàng"; nếu biến thể có đơn vị bán nhỏ hơn thì vẫn cho chọn đơn vị nhỏ hơn |
 | Kết quả tìm kiếm rỗng | Gợi ý từ khoá liên quan, bỏ bớt bộ lọc, sản phẩm phổ biến |
 | Sản phẩm tùy chỉnh nhưng model 3D lỗi | Vẫn cho thiết kế 2D (module 12 xử lý); catalog vẫn hiển thị bình thường |
 | Chênh lệch index tìm kiếm vs dữ liệu thật (vừa đổi giá/ẩn) | Re-index theo sự kiện; PDP luôn đọc dữ liệu nguồn khi tải |
@@ -116,7 +118,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 
 | Module | Quan hệ |
 |--------|---------|
-| [01 · Product Creation](../../warehouse/01-product-creation/README.md) | Nguồn dữ liệu sản phẩm, biến thể, nội dung, cờ tùy chỉnh; trạng thái `Published` |
+| [01 · Product Creation](../../warehouse/01-product-creation/README.md) | Nguồn dữ liệu sản phẩm, biến thể, đơn vị bán & hệ số quy đổi, nội dung, cờ tùy chỉnh; trạng thái `Published` |
 | Mảng kho vận (05, 07, 10, 11) | Cung cấp tồn khả dụng (ATP) để hiển thị tình trạng còn hàng |
 | [12 · Product Design](../12-product-design/README.md) | "Bắt đầu thiết kế" từ PDP với sản phẩm tùy chỉnh |
 | [14 · Cart & Order](../14-cart-and-order/README.md) | "Thêm vào giỏ"; chuyển giá & biến thể đã chọn |
