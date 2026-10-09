@@ -52,7 +52,7 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 | Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
 | Picker | Lấy hàng theo pick list | [07](../warehouse/07-picking/README.md) |
 | Packer | Đóng gói, dán nhãn | [08](../warehouse/08-packing/README.md) |
-| Dispatch Staff | Gom chuyến, bàn giao vận chuyển | [09](../warehouse/09-shipping/README.md) |
+| Dispatch Staff | Gom chuyến, lập kế hoạch xếp hàng lên xe (Load Planning) khi giao nguyên chuyến, bàn giao vận chuyển | [09](../warehouse/09-shipping/README.md) |
 | NV kho nguồn / kho đích | Xuất & nhận hàng chuyển kho | [10](../warehouse/10-inter-warehouse-transfer/README.md) |
 
 ### 2.3. Quyền theo ngữ cảnh (permission — không phải role)
@@ -74,9 +74,9 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 |-------|---------|
 | **Khách hàng (Customer / Guest)** | Chủ yếu là quán / chuỗi đồ uống mua sỉ (B2B), vẫn phục vụ khách lẻ. Duyệt catalog, thiết kế sản phẩm, đặt hàng, thanh toán, theo dõi đơn, chat với Sale; quản lý giỏ hàng, đơn hàng và hồ sơ của chính mình |
 | **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
-| **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận kiện, vận chuyển, cập nhật tracking, thu hộ COD, xử lý hoàn (RTO) — tích hợp qua API |
+| **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận kiện, vận chuyển, cập nhật tracking, thu hộ COD, xử lý hoàn (RTO) — tích hợp qua API; cung cấp xe tải / container cho giao nguyên chuyến |
 
-Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Carrier Integration, Design Engine + 3D Renderer, Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Carrier Integration, Load Planner, Design Engine + 3D Renderer, Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
 
 > ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) — phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể — chưa được đề bài xác định, xem [open-questions](../open-questions/README.md).
 
@@ -202,8 +202,8 @@ flowchart LR
 | Luồng | Chuỗi module | Chứng từ xuyên suốt | Sơ đồ chi tiết |
 |-------|--------------|---------------------|----------------|
 | **Procurement** | Hoạch định nhu cầu → PO → Receipt (WH/Input) → QC (WH/Quality Control, nếu SKU yêu cầu) → Putaway (WH/Stock); Invoice song song | PO number liên kết Receipt & Invoice; Receipt liên kết nhiệm vụ chuyển QC, kết quả QC & Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
-| **Fulfillment** | Order → (Production: lấy phôi → in → QC, với dòng tùy chỉnh) → Picking → Packing → Shipping | Order number liên kết Production Order, Pick List, Package, Shipment | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
-| **Transfer** | Transfer Order → (xuất kho nguồn) → (vận chuyển) → (nhận kho đích) → Putaway | Transfer Order number | [diagrams §3](../diagrams/README.md#3-luồng-transfer-giữa-các-kho) |
+| **Fulfillment** | Order → (Production: lấy phôi → in → QC, với dòng tùy chỉnh) → Picking → Packing → Shipping (gửi kiện qua hãng, hoặc giao nguyên chuyến có lập kế hoạch xếp hàng 3D) | Order number liên kết Production Order, Pick List, Package, Shipment, Load Plan (nếu giao nguyên chuyến) | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
+| **Transfer** | Transfer Order → (xuất kho nguồn, có lập kế hoạch xếp hàng 3D nếu đi xe tải / container) → (vận chuyển) → (nhận kho đích) → Putaway | Transfer Order number; Load Plan (nếu có) | [diagrams §3](../diagrams/README.md#3-luồng-transfer-giữa-các-kho) |
 | **Storefront checkout** | Design/Catalog → Cart → Order → Payment | Cart ID → Order number → Payment transaction | — |
 
 ---

@@ -59,6 +59,9 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
 4. **Chọn kho xuất (fulfillment sourcing)** — theo tồn khả dụng, khoảng cách đến khách, tải kho, chính sách vùng. Có thể tách đơn giao từ nhiều kho (split fulfillment). Dòng tùy chỉnh chỉ được giao cho kho có **khu xưởng in (`PRODUCTION`) và trạm in `Active` đúng kỹ thuật in** của sản phẩm.
    > ⚠️ Giả định: xưởng in đặt trong kho, nên kho không có xưởng không xuất được dòng tùy chỉnh. Xem [open-questions](../../open-questions/README.md).
+
+   Với đơn sỉ khối lượng lớn, Order Coordinator có thể chỉ định **giao nguyên chuyến** (thuê nguyên xe tải / container, có lập kế hoạch xếp hàng 3D — xem [09 §4.2](../../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)) thay cho gửi kiện qua hãng.
+   > ⚠️ Giả định: khách không tự chọn giao nguyên chuyến trên storefront; phí vận chuyển và thu COD cho đơn giao nguyên chuyến chưa xác định. Xem [open-questions](../../open-questions/README.md).
 5. **Đơn in ấn / hỗn hợp:** mỗi dòng tùy chỉnh sinh một **lệnh sản xuất** tại kho xuất ([19 Production](../../warehouse/19-production/README.md)); đơn → `In Production`. Dòng hàng thường của đơn hỗn hợp được release pick **song song** và chờ tại khu `PACKING`.
 6. **Release** — khi **mọi lệnh sản xuất** của đơn đã `Completed` (hoặc đơn không có dòng tùy chỉnh) → đơn `Ready to Fulfill`:
    - Còn dòng hàng thường chưa pick → release **lệnh xuất** → [Picking](../../warehouse/07-picking/README.md); đơn → `Picking`.

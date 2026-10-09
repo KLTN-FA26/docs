@@ -43,6 +43,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | **Đơn vị quy đổi (UoM conversion)** | Inventory Item | Danh sách đơn vị đóng gói kèm **hệ số quy về đơn vị cơ sở** (ví dụ *thùng* = 1.000 cái), kích thước & khối lượng của từng đơn vị; đánh dấu **đơn vị mua mặc định** dùng trên PO | Không (mặc định chỉ có đơn vị cơ sở) |
 | **Đơn vị bán (sales UoM)** | Variant | Các đơn vị khách được đặt (chọn từ danh sách đơn vị quy đổi của Inventory Item, ví dụ chỉ bán theo *thùng*), giá bán theo từng đơn vị bán | Có (mặc định: đơn vị cơ sở) |
 | **Thông tin mua hàng** | Inventory Item | Nhà cung cấp mặc định, giá mua tham chiếu, lead time, MOQ | Không (khuyến nghị) |
+| **Cho phép xoay khi xếp xe (rotatable)** | Inventory Item | Bật → kiện chứa SKU được xoay theo 6 hướng khi lập kế hoạch xếp hàng lên xe / container; tắt → giữ nguyên hướng đặt. Là giá trị mặc định cho cờ xoay của kiện ở [08](../08-packing/README.md), dùng cho Load Planning ở [09](../09-shipping/README.md) | Không (mặc định: cho phép xoay) ⚠️ Giả định — xem [open-questions](../../open-questions/README.md) |
 | **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` / `COLD` / `HAZMAT` / `FRAGILE` / `OVERSIZE` — quyết định loại bin được phép cất (xem [06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |
 | **Kiểm soát tồn kho** | Inventory Item | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
 | **Yêu cầu QC khi nhận (QC required)** | Inventory Item | Bật → hàng nhận đi luồng 3 bước qua khu kiểm tra chất lượng trước khi putaway; tắt → luồng 2 bước (xem [03](../03-receipt/README.md)) | Không (mặc định: không yêu cầu) |
@@ -110,7 +111,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 
 - **BR-01:** SKU là **bất biến (immutable)** sau khi đã phát sinh giao dịch tồn kho. Chỉ được đổi thuộc tính mô tả, không đổi mã hay ý nghĩa biến thể.
 - **BR-02:** Không thể xoá sản phẩm/SKU đã có: giao dịch tồn, PO, hoặc đơn hàng tham chiếu. Chỉ được `Inactive` / `Discontinued`.
-- **BR-03:** Thông số logistics (khối lượng, kích thước) là **bắt buộc trước khi** SKU được đưa vào Receipt/Putaway — vì module 06 Slotting và 08 Packing phụ thuộc dữ liệu này.
+- **BR-03:** Thông số logistics (khối lượng, kích thước) là **bắt buộc trước khi** SKU được đưa vào Receipt/Putaway — vì module 06 Slotting, 08 Packing và Load Planning ở 09 Shipping phụ thuộc dữ liệu này.
 - **BR-04:** Chỉ sản phẩm `Published` mới hiển thị trên catalog; chỉ sản phẩm `Active`/`Published` mới được đưa vào PO.
 - **BR-05:** Với sản phẩm in ấn, **bắt buộc** có ít nhất một print area và một template preview (2D hoặc 3D) trước khi `Published`.
 - **BR-06:** Giá bán TMĐT (thuộc Variant) và giá mua tham chiếu (thuộc Inventory Item) là hai trường độc lập; module này chỉ lưu, không tính margin.
@@ -141,7 +142,8 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | [02 · Purchase Order](../02-purchase-order/README.md) | PO chỉ chọn được SKU `Active`; kế thừa NCC mặc định, giá mua tham chiếu, MOQ, lead time, đơn vị mua mặc định từ đây |
 | [03 · Receipt](../03-receipt/README.md) | Nhận hàng theo SKU; cấu hình lô/hạn dùng/serial quyết định thông tin phải ghi nhận khi nhận; cờ Yêu cầu QC quyết định luồng nhận 2 bước hay 3 bước; đơn vị quy đổi để kiểm đếm theo thùng |
 | [05 · Putaway](../05-putaway/README.md) & [06 · Slotting](../06-warehouse-map-slotting/README.md) | Dùng thông số kích thước/khối lượng SKU để gợi ý vị trí phù hợp |
-| [07 · Picking](../07-picking/README.md) / [08 · Packing](../08-packing/README.md) | Đơn vị quy đổi (thùng) & kích thước SKU ảnh hưởng hiển thị số lượng lấy, gợi ý thùng và cách đóng gói |
+| [07 · Picking](../07-picking/README.md) / [08 · Packing](../08-packing/README.md) | Đơn vị quy đổi (thùng) & kích thước SKU ảnh hưởng hiển thị số lượng lấy, gợi ý thùng và cách đóng gói; cờ cho phép xoay làm giá trị mặc định cho kiện |
+| [09 · Shipping](../09-shipping/README.md) | Load Planning dùng cờ cho phép xoay (qua kiện) khi xếp hàng lên xe / container |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Lấy template 2D, model 3D, định nghĩa print area & ràng buộc thiết kế từ đây |
 | [19 · Production](../19-production/README.md) | Kỹ thuật in quyết định trạm in nhận lệnh sản xuất; Inventory Item của SKU tùy chỉnh là phôi được cấp cho xưởng |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, đơn vị bán & giá bán, trạng thái `Published`; ATP tính trên Inventory Item của SKU |

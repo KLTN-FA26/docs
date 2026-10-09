@@ -121,6 +121,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **POD** (Proof of Delivery) — **Bằng chứng giao hàng** | Chữ ký/ảnh/thời gian xác nhận đã giao. |
 | **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện không giao được, quay về kho gửi. |
 | **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái & lịch sử tracking chung. |
+| **FTL** (Full Truckload) / **Giao nguyên chuyến** | Hình thức giao thuê nguyên xe tải / container (cho đơn sỉ khối lượng lớn được chỉ định, hoặc lệnh chuyển kho), khác với gửi từng kiện qua hãng vận chuyển. |
+| **Load Planning / Lập kế hoạch xếp hàng 3D** | Tính từ danh sách kiện: cần loại xe nào, bao nhiêu chiếc, mỗi kiện đặt ở vị trí & hướng nào trong thùng xe; hiển thị 3D để kiểm tra trước khi thuê xe. |
+| **Load Plan / Kế hoạch chuyến xe** | Kết quả của Load Planning: số xe từng loại, vị trí từng kiện, % lấp đầy, kiện không xếp được; có vòng đời `Draft` → `Planned` → `Confirmed` → `Dispatched`. |
+| **Vehicle Type / Loại xe** | Danh mục xe tải / container cấu hình được: kích thước lòng thùng, tải trọng tối đa, số chiếc sẵn có, giá thuê. Cài sẵn container 20DC, 40DC, 40HC, 45HC. |
+| **Fill rate / Tỷ lệ lấp đầy** | Phần trăm thể tích lòng thùng và phần trăm tải trọng của một xe đã được kiện sử dụng. |
+| **Rotatable / Cho phép xoay** | Cờ của SKU (mặc định cho kiện, Packer được ghi đè) cho biết kiện được xoay theo 6 hướng khi xếp lên xe hay phải giữ nguyên hướng đặt. |
 | **Inter-warehouse Transfer / Chuyển kho** | Di chuyển tồn giữa hai kho khác địa điểm. |
 | **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. |
 | **Transfer Order (TO) / Lệnh chuyển kho** | Chứng từ yêu cầu chuyển hàng giữa/trong kho. |
@@ -218,9 +224,11 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
-| `Draft` | PO, Receipt, Invoice, TO, Design | Bản nháp, sửa tự do, chưa có hiệu lực |
+| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan | Bản nháp, sửa tự do, chưa có hiệu lực |
 | `Pending Approval` | PO, TO | Chờ phê duyệt |
-| `Confirmed` | PO, Order | Đã chốt nội bộ, khoá sửa nội dung chính |
+| `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
+| `Planned` | Load Plan | Đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay |
+| `Dispatched` | Load Plan | Mọi xe của kế hoạch đã xếp hàng, ký manifest & rời kho |
 | `Partially Received` | PO, TO | Đã nhận một phần |
 | `Received` | PO, TO | Đã nhận đủ |
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
@@ -262,6 +270,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | POD | Proof of Delivery | Bằng chứng giao hàng |
 | AWB | Air Waybill | Vận đơn |
 | COD | Cash On Delivery | Thanh toán khi nhận hàng |
+| FTL | Full Truckload | Giao nguyên chuyến (thuê nguyên xe / container) |
+| DC / HC | Dry Container / High Cube | Container khô tiêu chuẩn / container cao (ví dụ 20DC, 40DC, 40HC, 45HC) |
 | AP | Accounts Payable | Công nợ phải trả |
 | FIFO / FEFO | First-In / First-Expired-First-Out | Nhập trước / hết hạn trước, xuất trước |
 | PLP / PDP | Product Listing / Detail Page | Trang danh sách / chi tiết sản phẩm |

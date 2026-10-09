@@ -36,7 +36,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Package(s)** — một hoặc nhiều kiện: nội dung, kích thước, khối lượng thực & quy đổi | 09 Shipping |
+| **Package(s)** — một hoặc nhiều kiện: nội dung, kích thước, khối lượng thực & quy đổi, **cờ cho phép xoay** | 09 Shipping (kể cả Load Planning khi giao nguyên chuyến) |
 | **Packing slip** (phiếu đóng gói) & hoá đơn bán hàng kèm (nếu chính sách yêu cầu) | Khách hàng, 17 Order Management |
 | **Yêu cầu tạo nhãn vận đơn** (shipping label request) | 09 Shipping / Carrier |
 | **Cập nhật trạng thái đơn** → `Packed` | 17 Order Management |
@@ -52,8 +52,9 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
    - Với SKU serial: quét serial để gắn vào đơn.
 3. **Gợi ý đóng gói (cartonization)** — hệ thống đề xuất loại thùng/túi & cách chia kiện dựa trên kích thước, khối lượng, quy tắc dễ vỡ, và giới hạn của hãng vận chuyển.
 4. **Đóng gói vật lý** — cho hàng vào thùng, chèn lót, thêm phiếu đóng gói / hoá đơn / quà tặng theo yêu cầu.
-5. **Cân & đo** — nhập khối lượng thực và kích thước kiện (hoặc lấy từ cân tích hợp). Hệ thống tính **khối lượng quy đổi (dimensional weight)**.
-6. **Chọn dịch vụ vận chuyển & tạo nhãn** — theo phương thức khách chọn / rule chọn hãng rẻ-nhanh; gọi [Shipping](../09-shipping/README.md) để lấy **tracking number + shipping label**. In & dán nhãn lên kiện.
+5. **Cân & đo** — nhập khối lượng thực và kích thước kiện (hoặc lấy từ cân tích hợp). Hệ thống tính **khối lượng quy đổi (dimensional weight)**. Kiện nhận **cờ cho phép xoay** mặc định từ SKU bên trong; Packer được ghi đè (ví dụ kiện phải giữ chiều đứng).
+   > ⚠️ Giả định: kiện chứa nhiều SKU có cờ khác nhau lấy giá trị chặt nhất — chỉ cần một SKU không cho xoay thì kiện không cho xoay. Xem [open-questions](../../open-questions/README.md).
+6. **Chọn dịch vụ vận chuyển & tạo nhãn** — theo phương thức khách chọn / rule chọn hãng rẻ-nhanh; gọi [Shipping](../09-shipping/README.md) để lấy **tracking number + shipping label**. In & dán nhãn lên kiện. Đơn **giao nguyên chuyến** không tạo nhãn hãng: in nhãn kiện nội bộ (mã kiện) và chuyển sang lập kế hoạch chuyến xe ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)).
 7. **Niêm phong & xác nhận** — dán nhãn, niêm phong; xác nhận `Packed`. Mỗi kiện có mã kiện (package ID) và tracking riêng.
 8. **Chuyển sang khu chờ giao (Area `DISPATCH`)** — bàn giao cho bước [Shipping](../09-shipping/README.md).
 9. **Xử lý đơn nhiều kiện (multi-package)** — một đơn có thể tách nhiều kiện; mỗi kiện có nội dung & tracking riêng, cùng thuộc một shipment.
@@ -107,8 +108,8 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 |--------|---------|
 | [07 · Picking](../07-picking/README.md) | Nhận hàng đã pick tại staging; báo ngược khi kiểm đơn phát hiện lệch |
 | [19 · Production](../19-production/README.md) | Nhận thành phẩm in đạt QC tại khu `PACKING`; báo ngược khi thành phẩm sai thiết kế (lệnh `Rework`) |
-| [09 · Shipping](../09-shipping/README.md) | Gửi yêu cầu tạo nhãn vận đơn; bàn giao kiện đã đóng cho bước giao vận |
+| [09 · Shipping](../09-shipping/README.md) | Gửi yêu cầu tạo nhãn vận đơn; bàn giao kiện đã đóng cho bước giao vận; cung cấp kích thước, khối lượng & cờ cho phép xoay của kiện cho Load Planning |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Cập nhật trạng thái `Packed`; nhận yêu cầu sửa địa chỉ / xử lý huỷ |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot để đối chiếu thành phẩm in ấn |
-| [01 · Product Creation](../01-product-creation/README.md) | Kích thước/khối lượng/quy cách & cờ dễ vỡ của SKU cho cartonization |
+| [01 · Product Creation](../01-product-creation/README.md) | Kích thước/khối lượng/quy cách & cờ dễ vỡ của SKU cho cartonization; cờ cho phép xoay của SKU làm giá trị mặc định cho kiện |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 2 của luồng Fulfillment |

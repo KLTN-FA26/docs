@@ -91,6 +91,13 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | E4 | Cập nhật tracking từ hãng qua **webhook** hay **polling**? Tần suất? | Ưu tiên webhook + verify | 🟢 | 09 |
 | E5 | Xử lý **bồi thường** khi hãng làm mất/hỏng hàng: quy trình claim, ai chịu chi phí với khách trong lúc chờ? | Mở tra soát; bồi thường/giao lại theo chính sách | 🟡 | 09, 17 |
 | E6 | **Đối soát COD & cước** với hãng: chu kỳ, công cụ, xử lý chênh lệch? | Có bước reconciliation; chu kỳ chưa chốt | 🟡 | 09, 15 |
+| E7 | **Giao nguyên chuyến cho đơn khách**: ai chỉ định đơn nào giao nguyên chuyến (khách chọn ở checkout hay nội bộ chỉ định)? Phí vận chuyển thu khách và cách thu COD cho đơn giao nguyên chuyến? | Order Coordinator chỉ định khi release đơn sỉ khối lượng lớn; khách không chọn trên storefront; phí & COD chưa xác định | 🔴 | 09, 14, 15, 17 |
+| E8 | **Đặt xe & bàn giao** cho giao nguyên chuyến: đặt xe trong hay ngoài hệ thống? Danh mục loại xe & số chiếc sẵn có khai báo theo từng kho hay toàn hệ thống? Theo dõi hành trình bằng gì? | Đặt xe ngoài hệ thống, hệ thống chỉ ghi thông tin xe (biển số, tài xế) cho từng xe của kế hoạch; Quản lý kho khai báo loại xe; trạng thái giao cập nhật thủ công | 🟡 | 09, 10 |
+| E9 | Load Planning có cần **chọn xe theo chi phí thuê** (rẻ nhất) không? | Chưa hỗ trợ: chọn theo số xe & độ lấp đầy; giá thuê chỉ lưu tham khảo. Muốn chọn xe rẻ nhất phải bổ sung bảng giá cho từng loại xe | 🟡 | 09 |
+| E10 | Load Planning có cần tính **phân bố trọng tâm, hàng dễ vỡ, giới hạn chồng tầng** không? | Chưa hỗ trợ | 🟡 | 09, 01, 08 |
+| E11 | Chuyến nhiều điểm giao: có cần xếp theo **thứ tự điểm giao** (hàng giao trước đặt phía cửa xe) không? | Chưa hỗ trợ | 🟡 | 09 |
+| E12 | Có cần cho phép **đặt kiện nghiêng** (không vuông góc cạnh thùng) không? | Không: chỉ đặt vuông góc với các cạnh thùng | 🟢 | 09 |
+| E13 | **Cờ cho phép xoay**: mặc định của SKU là gì? Kiện chứa nhiều SKU có cờ khác nhau lấy giá trị nào? | Mặc định cho phép xoay; kiện lấy giá trị chặt nhất (một SKU không cho xoay → kiện không cho xoay); Packer được ghi đè | 🟢 | 01, 08, 09 |
 
 ---
 
