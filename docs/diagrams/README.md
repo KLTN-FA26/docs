@@ -5,7 +5,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 Mục lục:
 
 1. [Luồng Procurement: PO → Receipt → Invoice → Putaway](#1-luồng-procurement)
-2. [Luồng Fulfillment: Order → (Production) → Picking → Packing → Shipping](#2-luồng-fulfillment) — kèm vòng đời lệnh sản xuất (§2.3)
+2. [Luồng Fulfillment: Order → (Production) → Picking → Packing → Shipping](#2-luồng-fulfillment) — kèm vòng đời lệnh sản xuất (§2.3) và kế hoạch chuyến xe (§2.4)
 3. [Luồng Transfer giữa các kho](#3-luồng-transfer-giữa-các-kho)
 4. [Phụ lục: Luồng Storefront checkout & luồng Transfer nội bộ kho](#4-phụ-lục)
 
@@ -166,7 +166,12 @@ flowchart TD
     PACK_FAIL -- Có --> PACK_BOX[Chọn thùng, đóng gói,\ncân & đo]
     INVESTIGATE --> REWORK
 
-    PACK_BOX --> LABEL[Gọi Carrier API\nTạo shipping label + tracking]
+    PACK_BOX --> MODE{Hình thức giao?}
+    MODE -- Gửi kiện qua hãng --> LABEL[Gọi Carrier API\nTạo shipping label + tracking]
+    MODE -- Giao nguyên chuyến --> FTL_PACKED[Order: Packed\nNhãn kiện nội bộ\nShipment: Ready to Dispatch]
+    FTL_PACKED --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed]
+    LOADPLAN --> LOADING[Đặt xe, xếp kiện theo sơ đồ\nmanifest theo từng xe\nShipment: Handed Over]
+    LOADING --> SHIPPED
     LABEL --> LABEL_OK{Tạo nhãn OK?}
     LABEL_OK -- Không (địa chỉ sai / lỗi API) --> HOLD[Order: On Hold\nCSKH liên hệ khách]
     HOLD --> LABEL
@@ -231,11 +236,17 @@ sequenceDiagram
     end
     PICKER->>PACKER: Bàn giao hàng đã pick (Staged)
     PACKER->>PACKER: Kiểm đơn + (dòng tùy chỉnh) đối chiếu thành phẩm với design snapshot
-    PACKER->>SHIP: Yêu cầu tạo nhãn vận đơn
-    SHIP->>CARRIER: Tạo label (API)
-    CARRIER-->>SHIP: Tracking number + label
-    PACKER-->>OM: Order = Packed
-    PACKER->>CARRIER: Bàn giao kiện + manifest
+    alt Gửi kiện qua hãng
+        PACKER->>SHIP: Yêu cầu tạo nhãn vận đơn
+        SHIP->>CARRIER: Tạo label (API)
+        CARRIER-->>SHIP: Tracking number + label
+        PACKER-->>OM: Order = Packed
+        PACKER->>CARRIER: Bàn giao kiện + manifest
+    else Giao nguyên chuyến
+        PACKER-->>OM: Order = Packed (nhãn kiện nội bộ)
+        SHIP->>SHIP: Load Planning 3D → kế hoạch chuyến xe Confirmed
+        SHIP->>CARRIER: Đặt xe, xếp kiện theo sơ đồ + manifest theo từng xe
+    end
     CARRIER-->>OM: Shipped → In Transit → Out for Delivery
     CARRIER-->>CUST: Giao hàng
     alt Giao thành công
@@ -286,6 +297,26 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
+### 2.4. Vòng đời kế hoạch chuyến xe (Load Plan — giao nguyên chuyến)
+
+Chi tiết: [09 · Shipping §4.2](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Dùng cho đơn khách giao nguyên chuyến và lệnh chuyển kho đi xe tải / container.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Planned: Tính phương án xếp
+    Planned --> Planned: Chỉnh tay + tính lại xe
+    Planned --> Draft: Đổi kiện / loại xe / chế độ
+    Planned --> Confirmed: Chốt kế hoạch
+    Confirmed --> Planned: Mở lại (chưa xếp lên xe)
+    Confirmed --> Dispatched: Mọi xe bàn giao & rời kho
+    Draft --> Cancelled
+    Planned --> Cancelled
+    Confirmed --> Cancelled
+    Dispatched --> [*]
+    Cancelled --> [*]
+```
+
 ---
 
 ## 3. Luồng Transfer giữa các kho
@@ -304,7 +335,10 @@ flowchart TD
 
     TO_APPROVED --> SRC_PICK["Kho nguồn: phân bổ tồn + pick\n(FEFO theo lô)"]
     SRC_PICK --> SRC_PACK[Đóng kiện, ghi khối lượng]
-    SRC_PACK --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
+    SRC_PACK --> TRUCK{Đi xe tải / container?}
+    TRUCK -- Có --> SRC_LOADPLAN[Load Planning 3D\nchốt kế hoạch chuyến xe,\nxếp kiện theo sơ đồ]
+    SRC_LOADPLAN --> DISPATCH
+    TRUCK -- Không --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
 
     DISPATCH --> TRANSPORT["Vận chuyển giữa 2 kho\n(có/không tracking)"]
     TRANSPORT --> DST_RECV[Kho đích: tạo phiếu nhận\ntham chiếu Transfer Order]
@@ -340,6 +374,9 @@ sequenceDiagram
     TO->>TO: Duyệt (nếu vượt ngưỡng) → Approved
     TO->>SRC: Yêu cầu pick (phân bổ tồn, FEFO)
     SRC->>INV_SRC: Lấy hàng khỏi vị trí
+    opt Đi xe tải / container
+        SRC->>SRC: Load Planning 3D → kế hoạch chuyến xe, xếp kiện theo sơ đồ
+    end
     SRC->>TRANS: Xuất kho nguồn (Dispatch)
     INV_SRC->>INV_SRC: Giảm tồn → trạng thái In-Transit (gắn TO)
     TRANS->>DST: Giao hàng tới kho đích

@@ -50,7 +50,7 @@ Di chuyển tồn kho **từ kho này sang kho khác** (khác địa điểm v�
 2. **Kiểm tra khả dụng tại kho nguồn** — số lượng yêu cầu ≤ tồn `Available` tại kho nguồn (không tính hàng đã allocate cho đơn khách).
 3. **Gửi duyệt (Submit)** — nếu vượt ngưỡng → `Pending Approval`; duyệt → `Approved`.
 4. **Phân bổ & pick tại kho nguồn** — hệ thống phân bổ (allocate) tồn theo vị trí/lô (FEFO); sinh pick task nội bộ. NV kho nguồn lấy hàng.
-5. **Đóng gói & xuất kho nguồn (Ship from source)** — đóng kiện, ghi khối lượng; xác nhận **Dispatch**. Tồn kho nguồn **giảm**, chuyển sang trạng thái **`In-Transit`** gắn với TO.
+5. **Đóng gói & xuất kho nguồn (Ship from source)** — đóng kiện, ghi khối lượng & kích thước. Nếu đi **xe tải / container** (xe thuê hoặc xe nội bộ): lập **kế hoạch chuyến xe** bằng Load Planning 3D và xếp kiện lên xe theo sơ đồ ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)). Xác nhận **Dispatch**. Tồn kho nguồn **giảm**, chuyển sang trạng thái **`In-Transit`** gắn với TO.
 6. **Vận chuyển** — theo dõi hành trình (nếu qua hãng vận chuyển: có tracking; nếu xe nội bộ: cập nhật thủ công).
 7. **Nhận tại kho đích (Receive at destination)** — NV kho đích tạo phiếu nhận tham chiếu **TO** (không phải PO): kiểm đếm số lượng thực nhận, kiểm tra tình trạng.
 8. **Đối chiếu chênh lệch** — so số nhận với số xuất:
@@ -132,6 +132,7 @@ stateDiagram-v2
 | [05 · Putaway](../05-putaway/README.md) | Hàng nhận tại kho đích sinh putaway task |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Gợi ý vị trí đích tại kho nhận; đề xuất chuyển bớt khi kho nguồn quá tải |
 | [07 · Picking](../07-picking/README.md) | Pick tại kho nguồn dùng cơ chế picking nội bộ; không được đụng hàng đã allocate cho đơn khách |
+| [09 · Shipping](../09-shipping/README.md) | TO đi xe tải / container dùng Load Planning (kế hoạch chuyến xe) trước khi xuất kho nguồn |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Phân biệt: intra = trong một kho, inter = giữa các kho |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) / [14 · Order](../../ecommerce/14-cart-and-order/README.md) | Ảnh hưởng tồn khả dụng theo từng kho; hỗ trợ chiến lược bán theo khu vực |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Luồng Transfer |
