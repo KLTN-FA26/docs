@@ -2,7 +2,7 @@
 
 ## 1. Mục đích (Purpose)
 
-Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản phẩm tùy chỉnh (áo, cốc, túi, hộp, name card…) bằng trình thiết kế 2D, và **xem trước kết quả trên mô hình 3D theo thời gian thực (Live 3D Preview)** trước khi thêm vào giỏ và đặt hàng.
+Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản phẩm tùy chỉnh (ly nhựa, ly giấy, túi đựng ly, túi giấy…) — thường là logo và nhận diện thương hiệu của quán đồ uống — bằng trình thiết kế 2D, và **xem trước kết quả trên mô hình 3D theo thời gian thực (Live 3D Preview)** trước khi thêm vào giỏ và đặt hàng.
 
 Đầu ra là một **"artifact thiết kế" (design artifact / design snapshot)** — bản mô tả đầy đủ và bất biến của thiết kế khách chốt — đi kèm đơn hàng để **xưởng in / sản xuất** thực hiện chính xác.
 
@@ -28,7 +28,7 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 | **Template & khung sản phẩm** | Model 3D, template 2D, danh sách **print area** (vị trí, kích thước, hình dạng), vùng an toàn (safe area), bleed | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
 | **Ràng buộc kỹ thuật** | DPI tối thiểu, hệ màu (RGB/CMYK), định dạng & dung lượng file cho phép, số màu in tối đa (nếu in lụa), font được phép nhúng | [01 Product Creation](../../warehouse/01-product-creation/README.md) |
 | **Nội dung khách đưa vào** | Ảnh tải lên, chữ (text) + phông + màu + hiệu ứng, hình khối, clipart có sẵn, layout | Khách hàng |
-| **Lựa chọn biến thể** | Màu sản phẩm, kích cỡ, chất liệu (ảnh hưởng preview & vùng in) | Khách hàng / [13 Catalog](../13-catalog/README.md) |
+| **Lựa chọn biến thể** | Dung tích, chất liệu, màu ly (ảnh hưởng preview & vùng in) | Khách hàng / [13 Catalog](../13-catalog/README.md) |
 
 ### Output
 
@@ -44,7 +44,7 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-1. **Chọn sản phẩm để thiết kế** — từ [Catalog](../13-catalog/README.md), khách chọn sản phẩm tùy chỉnh & biến thể (màu, size). Hệ thống nạp template 2D + model 3D + print area + ràng buộc.
+1. **Chọn sản phẩm để thiết kế** — từ [Catalog](../13-catalog/README.md), khách chọn sản phẩm tùy chỉnh & biến thể (dung tích, chất liệu). Hệ thống nạp template 2D + model 3D + print area + ràng buộc.
 2. **Mở trình thiết kế 2D** — khung làm việc hiển thị print area, vùng an toàn, đường bleed.
 3. **Thêm nội dung:**
    - Tải ảnh: hệ thống kiểm tra định dạng, dung lượng, **DPI theo kích thước đặt** → cảnh báo nếu ảnh mờ.
@@ -90,7 +90,7 @@ Cho phép khách hàng **tự thiết kế nội dung in ấn** trên sản ph�
 - **BR-01:** Không cho `Confirmed` khi preflight còn lỗi `Fail`.
 - **BR-02:** Nội dung thiết kế **không được vượt ra ngoài print area** đã khai báo cho biến thể đang chọn.
 - **BR-03:** Design snapshot là **bất biến** sau khi đơn `Confirmed`; mọi tài nguyên (ảnh upload, font) được lưu kèm phiên bản, không phụ thuộc file gốc của khách sau này.
-- **BR-04:** Đổi biến thể sản phẩm (màu/size/chất liệu) có thể làm print area thay đổi → hệ thống phải kiểm tra lại layout và cảnh báo phần tử không hợp lệ.
+- **BR-04:** Đổi biến thể sản phẩm (dung tích/chất liệu/màu) có thể làm print area thay đổi → hệ thống phải kiểm tra lại layout và cảnh báo phần tử không hợp lệ.
 - **BR-05:** Giá dòng hàng có thể phụ thuộc thông số in (diện tích phủ mực, số màu, kỹ thuật in) — công thức tính giá lấy từ cấu hình sản phẩm.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
 - **BR-06:** Ảnh/nội dung khách tải lên phải qua kiểm tra cơ bản (định dạng, dung lượng, có thể cả rà nội dung vi phạm bản quyền/không phù hợp theo chính sách).
 - **BR-07:** 3D preview là hình ảnh **minh hoạ** — có disclaimer màu sắc hiển thị có thể sai lệch so với thành phẩm in thật.

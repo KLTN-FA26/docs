@@ -8,11 +8,15 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Áo thun – Đỏ – Size M") là một SKU riêng. |
-| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Áo thun" có nhiều màu/size). |
-| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (màu × size × chất liệu…), tương ứng một SKU. |
+| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Ly PP 500 ml – miệng 95 – trong") là một SKU riêng. |
+| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Ly nhựa PP" có nhiều dung tích). |
+| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (dung tích × chất liệu × đường kính miệng…), tương ứng một SKU. |
 | **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, lô/hạn dùng/serial, ngưỡng tồn, thông tin mua hàng. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
-| **UoM** (Unit of Measure) | Đơn vị tính (cái, hộp, kg, mét…). |
+| **UoM** (Unit of Measure) | Đơn vị tính (cái, cây, thùng…). |
+| **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
+| **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
+| **Purchase UoM / Đơn vị mua** | Đơn vị quy đổi dùng mặc định khi đặt hàng NCC trên PO (thường là *thùng*). |
+| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt trên storefront, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi; giá bán niêm yết theo đơn vị bán. |
 | **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
@@ -128,8 +132,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **Blank / Phôi** | Hàng chưa in của sản phẩm tùy chỉnh (áo trơn, cốc trắng…); là Inventory Item của SKU tùy chỉnh, được cấp cho xưởng theo lệnh sản xuất. |
-| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (DTG, in lụa, UV, sublimation…), khai báo ở [01](../warehouse/01-product-creation/README.md); quyết định trạm in được nhận lệnh. |
+| **Blank / Phôi** | Hàng chưa in của sản phẩm tùy chỉnh (ly trơn, túi giấy trơn…); là Inventory Item của SKU tùy chỉnh, được cấp cho xưởng theo lệnh sản xuất. |
+| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); quyết định trạm in được nhận lệnh. |
 | **Print Station / Trạm in** | Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái (`Active` / `Maintenance` / `Inactive`). |
 | **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
 | **Production Order (MO) / Lệnh sản xuất** | Chứng từ sản xuất sinh từ **một dòng đơn tùy chỉnh**: SKU phôi, số lượng, design snapshot, print-ready file, kỹ thuật in, trạm in, hạn cần xong. Mã theo prefix kho, ví dụ `HN-MO-000123`. Xem [19](../warehouse/19-production/README.md). |

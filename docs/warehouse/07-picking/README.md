@@ -25,7 +25,7 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Lệnh xuất / đơn cần giao | Order number + dòng hàng (SKU, số lượng) + hạn giao | Có |
+| Lệnh xuất / đơn cần giao | Order number + dòng hàng (SKU, số lượng theo đơn vị cơ sở) + hạn giao; pick list hiển thị quy đổi thành **số thùng nguyên + cái lẻ** theo đơn vị quy đổi của [01](../01-product-creation/README.md) | Có |
 | Lệnh lấy phôi (với dòng đơn tùy chỉnh) | Lệnh sản xuất + SKU phôi + số lượng; **đích là khu `PRODUCTION`** thay vì khu `PACKING` (xem [19](../19-production/README.md)) | Có (nếu áp dụng) |
 | Chiến lược picking | Single-order / batch / zone / wave (cấu hình) | Có |
 | Phân bổ tồn (allocation) | Hệ thống chọn vị trí & lô nguồn theo FEFO/FIFO & khoảng cách | Có |

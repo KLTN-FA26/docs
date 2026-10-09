@@ -26,7 +26,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Dòng giỏ (cart line) | SKU, số lượng, (design snapshot nếu sản phẩm tùy chỉnh) | Có |
+| Dòng giỏ (cart line) | SKU, **đơn vị bán** (ví dụ *thùng*), số lượng theo đơn vị bán, (design snapshot nếu sản phẩm tùy chỉnh) | Có |
 | Mã giảm giá / voucher | | Không |
 | Địa chỉ giao & người nhận | | Có (khi checkout) |
 | Phương thức vận chuyển | Chọn từ danh sách khả dụng theo địa chỉ & giỏ | Có (khi checkout) |
@@ -51,7 +51,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 ### 4.1. Giỏ hàng (Cart)
 
 1. **Thêm vào giỏ** — từ [Catalog](../13-catalog/README.md) (sản phẩm thường) hoặc sau khi chốt thiết kế ở [12](../12-product-design/README.md) (sản phẩm tùy chỉnh — dòng giỏ mang design snapshot & giá theo thông số in).
-2. **Xem & chỉnh giỏ** — đổi số lượng, xoá dòng, xem tạm tính (subtotal). Hệ thống kiểm tồn khả dụng mỗi lần cập nhật.
+2. **Xem & chỉnh giỏ** — đổi số lượng / đơn vị bán, xoá dòng, xem tạm tính (subtotal). Hệ thống quy số lượng về đơn vị cơ sở (ví dụ 3 thùng × 1.000 = 3.000 cái) và kiểm tồn khả dụng mỗi lần cập nhật.
 3. **Áp mã giảm giá** — kiểm tra điều kiện (giá trị tối thiểu, sản phẩm áp dụng, hạn dùng, giới hạn lượt).
 4. **Ước tính phí vận chuyển & thuế** — theo địa chỉ tạm (nếu có) và trọng số/kích thước giỏ.
 5. **Giữ giỏ** — giỏ tồn tại theo thời hạn cấu hình; với khách đăng nhập thì đồng bộ nhiều thiết bị.
@@ -138,6 +138,7 @@ stateDiagram-v2
 - **BR-06:** Voucher: kiểm tra điều kiện & giới hạn lượt tại **thời điểm checkout**, không chỉ khi áp vào giỏ.
 - **BR-07:** Đơn `Confirmed` chỉ được sửa nội dung (SKU/số lượng/địa chỉ) qua [Order Management](../17-order-management/README.md) với quy tắc & phê duyệt; không sửa tự do.
 - **BR-08:** Một khách có thể có nhiều giỏ đang mở? → mặc định **một giỏ Active/khách**; guest cart gộp vào khi đăng nhập.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
+- **BR-09:** Số lượng dòng giỏ/đơn nhập theo **đơn vị bán** được phép của biến thể và phải là số nguyên. Reservation, allocation và lệnh sản xuất dùng số lượng đã quy về **đơn vị cơ sở**; đơn vị bán và hệ số được chốt vào dòng đơn cùng giá (BR-03).  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
 
 ### Edge case
 
@@ -158,7 +159,8 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [13 · Catalog](../13-catalog/README.md) | Nguồn sản phẩm, giá, tình trạng còn hàng để thêm vào giỏ |
+| [13 · Catalog](../13-catalog/README.md) | Nguồn sản phẩm, giá & đơn vị bán, tình trạng còn hàng để thêm vào giỏ |
+| [01 · Product Creation](../../warehouse/01-product-creation/README.md) | Đơn vị bán & hệ số quy đổi dùng để quy số lượng dòng đơn về đơn vị cơ sở |
 | [12 · Product Design](../12-product-design/README.md) | Dòng giỏ sản phẩm tùy chỉnh mang design snapshot; ảnh hưởng giá dòng |
 | [15 · Payment](../15-payment/README.md) | Order `Pending Payment` chuyển sang thanh toán; kết quả quyết định `Confirmed`/`Failed` |
 | [17 · Order Management](../17-order-management/README.md) | Theo dõi & thao tác đơn suốt vòng đời sau khi tạo |

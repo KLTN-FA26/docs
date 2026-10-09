@@ -35,9 +35,9 @@ Doanh nghiệp **không** thuê gia công in bên ngoài; toàn bộ sản xuấ
 
 | Dữ liệu | Mô tả | Nguồn |
 |---------|-------|-------|
-| **Dòng đơn tùy chỉnh** | Order number, dòng hàng, SKU phôi, số lượng, hạn giao dự kiến | [17 · Order Management](../../ecommerce/17-order-management/README.md) |
+| **Dòng đơn tùy chỉnh** | Order number, dòng hàng, SKU phôi, số lượng (đã quy về đơn vị cơ sở), hạn giao dự kiến | [17 · Order Management](../../ecommerce/17-order-management/README.md) |
 | **Design snapshot + print-ready file** | Bản thiết kế chốt (`Locked`) và file in đúng chuẩn (bleed, DPI, hệ màu) | [12 · Product Design](../../ecommerce/12-product-design/README.md) |
-| **Kỹ thuật in (print method)** | Kỹ thuật in của sản phẩm (DTG, in lụa, UV, sublimation…) — dùng để chọn trạm in phù hợp | [01 · Product Creation](../01-product-creation/README.md) |
+| **Kỹ thuật in (print method)** | Kỹ thuật in của sản phẩm (in lụa, in offset khô, in UV, flexo…) — dùng để chọn trạm in phù hợp | [01 · Product Creation](../01-product-creation/README.md) |
 | **Tồn phôi** | Phôi `Available` tại bin của kho xuất | Tồn kho theo vị trí ([06](../06-warehouse-map-slotting/README.md)) |
 | **Trạm in & công suất** | Danh sách trạm, kỹ thuật in, công suất/ngày, trạng thái | Warehouse Manager khai báo |
 

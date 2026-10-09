@@ -43,7 +43,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 | Kho & khu nhận hàng | Area loại `RECEIVING` của kho (WH/Input, xem [06](../06-warehouse-map-slotting/README.md)) | Có |
 | Khu kiểm tra chất lượng | Area loại `QUALITY_CONTROL` của kho (WH/Quality Control) | Có nếu phiếu có SKU bật cờ Yêu cầu QC |
 | Phiếu giao hàng NCC (delivery note / packing slip) | Số phiếu, ngày | Không (khuyến nghị) |
-| **Dòng nhận (receipt lines)** | SKU, số lượng thực nhận, đơn vị | Có |
+| **Dòng nhận (receipt lines)** | SKU, số lượng thực nhận theo đơn vị quy đổi (ví dụ số thùng nguyên) và/hoặc đơn vị cơ sở (cái lẻ); hệ thống quy về đơn vị cơ sở | Có |
 | Thông tin lô (batch/lot), hạn sử dụng, serial | Bắt buộc nếu SKU được cấu hình theo dõi (module 01) | Có/Không tuỳ SKU |
 | Cờ Yêu cầu QC khi nhận | Lấy từ SKU (module 01); quyết định dòng nhận đi luồng 3 bước hay 2 bước | Có (mặc định: không yêu cầu) |
 | Kết quả kiểm tra chất lượng | Số lượng `Accepted` / `Quarantine` / `Rejected` của từng phần hàng, lý do nếu không đạt; ghi tại khu QC | Có với dòng cần QC |
@@ -70,7 +70,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 
 1. **Tạo phiên nhận (Create receipt)** — NV kho chọn PO đang `Confirmed` / `Partially Received`. Hệ thống nạp danh sách dòng hàng còn *open* làm dòng nhận dự kiến.
 2. **Đối chiếu phiếu giao NCC** — so số kiện, số phiếu giao với thực tế trên xe.
-3. **Kiểm đếm & quét mã** — với mỗi SKU: quét barcode, nhập **số lượng thực nhận**. Hệ thống so với số lượng dự kiến.
+3. **Kiểm đếm & quét mã** — với mỗi SKU: quét barcode, nhập **số lượng thực nhận** (theo thùng nguyên và/hoặc cái lẻ). Hệ thống quy về đơn vị cơ sở rồi so với số lượng dự kiến của PO.
 4. **Ghi nhận lô / hạn dùng / serial** — nếu SKU yêu cầu. Một dòng nhận có thể tách nhiều lô.
 5. **Xử lý chênh lệch (discrepancy)**:
    - Nhận **thiếu**: ghi nhận số thực nhận; phần còn lại vẫn open trên PO.

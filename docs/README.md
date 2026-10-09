@@ -9,7 +9,14 @@
 
 ## 1. StockFlowCommerce là gì
 
-**StockFlowCommerce** là nền tảng hợp nhất (unified platform) giữa **Quản lý quy trình kho vận (Warehouse Management System – WMS)** và **Sàn thương mại điện tử (E-commerce Storefront)**, phục vụ các doanh nghiệp kinh doanh mặt hàng **có thể tùy chỉnh / in ấn theo yêu cầu** (customizable / print-on-demand products).
+**StockFlowCommerce** là nền tảng hợp nhất (unified platform) giữa **Quản lý quy trình kho vận (Warehouse Management System – WMS)** và **Sàn thương mại điện tử (E-commerce Storefront)**, phục vụ doanh nghiệp chuyên cung cấp **ly và bao bì dùng một lần cho ngành đồ uống**, bán dưới dạng hàng trơn hoặc **in logo theo yêu cầu** (customizable / print-on-demand products). Khách hàng chủ yếu là quán / chuỗi đồ uống (B2B).
+
+Dải mặt hàng gồm hai nhóm:
+
+| Nhóm hàng | Ví dụ |
+|-----------|-------|
+| **Ly** | Ly nhựa PP / PET (ly trà sữa, cà phê đá), ly giấy nóng / lạnh |
+| **Bao bì mang đi** | Túi đựng ly, khay giấy, túi giấy |
 
 Hệ thống gồm hai mảng lớn:
 

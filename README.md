@@ -1,6 +1,6 @@
 # StockFlowCommerce
 
-Nền tảng hợp nhất **Quản lý kho vận (WMS)** và **Sàn thương mại điện tử** cho doanh nghiệp kinh doanh sản phẩm tùy chỉnh / in ấn theo yêu cầu.
+Nền tảng hợp nhất **Quản lý kho vận (WMS)** và **Sàn thương mại điện tử** cho doanh nghiệp chuyên cung cấp **ly và bao bì dùng một lần cho ngành đồ uống** — bán hàng trơn hoặc in logo theo yêu cầu, khách hàng chủ yếu là quán / chuỗi đồ uống (B2B).
 
 ## Tài liệu sản phẩm
 

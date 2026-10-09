@@ -17,6 +17,8 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | A5 | Phạm vi **tích hợp kế toán**: hệ thống chỉ đối chiếu & đề nghị thanh toán, hay hạch toán sổ cái đầy đủ? | Chỉ AP matching + đề nghị thanh toán; sổ cái ở hệ thống ngoài | 🔴 | 04, 15 |
 | A6 | Yêu cầu **tuân thủ dữ liệu cá nhân** áp dụng khung nào (Nghị định 13/2023 VN, GDPR…)? Thời hạn lưu chứng từ? | Ẩn danh khi có yêu cầu xoá, giữ chứng từ theo nghĩa vụ luật định | 🟡 | 18, 16, 15 |
 | A7 | **Đơn vị đo lường & bản địa hoá**: hệ mét, định dạng địa chỉ VN nhiều cấp (tỉnh/huyện/xã), đa ngôn ngữ storefront? | Hệ mét, địa chỉ VN, tiếng Việt là chính | 🟢 | 08, 09, 13, 14 |
+| A8 | **Ngành hàng & khách hàng mục tiêu** của doanh nghiệp? | ✅ **Đã chốt 2026-10-09:** chuyên **ly và bao bì dùng một lần cho ngành đồ uống** gồm hai nhóm: **ly** (ly nhựa PP/PET, ly giấy) và **bao bì mang đi** (túi đựng ly, khay giấy, túi giấy); không kinh doanh phụ kiện (nắp, ống hút…); bán hàng trơn hoặc in logo theo yêu cầu tại xưởng nội bộ; khách chủ yếu là quán / chuỗi đồ uống (B2B). Không còn kinh doanh nguyên liệu đồ uống | 🔴 | 00, 01, 12, 13, 19 |
+| A9 | **Đơn vị bán & quy đổi**: khách được đặt theo đơn vị nào (chỉ thùng, hay cả cây / cái lẻ)? Cấu hình theo biến thể hay theo nhóm khách? Có cho đặt số lẻ thùng không? | Tồn ghi theo đơn vị cơ sở (cái); mỗi SKU khai báo đơn vị quy đổi (ví dụ thùng = 1.000 cái); đơn vị bán cấu hình **theo biến thể**, khách đặt **số nguyên** đơn vị bán; hệ số đã dùng không được sửa | 🟡 | 01, 02, 03, 07, 13, 14 |
 
 ---
 

@@ -8,7 +8,7 @@ Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp
 
 Về nghiệp vụ, Putaway được thiết kế theo mô hình WMS phổ biến như Odoo/MISA: **Receipt/nhận hàng** đưa hàng vào khu chờ (và qua khu QC nếu SKU yêu cầu), sau đó **Putaway/nhập kho nội bộ** mới đưa hàng lên bin chính thức. Putaway là **chặng cuối** của luồng nhập kho 3 bước (WH/Input → WH/Quality Control → WH/Stock) hoặc 2 bước (WH/Input → WH/Stock). Thuật toán chỉ là lớp gợi ý; quyết định cuối cùng vẫn được xác nhận bằng thao tác quét thực tế tại kho.
 
-> Nguyên tắc dữ liệu: thao tác vật lý thường xử lý theo **thùng/kiện/pallet** (handling unit), nhưng tồn kho hệ thống vẫn ghi nhận theo **đơn vị cơ sở của SKU**. Ví dụ: nhận 4 thùng x 50 cái thì task có thể hướng dẫn theo 4 thùng, còn `InventoryStock` lưu 200 cái.
+> Nguyên tắc dữ liệu: thao tác vật lý thường xử lý theo **thùng/kiện/pallet** (handling unit), nhưng tồn kho hệ thống vẫn ghi nhận theo **đơn vị cơ sở của SKU** (hệ số quy đổi khai báo ở [01](../01-product-creation/README.md)). Ví dụ: nhận 4 thùng × 1.000 cái thì task có thể hướng dẫn theo 4 thùng, còn `InventoryStock` lưu 4.000 cái.
 
 ---
 
@@ -58,7 +58,7 @@ Về nghiệp vụ, Putaway được thiết kế theo mô hình WMS phổ biế
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
 1. **Sinh nhiệm vụ putaway** — hệ thống tạo putaway task khi phần hàng sẵn sàng cất: SKU cần QC → khi QC kết luận `Accepted` tại khu `QUALITY_CONTROL`; SKU không cần QC → ngay khi [Receipt](../03-receipt/README.md) `Confirmed`. Task có thể tách theo SKU, lô, serial, kiện hoặc pallet để khớp thao tác thực tế.
-2. **Chuẩn hoá số lượng xử lý** — hệ thống quy đổi giữa đơn vị vận hành và đơn vị tồn kho: ví dụ `quantityBase = 200 cái`, `packageQty = 50 cái/thùng`, `handlingUnits = 4 thùng`.
+2. **Chuẩn hoá số lượng xử lý** — hệ thống quy đổi giữa đơn vị vận hành và đơn vị tồn kho: ví dụ `quantityBase = 4.000 cái`, `packageQty = 1.000 cái/thùng`, `handlingUnits = 4 thùng`.
 3. **Gợi ý vị trí (slotting suggestion)** — [Slotting Engine](../06-warehouse-map-slotting/README.md) đề xuất vị trí đích dựa trên:
    - Ràng buộc cứng: bin cho phép cất & đang `Active`, lớp lưu trữ, sức chứa, kích thước, tải trọng & chiều cao lọt của tầng.
    - Tiêu chí mềm: gom cùng SKU/lô, velocity/ABC, quãng đường đi thực tế đến khu đóng gói, FEFO/FIFO, cân bằng tải, độ lấp đầy.
