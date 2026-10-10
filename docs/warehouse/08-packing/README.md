@@ -13,9 +13,8 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên đóng gói (Packer)** | Quét kiểm đơn, chọn thùng, đóng gói, cân, in & dán nhãn, xác nhận hoàn tất |
-| **Hệ thống (Cartonization / Rate engine)** | Gợi ý loại thùng, ước tính khối lượng quy đổi, chọn dịch vụ vận chuyển & phí |
+| **Hệ thống (Cartonization)** | Gợi ý loại thùng, ước tính khối lượng quy đổi |
 | **Quản lý kho** | Xử lý sai lệch khi kiểm đơn, cấu hình vật liệu đóng gói & quy tắc |
-| **Đơn vị vận chuyển (Carrier)** | Cung cấp nhãn vận đơn qua tích hợp (xem [09 Shipping](../09-shipping/README.md)) |
 
 ---
 
@@ -38,7 +37,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 |---------|----------|
 | **Package(s)** — một hoặc nhiều kiện: nội dung, kích thước, khối lượng thực & quy đổi, **cờ cho phép xoay** | 09 Shipping (kể cả Load Planning khi giao nguyên chuyến) |
 | **Packing slip** (phiếu đóng gói) & hoá đơn bán hàng kèm (nếu chính sách yêu cầu) | Khách hàng, 17 Order Management |
-| **Yêu cầu tạo nhãn vận đơn** (shipping label request) | 09 Shipping / Carrier |
+| **Nhãn kiện (package label)** — nhãn nội bộ in tại bàn đóng gói | Dán lên kiện; 09 Shipping (quét khi xếp xe, bàn giao) |
 | **Cập nhật trạng thái đơn** → `Packed` | 17 Order Management |
 | Bản ghi sai lệch / hư hỏng khi đóng gói | Manager, 07 Picking / 19 Production (điều tra) |
 
@@ -48,16 +47,16 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 
 1. **Nhận hàng tại bàn đóng gói** — Packer quét mã đơn / tote để nạp danh sách dòng hàng cần đóng. Packing task chỉ sinh khi **mọi dòng** của đơn đã ở khu `PACKING`: dòng hàng thường đã pick (`Staged`) và dòng tùy chỉnh đã có thành phẩm đạt QC do xưởng bàn giao ([19](../19-production/README.md)). Đơn chỉ gồm hàng tùy chỉnh đi thẳng từ sản xuất sang packing, không qua picking thành phẩm.
 2. **Kiểm đơn (verification / check)** — quét từng SKU & số lượng đối chiếu đơn:
-   - Với sản phẩm in ấn: đối chiếu **thành phẩm với thiết kế đã chốt** (mã design, hình ảnh preview) — đảm bảo đúng nội dung khách đặt.
+   - Với sản phẩm in: thành phẩm nhận từ xưởng ([19](../19-production/README.md)) ở khu `PACKING`; đối chiếu **thành phẩm với thiết kế đã chốt và mẫu khách đã duyệt** (mã design, hình ảnh preview) — đảm bảo đúng nội dung khách đặt.
    - Với SKU serial: quét serial để gắn vào đơn.
-3. **Gợi ý đóng gói (cartonization)** — hệ thống đề xuất loại thùng/túi & cách chia kiện dựa trên kích thước, khối lượng, quy tắc dễ vỡ, và giới hạn của hãng vận chuyển.
+3. **Gợi ý đóng gói (cartonization)** — hệ thống đề xuất loại thùng/túi & cách chia kiện dựa trên kích thước, khối lượng và quy tắc dễ vỡ.
 4. **Đóng gói vật lý** — cho hàng vào thùng, chèn lót, thêm phiếu đóng gói / hoá đơn / quà tặng theo yêu cầu.
 5. **Cân & đo** — nhập khối lượng thực và kích thước kiện (hoặc lấy từ cân tích hợp). Hệ thống tính **khối lượng quy đổi (dimensional weight)**. Kiện nhận **cờ cho phép xoay** mặc định từ SKU bên trong; Packer được ghi đè (ví dụ kiện phải giữ chiều đứng).
    > ⚠️ Giả định: kiện chứa nhiều SKU có cờ khác nhau lấy giá trị chặt nhất — chỉ cần một SKU không cho xoay thì kiện không cho xoay. Xem [open-questions](../../open-questions/README.md).
-6. **Chọn dịch vụ vận chuyển & tạo nhãn** — theo phương thức khách chọn / rule chọn hãng rẻ-nhanh; gọi [Shipping](../09-shipping/README.md) để lấy **tracking number + shipping label**. In & dán nhãn lên kiện. Đơn **giao nguyên chuyến** không tạo nhãn hãng: in nhãn kiện nội bộ (mã kiện) và chuyển sang lập kế hoạch chuyến xe ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)).
-7. **Niêm phong & xác nhận** — dán nhãn, niêm phong; xác nhận `Packed`. Mỗi kiện có mã kiện (package ID) và tracking riêng.
+6. **In nhãn kiện** — hệ thống sinh **nhãn kiện nội bộ**: mã đơn, mã kiện (package ID), người nhận, địa chỉ giao, địa chỉ hoàn hàng, số tiền thu hộ (phần còn lại của đơn đặt cọc) nếu có. In & dán lên kiện. Hệ thống **không gọi API hãng vận chuyển** (xem [09 Shipping](../09-shipping/README.md)). Kiện của đơn **giao nguyên chuyến** chuyển sang lập kế hoạch chuyến xe ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)).
+7. **Niêm phong & xác nhận** — dán nhãn, niêm phong; xác nhận `Packed`. Mỗi kiện có mã kiện (package ID) riêng.
 8. **Chuyển sang khu chờ giao (Area `DISPATCH`)** — bàn giao cho bước [Shipping](../09-shipping/README.md).
-9. **Xử lý đơn nhiều kiện (multi-package)** — một đơn có thể tách nhiều kiện; mỗi kiện có nội dung & tracking riêng, cùng thuộc một shipment.
+9. **Xử lý đơn nhiều kiện (multi-package)** — một đơn có thể tách nhiều kiện; mỗi kiện có nội dung & mã kiện riêng, cùng thuộc một shipment.
 
 ---
 
@@ -82,11 +81,11 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 ### Business rules
 
 - **BR-01:** Không `Packed` nếu kiểm đơn chưa khớp 100% (đúng SKU, đủ số lượng, đúng serial, đúng thiết kế).
-- **BR-02:** Với sản phẩm in ấn, thành phẩm phải khớp **design snapshot đã chốt** của đơn; không khớp → `Verification Failed`; thành phẩm lỗi được xuất huỷ và lệnh sản xuất tương ứng mở lại ở `Rework` để in bù (xem [19](../19-production/README.md)).
-- **BR-03:** Khối lượng & kích thước kiện phải nằm trong giới hạn của dịch vụ vận chuyển được chọn; vượt → tách kiện hoặc đổi dịch vụ.
+- **BR-02:** Với sản phẩm in, thành phẩm phải khớp **design snapshot đã chốt** và **mẫu đã duyệt** của đơn; không khớp → `Verification Failed`; thành phẩm lỗi được xuất huỷ và lệnh sản xuất tương ứng quay về `Ready` để in bù (xem [19](../19-production/README.md)).
+- **BR-03:** Kiện phải có khối lượng & kích thước thực đo — đây là đầu vào của bàn giao và kế hoạch xếp hàng ở [09 Shipping](../09-shipping/README.md); kiện quá khổ / quá nặng so với mọi loại phương tiện → tách kiện.
 - **BR-04:** Mỗi kiện chỉ thuộc một đơn (không gộp nhiều đơn vào một kiện) — trừ khi có tính năng "consolidated shipment" được bật.  ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
-- **BR-05:** Nhãn vận đơn đã tạo mà đơn bị huỷ → phải **void label** với hãng vận chuyển (tránh bị tính phí).
-- **BR-06:** Hàng đã `Packed` mà cần rút ra (đổi hàng, huỷ) → mở kiện có kiểm soát, put-back tồn, void label.
+- **BR-05:** Đơn bị huỷ sau khi đã in nhãn kiện → nhãn kiện bị huỷ cùng shipment (`Cancelled`); kiện chưa bàn giao nên không phát sinh gì với hãng.
+- **BR-06:** Hàng đã `Packed` mà cần rút ra (đổi hàng, huỷ) → mở kiện có kiểm soát, put-back tồn, huỷ nhãn kiện.
 
 ### Edge case
 
@@ -95,7 +94,7 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 | Kiểm đơn thiếu hàng (picking sót) | `Verification Failed` → yêu cầu re-pick phần thiếu; nếu hết hàng → partial ship / backorder theo chính sách |
 | Hàng bị hư khi đóng gói | Loại ra, `Blocked` + adjustment, re-pick hàng thay thế |
 | Hết loại thùng gợi ý | `On Hold`; chọn thùng thay thế lớn hơn (cảnh báo tăng phí) |
-| Địa chỉ giao không hợp lệ (hãng vận chuyển từ chối) | Không tạo được nhãn → chuyển Order Management liên hệ khách sửa địa chỉ; task `On Hold` |
+| Địa chỉ giao không hợp lệ (thiếu phường/xã, sai định dạng) | Không in được nhãn kiện → chuyển Order Management liên hệ khách sửa địa chỉ; task `On Hold` |
 | Đơn có sản phẩm cấm vận chuyển bằng hãng đã chọn (hàng đặc thù) | Đổi hãng/dịch vụ phù hợp; nếu không có → thông báo Order Management |
 | Khách yêu cầu không kèm hoá đơn giá trị trong kiện (giao làm quà) | Theo cờ "gift order": in packing slip ẩn giá |
 | Đơn nhiều kiện, một kiện lỗi | Chỉ đóng lại kiện lỗi; các kiện khác vẫn tiến hành; shipment chờ đủ kiện hoặc cho giao lệch chuyến theo chính sách |
@@ -107,9 +106,9 @@ Packing đảm bảo: **đúng đơn – đúng hàng – đủ số lượng �
 | Module | Quan hệ |
 |--------|---------|
 | [07 · Picking](../07-picking/README.md) | Nhận hàng đã pick tại staging; báo ngược khi kiểm đơn phát hiện lệch |
-| [19 · Production](../19-production/README.md) | Nhận thành phẩm in đạt QC tại khu `PACKING`; báo ngược khi thành phẩm sai thiết kế (lệnh `Rework`) |
-| [09 · Shipping](../09-shipping/README.md) | Gửi yêu cầu tạo nhãn vận đơn; bàn giao kiện đã đóng cho bước giao vận; cung cấp kích thước, khối lượng & cờ cho phép xoay của kiện cho Load Planning |
+| [19 · Production](../19-production/README.md) | Nhận thành phẩm in đạt QC tại khu `PACKING`; báo ngược khi thành phẩm sai thiết kế / mẫu đã duyệt (lệnh quay về `Ready` để in bù) |
+| [09 · Shipping](../09-shipping/README.md) | Bàn giao kiện đã đóng (kèm khối lượng, kích thước, nhãn kiện nội bộ) cho bước giao vận; cung cấp kích thước, khối lượng & cờ cho phép xoay của kiện cho Load Planning |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Cập nhật trạng thái `Packed`; nhận yêu cầu sửa địa chỉ / xử lý huỷ |
-| [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot để đối chiếu thành phẩm in ấn |
+| [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot để đối chiếu thành phẩm in |
 | [01 · Product Creation](../01-product-creation/README.md) | Kích thước/khối lượng/quy cách & cờ dễ vỡ của SKU cho cartonization; cờ cho phép xoay của SKU làm giá trị mặc định cho kiện |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 2 của luồng Fulfillment |

@@ -62,7 +62,7 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
    - Hệ thống thử **phân bổ lại** từ vị trí/lô khác.
    - Nếu vẫn thiếu: ghi nhận short pick; đơn chuyển trạng thái chờ (backorder) hoặc giao một phần (partial) theo chính sách; thông báo Order Management & Manager; kích hoạt kiểm kê vị trí lệch.
 8. **Gom về khu đóng gói (Staging)** — picker mang hàng đã lấy đến khu đóng gói (Area `PACKING`); quét bàn giao. Hàng chuyển trạng thái `Picked` → `Staged`.
-   - Với **lệnh lấy phôi**: picker mang phôi lên khu xưởng in (Area `PRODUCTION`) và quét bàn giao; phôi giữ trạng thái `Allocated` cho dòng đơn, lệnh sản xuất chuyển `Queued` (xem [19](../19-production/README.md)).
+   - Với **lệnh lấy phôi**: picker mang phôi lên khu xưởng in (Area `PRODUCTION`) và quét bàn giao; phôi giữ trạng thái `Allocated` cho dòng đơn, lệnh sản xuất chuyển `Material Issued` (xem [19](../19-production/README.md)).
 9. **Đóng pick task** — khi mọi dòng đã lấy đủ (hoặc chốt short). Sinh/nối tiếp **Packing task** cho đơn (không áp dụng cho lệnh lấy phôi).
 
 ---
@@ -97,12 +97,12 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 ### Business rules
 
-- **BR-01:** Chỉ picking khi đơn đã `Confirmed` và thanh toán hợp lệ theo chính sách (ví dụ đơn prepaid phải `Paid`; đơn COD được phép).  Xem [15 Payment](../../ecommerce/15-payment/README.md).
+- **BR-01:** Chỉ picking khi đơn đã `Confirmed` và thanh toán hợp lệ theo chính sách (trả trước đã nhận đủ tiền; đặt cọc đã nhận cọc; công nợ trong hạn mức hoặc đã duyệt — xem [15](../../ecommerce/15-payment/README.md)).  Xem [15 Payment](../../ecommerce/15-payment/README.md).
 - **BR-02:** Chỉ được lấy từ tồn `Available` và được phân bổ; không lấy từ hàng `Blocked` / `Quarantine` / `Allocated cho đơn khác`.
 - **BR-03:** SKU FEFO → phải lấy lô hạn dùng gần nhất trước; lệch phải có lý do.
 - **BR-04:** Số lượng lấy không vượt số lượng phân bổ của dòng; muốn lấy thêm phải re-allocate.
 - **BR-05:** Hàng đã `Picked`/`Staged` mà đơn bị huỷ → phải làm **put-back** (trả về vị trí) qua quy trình có kiểm soát, không "biến mất".
-- **BR-06:** Dòng đơn tùy chỉnh (in theo đơn): picking **chỉ lấy phôi** cho xưởng in theo lệnh sản xuất, **không lấy thành phẩm** — thành phẩm đạt QC được xưởng chuyển thẳng sang khu `PACKING` (xem [19](../19-production/README.md)).
+- **BR-06:** Dòng đơn in theo thiết kế: khi release, dòng đó sinh lệnh sản xuất ([19](../19-production/README.md)); picking **chỉ lấy phôi** cho xưởng in theo lệnh sản xuất (đích khu `PRODUCTION`), **không lấy thành phẩm** — thành phẩm đạt QC được xưởng chuyển thẳng sang khu `PACKING`.
 
 ### Edge case
 
@@ -118,12 +118,14 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 | Lệnh sản xuất bị huỷ khi phôi đã lên khu `PRODUCTION` | Put-back phôi về bin theo BR-05 |
 | Lấy dư do quét nhầm | Hệ thống chặn khi số lượng > phân bổ; nếu đã xảy ra → điều chỉnh + put-back |
 
+> ✅ Đã chốt 2026-09-28 / 2026-10-06 (B1, B2): bước sản xuất in là module riêng [19 · Production](../19-production/README.md); kho lấy phôi cho xưởng qua picking, không pick thành phẩm trên kệ.
 ---
 
 ## 7. Liên kết với các module khác
 
 | Module | Quan hệ |
 |--------|---------|
+| [19 · Production](../19-production/README.md) | Dòng in không pick trên kệ: kho xuất phôi sang khu `PRODUCTION`, thành phẩm chuyển thẳng sang `PACKING` |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn cần xuất; nhận cập nhật picked/short/partial |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Điều kiện thanh toán quyết định đơn có được release để pick hay không |
 | [05 · Putaway](../05-putaway/README.md) / [06 · Slotting](../06-warehouse-map-slotting/README.md) | Vị trí & FEFO do putaway/slotting quyết định; velocity từ picking phản hồi lại slotting |

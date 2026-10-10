@@ -1,10 +1,12 @@
-# 18 — Quản lý thông tin khách hàng (Customer Information Management)
+# 18 — Quản lý thông tin khách hàng sỉ (Customer Information Management)
+
+> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách là **doanh nghiệp đã liên hệ từ trước**, do Sale tạo hồ sơ; không có đăng ký tự do và không có khách vãng lai (guest).
 
 ## 1. Mục đích (Purpose)
 
-Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên quan: thông tin định danh & liên hệ, **sổ địa chỉ**, phương thức thanh toán đã lưu (token), **lịch sử đơn hàng & tương tác**, thiết kế đã lưu, nhóm khách / phân khúc, và **hồ sơ rủi ro**.
+Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu liên quan: thông tin doanh nghiệp (tên, mã số thuế), **người liên hệ / người đặt hàng**, **sổ địa chỉ**, **điều khoản thương mại** (phương thức thanh toán được phép, **hạn mức công nợ, kỳ hạn**, **bảng giá riêng**), **lịch sử đơn hàng & tương tác**, thiết kế và **mẫu đã duyệt**, nhóm khách, và **hồ sơ rủi ro**.
 
-Đây là **nguồn dữ liệu khách hàng dùng chung** cho checkout ([14](../14-cart-and-order/README.md)), thanh toán ([15](../15-payment/README.md)), chăm sóc ([16](../16-sales-chat/README.md)), và điều hành đơn ([17](../17-order-management/README.md)); đồng thời là nơi thực thi **quyền riêng tư dữ liệu** của khách.
+Đây là **nguồn dữ liệu khách hàng dùng chung** cho báo giá & đặt hàng ([14](../14-cart-and-order/README.md)), thanh toán ([15](../15-payment/README.md)), chăm sóc ([16](../16-sales-chat/README.md)), và điều hành đơn ([17](../17-order-management/README.md)); đồng thời là nơi thực thi **quyền riêng tư dữ liệu** của khách.
 
 ---
 
@@ -12,8 +14,9 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng** | Tự quản lý hồ sơ, địa chỉ, phương thức thanh toán, mật khẩu, tuỳ chọn nhận tin; yêu cầu tải/xoá dữ liệu |
-| **Nhân viên Sale (Sales Staff)** | Xem hồ sơ (theo quyền) để tư vấn & xử lý đơn; cập nhật thông tin thay khách khi được yêu cầu; thêm ghi chú |
+| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời; quản lý người liên hệ, địa chỉ, mật khẩu, tuỳ chọn nhận tin; xem công nợ; yêu cầu tải/xoá dữ liệu |
+| **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi lời mời kích hoạt; xem hồ sơ (theo quyền) để tư vấn & xử lý đơn; cập nhật thông tin thay khách; thêm ghi chú |
+| **Người giữ quyền duyệt hạn mức** | Thiết lập / thay đổi phương thức thanh toán được phép, hạn mức công nợ, kỳ hạn của khách |
 | **Quản trị sàn (E-commerce Admin)** | Quản lý nhóm khách, phân khúc, chính sách dữ liệu, hợp nhất hồ sơ trùng; phân quyền truy cập hồ sơ (phối hợp System Admin) |
 | **Hệ thống** | Xác thực, chống trùng, gắn dữ liệu đơn/tương tác vào hồ sơ, đánh giá rủi ro, thực thi yêu cầu quyền riêng tư |
 
@@ -25,20 +28,22 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 | Nhóm | Dữ liệu | Nguồn |
 |------|---------|-------|
-| Định danh & liên hệ | Họ tên, email, số điện thoại, ngày sinh (tuỳ chọn), loại khách (cá nhân / doanh nghiệp), mã số thuế | Khách / Sale |
+| Định danh doanh nghiệp | Tên công ty, mã số thuế, địa chỉ xuất hoá đơn | Sale |
+| Người liên hệ / người đặt hàng | Họ tên, email, số điện thoại, quyền trên cổng (xem / đặt hàng / duyệt mẫu) | Sale / Khách |
+| Điều khoản thương mại | Phương thức thanh toán được phép (trả trước / đặt cọc / công nợ), % cọc mặc định, **hạn mức công nợ**, **kỳ hạn**, **bảng giá riêng** | Sale + người duyệt hạn mức |
 | Sổ địa chỉ | Nhiều địa chỉ giao & xuất hoá đơn; địa chỉ mặc định | Khách |
-| Phương thức thanh toán đã lưu | Token thẻ/ví (không lưu số thẻ thật) | [15 Payment](../15-payment/README.md) |
 | Tài khoản & bảo mật | Mật khẩu (hash), đăng nhập mạng xã hội, 2FA, phiên đăng nhập | Hệ thống |
 | Tuỳ chọn (preferences) | Ngôn ngữ, nhận email/SMS marketing, kênh liên hệ ưu tiên | Khách |
-| Dữ liệu phái sinh | Lịch sử đơn, tổng chi tiêu, tần suất mua, thiết kế đã lưu, lịch sử chat, điểm/hạng thành viên, hồ sơ rủi ro | 12, 14, 16, 17 |
+| Dữ liệu phái sinh | Lịch sử báo giá & đơn, tổng chi tiêu, **dư nợ & quá hạn**, thiết kế và mẫu đã duyệt, lịch sử chat, hồ sơ rủi ro | 12, 14, 15, 16, 17, 19 |
 
 ### Output
 
 | Kết quả | Dùng bởi |
 |---------|----------|
 | **Customer profile** hợp nhất | 14, 15, 16, 17, báo cáo |
-| **Địa chỉ & người nhận** cho checkout | 14 Cart & Order |
-| **Phân khúc / nhóm khách** (VIP, doanh nghiệp, khách mới…) | Pricing, khuyến mãi ([13](../13-catalog/README.md)), routing chat ([16](../16-sales-chat/README.md)) |
+| **Địa chỉ & người nhận** cho đơn | 14 Quote & Order |
+| **Điều khoản thương mại** (phương thức thanh toán, hạn mức, kỳ hạn, bảng giá) | 13 Catalog, 14 Quote & Order, 15 Payment |
+| **Nhóm khách** (theo quy mô, ngành…) | Pricing mặc định khi chưa có bảng giá riêng ([13](../13-catalog/README.md)), routing chat ([16](../16-sales-chat/README.md)) |
 | **Hồ sơ rủi ro / blacklist** | 15 Payment, 17 Order Management |
 | **Bản xuất dữ liệu cá nhân / xác nhận đã xoá** (theo yêu cầu quyền riêng tư) | Khách |
 | **Lịch sử hoạt động (activity log)** của hồ sơ | Quản trị sàn, Sales Staff |
@@ -49,14 +54,14 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 ### 4.1. Tạo & xác thực hồ sơ
 
-1. **Đăng ký** — khách tạo tài khoản (email/SĐT + mật khẩu, hoặc social login). Hệ thống kiểm tra trùng (email/SĐT đã tồn tại?).
-2. **Xác thực** — xác minh email/SĐT (OTP/link). Chưa xác thực vẫn mua được (guest → tài khoản) tuỳ chính sách.
-3. **Guest checkout** — khách mua không đăng ký; hệ thống tạo **hồ sơ nhẹ (guest profile)** theo email; sau này khách đăng ký cùng email → **gắn kết lịch sử**.
+1. **Sale tạo hồ sơ khách sỉ** — sau khi khách liên hệ: thông tin doanh nghiệp, mã số thuế, người liên hệ, địa chỉ. Hệ thống kiểm tra trùng (mã số thuế / email). Hồ sơ ở `Pending Activation`.
+2. **Thiết lập điều khoản thương mại** — phương thức thanh toán được phép, % cọc, hạn mức công nợ, kỳ hạn, bảng giá riêng; hạn mức và kỳ hạn do người có quyền duyệt.
+3. **Mời kích hoạt** — hệ thống gửi lời mời tới email người liên hệ; người liên hệ đặt mật khẩu → hồ sơ `Active`. **Không có đăng ký tự do và không có guest checkout.**
 
 ### 4.2. Quản lý dữ liệu hồ sơ
 
 4. **Sổ địa chỉ** — thêm/sửa/xoá địa chỉ; đặt mặc định giao & xuất hoá đơn; validate địa chỉ (định dạng, vùng phục vụ).
-5. **Phương thức thanh toán** — lưu token qua [Payment](../15-payment/README.md) (không lưu số thẻ); đặt mặc định; xoá khi cần.
+5. **Người liên hệ & quyền trên cổng** — thêm/bớt người đặt hàng, người duyệt mẫu của công ty khách.
 6. **Bảo mật** — đổi mật khẩu, bật 2FA, xem & thu hồi phiên đăng nhập, lịch sử đăng nhập bất thường.
 7. **Tuỳ chọn nhận tin** — bật/tắt marketing theo kênh; lưu mốc thời gian đồng ý (consent) để tuân thủ quy định.
 
@@ -64,8 +69,9 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 8. **Gắn lịch sử** — mỗi đơn ([17](../17-order-management/README.md)), mỗi hội thoại ([16](../16-sales-chat/README.md)), mỗi thiết kế lưu ([12](../12-product-design/README.md)) tự động liên kết hồ sơ.
 9. **Tính chỉ số** — tổng chi tiêu, số đơn, giá trị đơn trung bình, lần mua gần nhất, tỷ lệ huỷ/hoàn.
-10. **Phân khúc / nhóm** — hệ thống/Quản trị sàn gán nhóm (VIP theo chi tiêu, khách doanh nghiệp, khách mới, khách rủi ro). Nhóm ảnh hưởng giá, ưu đãi, ưu tiên chăm sóc.
-11. **Hồ sơ rủi ro** — cập nhật khi có chargeback, gian lận, tỷ lệ RTO cao, khiếu nại bất thường → cảnh báo cho [Payment](../15-payment/README.md) & [Order Management](../17-order-management/README.md).
+10. **Nhóm khách** — Quản trị bán hàng gán nhóm (theo quy mô, ngành, khách rủi ro). Nhóm dùng làm giá mặc định khi chưa có bảng giá riêng, và ưu tiên chăm sóc.
+    - **Dư nợ** — cập nhật từ [Payment](../15-payment/README.md); quá hạn → cảnh báo Sale và ảnh hưởng đơn công nợ mới.
+11. **Hồ sơ rủi ro** — cập nhật khi quá hạn công nợ kéo dài, gian lận, khiếu nại bất thường → cảnh báo cho [Payment](../15-payment/README.md) & [Order Management](../17-order-management/README.md).
 
 ### 4.4. Quyền riêng tư dữ liệu (Data privacy)
 
@@ -86,8 +92,7 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp | Ai |
 |------------|---------|-------------|----|
-| `Guest` | Hồ sơ nhẹ từ guest checkout, chưa có tài khoản | → `Active` (đăng ký cùng email) | Khách |
-| `Pending Verification` | Đã đăng ký, chưa xác thực email/SĐT | → `Active` | Khách |
+| `Pending Activation` | Sale đã tạo hồ sơ, chờ người liên hệ kích hoạt từ lời mời | → `Active`, → `Closed` | Sale / Khách |
 | `Active` | Bình thường | → `Suspended`, → `Closed`, → `Anonymized` | — |
 | `Suspended` | Tạm khoá (gian lận, vi phạm) — không đăng nhập/mua | → `Active`, → `Closed` | Quản trị sàn |
 | `Closed` | Khách yêu cầu đóng tài khoản; dữ liệu còn theo nghĩa vụ lưu trữ | → `Anonymized` | Khách / Quản trị sàn |
@@ -100,8 +105,9 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 ### Business rules
 
-- **BR-01:** Email (hoặc SĐT) là khoá định danh chính; không cho hai hồ sơ `Active` trùng khoá định danh.
-- **BR-02:** **Không lưu** dữ liệu thẻ nhạy cảm; chỉ lưu token & 4 số cuối / thương hiệu thẻ (qua [Payment](../15-payment/README.md), tuân thủ PCI-DSS).
+- **BR-01:** **Mã số thuế** là khoá định danh của khách doanh nghiệp; email là khoá đăng nhập của từng người liên hệ. Không cho hai hồ sơ `Active` trùng mã số thuế.
+- **BR-01a:** Chỉ **Sale** tạo hồ sơ khách; không có đăng ký tự do và guest checkout. Chỉ hồ sơ `Active` mới xem giá, nhận báo giá và đặt hàng.
+- **BR-02:** Hạn mức công nợ, kỳ hạn và phương thức thanh toán được phép chỉ do **người có quyền duyệt** thay đổi; mọi thay đổi được log.
 - **BR-03:** Truy cập hồ sơ khách theo **quyền tối thiểu**: Sales Staff chỉ xem dữ liệu cần cho công việc; mọi truy cập nhạy cảm được log.
 - **BR-04:** Marketing chỉ gửi khi có **consent còn hiệu lực**; lưu mốc thời gian & nguồn consent.
 - **BR-05:** Xoá dữ liệu: chứng từ đơn hàng/thanh toán phải giữ theo thời hạn luật định → thực hiện **ẩn danh** (tách thông tin cá nhân khỏi chứng từ), không xoá chứng từ.
@@ -113,14 +119,15 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Guest mua nhiều lần rồi mới đăng ký | Gắn kết mọi đơn cùng email vào hồ sơ mới; thông báo khách |
+| Người liên hệ của khách nghỉ việc | Khách / Sale vô hiệu hoá người liên hệ đó; thêm người mới; lịch sử đơn vẫn gắn công ty |
+| Một người tự đăng ký trên cổng mà chưa liên hệ Sale | Không có đăng ký tự do: chuyển thành yêu cầu liên hệ cho Sale xử lý |
 | Khách đổi email | Xác thực email mới; giữ email cũ như liên hệ phụ trong thời gian chuyển tiếp |
 | Hai người cùng nhà dùng chung email | Địa chỉ & người nhận tách theo từng đơn; hồ sơ vẫn là một |
 | Yêu cầu xoá dữ liệu khi còn đơn đang giao / còn công nợ | Hoãn ẩn danh phần liên quan tới khi đơn đóng & công nợ tất toán; ẩn danh phần còn lại |
 | Nghi tài khoản bị chiếm (login lạ) | Buộc đổi mật khẩu, thu hồi phiên, tạm `Suspended` nếu cần |
 | Trùng hồ sơ nhưng lịch sử mâu thuẫn (địa chỉ/tên khác) | Quản trị sàn review thủ công trước khi merge; giữ cả hai bộ địa chỉ |
 | Khách doanh nghiệp nhiều người đặt hàng | Hồ sơ công ty + danh sách người liên hệ/đặt hàng; phân quyền theo người |
-| Chargeback từ một khách "VIP theo chi tiêu" | Cập nhật hồ sơ rủi ro; nhóm phân khúc có thể bị hạ; cảnh báo OPS |
+| Khách quá hạn công nợ kéo dài | Cập nhật hồ sơ rủi ro; người có quyền có thể hạ hạn mức hoặc chỉ cho trả trước; cảnh báo Sale |
 
 ---
 
@@ -128,10 +135,10 @@ Quản lý **hồ sơ khách hàng (customer profile)** và dữ liệu liên qu
 
 | Module | Quan hệ |
 |--------|---------|
-| [14 · Cart & Order](../14-cart-and-order/README.md) | Cung cấp thông tin khách, sổ địa chỉ, người nhận cho checkout |
-| [15 · Payment](../15-payment/README.md) | Lưu token phương thức thanh toán; nhận & cập nhật hồ sơ rủi ro/gian lận |
+| [14 · Quote & Order](../14-cart-and-order/README.md) | Cung cấp thông tin khách, sổ địa chỉ, người nhận, phương thức thanh toán được phép, hạn mức |
+| [15 · Payment](../15-payment/README.md) | Hạn mức, kỳ hạn, dư nợ; cập nhật hồ sơ rủi ro khi quá hạn |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Hồ sơ & lịch sử tương tác hiển thị cho agent; lưu vết hội thoại vào hồ sơ |
 | [17 · Order Management](../17-order-management/README.md) | Lịch sử đơn gắn hồ sơ; hồ sơ rủi ro ảnh hưởng cách xử lý đơn |
 | [12 · Product Design](../12-product-design/README.md) | Thiết kế nháp/đã lưu gắn theo tài khoản khách |
-| [13 · Catalog](../13-catalog/README.md) | Phân khúc khách ảnh hưởng giá & khuyến mãi hiển thị; wishlist |
+| [13 · Catalog](../13-catalog/README.md) | Bảng giá riêng / nhóm khách quyết định giá hiển thị |
 | [00 · System Overview §3](../../00-system-overview/README.md) | Persona khách hàng |
