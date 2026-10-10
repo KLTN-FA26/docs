@@ -51,7 +51,7 @@ Di chuyển tồn kho **từ kho này sang kho khác** (khác địa điểm v�
 3. **Gửi duyệt (Submit)** — nếu vượt ngưỡng → `Pending Approval`; duyệt → `Approved`.
 4. **Phân bổ & pick tại kho nguồn** — hệ thống phân bổ (allocate) tồn theo vị trí/lô (FEFO); sinh pick task nội bộ. NV kho nguồn lấy hàng.
 5. **Đóng gói & xuất kho nguồn (Ship from source)** — đóng kiện, ghi khối lượng & kích thước. Nếu đi **xe tải / container** (xe thuê hoặc xe nội bộ): lập **kế hoạch chuyến xe** bằng Load Planning 3D và xếp kiện lên xe theo sơ đồ ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)). Xác nhận **Dispatch**. Tồn kho nguồn **giảm**, chuyển sang trạng thái **`In-Transit`** gắn với TO.
-6. **Vận chuyển** — theo dõi hành trình (nếu qua hãng vận chuyển: có tracking; nếu xe nội bộ: cập nhật thủ công).
+6. **Vận chuyển** — hệ thống **không theo dõi hành trình** (dù đi xe nội bộ hay thuê hãng vận chuyển). Tồn nằm ở trạng thái `In-Transit` gắn với TO cho tới khi kho đích xác nhận nhận hàng ở bước 7.
 7. **Nhận tại kho đích (Receive at destination)** — NV kho đích tạo phiếu nhận tham chiếu **TO** (không phải PO): kiểm đếm số lượng thực nhận, kiểm tra tình trạng.
 8. **Đối chiếu chênh lệch** — so số nhận với số xuất:
    - Khớp → tiếp tục.

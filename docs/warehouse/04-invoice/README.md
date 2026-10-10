@@ -115,6 +115,7 @@ stateDiagram-v2
 - **BR-04:** Số hoá đơn NCC là **duy nhất theo từng NCC** — chặn nhập trùng (chống thanh toán hai lần).
 - **BR-05:** Một Receipt có thể được đối chiếu bởi nhiều hoá đơn (giao nhiều đợt, hoá đơn từng phần) nhưng tổng không vượt SL đã nhận.
 - **BR-06:** Hoá đơn `Paid` là bất biến; điều chỉnh phải qua **credit note / debit note** riêng.
+- **BR-07:** Hoá đơn **gia công** đối chiếu theo **số thành phẩm đạt QC** của LSX con (không theo số nhận), và trừ khoản hao hụt phôi đã được Quản lý kho duyệt ([19](../19-production/README.md) BR-17).
 
 ### Edge case
 
@@ -136,5 +137,6 @@ stateDiagram-v2
 |--------|---------|
 | [02 · Purchase Order](../02-purchase-order/README.md) | Cung cấp giá đặt & điều khoản; Invoice `Approved`/`Paid` là điều kiện để PO `Closed` |
 | [03 · Receipt](../03-receipt/README.md) | Cung cấp số lượng thực nhận & trạng thái QC làm cơ sở matching |
+| [19 · Production](../19-production/README.md) | Số đạt QC và khoản trừ hao hụt của LSX gia công là cơ sở đối chiếu hoá đơn gia công |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Invoice là bước thứ 3 trong luồng Procurement (PO → Receipt → **Invoice** → Putaway) |
 | Hệ thống kế toán / AP (ngoài phạm vi hoặc tích hợp) | Nhận payment proposal, thực hiện chi tiền, phản hồi trạng thái `Paid` |

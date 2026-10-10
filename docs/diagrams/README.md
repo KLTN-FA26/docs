@@ -7,7 +7,7 @@ Mục lục:
 1. [Luồng Procurement: PO → Receipt → Invoice → Putaway](#1-luồng-procurement)
 2. [Luồng Fulfillment: Order → (Production) → Picking → Packing → Shipping](#2-luồng-fulfillment) — kèm vòng đời lệnh sản xuất (§2.3) và kế hoạch chuyến xe (§2.4)
 3. [Luồng Transfer giữa các kho](#3-luồng-transfer-giữa-các-kho)
-4. [Phụ lục: Luồng Storefront checkout & luồng Transfer nội bộ kho](#4-phụ-lục)
+4. [Phụ lục: Luồng bán sỉ, luồng sản xuất (đơn hàng, gia công ngoài, mẫu) & luồng Transfer nội bộ kho](#4-phụ-lục)
 
 ---
 
@@ -122,21 +122,23 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    ORDER([Order: Confirmed]) --> SOURCE[Order Mgmt chọn kho xuất\ndòng tùy chỉnh: kho có xưởng in]
+    ORDER([Order: Confirmed]) --> SOURCE[Order Coordinator chọn kho xuất & release đơn\ndòng tùy chỉnh: kho có xưởng in]
     SOURCE --> PRINT{Có dòng tùy chỉnh?}
     PRINT -- Không --> READY[Order: Ready to Fulfill\nrelease lệnh xuất]
 
-    PRINT -- Có --> MO[Sinh lệnh sản xuất / dòng\nOrder: In Production]
-    MO --> PREPRESS{Prepress file in đạt?}
+    PRINT -- Có --> MO[Sinh LSX ORDER / dòng — Pending Prepress\nOrder: In Production]
+    MO --> PREPRESS{Prepress file in đạt?\nchecksum khớp}
     PREPRESS -- Không --> MO_HOLD[Lệnh On Hold\nSale liên hệ khách sửa file]
     MO_HOLD --> PREPRESS
-    PREPRESS -- Có --> BLANK[Lấy phôi từ bin\n→ khu PRODUCTION]
-    BLANK --> QUEUE[Hàng đợi → gán trạm in\ncùng kỹ thuật in]
-    QUEUE --> PRINTING[Production Staff in\nbáo SL đạt / hỏng]
-    PRINTING --> PQC{QC thành phẩm\nđủ SL đạt?}
-    PQC -- Không --> REWORK[Phần hỏng xuất huỷ\nLệnh Rework]
-    REWORK --> BLANK
-    PQC -- Có --> TO_PACK[Thành phẩm → khu PACKING\nLệnh Completed]
+    PREPRESS -- Có --> QUEUE[LSX Ready: vào hàng đợi\nWarehouse Manager gán trạm in\ncùng kỹ thuật in]
+    QUEUE --> BLANK[Lấy phôi từ bin → khu PRODUCTION\nLSX Material Issued]
+    BLANK --> PRINTING[Production Staff in tại trạm đã gán\nLSX Printing → báo SL in được / phế phẩm]
+    PRINTING --> PQC{LSX QC: theo mẫu đã duyệt\nđủ SL đạt?}
+    PQC -- Không --> REWORK[Phần hỏng xuất huỷ\nLSX quay về Ready để in bù]
+    REWORK --> QUEUE
+    PQC -- Có --> TO_PACK[Thành phẩm → khu PACKING\nLSX Completed]
+    PREPRESS -. xưởng không kịp hạn:\ntách một phần gia công ngoài .-> SUBC[LSX con gia công\nxem §4.2]
+    SUBC -. hàng về, QC đạt .-> TO_PACK
     TO_PACK --> ALL_DONE{Mọi lệnh của đơn\nđã Completed?}
     ALL_DONE -- Chưa --> WAIT_MO[Chờ các lệnh còn lại]
     WAIT_MO --> ALL_DONE
@@ -159,36 +161,36 @@ flowchart TD
 
     STAGE --> PACK_CHECK[Packing: kiểm đơn\nquét từng SKU / serial]
     PACK_CHECK --> PACK_DESIGN{Sản phẩm in ấn?}
-    PACK_DESIGN -- Có --> PACK_VERIFY[Đối chiếu thành phẩm\nvới design snapshot]
+    PACK_DESIGN -- Có --> PACK_VERIFY[Đối chiếu thành phẩm\nvới design snapshot & mẫu đã duyệt]
     PACK_DESIGN -- Không --> PACK_BOX
     PACK_VERIFY --> PACK_FAIL{Khớp?}
-    PACK_FAIL -- Không --> INVESTIGATE[Verification Failed →\nxuất huỷ thành phẩm lỗi,\nlệnh sản xuất Rework]
+    PACK_FAIL -- Không --> INVESTIGATE[Verification Failed →\nxuất huỷ thành phẩm lỗi,\nLSX quay về Ready để in bù]
     PACK_FAIL -- Có --> PACK_BOX[Chọn thùng, đóng gói,\ncân & đo]
     INVESTIGATE --> REWORK
 
-    PACK_BOX --> MODE{Hình thức giao?}
-    MODE -- Gửi kiện qua hãng --> LABEL[Gọi Carrier API\nTạo shipping label + tracking]
-    MODE -- Giao nguyên chuyến --> FTL_PACKED[Order: Packed\nNhãn kiện nội bộ\nShipment: Ready to Dispatch]
-    FTL_PACKED --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed]
-    LOADPLAN --> LOADING[Đặt xe, xếp kiện theo sơ đồ\nmanifest theo từng xe\nShipment: Handed Over]
-    LOADING --> SHIPPED
-    LABEL --> LABEL_OK{Tạo nhãn OK?}
-    LABEL_OK -- Không (địa chỉ sai / lỗi API) --> HOLD[Order: On Hold\nCSKH liên hệ khách]
+    PACK_BOX --> LABEL[In nhãn kiện nội bộ\nmã đơn, mã kiện, địa chỉ,\nsố tiền thu khi giao nếu có]
+    LABEL --> LABEL_OK{Địa chỉ hợp lệ?}
+    LABEL_OK -- Không --> HOLD[Order: On Hold\nCSKH liên hệ khách]
     HOLD --> LABEL
-    LABEL_OK -- Có --> PACKED[Order: Packed\nDán nhãn, niêm phong]
+    LABEL_OK -- Có --> PACKED[Order: Packed\nDán nhãn, niêm phong\nShipment: Ready to Dispatch]
 
-    PACKED --> HANDOVER[Bàn giao Carrier + manifest\nShipment: Handed Over]
-    HANDOVER --> SHIPPED[Order: Shipped]
-    SHIPPED --> TRANSIT[In Transit → Out for Delivery]
-    TRANSIT --> DELIV{Giao thành công?}
-    DELIV -- Có --> DELIVERED[Order: Delivered]
-    DELIV -- Thất bại --> RETRY{Thử lại?}
-    RETRY -- Có --> TRANSIT
-    RETRY -- Không --> RTO[Returning → Returned\nNhập lại kho qua Receipt]
+    PACKED --> MODE{Hình thức giao?}
+    MODE -- Gửi kiện qua hãng --> PICKUP[Gom kiện theo hãng\nchờ hãng lấy hàng]
+    PICKUP --> HANDOVER[Bàn giao + manifest\nShipment: Handed Over]
+    MODE -- Giao nguyên chuyến --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed]
+    LOADPLAN --> BOOK[Đặt xe với hãng\nngoài hệ thống]
+    BOOK --> LOAD[Xếp kiện theo sơ đồ, quét kiện\nmanifest theo từng xe]
+    LOAD --> HANDOVER
+    HANDOVER --> SHIPPED[Order: Shipped\nkhông theo dõi hành trình]
+    SHIPPED --> DELIV{Hãng báo kết quả\nOrder Coordinator cập nhật}
+    DELIV -- Thành công --> DELIVERED[Order: Delivered]
+    DELIV -- Thất bại --> FAILED[Order: Delivery Failed]
+    FAILED -- Hãng giao lại thành công --> DELIVERED
+    FAILED -- Hàng hoàn về --> RTO[Returned\nNhập lại kho qua Receipt]
 
-    DELIVERED --> COD{Đơn COD?}
-    COD -- Có --> RECON[Đối soát tiền carrier\npayment_status → Paid]
-    COD -- Không --> DONE
+    DELIVERED --> BAL{Còn phải thu?\ncông nợ / phần sau cọc}
+    BAL -- Có --> RECON[Ghi công nợ phải thu /\nthu phần còn lại → Paid]
+    BAL -- Không --> DONE
     RECON --> DONE([Order: Completed / Closed])
 ```
 
@@ -197,11 +199,10 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor CUST as Khách hàng
+    actor CUST as Khách hàng sỉ
     participant OM as Order Management
     participant PAY as Payment
-    participant PROD as Production (19)
-    actor ADMIN as E-commerce Admin
+    participant PROD as Sản xuất in (19)
     actor OPER as Production Staff
     actor QC as NV QC
     actor PICKER as Picker
@@ -210,19 +211,20 @@ sequenceDiagram
     participant SHIP as Shipping
     participant CARRIER as Carrier (hãng vận chuyển)
 
-    CUST->>PAY: Thanh toán đơn
-    PAY-->>OM: payment_status = Paid / COD hợp lệ → Confirmed
-    OM->>OM: Chọn kho xuất (dòng tùy chỉnh: kho có xưởng in)
+    CUST->>PAY: Chuyển khoản trả trước / tiền cọc (hoặc đơn công nợ trong hạn mức)
+    PAY-->>OM: Đủ điều kiện thanh toán → Confirmed
+    OM->>OM: Coordinator chọn kho xuất (dòng tùy chỉnh: kho có xưởng in) + release
     opt Đơn có dòng tùy chỉnh
-        OM->>PROD: Sinh lệnh sản xuất / dòng (Order: In Production)
-        ADMIN->>PROD: Prepress file in → Waiting Material
+        OM->>PROD: Release dòng in → LSX ORDER / dòng (Order: In Production)
+        OPER->>PROD: Prepress file in (checksum): Pending Prepress → Ready
+        PROD->>PROD: Hàng đợi + Warehouse Manager gán trạm in (thuộc tính của lệnh Ready)
         PROD->>PICKER: Lệnh lấy phôi (đích khu PRODUCTION)
-        PICKER->>INVSYS: Lấy phôi, bàn giao khu PRODUCTION (Allocated)
-        OPER->>PROD: In tại trạm, báo SL đạt / hỏng → QC Pending
-        QC->>PROD: QC thành phẩm
+        PICKER->>INVSYS: Lấy phôi, bàn giao khu PRODUCTION (Allocated) → Material Issued
+        OPER->>PROD: In tại trạm (Printing), báo SL in được / phế phẩm → QC
+        QC->>PROD: QC thành phẩm (đối chiếu mẫu đã duyệt)
         alt Thiếu SL đạt
             PROD->>INVSYS: Xuất huỷ phần hỏng
-            PROD->>PICKER: Cấp phôi phần thiếu (Rework)
+            PROD->>PICKER: LSX quay về Ready, cấp phôi phần thiếu (in bù)
         end
         PROD->>INVSYS: Thành phẩm → khu PACKING (Staged)
         PROD-->>OM: Mọi lệnh Completed → Ready to Fulfill
@@ -235,29 +237,27 @@ sequenceDiagram
         PICKER-->>OM: Short pick → backorder/partial
     end
     PICKER->>PACKER: Bàn giao hàng đã pick (Staged)
-    PACKER->>PACKER: Kiểm đơn + (dòng tùy chỉnh) đối chiếu thành phẩm với design snapshot
+    PACKER->>PACKER: Kiểm đơn + (dòng tùy chỉnh) đối chiếu thành phẩm với design snapshot & mẫu đã duyệt
+    PACKER->>PACKER: In nhãn kiện nội bộ, dán nhãn
+    PACKER-->>OM: Order = Packed
     alt Gửi kiện qua hãng
-        PACKER->>SHIP: Yêu cầu tạo nhãn vận đơn
-        SHIP->>CARRIER: Tạo label (API)
-        CARRIER-->>SHIP: Tracking number + label
-        PACKER-->>OM: Order = Packed
-        PACKER->>CARRIER: Bàn giao kiện + manifest
+        PACKER->>CARRIER: Bàn giao kiện + manifest (hãng tới lấy hàng)
     else Giao nguyên chuyến
-        PACKER-->>OM: Order = Packed (nhãn kiện nội bộ)
         SHIP->>SHIP: Load Planning 3D → kế hoạch chuyến xe Confirmed
-        SHIP->>CARRIER: Đặt xe, xếp kiện theo sơ đồ + manifest theo từng xe
+        SHIP->>CARRIER: Đặt xe (ngoài hệ thống)
+        SHIP->>CARRIER: Xếp kiện theo sơ đồ + manifest theo từng xe
     end
-    CARRIER-->>OM: Shipped → In Transit → Out for Delivery
-    CARRIER-->>CUST: Giao hàng
+    SHIP-->>OM: Shipped
+    CARRIER-->>CUST: Giao hàng (ngoài hệ thống, không tracking)
     alt Giao thành công
-        CARRIER-->>OM: Delivered
-        opt COD
-            CARRIER->>PAY: Chuyển tiền thu hộ (đối soát)
+        CARRIER-->>OM: Báo đã giao → Order Coordinator cập nhật Delivered
+        opt Đơn công nợ / còn phần sau cọc
+            CUST->>PAY: Chuyển khoản theo kỳ hạn (kế toán đối soát sao kê)
             PAY-->>OM: payment_status = Paid
         end
         OM->>OM: Completed / Closed
     else Giao thất bại
-        CARRIER-->>OM: Delivery Failed → Returning
+        CARRIER-->>OM: Báo giao thất bại → Order Coordinator cập nhật Delivery Failed
         CARRIER->>SHIP: Hoàn hàng về kho (RTO)
         SHIP->>OM: Returned (nhập lại kho qua Receipt)
         opt Đã thu tiền
@@ -268,31 +268,33 @@ sequenceDiagram
 
 ### 2.3. Vòng đời lệnh sản xuất (Production Order)
 
-Chi tiết trạng thái & điều kiện chuyển xem [19 · Production §5](../warehouse/19-production/README.md).
+Chi tiết trạng thái & điều kiện chuyển xem [19 · Production §5](../warehouse/19-production/README.md). Áp dụng cho cả LSX `SAMPLE` và `ORDER`; nhánh `Subcontracted` chỉ dành cho LSX gia công ngoài. Hàng đợi và trạm in được gán là thuộc tính của lệnh `Ready`, không phải trạng thái.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Created
-    Created --> WaitingMaterial: Prepress đạt
-    Created --> OnHold: File lỗi
-    WaitingMaterial --> Queued: Phôi đã lên khu PRODUCTION
-    WaitingMaterial --> OnHold: Thiếu phôi
-    Queued --> Assigned: Gán trạm in
-    Assigned --> Queued: Gán lại
-    Assigned --> InProgress: Bắt đầu in
-    InProgress --> QCPending: Báo SL đạt / hỏng
-    QCPending --> Completed: Đủ SL đạt → khu PACKING
-    QCPending --> Rework: Thiếu SL đạt
-    Rework --> WaitingMaterial: Cấp phôi mới phần thiếu
-    Rework --> OnHold: Vượt ngưỡng in lại
-    OnHold --> Created
-    OnHold --> WaitingMaterial
-    OnHold --> Queued
-    Created --> Cancelled
-    WaitingMaterial --> Cancelled
-    Queued --> Cancelled
-    Assigned --> Cancelled
-    OnHold --> Cancelled
+    [*] --> PendingPrepress
+    PendingPrepress --> Ready: File đạt, checksum khớp
+    Ready --> MaterialIssued: Phôi đã lên khu PRODUCTION (in nội bộ)
+    MaterialIssued --> Printing: Bắt đầu in tại trạm đã gán
+    Printing --> QC: Ghi số in được, phế phẩm
+    Ready --> Subcontracted: LSX gia công — gửi nhà gia công (PO đã duyệt)
+    Subcontracted --> QC: Nhận hàng về, phiếu nhận Confirmed
+    QC --> Completed: Đủ số đạt → khu PACKING / bàn giao mẫu
+    QC --> Ready: Thiếu → in bù / gửi bù
+    PendingPrepress --> OnHold
+    Ready --> OnHold
+    MaterialIssued --> OnHold
+    Printing --> OnHold
+    Subcontracted --> OnHold
+    OnHold --> PendingPrepress: Mở lại (về trạng thái trước)
+    OnHold --> Ready: Mở lại
+    OnHold --> MaterialIssued: Mở lại
+    OnHold --> Printing: Mở lại
+    OnHold --> Subcontracted: Mở lại
+    PendingPrepress --> Cancelled
+    Ready --> Cancelled
+    MaterialIssued --> Cancelled: Trả phôi về kho
+    Subcontracted --> Cancelled: Thu hồi phôi, huỷ PO gia công
     Completed --> [*]
     Cancelled --> [*]
 ```
@@ -340,11 +342,11 @@ flowchart TD
     SRC_LOADPLAN --> DISPATCH
     TRUCK -- Không --> DISPATCH[Xuất kho nguồn – Dispatch\nTồn kho nguồn giảm → In-Transit]
 
-    DISPATCH --> TRANSPORT["Vận chuyển giữa 2 kho\n(có/không tracking)"]
+    DISPATCH --> TRANSPORT["Vận chuyển giữa 2 kho\n(không theo dõi hành trình)"]
     TRANSPORT --> DST_RECV[Kho đích: tạo phiếu nhận\ntham chiếu Transfer Order]
     DST_RECV --> DST_COUNT[Kiểm đếm SL thực nhận + tình trạng]
     DST_COUNT --> DISCREPANCY{Khớp SL xuất?}
-    DISCREPANCY -- Lệch --> INVESTIGATE["Ghi transfer discrepancy\nĐiều tra / claim hãng VC\nĐiều chỉnh In-Transit"]
+    DISCREPANCY -- Lệch --> INVESTIGATE["Ghi transfer discrepancy\nĐiều tra / claim hãng VC (ngoài hệ thống)\nĐiều chỉnh In-Transit"]
     DISCREPANCY -- Khớp --> DST_PA
     INVESTIGATE --> DST_PA[Sinh Putaway task tại kho đích]
 
@@ -397,46 +399,91 @@ sequenceDiagram
 
 ## 4. Phụ lục
 
-### 4.1. Luồng Storefront checkout (Design/Catalog → Cart → Order → Payment)
+### 4.1. Luồng bán sỉ (Báo giá → Mẫu → Đơn → Thanh toán)
 
 ```mermaid
 flowchart TD
-    ENTRY{Khách vào sàn} --> BROWSE[Catalog: duyệt / tìm / lọc]
-    BROWSE --> KIND{Sản phẩm tùy chỉnh?}
-    KIND -- Có --> DESIGN[Product Design 2D\n+ Live 3D Preview]
+    ENTRY{Khách sỉ liên hệ\nhoặc đăng nhập cổng} --> PATH{Thiết kế mới?}
+    PATH -- Có --> DESIGN[Product Design 2D\n+ Live 3D Preview]
     DESIGN --> PREFLIGHT{Preflight đạt?}
     PREFLIGHT -- Fail --> DESIGN
     PREFLIGHT -- Pass/Warning --> CONFIRM_DSN["Chốt thiết kế\n→ Design snapshot"]
-    CONFIRM_DSN --> ADDCART
-    KIND -- Không --> ADDCART[Thêm vào giỏ]
+    CONFIRM_DSN --> QUOTE[Sale lập báo giá\nbậc số lượng, MOQ, hiệu lực]
+    QUOTE --> SAMPLE["Yêu cầu làm mẫu (19)\nLSX SAMPLE"]
+    SAMPLE --> SAMPLE_OK{Khách duyệt mẫu?}
+    SAMPLE_OK -- Yêu cầu sửa --> DESIGN
+    SAMPLE_OK -- Duyệt --> ACCEPT[Khách chấp nhận báo giá]
+    PATH -- "Không (hàng sẵn / đặt lại)" --> QUICK[Đặt nhanh / đặt lại trên cổng\ngiá riêng của khách]
+    ACCEPT --> ORDER[Tạo Order\nkiểm tồn phôi, MOQ, chốt giá]
+    QUICK --> ORDER
+    ORDER --> RESERVE["Giữ hàng (reservation)"]
+    RESERVE --> METHOD{Phương thức thanh toán\nđược phép cho khách}
+    METHOD -- Trả trước 100% --> BANK[Pending Payment\nkế toán đối chiếu sao kê]
+    METHOD -- Đặt cọc --> DEPOSIT[Pending Payment\nchờ tiền cọc]
+    METHOD -- Công nợ --> CREDIT{Dư nợ + đơn ≤ hạn mức?}
+    BANK -- Đủ tiền --> CONFIRMED
+    DEPOSIT -- Đủ cọc --> CONFIRMED
+    CREDIT -- Có --> CONFIRMED[Order: Confirmed]
+    CREDIT -- Không --> HOLD[Order: On Hold\nchờ duyệt vượt hạn mức]
+    HOLD -- Duyệt --> CONFIRMED
+    BANK -- Hết hạn --> CANCEL[Cancelled\ngiải phóng reservation]
+    DEPOSIT -- Hết hạn --> CANCEL
 
-    ADDCART --> CART[Giỏ hàng: sửa SL, áp voucher,\nước tính phí ship]
-    CART --> CHECKOUT[Checkout: kiểm tra lần cuối\ntồn / giá / voucher]
-    CHECKOUT --> ADDR[Địa chỉ giao + phương thức vận chuyển]
-    ADDR --> TOTALS[Chốt giá cuối\n= subtotal + ship + thuế − giảm giá]
-    TOTALS --> RESERVE["Giữ hàng (reservation)"]
-    RESERVE --> CREATE_ORDER[Tạo Order: Pending Payment]
-    CREATE_ORDER --> PAY[Payment: chọn phương thức]
-
-    PAY --> METHOD{Loại thanh toán}
-    METHOD -- Online gateway/ví/thẻ --> ONLINE["Xác thực qua cổng\n(webhook + verify)"]
-    METHOD -- Chuyển khoản --> BANK[Awaiting Confirmation\nKế toán đối chiếu sao kê]
-    METHOD -- COD --> CODCHK{Đủ điều kiện COD?}
-    METHOD -- Đặt cọc --> DEPOSIT[Thu cọc → Partially Paid]
-
-    ONLINE --> PAYRES{Kết quả}
-    BANK --> PAYRES
-    CODCHK -- Có --> CONFIRMED
-    CODCHK -- Không --> METHOD
-    DEPOSIT --> CONFIRMED
-    PAYRES -- Thành công --> CONFIRMED[Order: Confirmed\nreservation → allocation]
-    PAYRES -- Thất bại/hết hạn --> FAILED[Order: Payment Failed\ngiải phóng reservation]
-    FAILED --> PAY
-
-    CONFIRMED --> HANDOFF([→ Order Management → Fulfillment])
+    CONFIRMED --> HANDOFF([→ Order Management release → Sản xuất / Fulfillment])
 ```
 
-### 4.2. Luồng Transfer nội bộ một kho (Intra-warehouse — Replenishment)
+### 4.2. Luồng sản xuất đơn hàng và gia công ngoài
+
+```mermaid
+flowchart TD
+    REL[Order Coordinator release đơn\nmỗi dòng in → 1 LSX ORDER] --> PRE{Prepress đạt?}
+    PRE -- Không --> HOLD[LSX On Hold\nSale liên hệ khách]
+    HOLD --> PRE
+    PRE -- Có --> CAP{Xưởng nội bộ kịp hạn?}
+    CAP -- Có --> QUEUE[LSX Ready: hàng đợi\ngán trạm in cùng kỹ thuật in]
+    QUEUE --> ISSUE[Lấy phôi qua Picking\nsang khu PRODUCTION — Material Issued]
+    CAP -- "Không — Quản lý kho tách một phần" --> SPLIT["LSX con gia công\n+ PO gia công (SUBCONTRACT)"]
+    SPLIT -. phần còn lại .-> QUEUE
+    ISSUE --> PRINT[Printing: in, ghi phế phẩm có lý do]
+    PRINT --> QC
+    SPLIT --> APPR{PO gia công Approved?}
+    APPR -- Có --> MODE{Cách gia công}
+    MODE -- Mình cấp phôi --> SEND_B["Xuất phôi gửi nhà gia công\nvị trí ảo, không tính ATP"]
+    MODE -- Nhà gia công lo phôi --> SEND_F[Gửi file in + mẫu đã duyệt]
+    SEND_B --> SUBC[LSX con: Subcontracted]
+    SEND_F --> SUBC
+    SUBC --> RCV["Nhận hàng theo PO gia công (03)\nđếm thành phẩm, phôi / phế phẩm trả về\nđối soát hao hụt"]
+    RCV --> QC{QC theo mẫu đã duyệt\nđủ số đạt?}
+    QC -- "Thiếu — in bù nội bộ (về Ready)" --> QUEUE
+    QC -- "Thiếu — gửi bù nhà gia công (về Ready)" --> SUBC
+    QC -- Đủ --> PACK[Thành phẩm sang khu PACKING\nLSX Completed]
+    PACK --> ALL{Mọi LSX của đơn xong?}
+    ALL -- Có --> RTF([Order: Ready to Fulfill → Packing])
+    RCV -. "hoá đơn theo số đạt QC (04)" .-> AP[Đối chiếu ba chiều\ntrừ hao hụt đã duyệt]
+```
+
+### 4.3. Luồng sản xuất mẫu (Sample)
+
+```mermaid
+flowchart TD
+    REQ[Sale tạo yêu cầu làm mẫu\nkhách, phôi, thiết kế, số lượng] --> SUB[Gửi xưởng → LSX SAMPLE\ngiữ chỗ phôi]
+    SUB --> PRE{Prepress đạt?}
+    PRE -- Không --> HOLD[LSX On Hold\nSale liên hệ khách sửa file]
+    HOLD --> PRE
+    PRE -- Có --> RDY[LSX Ready\nhàng đợi, gán trạm in]
+    RDY --> ISSUE[Lấy phôi qua Picking\nsang khu PRODUCTION — Material Issued]
+    ISSUE --> PRINT[Printing: in mẫu\nghi phế phẩm có lý do]
+    PRINT --> QC{QC đạt đủ số mẫu?}
+    QC -- Thiếu, in bù --> RDY
+    QC -- Đủ --> READY[Yêu cầu mẫu: Ready\nphôi trừ tồn lý do SAMPLE]
+    READY --> SENT[Gửi mẫu cho khách\nngoài hệ thống]
+    SENT --> FB{Khách phản hồi}
+    FB -- Duyệt --> APPROVED([Mẫu Approved\nkhoá thiết kế, chuẩn QC cho đơn])
+    FB -- Yêu cầu sửa --> REV[Sửa thiết kế\nlàm mẫu lần tiếp theo]
+    REV --> REQ
+```
+
+### 4.4. Luồng Transfer nội bộ một kho (Intra-warehouse — Replenishment)
 
 ```mermaid
 flowchart TD
@@ -458,4 +505,4 @@ flowchart TD
 
 - Các trạng thái viết hoa kiểu `Confirmed`, `In Transit`… là trạng thái chứng từ/nhiệm vụ, khớp với bảng vòng đời trong từng module.
 - Sơ đồ mô tả **happy path + các nhánh ngoại lệ chính**; edge case chi tiết xem phần "Ràng buộc nghiệp vụ & Edge case" của module tương ứng.
-- Các bước "Sản xuất/In" trong luồng Fulfillment mô tả xưởng in nội bộ của [19 · Production](../warehouse/19-production/README.md) cho dòng đơn tùy chỉnh.
+- Bước "Sản xuất in" trong luồng Fulfillment và luồng sản xuất mẫu mô tả xưởng in nội bộ (kèm gia công ngoài một phần lệnh đơn hàng) của [19 · Production](../warehouse/19-production/README.md) (đã chốt 2026-10-06).

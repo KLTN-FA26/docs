@@ -4,6 +4,8 @@
 
 Ghi nhận **cam kết mua hàng** giữa doanh nghiệp và nhà cung cấp (supplier/vendor): mua **cái gì, số lượng bao nhiêu, giá nào, giao về kho nào, khi nào**.
 
+PO có hai loại: **PO mua hàng** (`STANDARD` — mua phôi, vật tư) và **PO gia công** (`SUBCONTRACT` — thuê nhà gia công in một phần lệnh sản xuất, sinh tự động khi Quản lý kho tách LSX, xem [19 §4.7](../19-production/README.md)). Hai loại dùng chung vòng đời, hạn mức duyệt, nhận hàng và đối chiếu hoá đơn.
+
 PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàng ([03 Receipt](../03-receipt/README.md)) và hoá đơn NCC ([04 Invoice](../04-invoice/README.md)) đều đối chiếu ngược về PO (three-way matching: PO ↔ Receipt ↔ Invoice).
 
 ---
@@ -120,6 +122,7 @@ stateDiagram-v2
 - **BR-07:** Đơn vị tiền tệ của PO cố định theo NCC; không trộn nhiều loại tiền trong một PO.
 - **BR-08:** Hệ thống chỉ sinh đề xuất khi *(Tồn thực tế + Hàng đang về − Hàng chờ xuất) < Reorder Point*.
 - **BR-09:** Số lượng đề xuất được làm tròn lên theo MOQ / bội số đóng gói của NCC.
+- **BR-10:** PO gia công (`SUBCONTRACT`) chỉ đặt cho NCC được đánh dấu **gia công in**, luôn gắn đúng một LSX con, và không sửa số lượng ngoài luồng tách / gửi bù của [19](../19-production/README.md).
 
 ### Edge case
 
@@ -144,4 +147,5 @@ stateDiagram-v2
 | [04 · Invoice](../04-invoice/README.md) | Hoá đơn NCC đối chiếu PO ↔ Receipt (three-way matching); xử lý chênh lệch giá/số lượng |
 | [05 · Putaway](../05-putaway/README.md) | Gián tiếp: hàng nhận theo PO sẽ được cất kho |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Khi cần điều chuyển hàng nhận sai kho so với nhu cầu |
+| [19 · Production](../19-production/README.md) | Sinh PO gia công khi tách LSX; LSX con chỉ gửi đi khi PO gia công `Approved` |
 | [00 · System Overview §5](../../00-system-overview/README.md) | PO là bước mở đầu luồng Procurement |

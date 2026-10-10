@@ -113,14 +113,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. |
 | **Packing slip / Phiếu đóng gói** | Phiếu liệt kê nội dung kiện, đặt kèm trong hoặc ngoài kiện. |
 | **Dimensional weight / Khối lượng quy đổi** | Khối lượng tính cước theo thể tích kiện (khi hàng cồng kềnh nhẹ cân). |
-| **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao kiện cho hãng vận chuyển ngoài để giao đến khách. |
-| **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận). |
-| **AWB** (Air Waybill) / **Shipping label** / **Vận đơn / Nhãn vận chuyển** | Chứng từ + nhãn dán lên kiện, chứa mã theo dõi. |
-| **Tracking number / Mã theo dõi** | Mã để tra cứu hành trình kiện hàng. |
+| **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao kiện (gửi kiện qua hãng, hoặc xếp lên xe khi giao nguyên chuyến) cho hãng vận chuyển ngoài để giao đến khách. Hệ thống không theo dõi hành trình sau bàn giao. |
+| **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận), hoạt động ngoài hệ thống. |
+| **Package label / Nhãn kiện** | Nhãn nội bộ in khi đóng gói: mã đơn, mã kiện, người nhận, địa chỉ, số tiền thu khi giao (nếu có). Hệ thống không lấy vận đơn / mã theo dõi của hãng. |
 | **Manifest / Bảng kê bàn giao** | Danh sách kiện giao cho hãng vận chuyển trong một lần, hai bên ký. |
-| **POD** (Proof of Delivery) — **Bằng chứng giao hàng** | Chữ ký/ảnh/thời gian xác nhận đã giao. |
 | **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện không giao được, quay về kho gửi. |
-| **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái & lịch sử tracking chung. |
+| **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái giao chung (`Ready to Dispatch` → `Handed Over` → `Delivered` / `Delivery Failed` → `Returned`); không có lịch sử tracking từ hãng. |
 | **FTL** (Full Truckload) / **Giao nguyên chuyến** | Hình thức giao thuê nguyên xe tải / container (cho đơn sỉ khối lượng lớn được chỉ định, hoặc lệnh chuyển kho), khác với gửi từng kiện qua hãng vận chuyển. |
 | **Load Planning / Lập kế hoạch xếp hàng 3D** | Tính từ danh sách kiện: cần loại xe nào, bao nhiêu chiếc, mỗi kiện đặt ở vị trí & hướng nào trong thùng xe; hiển thị 3D để kiểm tra trước khi thuê xe. |
 | **Load Plan / Kế hoạch chuyến xe** | Kết quả của Load Planning: số xe từng loại, vị trí từng kiện, % lấp đầy, kiện không xếp được; có vòng đời `Draft` → `Planned` → `Confirmed` → `Dispatched`. |
@@ -138,24 +136,37 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **Blank / Phôi** | Hàng chưa in của sản phẩm tùy chỉnh (ly trơn, túi giấy trơn…); là Inventory Item của SKU tùy chỉnh, được cấp cho xưởng theo lệnh sản xuất. |
+| **Phôi / Blank** | Ly, hộp, túi chưa in (ly trơn, túi giấy trơn…) — Inventory Item của SKU; tồn kho và ATP tính trên phôi; được cấp cho xưởng theo lệnh sản xuất. |
 | **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); quyết định trạm in được nhận lệnh. |
 | **Print Station / Trạm in** | Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái (`Active` / `Maintenance` / `Inactive`). |
 | **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
-| **Production Order (MO) / Lệnh sản xuất** | Chứng từ sản xuất sinh từ **một dòng đơn tùy chỉnh**: SKU phôi, số lượng, design snapshot, print-ready file, kỹ thuật in, trạm in, hạn cần xong. Mã theo prefix kho, ví dụ `HN-MO-000123`. Xem [19](../warehouse/19-production/README.md). |
-| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh đã có phôi, chờ gán trạm; ưu tiên theo hạn giao rồi thời điểm xác nhận đơn. |
-| **Prepress / Kiểm file trước sản xuất** | E-commerce Admin kiểm print-ready file của lệnh sản xuất trước khi cấp phôi. Khác *Preflight* (kiểm tự động khi khách thiết kế). |
-| **Rework / In lại** | Cấp phôi mới và in lại **phần còn thiếu** khi in hỏng hoặc QC thành phẩm không đạt. |
-| **Scrap / Xuất huỷ** | Giảm tồn phôi in hỏng / thành phẩm lỗi bằng chứng từ điều chỉnh có lệnh sản xuất làm nguồn. |
+| **Production Order (MO) / Lệnh sản xuất (LSX)** | Chứng từ xưởng in cho **một dòng đơn tùy chỉnh** (`ORDER`) hoặc **một yêu cầu làm mẫu** (`SAMPLE`): SKU phôi, số lượng, design snapshot, print-ready file, kỹ thuật in, trạm in, hạn cần xong. Mã theo prefix kho, ví dụ `HN-MO-000123`. Xem [19](../warehouse/19-production/README.md). |
+| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh `Ready` (đã qua prepress) xếp theo hạn hoàn thành rồi thời điểm release đơn; vị trí hàng đợi và trạm in được gán là thuộc tính của lệnh, không phải trạng thái. |
+| **Prepress / Kiểm file trước sản xuất** | Production Staff kiểm print-ready file của lệnh sản xuất trước khi cấp phôi: checksum khớp thiết kế đã khoá, vùng in, độ phân giải. Khác *Preflight* (kiểm tự động khi khách thiết kế). |
+| **In bù / Reprint (rework)** | Cấp phôi mới và in lại **phần còn thiếu** khi in hỏng hoặc QC thành phẩm không đạt; lệnh quay từ `QC` về `Ready`. |
+| **Scrap / Phế phẩm, xuất huỷ** | Sản phẩm in hỏng hoặc phôi hỏng; luôn ghi kèm lý do và giảm tồn bằng chứng từ điều chỉnh có lệnh sản xuất làm nguồn. |
+| **Sản xuất mẫu / Sample production** | Làm vài sản phẩm theo thiết kế mới để khách duyệt trước khi đặt số lượng lớn (LSX `SAMPLE`, luôn in nội bộ). |
+| **Yêu cầu làm mẫu / Sample request** | Chứng từ Sale tạo để xưởng làm mẫu cho khách; kết thúc khi khách duyệt hoặc yêu cầu sửa. |
+| **Mẫu đã duyệt / Approved sample** | Mẫu khách đã chấp nhận; khoá thiết kế cho cặp (thiết kế, phôi) và là chuẩn QC khi sản xuất đơn hàng. |
+| **Gia công ngoài / Subcontracting** | Thuê **nhà gia công** in một phần LSX `ORDER` khi xưởng nội bộ thiếu công suất. Hai cách: **`SUPPLIED_BLANKS`** (mình cấp phôi, trả phí gia công) và **`FULL_SERVICE`** (nhà gia công tự lo phôi, mình mua thành phẩm). Xem [19 §4.7](../warehouse/19-production/README.md). |
+| **Nhà gia công / Subcontractor** | Nhà cung cấp được đánh dấu **gia công in**; nhận PO gia công, không dùng hệ thống. |
+| **PO gia công** (`SUBCONTRACT`) | PO sinh khi tách LSX, một dòng là thành phẩm của LSX con; duyệt, nhận hàng và đối chiếu hoá đơn như PO thường. |
+| **Đối soát phôi gia công** | Phôi gửi = thành phẩm nhận + phế phẩm trả về + phôi trả về + hao hụt; hao hụt vượt mức cho phép bị trừ vào hoá đơn gia công. |
 
 ---
 
-## 4. Thuật ngữ sàn TMĐT (E-commerce / Storefront)
+## 4. Thuật ngữ bán hàng sỉ (B2B Sales)
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **Storefront** | Mặt tiền bán hàng online mà khách nhìn thấy. |
-| **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày để khách duyệt & mua. |
+| **B2B / Bán sỉ** | Hệ thống chỉ bán cho khách doanh nghiệp đã liên hệ trước; không có khách vãng lai. |
+| **Customer portal / Cổng khách hàng** | Trang dành cho khách sỉ đã đăng nhập: catalog & giá riêng, báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ. |
+| **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận → thành đơn bán. |
+| **Giá riêng theo khách / Customer price list** | Giá theo từng khách sỉ, có bậc theo số lượng. |
+| **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ với đơn bán theo công nợ. |
+| **Hạn mức tín dụng / Credit limit** | Mức dư nợ tối đa của một khách; đơn công nợ vượt hạn mức bị giữ chờ duyệt. |
+| **Kỳ hạn thanh toán / Payment term** | Số ngày khách được trả chậm (ví dụ 30 ngày) với đơn công nợ. |
+| **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày trên cổng khách hàng để khách sỉ xem & đặt. |
 | **PLP** (Product Listing Page) — **Trang danh sách sản phẩm** | Trang liệt kê nhiều sản phẩm (có lọc, sắp xếp). |
 | **PDP** (Product Detail Page) — **Trang chi tiết sản phẩm** | Trang một sản phẩm: hình ảnh, mô tả, chọn biến thể, giá, tình trạng còn hàng. |
 | **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. |
@@ -186,9 +197,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
 | **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). |
 | **Authorize / Capture / Void** | Giữ tiền (authorize) → trừ tiền (capture); huỷ khoản đã giữ chưa trừ (void). |
-| **COD** (Cash On Delivery) — **Thanh toán khi nhận hàng** | Khách trả tiền cho người giao khi nhận hàng. |
+| **COD** (Cash On Delivery) — **Thanh toán khi nhận hàng** | Khách trả tiền khi nhận hàng. Không áp dụng cho bán lẻ (hệ thống chỉ bán sỉ); với đơn đặt cọc, phần còn lại có thể thu khi giao. |
 | **Prepaid / Trả trước** | Khách thanh toán trước khi hàng được giao. |
-| **Deposit / Partial payment — Đặt cọc / Trả một phần** | Trả trước một phần (thường % giá trị đơn) để đơn vào sản xuất. |
+| **Deposit / Partial payment — Đặt cọc / Trả một phần** | Trả trước một phần (thường % giá trị đơn); đơn đặt cọc chỉ được release sang sản xuất khi tiền cọc đã về. |
 | **Refund / Hoàn tiền** | Trả lại tiền cho khách (toàn phần / một phần). |
 | **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. |
 | **Reconciliation / Đối soát** | So khớp giao dịch hệ thống với báo cáo của cổng thanh toán / hãng vận chuyển. |
@@ -209,7 +220,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Escalate / Chuyển cấp** | Đưa vấn đề vượt thẩm quyền lên người giữ quyền giám sát chat / cấp quản lý. |
 | **Internal note / Ghi chú nội bộ** | Ghi chú chỉ nhân viên thấy, khách không thấy. |
 | **Customer profile / Hồ sơ khách hàng** | Bộ dữ liệu về một khách: định danh, địa chỉ, lịch sử, phân khúc, rủi ro. |
-| **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. |
+| **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. **Không áp dụng** (hệ thống chỉ bán sỉ). |
 | **Address book / Sổ địa chỉ** | Danh sách địa chỉ giao & xuất hoá đơn của khách. |
 | **Segment / Nhóm khách / Phân khúc** | Nhóm khách theo tiêu chí (VIP, doanh nghiệp, mới, rủi ro…) để áp giá/ưu đãi. |
 | **Consent / Đồng ý (nhận tin)** | Sự cho phép của khách để gửi marketing, có lưu thời điểm. |
@@ -224,7 +235,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
-| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan | Bản nháp, sửa tự do, chưa có hiệu lực |
+| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request | Bản nháp, sửa tự do, chưa có hiệu lực |
 | `Pending Approval` | PO, TO | Chờ phê duyệt |
 | `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
 | `Planned` | Load Plan | Đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay |
@@ -240,12 +251,16 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
 | `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
 | `Paid` | Order (payment_status) | Đã thu đủ tiền |
-| `In Production` | Order | Đang sản xuất/in (đơn tùy chỉnh); rời trạng thái khi mọi lệnh sản xuất của đơn `Completed` |
-| `Waiting Material` | Production Order | Đã qua prepress, chờ cấp phôi lên khu `PRODUCTION` |
-| `Queued` / `Assigned` | Production Order | Chờ gán trạm in / đã gán trạm |
-| `QC Pending` | Production Order | In xong, chờ QC thành phẩm |
-| `Rework` | Production Order | Thiếu thành phẩm đạt, cần cấp phôi in lại phần thiếu |
-| `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý |
+| `In Production` | Order, Sample request | Đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed` |
+| `Pending Prepress` | Lệnh sản xuất | Chờ kiểm file in |
+| `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi (vị trí hàng đợi, trạm in được gán), chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
+| `Material Issued` / `Printing` | Lệnh sản xuất (in nội bộ) | Phôi đã ở khu `PRODUCTION` / đang in tại trạm |
+| `Subcontracted` | Lệnh sản xuất (gia công) | Đã gửi nhà gia công, chờ hàng về |
+| `QC` | Lệnh sản xuất | Đang kiểm thành phẩm (in nội bộ hoặc hàng gia công đã nhận) |
+| `Submitted` | Sample request | Đã gửi xưởng, đã sinh LSX `SAMPLE` |
+| `Sent to Customer` / `Approved` / `Changes Requested` | Sample request | Đã gửi mẫu / khách duyệt / khách yêu cầu sửa |
+| `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý (với dòng in: đã sản xuất xong) |
+| `On Hold` | Order, Lệnh sản xuất | Tạm giữ (vượt hạn mức, file lỗi, thiếu phôi, máy hỏng…) |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
 | `Refunded` / `Partially Refunded` | Order, Payment | Đã hoàn tiền toàn phần / một phần |
 
@@ -267,12 +282,13 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | QC | Quality Control | Kiểm tra chất lượng |
 | RTV | Return To Vendor | Trả hàng nhà cung cấp |
 | RTO | Return To Origin | Hoàn hàng về kho |
-| POD | Proof of Delivery | Bằng chứng giao hàng |
-| AWB | Air Waybill | Vận đơn |
 | COD | Cash On Delivery | Thanh toán khi nhận hàng |
 | FTL | Full Truckload | Giao nguyên chuyến (thuê nguyên xe / container) |
 | DC / HC | Dry Container / High Cube | Container khô tiêu chuẩn / container cao (ví dụ 20DC, 40DC, 40HC, 45HC) |
 | AP | Accounts Payable | Công nợ phải trả |
+| AR | Accounts Receivable | Công nợ phải thu |
+| LSX | Lệnh sản xuất (Production Order) | Chứng từ xưởng in |
+| B2B | Business To Business | Bán cho doanh nghiệp (bán sỉ) |
 | FIFO / FEFO | First-In / First-Expired-First-Out | Nhập trước / hết hạn trước, xuất trước |
 | PLP / PDP | Product Listing / Detail Page | Trang danh sách / chi tiết sản phẩm |
 | DPI | Dots Per Inch | Độ phân giải in |
@@ -290,15 +306,15 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm. |
-| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO, chốt PO, xử lý tranh chấp hoá đơn. |
+| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO (kể cả PO gia công), chốt PO, xử lý tranh chấp hoá đơn. |
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
-| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên). |
-| **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: in theo lệnh sản xuất, báo số lượng đạt / hỏng, bàn giao thành phẩm cho QC. |
+| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên, quyết định tách lệnh đưa gia công ngoài). |
+| **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do, bàn giao thành phẩm cho QC. |
 | **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO. |
-| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine) & thành phẩm in tại xưởng (đạt / không đạt). |
-| **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán / COD / hoàn tiền. |
-| **E-commerce Admin / Quản trị sàn** | Quản lý catalog, giá, khuyến mãi, nội dung, chính sách; cấu hình template thiết kế & kiểm tra file in (prepress). |
-| **Sales Staff / Nhân viên Sale** | Tư vấn & chăm sóc khách hàng (CSKH) qua chat, tạo đơn hộ, chốt thiết kế, xử lý khiếu nại. |
-| **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn. |
+| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt). |
+| **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
+| **E-commerce Admin / Quản trị bán hàng** | Quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; cấu hình template thiết kế. |
+| **Sales Staff / Nhân viên Sale** | Tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, chốt thiết kế, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
+| **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
 | **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
 | **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |

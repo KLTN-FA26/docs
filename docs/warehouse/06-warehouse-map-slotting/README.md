@@ -136,6 +136,7 @@ Kệ ở trạng thái khác `Active` kéo theo mọi bin của kệ đó không
 | | `PRODUCTION` | Khu xưởng in (xem [19](../19-production/README.md)): phôi đã cấp cho lệnh sản xuất, hàng đang in và thành phẩm chờ QC |
 | | `PACKING` | Khu đóng gói, gồm chỗ gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói |
 | | `DISPATCH` | Khu chờ giao / bàn giao hãng vận chuyển (outbound dock) |
+| | `PRODUCTION` | Khu sản xuất: chứa phôi đã xuất cho xưởng in ([19](../19-production/README.md)) |
 | | `OVERFLOW` | Khu tràn cho hàng quá khổ hoặc khi hết chỗ trên kệ |
 | | `NON_STORAGE` | Khu không chứa hàng (văn phòng, khu sạc xe…) |
 | **Lớp lưu trữ (storage class)** | `NORMAL` · `COLD` · `HAZMAT` · `FRAGILE` · `OVERSIZE` | Hàng thường · lạnh · nguy hiểm · dễ vỡ · quá khổ |
@@ -218,8 +219,8 @@ Trường có dấu `?` là tùy chọn; nếu để trống thì hệ thống *
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Nhận gợi ý vị trí đích khi di chuyển nội bộ / re-slotting; replenishment từ bin dự trữ sang bin picking |
 | [07 · Picking](../07-picking/README.md) | Cung cấp quãng đường đi thực tế cho lộ trình picking; chỉ lấy từ bin `is_pickable`; zone dùng cho zone picking; velocity từ picking là đầu vào re-slotting |
 | [03 · Receipt](../03-receipt/README.md) / [08 · Packing](../08-packing/README.md) | Hàng nhận nằm ở khu `RECEIVING`, hàng chờ QC ở khu `QUALITY_CONTROL`, hàng cách ly/không đạt ở khu `QUARANTINE`; hàng chờ đóng gói ở khu `PACKING`, chờ giao ở khu `DISPATCH` |
-| [19 · Production](../19-production/README.md) | Phôi cấp cho lệnh sản xuất và hàng đang in nằm ở khu `PRODUCTION`; thành phẩm đạt QC chuyển sang khu `PACKING` |
-| [09 · Shipping](../09-shipping/README.md) | Dùng địa chỉ kho & địa chỉ hoàn hàng khi tạo vận đơn |
+| [19 · Production](../19-production/README.md) | Phôi cấp cho lệnh sản xuất và hàng đang in nằm ở khu `PRODUCTION`; thành phẩm đạt QC chuyển sang khu `PACKING`; phôi gửi gia công nằm ở vị trí ảo "tại nhà gia công" |
+| [09 · Shipping](../09-shipping/README.md) | Dùng địa chỉ kho & địa chỉ hoàn hàng trên nhãn kiện và biên bản bàn giao; kiện chờ giao / chờ xếp xe nằm ở khu `DISPATCH` |
 | [01 · Product Creation](../01-product-creation/README.md) | Cung cấp lớp lưu trữ yêu cầu, kích thước/khối lượng của SKU (Inventory Item) |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Khi kho hết chỗ, đề xuất chuyển bớt sang kho khác |
 | [00 · System Overview](../../00-system-overview/README.md) | Là lớp hỗ trợ xuyên suốt luồng lưu kho |
