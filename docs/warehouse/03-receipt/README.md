@@ -18,6 +18,8 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 - Đối chiếu [hoá đơn NCC](../04-invoice/README.md) (three-way matching).
 - Sinh nhiệm vụ [Putaway](../05-putaway/README.md) để cất hàng lên vị trí lưu trữ.
 
+Hàng **gia công ngoài** trả về cũng nhận theo luồng này, tham chiếu **PO gia công**: đếm thành phẩm, và nếu mình đã cấp phôi thì đếm thêm phế phẩm và phôi chưa dùng trả về để **đối soát phôi** ([19 §4.7](../19-production/README.md)). Thành phẩm gia công không đi Putaway mà sang QC của LSX (trạng thái `QC`) rồi tới khu `PACKING`; phôi chưa dùng trả về đi luồng nhận thường.
+
 > ⚠️ Giả định: Tồn kho khả dụng để bán (available-to-promise) chỉ được cộng **sau khi Putaway hoàn tất**, không phải ngay khi Receipt. Hàng ở khu nhận hàng và khu QC coi là "đã nhận, chưa khả dụng" (`Inbound`). Xem [open-questions](../../open-questions/README.md).
 
 ---
@@ -148,6 +150,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 - **BR-07:** Dòng nhận của SKU bật cờ Yêu cầu QC **không** được sinh Putaway task trước khi có kết luận QC; hàng chỉ được putaway từ khu `QUALITY_CONTROL`, không đi tắt từ khu `RECEIVING` lên bin.
 - **BR-08:** QC chỉ được kết luận cho hàng **đã nằm ở khu QC** (nhiệm vụ chuyển sang khu QC `Completed`). Tổng `Accepted` + `Quarantine` + `Rejected` phải bằng số lượng đã chuyển sang khu QC; phần `Quarantine` / `Rejected` bắt buộc có lý do.
 - **BR-09:** Mọi lần hàng đổi chỗ trong luồng nhận (khu nhận hàng → khu QC → khu cách ly / bin) đều phải ghi **movement** có chứng từ nguồn là Receipt; không sửa tồn trực tiếp.
+- **BR-10:** Phiếu nhận của PO gia công mà mình đã cấp phôi chỉ `Confirmed` khi đã ghi đủ thành phẩm, phế phẩm và phôi trả về; hao hụt vượt mức cho phép phải được Quản lý kho duyệt ([19](../19-production/README.md) BR-17).
 
 ### Edge case
 
@@ -164,6 +167,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 | Hàng Quarantine cuối cùng bị Rejected | Tồn chuyển `Blocked` tại khu cách ly; chốt trả NCC; cập nhật hồ sơ chất lượng NCC |
 | Hàng Quarantine sau đó `Accepted` | Sinh Putaway task từ khu `QUARANTINE` lên bin |
 | Hàng `Rejected` đã trả NCC | Movement xuất khỏi kho làm giảm tồn `Blocked` tại khu cách ly; dòng nhận được coi là đã xử lý |
+| Nhà gia công trả thiếu thành phẩm / thiếu phôi | Ghi số thực nhận; đối soát phôi ra hao hụt; vượt mức → Quản lý kho duyệt, trừ vào hoá đơn gia công |
 
 ---
 
@@ -176,4 +180,5 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 | [05 · Putaway](../05-putaway/README.md) | Sinh nhiệm vụ Putaway cho hàng `Accepted` (nguồn: khu `QUALITY_CONTROL`) và hàng không cần QC (nguồn: khu `RECEIVING`) |
 | [01 · Product Creation](../01-product-creation/README.md) | Cấu hình theo lô/hạn dùng/serial và cờ Yêu cầu QC của SKU quyết định dữ liệu phải ghi khi nhận và luồng 2 bước hay 3 bước |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Cung cấp khu nhận hàng (`RECEIVING`), khu QC (`QUALITY_CONTROL`), khu cách ly (`QUARANTINE`); sau Putaway, hàng nằm ở vị trí do slotting gợi ý |
+| [19 · Production](../19-production/README.md) | Nhận hàng gia công về; phiếu nhận `Confirmed` đưa LSX con sang `QC` |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Nhận hàng đến từ kho khác cũng dùng luồng Receipt (nguồn là Transfer Order thay vì PO) |

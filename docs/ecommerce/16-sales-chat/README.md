@@ -2,9 +2,9 @@
 
 ## 1. Mục đích (Purpose)
 
-Kênh **hội thoại trực tiếp giữa khách hàng và nhân viên Sale** để: tư vấn sản phẩm, hỗ trợ **tinh chỉnh & chốt thiết kế** ([12](../12-product-design/README.md)), báo giá, **đặt hàng hộ** ([14](../14-cart-and-order/README.md)), gửi **link thanh toán** ([15](../15-payment/README.md)), xử lý phát sinh sau bán (đổi/huỷ, khiếu nại giao hàng).
+Kênh **hội thoại trực tiếp giữa khách sỉ và nhân viên Sale** để: tư vấn sản phẩm, hỗ trợ **tinh chỉnh & chốt thiết kế** ([12](../12-product-design/README.md)), **báo giá** và **làm mẫu** ([14](../14-cart-and-order/README.md), [19](../../warehouse/19-production/README.md)), tạo đơn từ báo giá, gửi **thông tin thanh toán / nhắc công nợ** ([15](../15-payment/README.md)), xử lý phát sinh sau bán (đổi/huỷ, khiếu nại giao hàng).
 
-Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chiếu sản phẩm, thiết kế, giỏ hàng, hoặc đơn hàng cụ thể.
+Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chiếu sản phẩm, thiết kế, báo giá, yêu cầu làm mẫu, hoặc đơn hàng cụ thể.
 
 ---
 
@@ -12,12 +12,12 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng** | Mở hội thoại, gửi câu hỏi/ảnh/link thiết kế, nhận tư vấn & link hành động |
-| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn, chỉnh thiết kế hộ, tạo đơn hộ, gửi báo giá & link thanh toán, chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
+| **Khách hàng sỉ** | Mở hội thoại (trên cổng khách hàng), gửi câu hỏi / logo / ảnh, nhận tư vấn, báo giá, thông tin mẫu |
+| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn, chỉnh thiết kế hộ, lập báo giá, tạo yêu cầu làm mẫu, tạo đơn từ báo giá, gửi thông tin thanh toán, chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
 | **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản trị sàn hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
 | **Hệ thống (Routing + Notification)** | Định tuyến hội thoại đến agent phù hợp/rảnh; nhắc SLA; lưu lịch sử; (tuỳ chọn) chatbot trả lời câu hỏi cơ bản |
 
-> ⚠️ Giả định: Phạm vi là **chat 1–1 khách ↔ Sale trong nội bộ storefront**. Việc tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI chưa được đề bài xác định — xem [open-questions](../../open-questions/README.md).
+> ⚠️ Giả định: Phạm vi là **chat 1–1 khách sỉ ↔ Sale trong cổng khách hàng**. Việc tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI chưa được đề bài xác định — xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -28,7 +28,7 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
 | Người khởi tạo | Khách (từ PDP, trang thiết kế, trang đơn hàng, nút "Chat với Sale") hoặc Sale (chủ động) | Có |
-| Ngữ cảnh đính kèm | product ID / design ID / cart ID / order ID | Không |
+| Ngữ cảnh đính kèm | product ID / design ID / quote ID / sample request ID / order ID | Không |
 | Nội dung tin nhắn | Text, ảnh, file (ảnh thiết kế, ảnh sản phẩm lỗi), link | Có |
 | Thông tin khách | Từ [18 Customer Information](../18-customer-information/README.md) (nếu đăng nhập) | Không |
 
@@ -37,7 +37,7 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 | Kết quả | Dùng bởi |
 |---------|----------|
 | **Conversation / thread** — lịch sử tin nhắn, người tham gia, ngữ cảnh, trạng thái | Sale, khách, người giám sát chat |
-| **Hành động phát sinh:** link thiết kế đã chỉnh, giỏ/đơn tạo hộ, link thanh toán, phiếu yêu cầu đổi/huỷ | 12, 14, 15, 17 |
+| **Hành động phát sinh:** link thiết kế đã chỉnh, báo giá, yêu cầu làm mẫu, đơn tạo từ báo giá, thông tin thanh toán, phiếu yêu cầu đổi/huỷ | 12, 14, 15, 17, 19 |
 | **Ghi chú nội bộ (internal note)** — chỉ Sale thấy | Sale, người giám sát chat |
 | **Chỉ số:** thời gian phản hồi đầu (FRT), thời gian xử lý, mức hài lòng (CSAT) | Người giám sát chat, báo cáo |
 | **Lịch sử tương tác** gắn hồ sơ khách | [18 Customer Information](../18-customer-information/README.md) |
@@ -52,11 +52,11 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 4. **Tư vấn / trao đổi** — hai bên nhắn tin, gửi ảnh/file. Agent có thể:
    - Gửi **link sản phẩm** ([13](../13-catalog/README.md)).
    - Mở **thiết kế của khách** ([12](../12-product-design/README.md)), chỉnh hộ, gửi lại phiên bản mới để khách duyệt.
-   - Lập **báo giá** cho yêu cầu đặc thù (số lượng lớn, kỹ thuật in đặc biệt).
+   - Lập **báo giá** ([14](../14-cart-and-order/README.md)); với thiết kế mới, tạo **yêu cầu làm mẫu** ([19](../../warehouse/19-production/README.md)) và báo khách khi mẫu sẵn sàng.
 5. **Chốt đơn:**
-   - Khách tự đặt: agent hướng dẫn; hoặc
-   - **Đặt hộ (assisted order):** agent tạo giỏ/đơn ([14](../14-cart-and-order/README.md)), gắn thiết kế đã chốt, áp ưu đãi trong hạn mức, gửi khách **link thanh toán** ([15](../15-payment/README.md)) hoặc xác nhận COD.
-6. **Hỗ trợ sau bán** — khách nhắn về đơn đang giao / bị lỗi: agent tra [Order Management](../17-order-management/README.md), chia sẻ tracking, tạo **yêu cầu đổi/huỷ/hoàn** hoặc **yêu cầu thay đổi thiết kế** (nếu chưa sản xuất).
+   - Khách chấp nhận báo giá trên cổng (thiết kế mới: sau khi duyệt mẫu) → đơn được tạo; hoặc khách tự đặt nhanh / đặt lại;
+   - Agent tạo đơn từ báo giá ([14](../14-cart-and-order/README.md)), gửi khách **thông tin chuyển khoản** (trả trước / cọc) hoặc xác nhận đơn công nợ ([15](../15-payment/README.md)).
+6. **Hỗ trợ sau bán** — khách nhắn về đơn đang giao / bị lỗi: agent tra [Order Management](../17-order-management/README.md), báo trạng thái đơn, tạo **yêu cầu đổi/huỷ/hoàn** hoặc **yêu cầu thay đổi thiết kế** (nếu chưa sản xuất).
 7. **Escalate** — vấn đề vượt thẩm quyền (giảm giá lớn, bồi thường): chuyển người giám sát chat; thread ghi nhận lý do & người xử lý tiếp.
 8. **Kết thúc & đánh giá** — agent đóng thread khi giải quyết xong; gửi khảo sát CSAT. Thread có thể **mở lại (reopen)** nếu khách nhắn tiếp trong thời hạn.
 9. **Lưu vết** — toàn bộ hội thoại + hành động gắn vào [hồ sơ khách](../18-customer-information/README.md) và (nếu có) vào đơn liên quan.
@@ -115,8 +115,9 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 |--------|---------|
 | [12 · Product Design](../12-product-design/README.md) | Chia sẻ & chỉnh thiết kế hộ khách; khách duyệt phiên bản mới |
 | [13 · Catalog](../13-catalog/README.md) | Agent gửi link sản phẩm; khách hỏi về sản phẩm đang xem |
-| [14 · Cart & Order](../14-cart-and-order/README.md) | Đặt hàng hộ (assisted order); gắn thiết kế; áp ưu đãi |
-| [15 · Payment](../15-payment/README.md) | Gửi link thanh toán; hỗ trợ khi lỗi thanh toán |
-| [17 · Order Management](../17-order-management/README.md) | Tra cứu đơn, chia sẻ tracking, tạo yêu cầu đổi/huỷ/hoàn |
+| [14 · Quote & Order](../14-cart-and-order/README.md) | Lập báo giá; tạo đơn từ báo giá; gắn thiết kế; giảm giá trong hạn mức |
+| [19 · Production](../../warehouse/19-production/README.md) | Tạo yêu cầu làm mẫu; gửi mẫu & ghi nhận phản hồi của khách |
+| [15 · Payment](../15-payment/README.md) | Gửi thông tin chuyển khoản; nhắc thanh toán / công nợ |
+| [17 · Order Management](../17-order-management/README.md) | Tra cứu đơn và trạng thái giao, tạo yêu cầu đổi/huỷ/hoàn |
 | [18 · Customer Information](../18-customer-information/README.md) | Hồ sơ khách, lịch sử tương tác & mua hàng; lưu vết hội thoại |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Xử lý khiếu nại giao hàng, đơn trễ |
