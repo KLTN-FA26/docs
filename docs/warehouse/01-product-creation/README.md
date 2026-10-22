@@ -119,7 +119,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 - **BR-08:** Inventory Item chỉ chứa dữ liệu hàng vật lý & kiểm soát tồn; **không** chứa nội dung bán hàng (mô tả, hình ảnh, SEO, giá bán).
 - **BR-09:** Tồn kho và mọi chứng từ kho lưu số lượng theo **đơn vị cơ sở**. Số lượng nhập theo đơn vị quy đổi (thùng…) được hệ thống nhân hệ số trước khi ghi; hệ số phải là số nguyên dương. Mỗi SKU có thể có nhiều đơn vị quy đổi nhưng **không** sinh SKU mới cho từng quy cách.
 - **BR-10:** Hệ số quy đổi đã phát sinh giao dịch **không được sửa**. Muốn đổi quy cách (ví dụ NCC đổi thùng 1.000 cái sang thùng 500 cái) phải khai báo đơn vị quy đổi mới và ngừng dùng đơn vị cũ.
-- **BR-11:** Đơn vị bán của Variant chỉ được chọn trong danh sách đơn vị quy đổi của Inventory Item tương ứng.  ⚠️ Giả định: đơn vị bán cấu hình theo từng biến thể, khách chỉ đặt số nguyên đơn vị bán (không mua lẻ dưới đơn vị bán nhỏ nhất). Xem [open-questions](../../open-questions/README.md).
+- **BR-11:** Đơn vị bán của Variant chỉ được chọn trong danh sách đơn vị quy đổi của Inventory Item tương ứng. *(Quyết định 19/10/2026: giá bán của **đơn vị cơ sở** lấy từ **giá gốc trong catalog**, không nhập hai lần; chỉ đơn vị bán khác — ví dụ *thùng* — mới có giá riêng.)*  ⚠️ Giả định: đơn vị bán cấu hình theo từng biến thể, khách chỉ đặt số nguyên đơn vị bán (không mua lẻ dưới đơn vị bán nhỏ nhất). Xem [open-questions](../../open-questions/README.md).
 
 ### Edge case cần lưu ý
 

@@ -192,7 +192,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Price lock / Chốt giá** | Cố định giá dòng hàng vào đơn tại thời điểm đặt; không đổi theo giá catalog sau đó. |
 | **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn confirmed đến khi giao hàng cho khách (pick–pack–ship). |
 | **Fulfillment sourcing / Chọn kho xuất** | Quyết định đơn được giao từ kho nào. |
-| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt / từ nhiều kho. |
+| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt / từ nhiều kho. Trong hệ thống: **được phép, do Sale quyết định trên từng đơn** (cờ "cho phép giao một phần"), kho chỉ làm theo — xem [17 §4.2a](../ecommerce/17-order-management/README.md#42a-giao-một-phần-split-shipment-do-sale-quyết-định) *(Quyết định 21/10/2026)*. |
 | **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
 | **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
 | **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). |
@@ -260,7 +260,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Submitted` | Sample request | Đã gửi xưởng, đã sinh LSX `SAMPLE` |
 | `Sent to Customer` / `Approved` / `Changes Requested` | Sample request | Đã gửi mẫu / khách duyệt / khách yêu cầu sửa |
 | `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý (với dòng in: đã sản xuất xong) |
-| `On Hold` | Order, Lệnh sản xuất | Tạm giữ (vượt hạn mức, file lỗi, thiếu phôi, máy hỏng…) |
+| `Partially Fulfilled` | Order | Một phần hàng đã bàn giao / đang giao, phần còn lại chờ (backorder hoặc chờ in); chỉ khi Sale cho phép giao một phần |
+| `On Hold` | Order, Lệnh sản xuất | Tạm giữ (vượt hạn mức, file lỗi, thiếu phôi, máy hỏng…); đơn gỡ giữ về đúng trạng thái trước khi giữ |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
 | `Refunded` / `Partially Refunded` | Order, Payment | Đã hoàn tiền toàn phần / một phần |
 
