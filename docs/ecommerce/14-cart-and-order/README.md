@@ -75,15 +75,15 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 9. **Kiểm tra cuối** — còn tồn phôi khả dụng? giá còn đúng (báo giá còn hiệu lực / bảng giá hiện hành)? đủ MOQ? sản phẩm còn `Published`?
 10. **Địa chỉ giao & người nhận** — chọn từ sổ địa chỉ của khách ([18](../18-customer-information/README.md)).
 11. **Chốt giá cuối** — subtotal + phí giao + thuế − chiết khấu = **tổng tiền đơn**. Giá dòng hàng được **chốt (price lock)** vào đơn.
-12. **Chọn phương thức thanh toán** — chỉ trong các phương thức được phép cho khách:
-    - **Trả trước 100%** hoặc **Đặt cọc** → Order `Pending Payment`, chuyển sang [15 Payment](../15-payment/README.md);
+12. **Chọn phương thức thanh toán** — chỉ trong các phương thức được phép cho khách; trên cổng, khách đọc danh sách phương thức được phép và chọn trong đó *(Quyết định 21/10/2026)*:
+    - **Trả trước 100%** hoặc **Đặt cọc** → Order `Pending Payment`, chuyển sang [15 Payment](../15-payment/README.md). Phần còn lại của đơn đặt cọc có thể **ghi công nợ** (nếu khách được phép): hạn mức được kiểm trên phần còn lại ngay lúc đặt đơn, vượt thì báo lỗi để Sale đổi cách trả, không giữ đơn *(Quyết định 21/10/2026 — [15](../15-payment/README.md) §4.2 bước 3)*;
     - **Công nợ** → hệ thống kiểm **hạn mức**: dư nợ hiện tại + giá trị đơn ≤ hạn mức → Order `Confirmed`; vượt → Order `On Hold` chờ người có quyền duyệt.
 13. **Giữ hàng (Reservation)** — reserve tồn phôi cho các dòng (giảm ATP). Với đơn chờ thanh toán, reservation có thời hạn.
 14. **Kết quả:**
     - Nhận đủ tiền trả trước / đủ tiền cọc, hoặc công nợ hợp lệ / được duyệt → Order `Confirmed`; gửi xác nhận cho khách; đẩy sang [Order Management](../17-order-management/README.md) để release (dòng in → [sản xuất](../../warehouse/19-production/README.md), dòng sẵn → [Picking](../../warehouse/07-picking/README.md)).
     - Hết hạn chưa thanh toán → Order `Cancelled`; giải phóng reservation.
 
-> ⚠️ Giả định: hạn mức công nợ, kỳ hạn, người duyệt vượt hạn mức chưa có ngưỡng cụ thể (D13); bảng giá riêng theo khách có bậc số lượng (D14). Xem [open-questions](../../open-questions/README.md).
+> ⚠️ Giả định: hạn mức công nợ, kỳ hạn, người duyệt vượt hạn mức chưa có ngưỡng cụ thể (D13, đã chốt một phần — xem [open-questions](../../open-questions/README.md)); bảng giá riêng theo khách có bậc số lượng (D14). Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -126,7 +126,8 @@ stateDiagram-v2
 | `Confirmed` | Đủ điều kiện thanh toán; phôi đã giữ | → `In Production` / `Ready to Fulfill`, → `Cancelled` | System |
 | `In Production` | Các dòng in đang sản xuất ([19](../../warehouse/19-production/README.md)) | → `Ready to Fulfill` (mọi lệnh sản xuất `Completed`) | 19 Production |
 | `Ready to Fulfill` | Sẵn sàng cho kho xử lý | → `Picking` …, → `Packed` (đơn chỉ gồm hàng in — không qua picking thành phẩm) | 07 Picking / 08 Packing |
-| `Picking` / `Packed` / `Shipped` / `Delivered` | Theo luồng Fulfillment (sau `Shipped` không theo dõi hành trình — xem 09) | | 07/08/09 |
+| `Picking` / `Packed` / `Shipped` / `Delivered` | Theo luồng Fulfillment (sau `Shipped` không theo dõi hành trình — xem 09); đơn `Packed` không huỷ được *(Quyết định 21/10/2026)* | | 07/08/09 |
+| `Partially Fulfilled` | Một phần hàng đã giao, phần còn lại chờ — chỉ khi Sale cho phép giao một phần *(Quyết định 19/10 và 21/10/2026, xem [17](../17-order-management/README.md) §4.2a)* | → `Packed` / `Shipped` / `Delivered` | 17 |
 | `Completed` | Giao xong & đã thu đủ tiền (hoặc công nợ đã tất toán) | *(cuối)* | 17 Order Management |
 | `Cancelled` | Huỷ (trước khi giao) | *(cuối)* | Khách / Sale / System |
 | `Returned` / `Refunded` | Hoàn hàng / hoàn tiền (chỉ khi lỗi sản xuất) | *(cuối)* | 09 Shipping / 15 Payment |
@@ -145,7 +146,10 @@ stateDiagram-v2
     Confirmed --> InProduction: Release dòng in
     Confirmed --> ReadyToFulfill: Chỉ hàng sẵn
     InProduction --> ReadyToFulfill: Mọi lệnh sản xuất xong
+    InProduction --> PartiallyFulfilled: Hàng sẵn đi trước
     ReadyToFulfill --> Picking
+    Picking --> PartiallyFulfilled
+    PartiallyFulfilled --> Packed
     ReadyToFulfill --> Packed: Đơn chỉ gồm hàng tùy chỉnh
     Picking --> Packed
     Packed --> Shipped

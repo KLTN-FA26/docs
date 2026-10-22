@@ -56,8 +56,8 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 4. **Thêm dòng hàng** — chọn SKU (`Active`), chọn đơn vị mua (ví dụ *thùng*), nhập số lượng & đơn giá; hệ thống quy đổi số lượng về đơn vị cơ sở để so với tồn và nhận hàng. Hệ thống có thể gợi ý SKU cần bổ sung dựa trên ngưỡng tồn tối thiểu (reorder point) từ [module 01](../01-product-creation/README.md).
 5. **Kiểm tra ràng buộc NCC** — MOQ (số lượng đặt tối thiểu), bội số đóng gói, danh mục SKU mà NCC cung cấp.
 6. **Tính tổng tiền** — subtotal, thuế, chiết khấu, phí vận chuyển (nếu nhập) → tổng giá trị PO.
-7. **Gửi duyệt (Submit)** — nếu tổng giá trị vượt hạn mức của người tạo → `Pending Approval`; nếu không → có thể tự chuyển tiếp.
-8. **Phê duyệt / Từ chối** — Approver duyệt → `Approved`; từ chối → về `Draft` kèm lý do.
+7. **Gửi duyệt (Submit)** — nếu tổng giá trị vượt hạn mức của người tạo → `Pending Approval`; nếu không → **tự duyệt ngay lúc gửi** (`Draft` → `Approved`): hệ thống ghi rõ lý do *"tự duyệt trong hạn mức X của vai trò Y"* kèm hạn mức đã dùng, không cần tài khoản hệ thống giả *(Quyết định 21/10/2026)*. Các điều kiện chặn tự duyệt xem BR-11 → BR-14.
+8. **Phê duyệt / Từ chối** — Approver duyệt → `Approved`; từ chối → về `Draft` kèm lý do. PO vượt hạn mức chờ **người khác có hạn mức đủ lớn** duyệt; hạn mức gắn với vai trò, người nhiều vai trò lấy hạn mức cao nhất *(Quyết định 21/10/2026)*.
 9. **Chốt PO (Confirm)** — Procurement chốt PO → `Confirmed`. Từ đây PO **khoá chỉnh sửa nội dung chính** (SKU, số lượng, giá) — thay đổi phải qua **PO amendment / revision**.
 10. **Theo dõi tiến độ giao** — NV kho tạo [Receipt](../03-receipt/README.md) tham chiếu PO. Mỗi lần nhận cập nhật *SL đã nhận* và *open quantity* của dòng hàng.
 11. **Nhận một phần (partial receipt)** — PO chuyển `Partially Received`; phần còn lại vẫn open.
@@ -74,7 +74,7 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Draft` | Đang soạn, sửa tự do | → `Pending Approval`, → `Approved` (nếu dưới hạn mức), → `Cancelled` | Procurement |
+| `Draft` | Đang soạn, sửa tự do | → `Pending Approval`, → `Approved` (nếu dưới hạn mức — tự duyệt lúc gửi, BR-11), → `Cancelled` | Procurement |
 | `Pending Approval` | Chờ duyệt | → `Approved`, → `Draft` (từ chối) | Approver |
 | `Approved` | Đã duyệt, chưa chốt | → `Confirmed`, → `Cancelled` | Procurement |
 | `Confirmed` | PO đã chốt nội bộ; khoá nội dung chính; đang chờ hàng | → `Partially Received`, → `Received`, → `Cancelled` (nếu chưa nhận gì), → `Closed` (force) | Procurement / Warehouse |
@@ -123,6 +123,11 @@ stateDiagram-v2
 - **BR-08:** Hệ thống chỉ sinh đề xuất khi *(Tồn thực tế + Hàng đang về − Hàng chờ xuất) < Reorder Point*.
 - **BR-09:** Số lượng đề xuất được làm tròn lên theo MOQ / bội số đóng gói của NCC.
 - **BR-10:** PO gia công (`SUBCONTRACT`) chỉ đặt cho NCC được đánh dấu **gia công in**, luôn gắn đúng một LSX con, và không sửa số lượng ngoài luồng tách / gửi bù của [19](../19-production/README.md).
+- **BR-11:** *(Quyết định 21/10/2026)* PO dưới hạn mức của chính người gửi **tự duyệt lúc gửi** và ghi lý do + hạn mức đã dùng; PO vượt hạn mức chờ người khác có hạn mức đủ lớn duyệt (người gửi không tự bấm duyệt PO của mình — giữ nguyên tắc bốn mắt cho PO lớn).
+- **BR-12:** *(Quyết định 21/10/2026)* PO **đã từng bị từ chối**, sửa rồi gửi lại **luôn phải duyệt tay**, kể cả khi đã nằm dưới hạn mức — để người đã từ chối luôn được xem lại bản sửa.
+- **BR-13:** *(Quyết định 21/10/2026)* **Chống chia nhỏ PO:** các PO tự duyệt của **cùng người gửi + cùng NCC** trong **7 ngày** được **cộng dồn**; PO nào làm tổng cộng dồn vượt hạn mức thì PO đó phải duyệt tay.
+- **BR-14:** *(Quyết định 21/10/2026)* Hạn mức được so với **tổng PO sau thuế** (số tiền thực phải trả NCC), không phải trước thuế.
+- **BR-15:** *(Quyết định 21/10/2026)* **Cấu hình hạn mức duyệt PO** là một quyền riêng (xem [Role Registry §2.3](../../00-system-overview/README.md)): mặc định chỉ **System Admin** được sửa, Procurement Staff / Warehouse Manager / Accountant được xem; System Admin có thể cấp quyền sửa cho vai trò khác qua màn phân quyền.
 
 ### Edge case
 
