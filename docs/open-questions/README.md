@@ -31,9 +31,9 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | B3 | **Công thức tính giá** sản phẩm tùy chỉnh: theo diện tích phủ mực, số màu, kỹ thuật in, số lượng? Nguồn công thức? | Giá dòng phụ thuộc thông số in; công thức khai báo ở [01](../warehouse/01-product-creation/README.md) | 🟡 | 12, 14, 01 |
 | B4 | Chính sách **đổi/trả với sản phẩm cá nhân hoá**: chỉ nhận khi lỗi sản xuất, hay có cho đổi ý trong X ngày? | Không đổi/trả vì đổi ý; chỉ nhận khi lỗi sản xuất | 🟡 | 17, 16 |
 | B5 | **Yêu cầu thay đổi thiết kế sau khi đặt hàng**: cho phép tới mốc nào (trước khi vào sản xuất)? Có tính phí? | Cho tới khi bắt đầu sản xuất; sau đó từ chối hoặc tính phí | 🟡 | 12, 17 |
-| B6 | **Kiểm duyệt nội dung** khách tải lên (bản quyền, nội dung không phù hợp): tự động, thủ công, hay kết hợp? Ai chịu trách nhiệm? | Kiểm tra cơ bản (định dạng/dung lượng) + rà nội dung theo chính sách | 🟡 | 12 |
-| B7 | **Live 3D Preview**: render phía client (WebGL) hay server? Yêu cầu thiết bị tối thiểu? Fallback khi không render được? | Client-side, có fallback ảnh tĩnh render server | 🟢 | 12 |
-| B8 | Nguồn **model 3D & template**: doanh nghiệp tự dựng cho từng sản phẩm, hay có thư viện dùng chung? | Khai báo theo sản phẩm ở [01](../warehouse/01-product-creation/README.md) | 🟢 | 01, 12 |
+| B6 | **Kiểm duyệt nội dung** khách tải lên (bản quyền, nội dung không phù hợp): tự động, thủ công, hay kết hợp? Ai chịu trách nhiệm? | Kiểm tra cơ bản (định dạng/dung lượng) + rà nội dung theo chính sách. Hiện hệ thống chỉ kiểm định dạng, dung lượng và quét mã độc; QC duyệt kỹ thuật bộ file trước khi gửi khách ([12](../ecommerce/12-product-design/README.md)) | 🟡 | 12 |
+| B7 | **Live 3D Preview**: render phía client (WebGL) hay server? Yêu cầu thiết bị tối thiểu? Fallback khi không render được? | Client-side, có fallback ảnh tĩnh render server. Phụ thuộc B18 | 🟢 | 12 |
+| B8 | Nguồn **model 3D & template**: doanh nghiệp tự dựng cho từng sản phẩm, hay có thư viện dùng chung? | Khai báo theo sản phẩm ở [01](../warehouse/01-product-creation/README.md). Phụ thuộc B18 | 🟢 | 01, 12 |
 | B9 | **Tồn kho của sản phẩm tùy chỉnh** theo dõi trên **phôi** (hàng chưa in) hay trên thành phẩm? Mỗi thiết kế của khách có sinh SKU mới không? (liên quan B2) | ✅ **Đã chốt 2026-10-06:** Inventory Item của SKU là **phôi**; thiết kế đi kèm dòng đơn (design snapshot), không sinh SKU mới; ATP tính theo phôi | 🟡 | 01, 12, 13, 07, 19 |
 | B10 | **Xếp lịch xưởng in**: theo hạn hoàn thành, theo ưu tiên khách, hay tính công suất từng máy? | Bản đầu: hàng đợi theo hạn hoàn thành rồi thời điểm release; Quản lý kho gán trạm in thủ công; công suất/ngày của trạm chỉ dùng ước tính ngày xong — hệ thống chưa tự lập lịch theo công suất máy | 🟡 | 19 |
 | B11 | Có **xuất dư phôi** để bù hao hụt in không, hay chỉ in bù khi thiếu? | Không xuất dư; hao hụt bù bằng vòng in bù (LSX quay về `Ready`) | 🟢 | 19, 06 |
@@ -43,6 +43,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | B15 | **Gia công ngoài — trả tiền theo số nào**: số thành phẩm nhận, hay số **đạt QC**? Nhà gia công có dùng hệ thống (cổng NCC) không? | Trả theo số đạt QC; nhà gia công không dùng hệ thống, nhân viên mình ghi nhận mọi trạng thái | 🟡 | 19, 04, 02 |
 | B16 | Kho **không có xưởng in** có được chọn làm kho xuất cho dòng tùy chỉnh không (ví dụ in ở kho A rồi chuyển sang kho B giao)? | Không — dòng tùy chỉnh chỉ giao từ kho có khu `PRODUCTION` và trạm in `Active` đúng kỹ thuật in | 🟡 | 17, 19, 10 |
 | B17 | **Ngưỡng in bù (rework)** của một lệnh sản xuất là bao nhiêu lần trước khi phải dừng chờ Manager? Cấu hình theo hệ thống hay theo sản phẩm? | Cấu hình theo hệ thống; vượt ngưỡng → lệnh `On Hold` | 🟢 | 19 |
+| B18 | Có làm **trình thiết kế 2D cho khách tự thiết kế**, **xem trước 3D theo thời gian thực** và **preflight tự động** (`Pass` / `Warning` / `Fail`) không? | Phạm vi giai đoạn sau. Hiện tại nhân viên (Sale / Quản trị bán hàng) tải bộ file thiết kế, QC duyệt kỹ thuật, khách xác nhận trên cổng ([12](../ecommerce/12-product-design/README.md)) | 🟡 | 12, 01, 13 |
 
 ---
 

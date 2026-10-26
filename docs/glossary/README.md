@@ -183,10 +183,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Bleed / Vùng tràn lề** | Phần mở rộng ngoài mép để tránh viền trắng khi cắt. |
 | **DPI** (Dots Per Inch) | Độ phân giải in; DPI thấp → ảnh in bị mờ/vỡ. |
 | **RGB / CMYK** | Hệ màu màn hình (RGB) vs hệ màu in (CMYK); cần chuyển đổi khi in. |
-| **Live 3D Preview / Xem trước 3D trực tiếp** | Hiển thị thiết kế 2D "dán" lên mô hình 3D, cập nhật realtime khi khách chỉnh. |
-| **Design draft / Thiết kế nháp** | Bản thiết kế đang chỉnh, lưu tạm. |
-| **Design snapshot / artifact / Bản thiết kế chốt** | Bản mô tả đầy đủ & **bất biến** của thiết kế khách đã xác nhận, đi kèm đơn để sản xuất. |
-| **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). |
+| **Live 3D Preview / Xem trước 3D trực tiếp** | Hiển thị thiết kế 2D "dán" lên mô hình 3D, cập nhật realtime khi khách chỉnh. Phạm vi giai đoạn sau ([open-questions B18](../open-questions/README.md)). |
+| **Design draft / Bản thiết kế** | Bản thiết kế của một khách cho một sản phẩm, đang làm hoặc chờ khách xác nhận (`Draft` → `Submitted` → `Approved`). Chỉ chủ sở hữu, người thiết kế và người duyệt thấy. Xem [12](../ecommerce/12-product-design/README.md). |
+| **Design artifact role / Vai trò file thiết kế** | Mỗi file trong bộ thiết kế mang một vai trò: `CUSTOMER_PREVIEW` (xem trước cho khách — file được duyệt và xác nhận), `TECHNICAL_SPEC` (bản vẽ kỹ thuật), `PRINT_READY` (file in), `PRODUCTION_INSTRUCTION` (hướng dẫn sản xuất). |
+| **Technical review / Duyệt kỹ thuật thiết kế** | Nhân viên QC được giao duyệt **Đạt / Không đạt** bộ file thiết kế, kèm nhận xét, trước khi gửi khách xác nhận. Độc lập (bốn mắt): không phải khách, không phải người sửa cuối. Mọi thay đổi xoá kết quả duyệt. |
+| **Design snapshot / artifact / Bản thiết kế chốt** | Bộ file (theo vai trò) và đặc tả mà khách đã **xác nhận**, kèm checksum SHA-256 từng file và cả bộ. **Bất biến** từ lúc xác nhận; được kiểm lại checksum mỗi lần dùng (báo giá, đặt hàng, prepress, đóng gói). Đổi nội dung = tạo bản sửa (bản thiết kế mới). |
+| **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). Bản tự động (`Pass` / `Warning` / `Fail`) thuộc phạm vi giai đoạn sau (B18); hiện tại việc này là **duyệt kỹ thuật** do QC thực hiện. |
 | **Print-ready file / File sẵn sàng in** | File xuất bản in đúng chuẩn kỹ thuật cho xưởng. |
 | **Cart / Giỏ hàng** | Nơi tạm gom sản phẩm trước khi đặt hàng. |
 | **Cart line / Dòng giỏ hàng** | Một mục trong giỏ: SKU + số lượng (+ design snapshot nếu tùy chỉnh). |
@@ -321,10 +323,10 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên, quyết định tách lệnh đưa gia công ngoài). |
 | **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do, bàn giao thành phẩm cho QC. |
 | **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO. |
-| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt). |
+| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
-| **E-commerce Admin / Quản trị bán hàng** | Quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; cấu hình template thiết kế. |
-| **Sales Staff / Nhân viên Sale** | Tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, chốt thiết kế, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
+| **E-commerce Admin / Quản trị bán hàng** | Quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. |
+| **Sales Staff / Nhân viên Sale** | Tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, thiết kế (tải bộ file) & gửi khách xác nhận, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
 | **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
 | **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
 | **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |

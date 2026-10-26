@@ -58,7 +58,7 @@ docs/
 │   └── 20-inventory-control/              Kiểm soát tồn kho (kiểm kê, điều chỉnh, cảnh báo, truy xuất lô)
 │
 ├── ecommerce/                             MẢNG B — BÁN HÀNG SỈ (B2B)
-│   ├── 12-product-design/                 Thiết kế 2D + Xem trước 3D trực tiếp
+│   ├── 12-product-design/                 Thiết kế in: nhân viên thiết kế, QC duyệt, khách xác nhận
 │   ├── 13-catalog/                        Catalog trên cổng khách hàng (giá riêng)
 │   ├── 14-cart-and-order/                 Báo giá & Đặt hàng sỉ
 │   ├── 15-payment/                        Thanh toán & công nợ khách sỉ
@@ -105,12 +105,12 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 | **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, điều phối xưởng in, quyết định đưa gia công ngoài | 05, 06, 10, 11, 19, 20 |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do | 19 |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho, lập kiểm kê, theo dõi cảnh báo tồn | 02, 10, 20 |
-| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập, mẫu và thành phẩm in | 03, 19 |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập, mẫu và thành phẩm in; duyệt kỹ thuật bản thiết kế trước khi gửi khách | 03, 12, 19 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ | 04, 15, 17 |
-| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog, bảng giá theo khách, nội dung, template thiết kế | 12, 13, 14, 18 |
-| **Nhân viên Sale (Sales Staff)** | Tạo khách sỉ, báo giá, yêu cầu làm mẫu, tạo đơn từ báo giá, tư vấn qua chat | 14, 16, 17, 18, 19 |
+| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog, bảng giá theo khách, nội dung; lập & phân công bản thiết kế cho khách | 12, 13, 14, 18 |
+| **Nhân viên Sale (Sales Staff)** | Tạo khách sỉ, thiết kế (tải bộ file) & gửi khách xác nhận, báo giá, yêu cầu làm mẫu, tạo đơn từ báo giá, tư vấn qua chat | 12, 14, 16, 17, 18, 19 |
 | **Điều phối đơn hàng (Order Coordinator)** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất | 17 |
-| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước: thiết kế, xem catalog & giá riêng, chấp nhận báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ | 12, 13, 14, 15, 16, 19 |
+| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước: xác nhận / yêu cầu sửa thiết kế, xem catalog & giá riêng, chấp nhận báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ | 12, 13, 14, 15, 16, 19 |
 
 ---
 

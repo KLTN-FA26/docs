@@ -166,7 +166,7 @@ stateDiagram-v2
 ### Business rules
 
 - **BR-01:** Chỉ **tài khoản khách sỉ đang hoạt động** mới được xem giá, nhận báo giá và đặt hàng. Không có guest checkout.
-- **BR-02:** Dòng in phải có design snapshot `Confirmed`; snapshot `Locked` khi đơn `Confirmed`. Với **thiết kế mới**, báo giá chỉ được chấp nhận khi đã có **mẫu `Approved`** ([19](../../warehouse/19-production/README.md)); đặt lại thiết kế đã có mẫu duyệt thì không cần làm mẫu.
+- **BR-02:** Dòng in phải có design snapshot **đã được khách xác nhận** (bất biến từ lúc xác nhận — [12](../12-product-design/README.md) BR-08); hệ thống kiểm snapshot thuộc đúng khách, đúng sản phẩm của SKU phôi và file còn khớp checksum. Với **thiết kế mới**, báo giá chỉ được chấp nhận khi đã có **mẫu `Approved`** ([19](../../warehouse/19-production/README.md)); đặt lại thiết kế đã có mẫu duyệt thì không cần làm mẫu.
 - **BR-03:** Giá dòng hàng được **chốt vào Order** tại thời điểm tạo đơn; thay đổi bảng giá sau đó không ảnh hưởng đơn đã tạo. Báo giá giữ giá trong thời hạn hiệu lực.
 - **BR-04:** Số lượng mỗi dòng phải **≥ MOQ** của phôi / báo giá.
 - **BR-05:** Chỉ dùng **phương thức thanh toán được phép** cho khách đó (trả trước, đặt cọc, công nợ).

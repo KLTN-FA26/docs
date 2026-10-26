@@ -48,7 +48,7 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 |---------|-------|-------|
 | **Nguồn lệnh** | Yêu cầu làm mẫu (`SAMPLE`) hoặc dòng đơn đã release (`ORDER`) | Sale (§4.1) / [17 · Order Management](../../ecommerce/17-order-management/README.md) |
 | **Dòng đơn tùy chỉnh** | Order number, dòng hàng, SKU phôi, số lượng (đã quy về đơn vị cơ sở), hạn giao dự kiến | [17 · Order Management](../../ecommerce/17-order-management/README.md) |
-| **Design snapshot + print-ready file** | Bản thiết kế chốt (`Locked`) + checksum và file in đúng chuẩn (`PRINT_READY`: bleed, DPI, hệ màu) | [12 · Product Design](../../ecommerce/12-product-design/README.md) |
+| **Design snapshot + print-ready file** | Bản thiết kế chốt (đã khách xác nhận, bất biến) + checksum và file in đúng chuẩn (`PRINT_READY`: bleed, DPI, hệ màu) | [12 · Product Design](../../ecommerce/12-product-design/README.md) |
 | **Mẫu đã duyệt** | Với `ORDER`: mẫu khách đã duyệt cho cặp (thiết kế, phôi) — chuẩn QC | §4.1 |
 | **Kỹ thuật in (print method)** | Kỹ thuật in của sản phẩm (in lụa, in offset khô, in UV, flexo…) — dùng để chọn trạm in phù hợp | [01 · Product Creation](../01-product-creation/README.md) |
 | **Tồn phôi** | Phôi `Available` tại bin của kho xuất (Coordinator đã chọn khi release) | Tồn kho theo vị trí ([06](../06-warehouse-map-slotting/README.md)) |
@@ -267,7 +267,7 @@ stateDiagram-v2
 
 ### Business rules
 
-- **BR-01:** Mỗi dòng tuỳ chỉnh của đơn (hoặc mỗi yêu cầu làm mẫu) có **đúng 1 LSX**; tạo lại không sinh LSX trùng (ngoại lệ duy nhất: LSX con khi tách gia công, BR-12). Lệnh luôn gắn một design snapshot `Locked` (kèm checksum) và một print-ready file.
+- **BR-01:** Mỗi dòng tuỳ chỉnh của đơn (hoặc mỗi yêu cầu làm mẫu) có **đúng 1 LSX**; tạo lại không sinh LSX trùng (ngoại lệ duy nhất: LSX con khi tách gia công, BR-12). Lệnh luôn gắn một design snapshot đã khách xác nhận (bất biến, kèm checksum) và một print-ready file.
 - **BR-02:** Không được in khi chưa qua kiểm file, hoặc checksum file không khớp thiết kế đã khoá.
 - **BR-03:** Chỉ cấp phôi theo LSX, và không vượt số còn thiếu của LSX. Lệnh in nội bộ chỉ sang `Printing` khi phôi đã được quét bàn giao tại khu `PRODUCTION` (`Material Issued`).
 - **BR-04:** Số đạt + số phế phẩm = số đã in. Phế phẩm bắt buộc có lý do; phôi in hỏng hoặc thành phẩm QC không đạt phải **xuất huỷ có chứng từ** (điều chỉnh tồn lý do `SCRAP`, nguồn = lệnh sản xuất — [20 §4.3](../20-inventory-control/README.md)) — không trừ âm thầm.
@@ -323,7 +323,7 @@ stateDiagram-v2
 | Module | Quan hệ |
 |--------|---------|
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Release đơn sinh LSX `ORDER`; chọn kho xuất có xưởng; nhận sự kiện đơn rời `In Production` → `Ready to Fulfill`; xử lý huỷ / thay đổi, chính sách huỷ khi đang in |
-| [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot `Locked`, checksum và print-ready file cho lệnh; nhận yêu cầu sửa thiết kế khi file lỗi hoặc khách yêu cầu sửa mẫu |
+| [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot (đã khách xác nhận, bất biến), checksum và print-ready file cho lệnh; nhận yêu cầu sửa thiết kế khi file lỗi hoặc khách yêu cầu sửa mẫu |
 | [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | Báo giá cần mẫu `Approved` (thiết kế mới) trước khi khách chấp nhận |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Đơn đặt cọc chỉ release khi tiền cọc đã về; hoàn tiền / cấn trừ khi huỷ |
 | [07 · Picking](../07-picking/README.md) | Lấy phôi từ bin lên khu `PRODUCTION` (pick task đích `PRODUCTION`); put-back khi huỷ; thành phẩm không pick lại trên kệ |

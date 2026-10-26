@@ -404,14 +404,17 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     ENTRY{Khách sỉ liên hệ\nhoặc đăng nhập cổng} --> PATH{Thiết kế mới?}
-    PATH -- Có --> DESIGN[Product Design 2D\n+ Live 3D Preview]
-    DESIGN --> PREFLIGHT{Preflight đạt?}
-    PREFLIGHT -- Fail --> DESIGN
-    PREFLIGHT -- Pass/Warning --> CONFIRM_DSN["Chốt thiết kế\n→ Design snapshot"]
+    PATH -- Có --> DESIGN["Thiết kế (12)\nSale tải bộ file"]
+    DESIGN --> REVIEW{QC duyệt kỹ thuật?}
+    REVIEW -- Không đạt --> DESIGN
+    REVIEW -- Đạt --> CUST_OK{Khách xác nhận?}
+    CUST_OK -- Yêu cầu sửa --> DESIGN
+    CUST_OK -- Xác nhận --> CONFIRM_DSN["Thiết kế đã xác nhận\n→ Design snapshot"]
     CONFIRM_DSN --> QUOTE[Sale lập báo giá\nbậc số lượng, MOQ, hiệu lực]
     QUOTE --> SAMPLE["Yêu cầu làm mẫu (19)\nLSX SAMPLE"]
     SAMPLE --> SAMPLE_OK{Khách duyệt mẫu?}
-    SAMPLE_OK -- Yêu cầu sửa --> DESIGN
+    SAMPLE_OK -- Yêu cầu sửa --> FORK["Tạo bản sửa\ntừ snapshot"]
+    FORK --> DESIGN
     SAMPLE_OK -- Duyệt --> ACCEPT[Khách chấp nhận báo giá]
     PATH -- "Không (hàng sẵn / đặt lại)" --> QUICK[Đặt nhanh / đặt lại trên cổng\ngiá riêng của khách]
     ACCEPT --> ORDER[Tạo Order\nkiểm tồn phôi, MOQ, chốt giá]

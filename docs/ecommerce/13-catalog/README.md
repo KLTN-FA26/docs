@@ -39,7 +39,7 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
 |---------|----------|
 | Trang danh sách (PLP) & chi tiết (PDP) | Khách hàng |
 | Kết quả tìm kiếm & bộ lọc | Khách hàng |
-| Nút hành động: "Yêu cầu báo giá" / "Đặt nhanh" / "Bắt đầu thiết kế" | [14 Quote & Order](../14-cart-and-order/README.md), [12 Product Design](../12-product-design/README.md) |
+| Nút hành động: "Yêu cầu báo giá" / "Đặt nhanh" / "Yêu cầu thiết kế" | [14 Quote & Order](../14-cart-and-order/README.md), [12 Product Design](../12-product-design/README.md) |
 | Chỉ báo tình trạng: Còn hàng / Sắp hết / Hết hàng / Đặt trước | Khách hàng, [14](../14-cart-and-order/README.md) |
 | Link chia sẻ sản phẩm | [16 Sales Chat](../16-sales-chat/README.md) |
 
@@ -69,7 +69,7 @@ Catalog là **mặt tiền tiêu thụ dữ liệu** từ [Product Creation](../
    | Đặt trước (Pre-order / Backorder) | ATP ≤ 0 nhưng chính sách cho đặt trước |
 5. **Hành động:**
    - Hàng sẵn hoặc thiết kế đã có mẫu duyệt → **Đặt nhanh** (chọn số lượng ≥ MOQ) → [14](../14-cart-and-order/README.md).
-   - Thiết kế mới → **Bắt đầu thiết kế** ([12](../12-product-design/README.md)) rồi **Yêu cầu báo giá** — Sale báo giá và làm mẫu trước khi đặt hàng.
+   - Thiết kế mới → **Yêu cầu thiết kế**: khách gửi yêu cầu cho Sale (qua [chat](../16-sales-chat/README.md) hoặc yêu cầu báo giá); Quản trị bán hàng lập bản thiết kế, Sale thiết kế, QC duyệt, khách xác nhận trên cổng ([12](../12-product-design/README.md)). Sau đó Sale báo giá và làm mẫu trước khi đặt hàng.
 6. Khách có thể xem **lịch sử đặt hàng** và **đặt lại** các thiết kế đã có mẫu duyệt.
 
 ---
@@ -122,7 +122,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 |--------|---------|
 | [01 · Product Creation](../../warehouse/01-product-creation/README.md) | Nguồn dữ liệu sản phẩm, biến thể, đơn vị bán & hệ số quy đổi, nội dung, cờ tùy chỉnh; trạng thái `Published` |
 | Mảng kho vận (05, 07, 10, 11) | Cung cấp tồn khả dụng (ATP) để hiển thị tình trạng còn hàng |
-| [12 · Product Design](../12-product-design/README.md) | "Bắt đầu thiết kế" từ PDP với sản phẩm tùy chỉnh |
+| [12 · Product Design](../12-product-design/README.md) | "Yêu cầu thiết kế" từ PDP với sản phẩm tùy chỉnh; khách xác nhận thiết kế trên cổng |
 | [14 · Quote & Order](../14-cart-and-order/README.md) | "Yêu cầu báo giá" / "Đặt nhanh"; chuyển giá & biến thể đã chọn |
 | [15 · Payment](../15-payment/README.md) | Gián tiếp: giá riêng của khách ảnh hưởng số tiền thanh toán |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Sale gửi link sản phẩm; khách hỏi về sản phẩm đang xem |

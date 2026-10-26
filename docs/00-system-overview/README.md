@@ -32,7 +32,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: khai báo trạm in, gán lệnh sản xuất cho trạm, đổi ưu tiên, xử lý lệnh tạm dừng, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; gán/gán lại lệnh sản xuất |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất được gán cho trạm của mình; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO; lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
-| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất |
+| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)); **duyệt kỹ thuật bộ file thiết kế** trước khi gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất; duyệt Đạt / Không đạt bản thiết kế được giao |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, **công nợ phải thu của khách sỉ**, hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
 
 > ✅ Đã chốt 2026-10-06 (B1): có module **Sản xuất in** riêng — [19 · Production](../warehouse/19-production/README.md), xưởng in nội bộ (tách một phần lệnh đơn hàng đưa gia công ngoài khi thiếu công suất), hai loại sản xuất (mẫu và đơn hàng).
@@ -41,8 +41,8 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
-| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; cấu hình template thiết kế | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán được phép theo khách |
-| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, chốt thiết kế, tạo đơn từ báo giá, CSKH qua chat, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; giảm giá trong hạn mức |
+| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)) | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán được phép theo khách; lập & đổi phân công bản thiết kế |
+| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, thiết kế (tải bộ file) & gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)), tạo đơn từ báo giá, CSKH qua chat, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; giảm giá trong hạn mức |
 | **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn | Thao tác trên mọi đơn; ghi đè kho xuất |
 
 ### 2.2. Vai thao tác (operational hat — không phải role riêng)
@@ -75,11 +75,11 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên cổng khách hàng: xem catalog & giá riêng, chấp nhận báo giá, **duyệt mẫu**, đặt hàng / đặt lại, theo dõi đơn & công nợ, chat với Sale. **Không có khách vãng lai (guest).** |
+| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên cổng khách hàng: xem catalog & giá riêng, **xác nhận / yêu cầu sửa thiết kế**, chấp nhận báo giá, **duyệt mẫu**, đặt hàng / đặt lại, theo dõi đơn & công nợ, chat với Sale. **Không có khách vãng lai (guest).** |
 | **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: nhận kiện khi bàn giao, vận chuyển, giao cho khách, thu hộ phần còn lại (nếu có), hoàn hàng về kho (RTO); cung cấp xe tải / container cho giao nguyên chuyến. Hệ thống không tích hợp API và không theo dõi hành trình; nhân viên cập nhật kết quả giao khi hãng báo lại |
 
-Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Load Planner, Design Engine + 3D Renderer, Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
 
 > ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) — phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể — chưa được đề bài xác định, xem [open-questions](../open-questions/README.md).
 
@@ -111,7 +111,7 @@ flowchart TB
 
     subgraph EC["Mảng B — Bán hàng sỉ (B2B Sales / Customer Portal)"]
         direction TB
-        DSN[12 · Product Design 2D/3D]
+        DSN[12 · Product Design]
         CAT[13 · Catalog]
         CO[14 · Cart & Order]
         PAY[15 · Payment]
@@ -175,7 +175,7 @@ flowchart LR
     C1 --> E
     E --> F[(Tồn kho khả dụng\nAvailable stock)]
 
-    G[Thiết kế 2D/3D\nProduct Design] --> G1[Báo giá\nQuote]
+    G[Thiết kế & khách xác nhận\nProduct Design] --> G1[Báo giá\nQuote]
     G1 --> G2{Thiết kế mới?}
     G2 -- Có --> S[Làm mẫu & khách duyệt\nSample]
     S --> J
