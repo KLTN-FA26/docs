@@ -21,9 +21,9 @@ Về nghiệp vụ, Putaway được thiết kế theo mô hình WMS phổ biế
 | **Quản lý kho (Warehouse Manager / Thủ kho)** | Phân công, ưu tiên task, xử lý hết chỗ/lệch tồn, duyệt override đặc biệt, mở/khoá vị trí |
 | **Admin / System Config** | Khai báo kho & bản đồ kho (zone, kệ, tầng, bin, khu vực), sức chứa, mã vị trí, lớp lưu trữ — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
 | **Hệ thống (WMS / Slotting Engine)** | Sinh gợi ý vị trí, kiểm tra ràng buộc cứng, khoá mềm vị trí khi task được nhận, tạo movement log |
-| **Inventory Controller** (nếu có) | Kiểm kê vị trí, xử lý sai lệch tồn phát hiện trong/ sau putaway |
+| **Quản lý kho (Warehouse Manager)** — kiểm soát tồn | Lập kiểm kê vị trí, duyệt điều chỉnh tồn khi có sai lệch phát hiện trong / sau putaway — xem [20 · Inventory Control](../20-inventory-control/README.md) |
 
-> Trong MVP, `Warehouse Staff` là role vận hành chính cho cả nhận hàng và putaway. `QC` và `Inventory Controller` chỉ tách riêng nếu kho cần kiểm soát chất lượng/kiểm kê độc lập.
+> Trong MVP, `Warehouse Staff` là role vận hành chính cho cả nhận hàng và putaway. `QC` chỉ tách riêng nếu kho cần kiểm soát chất lượng độc lập. Kiểm kê và điều chỉnh tồn không có role riêng: do Quản lý kho / Nhân viên kế hoạch tồn kho thực hiện ở [20](../20-inventory-control/README.md).
 
 ---
 
@@ -51,7 +51,7 @@ Về nghiệp vụ, Putaway được thiết kế theo mô hình WMS phổ biế
 | **Tồn khả dụng để bán (available stock)** tăng lên | 13 Catalog / 14 Order (ATP) |
 | **Putaway task `Completed`** + lịch sử di chuyển (StockMovement / movement log) | Truy vết, 03 Receipt (chuyển `In Putaway` → `Closed`) |
 | **Cảnh báo chênh lệch gợi ý vs thực tế** | 06 Slotting (feedback loop) |
-| **Exception / On Hold reason** nếu không thể cất hàng | Manager, Inventory Controller |
+| **Exception / On Hold reason** nếu không thể cất hàng | Manager |
 
 ---
 
@@ -136,7 +136,7 @@ Các trường `*LocationId` trỏ tới một **Bin** hoặc một **Area chứ
 - **BR-08:** Khi nhân viên chấp nhận gợi ý, sức chứa vị trí nên được khoá mềm trong thời hạn cấu hình; quá hạn hoặc huỷ task thì giải phóng.
 - **BR-09:** Override chỉ được phép với tiêu chí mềm. Ràng buộc cứng như sai lớp lưu trữ (nhiệt độ, hàng nguy hiểm, dễ vỡ, quá khổ), quá tải, bin không cho phép cất hoặc không `Active` phải bị chặn.
 - **BR-10:** Split một task qua nhiều bin được phép nếu cấu hình hỗ trợ, nhưng mỗi phần split vẫn phải có dòng/movement riêng để truy vết.
-- **BR-11:** Nếu phát hiện lệch số lượng tại khu nhận hàng hoặc tại bin đích, không tự sửa task đã chốt; tạo adjustment/cycle count có phê duyệt.
+- **BR-11:** Nếu phát hiện lệch số lượng tại khu nhận hàng hoặc tại bin đích, không tự sửa task đã chốt; tạo adjustment/cycle count có phê duyệt — xem [20 §4.2–4.3](../20-inventory-control/README.md).
 - **BR-12:** Available-to-promise chỉ tăng khi hàng đã putaway vào vị trí được phép xuất bán; hàng ở inbound, quarantine, blocked hoặc đang di chuyển không được bán.
 
 ### Đối chiếu chuẩn tham chiếu
@@ -158,7 +158,7 @@ Các trường `*LocationId` trỏ tới một **Bin** hoặc một **Area chứ
 | Không còn chỗ cho SKU (kho đầy) | Task `On Hold` kèm reason; cảnh báo Manager; xem xét [Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) hoặc mở khu vực tràn (overflow) |
 | Hàng cồng kềnh không vừa vị trí tiêu chuẩn | Cất vào bin lớp lưu trữ `OVERSIZE`; nếu không có, Manager chỉ định khu tràn (Area `OVERFLOW`) |
 | Kiện hỗn hợp nhiều SKU | Tách task theo SKU; các SKU có thể cất chung một bin nếu cùng lớp lưu trữ và còn sức chứa |
-| Mất mát/hư hỏng phát hiện khi putaway | Điều chỉnh giảm số lượng task + inventory adjustment + ghi log; thông báo Manager |
+| Mất mát/hư hỏng phát hiện khi putaway | Điều chỉnh giảm số lượng task + inventory adjustment (lý do `DAMAGED` / `LOST`, có duyệt — [20 §4.3](../20-inventory-control/README.md)) + ghi log; thông báo Manager |
 | Đặt nhầm vị trí và đã confirm | Sửa bằng Intra-warehouse Transfer, không sửa trực tiếp task |
 | Hàng Quarantine sau đó `Accepted` | Sinh putaway task mới từ khu cách ly (Area `QUARANTINE`) vào vùng lưu trữ |
 | Gợi ý hết hạn trước khi nhân viên tới kệ | Tính lại gợi ý theo tồn/capacity hiện tại trước khi cho xác nhận |
@@ -176,3 +176,4 @@ Các trường `*LocationId` trỏ tới một **Bin** hoặc một **Area chứ
 | [07 · Picking](../07-picking/README.md) | Chất lượng putaway (vị trí hợp lý, FEFO đúng) quyết định hiệu suất & độ chính xác picking |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Công cụ để sửa/tối ưu vị trí sau khi putaway đã hoàn tất |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) / [14 · Order](../../ecommerce/14-cart-and-order/README.md) | Putaway hoàn tất làm tăng tồn khả dụng (available-to-promise) hiển thị/bán trên sàn |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Lệch số khi cất xử lý bằng kiểm kê / điều chỉnh tồn có duyệt; putaway chuyển tồn `Inbound` → `Available` |

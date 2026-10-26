@@ -108,8 +108,8 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Vị trí báo có hàng nhưng thực tế trống | Short pick → re-allocate → tạo yêu cầu cycle count cho vị trí đó |
-| Hàng hỏng phát hiện khi lấy | Không lấy; đánh dấu `Blocked` tại vị trí + adjustment; re-allocate lô khác |
+| Vị trí báo có hàng nhưng thực tế trống | Short pick → re-allocate → hệ thống tự mở phiếu kiểm kê mù cho vị trí đó ([20 §4.2-f](../20-inventory-control/README.md)) |
+| Hàng hỏng phát hiện khi lấy | Không lấy; đánh dấu `Blocked` tại vị trí + adjustment ([20 §4.3](../20-inventory-control/README.md)); re-allocate lô khác |
 | Đơn hoả tốc chen vào giữa wave | Cho phép tạo pick task ưu tiên, chèn lộ trình |
 | Khách đổi/huỷ đơn khi đang pick | Order Management gửi tín hiệu; task `On Hold`/`Cancelled`; hàng đã lấy làm put-back |
 | Một SKU nằm rải nhiều vị trí/lô | Phân bổ gộp nhiều dòng lấy; gom trong cùng tote |
@@ -133,3 +133,4 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 | [19 · Production](../19-production/README.md) | Gửi lệnh lấy phôi cho dòng đơn tùy chỉnh; picking mang phôi lên khu `PRODUCTION`; put-back khi lệnh bị huỷ |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Replenishment: bổ sung hàng từ bin dự trữ sang bin picking (`is_pickable`) khi cạn |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 1 của luồng Fulfillment |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Short pick tự mở phiếu kiểm kê mù cho vị trí đó và chặn bán phần tồn tự do tới khi chênh lệch được duyệt; hàng hỏng khi lấy ghi giảm bằng điều chỉnh |

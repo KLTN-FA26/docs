@@ -31,7 +31,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: khai báo trạm in, gán lệnh sản xuất cho trạm, đổi ưu tiên, xử lý lệnh tạm dừng, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; gán/gán lại lệnh sản xuất |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất được gán cho trạm của mình; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO; lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, **công nợ phải thu của khách sỉ**, hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
 
@@ -106,6 +106,7 @@ flowchart TB
         INTER[10 · Inter-warehouse Transfer]
         INTRA[11 · Intra-warehouse Transfer]
         PROD[19 · Production]
+        CTRL[20 · Inventory Control]
     end
 
     subgraph EC["Mảng B — Bán hàng sỉ (B2B Sales / Customer Portal)"]
@@ -153,6 +154,7 @@ flowchart TB
 
     INTER <--> INVENTORY
     INTRA <--> INVENTORY
+    CTRL <-->|kiểm kê, điều chỉnh, cảnh báo| INVENTORY
     MAP -. gợi ý vị trí .-> INTRA
 ```
 
@@ -202,7 +204,7 @@ flowchart LR
 | **2. Bán hàng sỉ (B2B Sales)** | Khách liên hệ / yêu cầu báo giá | Đơn đã xác nhận (đủ cọc, trả trước, hoặc trong hạn mức công nợ) | 18 → 12 → 14 → 15 (làm mẫu: 19; hỗ trợ: 16, 13) |
 | **3. Sản xuất (Production)** | Đơn release có dòng in | Thành phẩm ở khu đóng gói | 17 → 07 (cấp phôi) → 19 (gia công ngoài một phần: 02, 03, 04) |
 | **4. Hoàn tất đơn (Fulfillment)** | Đơn release / sản xuất xong | Kiện hàng đã giao cho khách | 17 → 07 → 08 → 09 |
-| **5. Điều phối tồn kho (Inventory ops)** | Chênh lệch/tối ưu vị trí | Tồn kho cân đối giữa & trong kho | 10, 11, 06 |
+| **5. Điều phối tồn kho (Inventory ops)** | Chênh lệch/tối ưu vị trí; cảnh báo tồn / hạn dùng | Tồn kho cân đối giữa & trong kho, số tồn khớp thực tế | 10, 11, 06, 20 |
 
 ---
 
@@ -227,7 +229,7 @@ flowchart LR
 4. **Trạng thái chứng từ chỉ tiến, không lùi tự do**: chuyển trạng thái theo sơ đồ vòng đời của từng module; huỷ/hoàn phải là hành động có kiểm soát và ghi log.
 5. **Sản phẩm tùy chỉnh mang theo "artifact thiết kế"**: đơn hàng chứa sản phẩm in luôn đính kèm file/định nghĩa thiết kế đã chốt (design snapshot), bất biến sau khi đơn confirmed. Thiết kế mới phải có **mẫu được khách duyệt** trước khi sản xuất đơn hàng ([19](../warehouse/19-production/README.md)).
 6. **Phạm vi tổ chức**: hệ thống phục vụ **một pháp nhân duy nhất** (một công ty, một mã số thuế, một sổ cái) sở hữu **nhiều kho vật lý (multi-warehouse)**. Chuyển hàng giữa các kho là **luân chuyển tồn nội bộ** (xem [10 · Inter-warehouse Transfer](../warehouse/10-inter-warehouse-transfer/README.md)), **không** phát sinh hoá đơn/công nợ nội bộ. Hệ thống **không** hỗ trợ đa công ty / đa pháp nhân (multi-entity).
-7. **Công thức số lượng tồn thống nhất**: **ATP = Tồn khả dụng (`Available`) − Phần đang giữ hàng (reservation)**. Hàng `Inbound`, `Allocated`, `Blocked`, `Quarantine`, `In-Transit` không thuộc tồn khả dụng. Định nghĩa On-hand, Inventory Level, Available, ATP xem [Glossary](../glossary/README.md).
+7. **Công thức số lượng tồn thống nhất**: **ATP = Tồn khả dụng (`Available`) − Phần đang giữ hàng (reservation)**. Tồn khả dụng chỉ gồm hàng `Available` **chưa hết hạn** và **không bị giữ** (không có khoản phân bổ, giữ cho sản xuất hay cho lệnh chuyển kho). Hàng `Inbound`, `Allocated`, `Blocked`, `Quarantine`, `Expired`, `In Production`, `In-Transit` không thuộc tồn khả dụng. Chi tiết: [20 · Inventory Control BR-01](../warehouse/20-inventory-control/README.md). Định nghĩa On-hand, Inventory Level, Available, ATP xem [Glossary](../glossary/README.md).
 8. **Số lượng tồn luôn theo đơn vị cơ sở (base UoM)**: tồn kho và mọi chứng từ kho ghi số lượng theo đơn vị cơ sở của SKU (ví dụ *cái*). Số lượng nhập theo **đơn vị quy đổi** (ví dụ *thùng* = 1.000 cái) được hệ thống nhân hệ số trước khi ghi. Xem [01 · Product Creation](../warehouse/01-product-creation/README.md).
 9. **Tiền tố kho (warehouse prefix)**: mỗi kho có một prefix duy nhất, không sửa được sau khi tạo, dùng cho **mã vị trí** (bin: prefix + mã kệ + tầng + mã bin, ví dụ `HN-A01-2-03`; khu vực: prefix + mã khu vực, ví dụ `HN-RCV01`) và **mã chứng từ phát sinh tại kho** (ví dụ `HN-RC-000123`). Xem [06](../warehouse/06-warehouse-map-slotting/README.md).
 

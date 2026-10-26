@@ -149,3 +149,4 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, đơn vị bán & giá bán, trạng thái `Published`; ATP tính trên Inventory Item của SKU |
 | [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | Số lượng đặt theo đơn vị bán, quy về đơn vị cơ sở bằng hệ số quy đổi khai báo ở đây |
 | [10/11 · Transfer](../10-inter-warehouse-transfer/README.md) | Giao dịch chuyển kho tham chiếu SKU |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Dùng ngưỡng đặt lại, tồn an toàn, FEFO/FIFO, theo dõi lô / hạn dùng khai báo trên Inventory Item để sinh cảnh báo tồn và phân bổ; chỉ SKU còn mua được mới có cảnh báo đặt lại |

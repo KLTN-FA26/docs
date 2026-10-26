@@ -34,6 +34,8 @@ Hai mảng gặp nhau tại **Tồn kho (Inventory)**: kho vận & xưởng in l
 Tài liệu được tổ chức theo **thứ tự luồng nghiệp vụ** (business flow order). Đọc tuần tự từ `00` → `18` sẽ đi hết vòng đời một sản phẩm: từ lúc khai báo → nhập kho → khách đặt → xuất kho → giao hàng.
 
 > Module `19-production` được bổ sung sau, nên số thứ tự không theo luồng: về nghiệp vụ, **Sản xuất / In theo đơn** (mẫu và đơn hàng) nằm giữa `17` (Order Management) và `07`/`08` (Picking / Packing) cho các dòng đơn tùy chỉnh.
+>
+> Module `20-inventory-control` cũng được bổ sung sau: **Kiểm soát tồn kho** (kiểm kê, điều chỉnh tồn, cảnh báo, truy xuất lô) không phải một bước trong luồng mà chạy song song, kiểm soát tồn mà các module 03–11 và 19 ghi vào.
 
 ```
 docs/
@@ -52,7 +54,8 @@ docs/
 │   ├── 09-shipping/                       Giao cho đơn vị vận chuyển
 │   ├── 10-inter-warehouse-transfer/       Chuyển hàng giữa các kho
 │   ├── 11-intra-warehouse-transfer/       Chuyển hàng trong nội bộ một kho
-│   └── 19-production/                     Sản xuất / In ly & bao bì (mẫu + đơn hàng, xưởng in nội bộ)
+│   ├── 19-production/                     Sản xuất / In ly & bao bì (mẫu + đơn hàng, xưởng in nội bộ)
+│   └── 20-inventory-control/              Kiểm soát tồn kho (kiểm kê, điều chỉnh, cảnh báo, truy xuất lô)
 │
 ├── ecommerce/                             MẢNG B — BÁN HÀNG SỈ (B2B)
 │   ├── 12-product-design/                 Thiết kế 2D + Xem trước 3D trực tiếp
@@ -98,10 +101,10 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 |---------|-------|--------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý dữ liệu gốc sản phẩm | 01, 06 |
 | **Nhân viên mua hàng (Procurement Staff)** | Lập & chốt PO (kể cả PO gia công), đối chiếu hoá đơn | 02, 03, 04, 19 |
-| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng (kể cả cấp phôi cho xưởng), đóng gói, chuyển kho | 03, 05, 07, 08, 09, 10, 11 |
-| **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, điều phối xưởng in, quyết định đưa gia công ngoài | 05, 06, 10, 11, 19 |
+| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng (kể cả cấp phôi cho xưởng), đóng gói, chuyển kho, đếm kiểm kê | 03, 05, 07, 08, 09, 10, 11, 20 |
+| **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, điều phối xưởng in, quyết định đưa gia công ngoài | 05, 06, 10, 11, 19, 20 |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do | 19 |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho | 02, 10 |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho, lập kiểm kê, theo dõi cảnh báo tồn | 02, 10, 20 |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập, mẫu và thành phẩm in | 03, 19 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ | 04, 15, 17 |
 | **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog, bảng giá theo khách, nội dung, template thiết kế | 12, 13, 14, 18 |

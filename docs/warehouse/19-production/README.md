@@ -65,7 +65,7 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 | **Kết quả QC thành phẩm** (đạt / không đạt + lý do) | Warehouse Manager, báo cáo chất lượng |
 | **Thành phẩm đạt** tại khu `PACKING`, gắn với dòng đơn | [08 · Packing](../08-packing/README.md) |
 | **Mẫu đã duyệt** (khoá thiết kế, làm chuẩn QC) | Báo giá & đơn bán ([14](../../ecommerce/14-cart-and-order/README.md)), LSX `ORDER` sau này |
-| **Chứng từ điều chỉnh tồn có lý do** — xuất huỷ (`SCRAP`) cho phôi in hỏng / QC không đạt, và `SAMPLE` cho phôi dùng làm mẫu; nguồn = lệnh sản xuất | Tồn kho, Kế toán, báo cáo chi phí |
+| **Chứng từ điều chỉnh tồn có lý do** — xuất huỷ (`SCRAP`) cho phôi in hỏng / QC không đạt, và `SAMPLE` cho phôi dùng làm mẫu; nguồn = lệnh sản xuất ([20 §4.3](../20-inventory-control/README.md)) | Tồn kho, Kế toán, báo cáo chi phí |
 | **Sự kiện trạng thái đơn**: mọi lệnh của đơn `Completed` → đơn rời `In Production`, chuyển `Ready to Fulfill` | [17](../../ecommerce/17-order-management/README.md) |
 | **LSX con gia công** + **PO gia công** (loại `SUBCONTRACT`) | Xưởng, Mua hàng ([02](../02-purchase-order/README.md)), đối chiếu hoá đơn ([04](../04-invoice/README.md)) |
 | **Phiếu xuất phôi gửi gia công** (chỉ `SUPPLIED_BLANKS`) — phôi chuyển sang vị trí ảo "tại nhà gia công", vẫn là tồn của mình nhưng **không tính ATP** | Tồn kho, đối soát phôi |
@@ -270,7 +270,7 @@ stateDiagram-v2
 - **BR-01:** Mỗi dòng tuỳ chỉnh của đơn (hoặc mỗi yêu cầu làm mẫu) có **đúng 1 LSX**; tạo lại không sinh LSX trùng (ngoại lệ duy nhất: LSX con khi tách gia công, BR-12). Lệnh luôn gắn một design snapshot `Locked` (kèm checksum) và một print-ready file.
 - **BR-02:** Không được in khi chưa qua kiểm file, hoặc checksum file không khớp thiết kế đã khoá.
 - **BR-03:** Chỉ cấp phôi theo LSX, và không vượt số còn thiếu của LSX. Lệnh in nội bộ chỉ sang `Printing` khi phôi đã được quét bàn giao tại khu `PRODUCTION` (`Material Issued`).
-- **BR-04:** Số đạt + số phế phẩm = số đã in. Phế phẩm bắt buộc có lý do; phôi in hỏng hoặc thành phẩm QC không đạt phải **xuất huỷ có chứng từ** (điều chỉnh tồn lý do `SCRAP`, nguồn = lệnh sản xuất) — không trừ âm thầm.
+- **BR-04:** Số đạt + số phế phẩm = số đã in. Phế phẩm bắt buộc có lý do; phôi in hỏng hoặc thành phẩm QC không đạt phải **xuất huỷ có chứng từ** (điều chỉnh tồn lý do `SCRAP`, nguồn = lệnh sản xuất — [20 §4.3](../20-inventory-control/README.md)) — không trừ âm thầm.
 - **BR-05:** Phải qua QC mới được `Completed`; LSX `ORDER` QC theo **mẫu đã được khách duyệt**. Thành phẩm chỉ rời khu `PRODUCTION` khi QC kết luận đạt; bàn giao sang khu `PACKING` phải quét mã vị trí.
 - **BR-06:** Đơn chỉ rời `In Production` khi **mọi LSX của đơn** (gốc và con) đã `Completed` (hoặc dòng đó đã huỷ).
 - **BR-07:** Design snapshot và print-ready file của lệnh **không sửa được**; không đổi thiết kế sau khi LSX đã sang `Printing` (LSX con: `Subcontracted`). Muốn đổi thiết kế trước mốc đó phải huỷ dòng & tạo lại.
@@ -335,3 +335,4 @@ stateDiagram-v2
 | [04 · Invoice](../04-invoice/README.md) | Đối chiếu hoá đơn gia công theo số đạt QC, trừ hao hụt đã duyệt |
 | [16 · Sales Chat](../../ecommerce/16-sales-chat/README.md) | Trả lời khách về tiến độ & ngày xong dự kiến; trao đổi với khách về mẫu và file lỗi |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Chặng sản xuất (mẫu và đơn hàng) giữa Order và Fulfillment |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Phôi ở trạng thái tồn `In Production`; xuất huỷ `SCRAP`, phôi mẫu `SAMPLE`, hao hụt gia công `SUBCONTRACT_LOSS` qua điều chỉnh tồn có duyệt |

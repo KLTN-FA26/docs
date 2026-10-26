@@ -21,18 +21,24 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
 | **Inventory / Tồn kho** | Số lượng hàng hoá đang có, luôn gắn với **vị trí** hoặc trạng thái quá cảnh. |
-| **On-hand / Tồn thực tế** | Tổng số lượng vật lý đang nằm trong kho ở mọi trạng thái (`Inbound`, `Available`, `Allocated`, `Blocked`, `Quarantine`…); không gồm hàng `In-Transit` (thuộc lệnh chuyển kho). |
+| **On-hand / Tồn thực tế** | Tổng số lượng vật lý đang nằm trong kho ở mọi trạng thái (`Inbound`, `Available`, `Quarantine`, `Blocked`, `Expired`, `In Production`), kể cả phần đang được giữ / phân bổ; không gồm hàng `In-Transit` (thuộc lệnh chuyển kho). Xem [20 §5.1](../warehouse/20-inventory-control/README.md). |
+| **Usable on-hand / Tồn dùng được** | Tồn `Available` chưa hết hạn, **không trừ** phần giữ hàng. Là số dùng để so với ngưỡng đặt lại và tồn an toàn khi sinh cảnh báo tồn; khác ATP. Xem [20 BR-13](../warehouse/20-inventory-control/README.md). |
 | **Inventory Level / Tồn theo kho** | Số lượng tồn của một Inventory Item tại **một kho**, **tổng hợp** từ tồn các vị trí trong kho đó (theo từng trạng thái). Là số tính ra, không nhập/sửa trực tiếp; tồn toàn hệ thống = tổng các kho. |
-| **Available stock / Tồn khả dụng** | Tồn ở trạng thái `Available`: đã putaway vào vị trí được phép xuất, **chưa phân bổ** (allocate) cho đơn/lệnh nào, không bị khoá/cách ly. **Chưa trừ** phần giữ hàng (reservation). |
-| **ATP** (Available To Promise) | Số lượng có thể "hứa bán" cho khách: **ATP = Tồn khả dụng − Phần đang giữ hàng (reservation)**. Không trừ thêm phần đã phân bổ vì hàng `Allocated` không nằm trong tồn khả dụng. Phạm vi: toàn hệ thống hoặc theo kho (câu hỏi C3). |
+| **Available stock / Tồn khả dụng** | Tồn ở trạng thái `Available`: đã putaway vào vị trí được phép xuất, **chưa hết hạn**, **chưa phân bổ** (allocate) và không bị giữ cho lệnh sản xuất / lệnh chuyển kho nào, không bị khoá/cách ly. **Chưa trừ** phần giữ hàng (reservation). |
+| **ATP** (Available To Promise) | Số lượng có thể "hứa bán" cho khách: **ATP = Tồn khả dụng − Phần đang giữ hàng (reservation)**. Không trừ thêm phần đã phân bổ vì hàng `Allocated` không nằm trong tồn khả dụng. Phạm vi: toàn hệ thống hoặc theo kho (câu hỏi C3). Định nghĩa đầy đủ: [20 BR-01](../warehouse/20-inventory-control/README.md). |
 | **On-order / Incoming stock** | Hàng đã đặt qua PO nhưng **chưa về kho**. |
 | **In-Transit / Đang quá cảnh** | Hàng đã rời kho nguồn nhưng chưa tới kho đích (trong luồng chuyển kho). |
-| **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. |
+| **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. Tồn dùng được ≤ ngưỡng sinh cảnh báo `REORDER` ([20](../warehouse/20-inventory-control/README.md)). |
+| **Safety stock / Tồn an toàn** | Mức tồn doanh nghiệp muốn luôn giữ, khai báo theo SKU trên Inventory Item. Tồn dùng được < mức này sinh cảnh báo `SAFETY`. **Chỉ để cảnh báo, không trừ vào ATP** (open-questions C11). |
+| **Stock alert / Cảnh báo tồn** | Thông báo tự động khi tồn chạm ngưỡng đặt lại (`REORDER`), dưới tồn an toàn (`SAFETY`), lô sắp hết hạn (`EXPIRING`) hoặc đã hết hạn (`EXPIRED`). Vòng đời `Open` → `Acknowledged` → `Resolved`. Xem [20 §4.4](../warehouse/20-inventory-control/README.md). |
 | **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. |
-| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán, **chưa gắn vị trí/lô**. Làm giảm ATP; hết hạn thì giải phóng; khi đơn được phân bổ thì chuyển thành allocation. |
-| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng. Số lượng chuyển trạng thái `Available` → `Allocated`. |
-| **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do, phê duyệt) khi phát hiện chênh lệch. |
-| **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một số vị trí theo lịch, không dừng toàn kho. |
+| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán, **chưa gắn vị trí/lô**. Làm giảm ATP; hết hạn thì giải phóng; khi đơn được phân bổ thì chuyển thành allocation. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
+| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng: một **khoản giữ** trên tồn `Available` (mỗi bin / lô một khoản), không có hạn. "`Allocated`" là cách gọi phần tồn đang có khoản phân bổ, không phải một trạng thái riêng của hàng. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
+| **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do) khi phát hiện chênh lệch. Duyệt **bốn mắt** (người duyệt ≠ người đề nghị); duyệt là ghi tồn ngay. Xem [20 §4.3](../warehouse/20-inventory-control/README.md). |
+| **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một phạm vi vị trí / SKU, không dừng toàn kho; mặc định **kiểm mù** (người đếm không thấy số sổ sách). Chênh lệch thành điều chỉnh `COUNT_VARIANCE` chờ duyệt. Xem [20 §4.2](../warehouse/20-inventory-control/README.md). |
+| **LPN** (License Plate Number) / **Thùng hàng** | Mã định danh một thùng nguyên đai, dán khi nhận hàng; thùng được theo dõi, kiểm kê và điều chỉnh như một đơn vị. Thùng không tự mang số lượng: hàng bên trong là tồn ở vị trí của thùng. Xem [20 §4.6](../warehouse/20-inventory-control/README.md). |
+| **Stock movement ledger / Sổ biến động tồn** | Nhật ký mọi thay đổi tồn: loại biến động, vị trí đi / đến, SKU, lô, số lượng, người, thời điểm, chứng từ nguồn. Không sửa, không xoá. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
+| **Lot traceability / Truy xuất lô** | Báo cáo một lô từ nguồn gốc (NCC, phiếu nhận) tới tồn còn lại, khoản đang giữ và đơn khách đã nhận hàng. Lô không có phiếu nhận ghi nguồn gốc `UNTRACED`. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
 | **FIFO** (First-In-First-Out) | Nhập trước xuất trước. |
 | **FEFO** (First-Expired-First-Out) | Hạn dùng gần thì xuất trước. |
 | **ABC / XYZ analysis** | Phân loại SKU theo mức độ quan trọng (ABC: theo giá trị/tần suất xuất; XYZ: theo độ ổn định nhu cầu). |
@@ -236,9 +242,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
 | `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request | Bản nháp, sửa tự do, chưa có hiệu lực |
-| `Pending Approval` | PO, TO | Chờ phê duyệt |
+| `Pending Approval` | PO, TO, Điều chỉnh tồn | Chờ phê duyệt |
 | `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
-| `Planned` | Load Plan | Đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay |
+| `Planned` | Load Plan, Kiểm kê | Load Plan: đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay. Kiểm kê: đã lập phiếu, chưa đếm dòng nào |
 | `Dispatched` | Load Plan | Mọi xe của kế hoạch đã xếp hàng, ký manifest & rời kho |
 | `Partially Received` | PO, TO | Đã nhận một phần |
 | `Received` | PO, TO | Đã nhận đủ |
@@ -247,11 +253,14 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `In QC` | Receipt | Còn dòng hàng cần QC chưa có kết luận |
 | `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
 | `Reserved` | Order (giữ hàng) | Đã giữ số lượng cho đơn, chưa gắn vị trí/lô; làm giảm ATP |
-| `Allocated` | Tồn kho (theo vị trí) | Đã phân bổ tồn ở vị trí & lô cho một đơn/lệnh cụ thể |
+| `Allocated` | Tồn kho (theo vị trí) | Phần tồn `Available` có khoản phân bổ ở vị trí & lô cho một đơn/lệnh cụ thể — khoản giữ, không phải trạng thái riêng của hàng ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
+| `Expired` | Tồn kho | Quá hạn dùng (quét hằng đêm); không bán, chỉ rời kho bằng điều chỉnh đã duyệt |
+| `Posted` / `Rejected` / `Withdrawn` | Điều chỉnh tồn | Đã duyệt và ghi tồn / bị từ chối / người đề nghị rút lại |
+| `Open` / `Acknowledged` / `Resolved` | Cảnh báo tồn | Đang xảy ra / đã có người xác nhận đã xem / điều kiện đã hết |
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
 | `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
 | `Paid` | Order (payment_status) | Đã thu đủ tiền |
-| `In Production` | Order, Sample request | Đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed` |
+| `In Production` | Order, Sample request, Tồn kho | Order / Sample request: đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed`. Tồn kho: phôi đã cấp cho xưởng hoặc gửi nhà gia công, không bán ([20 §5.1](../warehouse/20-inventory-control/README.md)) |
 | `Pending Prepress` | Lệnh sản xuất | Chờ kiểm file in |
 | `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi (vị trí hàng đợi, trạm in được gán), chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
 | `Material Issued` / `Printing` | Lệnh sản xuất (in nội bộ) | Phôi đã ở khu `PRODUCTION` / đang in tại trạm |
@@ -290,6 +299,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | LSX | Lệnh sản xuất (Production Order) | Chứng từ xưởng in |
 | B2B | Business To Business | Bán cho doanh nghiệp (bán sỉ) |
 | FIFO / FEFO | First-In / First-Expired-First-Out | Nhập trước / hết hạn trước, xuất trước |
+| LPN | License Plate Number | Mã thùng hàng nguyên đai |
 | PLP / PDP | Product Listing / Detail Page | Trang danh sách / chi tiết sản phẩm |
 | DPI | Dots Per Inch | Độ phân giải in |
 | SLA | Service Level Agreement | Cam kết mức dịch vụ |

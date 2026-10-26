@@ -145,7 +145,7 @@ Hàng **gia công ngoài** trả về cũng nhận theo luồng này, tham chi�
 - **BR-02:** Tổng SL nhận luỹ kế của một dòng PO ≤ *SL đặt × (1 + over-receipt tolerance)*. Vượt → chặn hoặc yêu cầu duyệt.
 - **BR-03:** SKU cấu hình theo lô/hạn dùng/serial → **bắt buộc** nhập đủ thông tin tương ứng mới cho `Confirmed`.
 - **BR-04:** Hàng chưa qua Putaway (`Inbound` ở khu nhận hàng hoặc khu QC), hàng `Quarantine` và hàng `Rejected` **không** được tính vào tồn khả dụng bán.
-- **BR-05:** Receipt đã `Confirmed` không được xoá; sai sót xử lý bằng **điều chỉnh tồn có kiểm soát (inventory adjustment)** hoặc **receipt reversal** kèm lý do và phê duyệt.
+- **BR-05:** Receipt đã `Confirmed` không được xoá; sai sót xử lý bằng **điều chỉnh tồn có kiểm soát (inventory adjustment)** ([20 §4.3](../20-inventory-control/README.md)) hoặc **receipt reversal** kèm lý do và phê duyệt.
 - **BR-06:** Hạn sử dụng nhập vào phải > ngày nhận (cảnh báo nếu quá gần hạn theo ngưỡng cấu hình).
 - **BR-07:** Dòng nhận của SKU bật cờ Yêu cầu QC **không** được sinh Putaway task trước khi có kết luận QC; hàng chỉ được putaway từ khu `QUALITY_CONTROL`, không đi tắt từ khu `RECEIVING` lên bin.
 - **BR-08:** QC chỉ được kết luận cho hàng **đã nằm ở khu QC** (nhiệm vụ chuyển sang khu QC `Completed`). Tổng `Accepted` + `Quarantine` + `Rejected` phải bằng số lượng đã chuyển sang khu QC; phần `Quarantine` / `Rejected` bắt buộc có lý do.
@@ -161,8 +161,8 @@ Hàng **gia công ngoài** trả về cũng nhận theo luồng này, tham chi�
 | Sai SKU trên phiếu giao NCC | Nhận theo SKU thực tế; nếu SKU không có trong PO → xử lý như thừa/ngoại lệ |
 | Thùng hỏng, nghi hụt bên trong | Ghi nhận có điều kiện (conditional receipt); dòng đó **bắt buộc đi qua khu QC** dù SKU không bật cờ Yêu cầu QC (⚠️ giả định — [open-questions C15](../../open-questions/README.md)); mở khiếu nại NCC |
 | NCC giao lô có hạn dùng ngắn hơn cam kết | Cảnh báo; Manager quyết định nhận/từ chối |
-| Kiểm đếm lại sau khi Confirmed phát hiện lệch | Inventory adjustment tại khu đang chứa hàng (khu nhận hàng hoặc khu QC), ghi log, thông báo Procurement |
-| Số lượng đếm được tại khu QC khác số đã chuyển | QC Staff không kết luận; báo Warehouse Manager xử lý bằng inventory adjustment trước khi kiểm |
+| Kiểm đếm lại sau khi Confirmed phát hiện lệch | Inventory adjustment có duyệt ([20 §4.3](../20-inventory-control/README.md)) tại khu đang chứa hàng (khu nhận hàng hoặc khu QC), ghi log, thông báo Procurement |
+| Số lượng đếm được tại khu QC khác số đã chuyển | QC Staff không kết luận; báo Warehouse Manager xử lý bằng inventory adjustment ([20 §4.3](../20-inventory-control/README.md)) trước khi kiểm |
 | Khu QC chưa được khai báo nhưng phiếu có SKU cần QC | Chặn `Confirmed`; Admin phải khai báo Area `QUALITY_CONTROL` cho kho ([06](../06-warehouse-map-slotting/README.md)) |
 | Hàng Quarantine cuối cùng bị Rejected | Tồn chuyển `Blocked` tại khu cách ly; chốt trả NCC; cập nhật hồ sơ chất lượng NCC |
 | Hàng Quarantine sau đó `Accepted` | Sinh Putaway task từ khu `QUARANTINE` lên bin |
@@ -182,3 +182,4 @@ Hàng **gia công ngoài** trả về cũng nhận theo luồng này, tham chi�
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Cung cấp khu nhận hàng (`RECEIVING`), khu QC (`QUALITY_CONTROL`), khu cách ly (`QUARANTINE`); sau Putaway, hàng nằm ở vị trí do slotting gợi ý |
 | [19 · Production](../19-production/README.md) | Nhận hàng gia công về; phiếu nhận `Confirmed` đưa LSX con sang `QC` |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Nhận hàng đến từ kho khác cũng dùng luồng Receipt (nguồn là Transfer Order thay vì PO) |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Sai lệch sau khi `Confirmed` xử lý bằng điều chỉnh tồn có duyệt; thùng LPN dán khi nhận; phiếu nhận là nguồn gốc cho truy xuất lô |

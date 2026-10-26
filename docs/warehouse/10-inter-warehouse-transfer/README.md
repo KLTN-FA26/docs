@@ -106,7 +106,7 @@ stateDiagram-v2
 - **BR-02:** Chỉ chuyển được tồn `Available` (không lấy hàng đã allocate cho đơn khách, `Blocked`, `Quarantine`).
 - **BR-03:** Tồn `In-Transit` **thuộc về TO**, không khả dụng để bán ở bất kỳ kho nào cho tới khi nhận & putaway tại kho đích. (Trừ khi bật ATP tính cả in-transit cho kho đích — ⚠️ Giả định, xem [open-questions](../../open-questions/README.md).)
 - **BR-04:** TO chỉ `Cancelled` khi chưa xuất kho nguồn. Sau khi `In Transit` chỉ có thể `Closed` (kèm xử lý hàng thực tế).
-- **BR-05:** Chênh lệch xuất/nhận phải được ghi nhận & điều chỉnh có lý do; không để tồn `In-Transit` "treo" vô thời hạn — có ngưỡng cảnh báo quá hạn.
+- **BR-05:** Chênh lệch xuất/nhận phải được ghi nhận & điều chỉnh có lý do (kiểm kê / điều chỉnh tồn có duyệt — [20](../20-inventory-control/README.md)); không để tồn `In-Transit` "treo" vô thời hạn — có ngưỡng cảnh báo quá hạn.
 - **BR-06:** Nhận tại kho đích **bắt buộc qua phiếu nhận** (kiểm đếm), không cộng thẳng tồn theo số xuất.
 - **BR-07:** Giá trị/định giá tồn khi chuyển kho theo chính sách kế toán (giữ nguyên giá vốn hay cộng chi phí vận chuyển) — cấu hình hệ thống.
 
@@ -136,3 +136,4 @@ stateDiagram-v2
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Phân biệt: intra = trong một kho, inter = giữa các kho |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) / [14 · Order](../../ecommerce/14-cart-and-order/README.md) | Ảnh hưởng tồn khả dụng theo từng kho; hỗ trợ chiến lược bán theo khu vực |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Luồng Transfer |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Chênh lệch xuất / nhận xử lý bằng kiểm kê và điều chỉnh tồn có duyệt; giữ hàng cho lệnh chuyển |

@@ -72,7 +72,7 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 
 ### 4.4. Xử lý chênh lệch
 
-- Nếu số lượng đặt vào vị trí đích khác số lấy ra khỏi nguồn (rơi vãi, đếm sai) → ghi **discrepancy**; tạo yêu cầu kiểm kê (cycle count) cho cả hai vị trí; điều chỉnh tồn có phê duyệt.
+- Nếu số lượng đặt vào vị trí đích khác số lấy ra khỏi nguồn (rơi vãi, đếm sai) → ghi **discrepancy**; tạo yêu cầu kiểm kê (cycle count) cho cả hai vị trí; điều chỉnh tồn có phê duyệt — xem [20 §4.2–4.3](../20-inventory-control/README.md).
 
 ---
 
@@ -111,7 +111,7 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 |------------|-------------|
 | Vị trí picking cạn giữa wave, chưa kịp replenish | Sinh replenishment ưu tiên khẩn; picker tạm bỏ dòng → short pick → re-allocate |
 | Vị trí đích đầy hơn dự kiến | Task `On Hold`; Slotting gợi ý vị trí thay thế; hoặc chia nhỏ số lượng |
-| Rơi vãi/hư khi di chuyển | Ghi `Discrepancy` + adjustment; cycle count hai vị trí |
+| Rơi vãi/hư khi di chuyển | Ghi `Discrepancy` + adjustment; cycle count hai vị trí ([20](../20-inventory-control/README.md)) |
 | Di chuyển nhầm SKU/lô | Sửa bằng move task ngược + ghi log; không sửa trực tiếp tồn |
 | Re-slotting khối lượng lớn làm gián đoạn vận hành | Manager lên lịch ngoài giờ cao điểm; chia lô nhỏ |
 | Hàng ở vị trí `Maintenance` cần giải toả gấp | Move task ưu tiên đưa hàng sang vị trí hợp lệ trước khi khoá vị trí |
@@ -129,3 +129,4 @@ Là nghiệp vụ **thuần vận hành nội bộ**, không có giai đoạn in
 | [03 · Receipt](../03-receipt/README.md) | Di chuyển hàng ra khỏi vùng `Quarantine` sau khi QC kết luận `Accepted` |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Phân biệt phạm vi: trong kho (11) vs giữa kho (10) |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Luồng Transfer / điều phối tồn kho |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Chênh lệch khi di chuyển xử lý bằng kiểm kê và điều chỉnh tồn có duyệt |

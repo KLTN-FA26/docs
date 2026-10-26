@@ -149,3 +149,4 @@ stateDiagram-v2
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Khi cần điều chuyển hàng nhận sai kho so với nhu cầu |
 | [19 · Production](../19-production/README.md) | Sinh PO gia công khi tách LSX; LSX con chỉ gửi đi khi PO gia công `Approved` |
 | [00 · System Overview §5](../../00-system-overview/README.md) | PO là bước mở đầu luồng Procurement |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Cảnh báo `REORDER` / `SAFETY` là tín hiệu lập PO bổ sung |
