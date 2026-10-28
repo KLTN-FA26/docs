@@ -152,13 +152,14 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **Phôi / Blank** | Ly, hộp, túi chưa in (ly trơn, túi giấy trơn…) — Inventory Item của SKU; tồn kho và ATP tính trên phôi; được cấp cho xưởng theo lệnh sản xuất. |
-| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); quyết định trạm in được nhận lệnh. |
-| **Print Station / Trạm in** | Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái (`Active` / `Maintenance` / `Inactive`). |
+| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); hiện chỉ là thuộc tính sản phẩm — dùng chọn trạm in khi có trạm in (phạm vi sau, [B10](../open-questions/README.md)). |
+| **Print Station / Trạm in** | **(Phạm vi sau — [B10](../open-questions/README.md))** Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái. Chưa triển khai: lệnh sản xuất không gán trạm. |
 | **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
-| **Production Order (MO) / Lệnh sản xuất (LSX)** | Chứng từ xưởng in cho **một dòng đơn tùy chỉnh** (`ORDER`) hoặc **một yêu cầu làm mẫu** (`SAMPLE`): SKU phôi, số lượng, design snapshot, print-ready file, kỹ thuật in, trạm in, hạn cần xong. Mã theo prefix kho, ví dụ `HN-MO-000123`. Xem [19](../warehouse/19-production/README.md). |
-| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh `Ready` (đã qua prepress) xếp theo hạn hoàn thành rồi thời điểm release đơn; vị trí hàng đợi và trạm in được gán là thuộc tính của lệnh, không phải trạng thái. |
+| **Production Order (MO) / Lệnh sản xuất (LSX)** | Chứng từ xưởng in cho **một dòng đơn tùy chỉnh** (`ORDER`) hoặc **một yêu cầu làm mẫu** (`SAMPLE`): SKU phôi, số lượng, design snapshot, print-ready file, hạn hoàn thành, chế độ (in nội bộ / gia công). Mã `LSX-yyyyMMdd-NNNN`, ví dụ `LSX-20261028-0001`. Xem [19](../warehouse/19-production/README.md). |
+| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh `Ready` (đã qua prepress) xếp theo hạn hoàn thành rồi thời điểm tạo lệnh; là cách xem, không phải trạng thái. |
 | **Prepress / Kiểm file trước sản xuất** | Production Staff kiểm print-ready file của lệnh sản xuất trước khi cấp phôi: checksum khớp thiết kế đã khoá, vùng in, độ phân giải. Khác *Preflight* (kiểm tự động khi khách thiết kế). |
-| **In bù / Reprint (rework)** | Cấp phôi mới và in lại **phần còn thiếu** khi in hỏng hoặc QC thành phẩm không đạt; lệnh quay từ `QC` về `Ready`. |
+| **In bù / Reprint (rework)** | Cấp phôi cho **phần còn thiếu** và in lại khi in hỏng hoặc QC không đạt; lệnh quay về `Ready`; phôi đã cấp chưa in được dùng trước, thiếu thì hệ thống giữ thêm. |
+| **Dừng lệnh sản xuất / Stop** | Quản lý kho kết thúc lệnh đang `Printing` hoặc `QC`: mọi hàng đã in thành phế phẩm, phôi chưa in trả về, lệnh `Cancelled`. Khác **huỷ** — chỉ áp cho lệnh chưa in. Xem [19 §4.9](../warehouse/19-production/README.md). |
 | **Scrap / Phế phẩm, xuất huỷ** | Sản phẩm in hỏng hoặc phôi hỏng; luôn ghi kèm lý do và giảm tồn bằng chứng từ điều chỉnh có lệnh sản xuất làm nguồn. |
 | **Sản xuất mẫu / Sample production** | Làm vài sản phẩm theo thiết kế mới để khách duyệt trước khi đặt số lượng lớn (LSX `SAMPLE`, luôn in nội bộ). |
 | **Yêu cầu làm mẫu / Sample request** | Chứng từ Sale tạo để xưởng làm mẫu cho khách; kết thúc khi khách duyệt hoặc yêu cầu sửa. |
@@ -289,8 +290,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Unpaid` / `Partially Paid` / `On Credit` / `Paid` | Order (trạng thái thanh toán — tính ra từ số tiền, không lưu riêng) | Chưa thu / đã thu một phần (thường là cọc) / đơn công nợ / đã thu đủ |
 | `In Production` | Order, Sample request, Tồn kho | Order / Sample request: đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed`. Tồn kho: phôi đã cấp cho xưởng hoặc gửi nhà gia công, không bán ([20 §5.1](../warehouse/20-inventory-control/README.md)) |
 | `Pending Prepress` | Lệnh sản xuất | Chờ kiểm file in |
-| `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi (vị trí hàng đợi, trạm in được gán), chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
-| `Material Issued` / `Printing` | Lệnh sản xuất (in nội bộ) | Phôi đã ở khu `PRODUCTION` / đang in tại trạm |
+| `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi, chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
+| `Material Issued` / `Printing` | Lệnh sản xuất (in nội bộ) | Phôi đã ở khu `PRODUCTION` / đang in |
 | `Subcontracted` | Lệnh sản xuất (gia công) | Đã gửi nhà gia công, chờ hàng về |
 | `QC` | Lệnh sản xuất | Đang kiểm thành phẩm (in nội bộ hoặc hàng gia công đã nhận) |
 | `Submitted` | Sample request | Đã gửi xưởng, đã sinh LSX `SAMPLE` |
@@ -351,7 +352,7 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO (kể cả PO gia công), chốt PO, xử lý tranh chấp hoá đơn. |
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
 | **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên, quyết định tách lệnh đưa gia công ngoài). |
-| **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do, bàn giao thành phẩm cho QC. |
+| **Production Staff / Nhân viên sản xuất** | Tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng in được / phế phẩm kèm lý do, treo lệnh, bàn giao thành phẩm cho QC. |
 | **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn. |
 | **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |

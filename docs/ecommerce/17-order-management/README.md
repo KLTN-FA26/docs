@@ -67,7 +67,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
 ### 4.2. Phân bổ & release fulfillment
 
-3. **Chọn kho xuất** — Điều phối chọn theo tồn khả dụng, khoảng cách, tải kho. Dòng in chỉ giao cho kho có **khu xưởng in (`PRODUCTION`) và trạm in `Active` đúng kỹ thuật in** của sản phẩm.
+3. **Chọn kho xuất** — Điều phối chọn theo tồn khả dụng, khoảng cách, tải kho. Dòng in chỉ giao cho kho có **khu xưởng in (`PRODUCTION`)** (khi có trạm in: thêm điều kiện trạm `Active` đúng kỹ thuật in — [B10, B16](../../open-questions/README.md)).
    > ⚠️ Giả định: xưởng in đặt trong kho, nên kho không có xưởng không xuất được dòng in. Xem [open-questions](../../open-questions/README.md).
 4. **Chọn cách giao** — Điều phối chọn **gửi kiện** (`PARCEL`, mặc định) hoặc **giao nguyên chuyến** (`FULL_TRUCKLOAD` — thuê nguyên xe tải / container, có lập kế hoạch xếp hàng 3D — xem [09 §4.2](../../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)).
    - Đổi được tới khi **mở kiện đầu tiên**; sau đó khoá (BR-13).

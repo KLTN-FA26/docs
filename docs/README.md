@@ -103,7 +103,7 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 | **Nhân viên mua hàng (Procurement Staff)** | Lập & chốt PO (kể cả PO gia công), đối chiếu hoá đơn | 02, 03, 04, 19 |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, cất hàng, lấy hàng (kể cả cấp phôi cho xưởng), đóng gói, chuyển kho, đếm kiểm kê | 03, 05, 07, 08, 09, 10, 11, 20 |
 | **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, điều phối xưởng in, quyết định đưa gia công ngoài | 05, 06, 10, 11, 19, 20 |
-| **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do | 19 |
+| **Nhân viên sản xuất (Production Staff)** | Tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng in được / phế phẩm kèm lý do, treo lệnh | 19 |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho, lập kiểm kê, theo dõi cảnh báo tồn | 02, 10, 20 |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập, mẫu và thành phẩm in; duyệt kỹ thuật bản thiết kế trước khi gửi khách | 03, 12, 19 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, ghi nhận & phân bổ tiền về, công nợ phải thu của khách sỉ, duyệt tín dụng & điều khoản thanh toán | 04, 14, 15, 17, 18 |

@@ -132,13 +132,13 @@ flowchart TD
     MO --> PREPRESS{Prepress file in đạt?\nchecksum khớp}
     PREPRESS -- Không --> MO_HOLD[Lệnh On Hold\nSale liên hệ khách sửa file]
     MO_HOLD --> PREPRESS
-    PREPRESS -- Có --> QUEUE[LSX Ready: vào hàng đợi\nWarehouse Manager gán trạm in\ncùng kỹ thuật in]
+    PREPRESS -- Có --> QUEUE[LSX Ready: vào hàng đợi\ntheo hạn hoàn thành]
     QUEUE --> BLANK[NV kho quét xuất phôi từ bin\nsang khu PRODUCTION\nLSX Material Issued]
-    BLANK --> PRINTING[Production Staff in tại trạm đã gán\nLSX Printing → báo SL in được / phế phẩm]
+    BLANK --> PRINTING[Production Staff in\nLSX Printing → báo SL in được / phế phẩm]
     PRINTING --> PQC{LSX QC: theo mẫu đã duyệt\nđủ SL đạt?}
     PQC -- Không --> REWORK[Phần hỏng xuất huỷ\nLSX quay về Ready để in bù]
     REWORK --> QUEUE
-    PQC -- Có --> TO_PACK[Thành phẩm → khu PACKING\nLSX Completed]
+    PQC -- Có --> TO_PACK[Thành phẩm → khu PACKING, ghi tiêu thụ\nLSX Completed]
     PREPRESS -. xưởng không kịp hạn:\ntách một phần gia công ngoài .-> SUBC[LSX con gia công\nxem §4.2]
     SUBC -. hàng về, QC đạt .-> TO_PACK
     TO_PACK --> ALL_DONE{Mọi lệnh của đơn\nđã Completed?}
@@ -214,15 +214,15 @@ sequenceDiagram
     opt Đơn có dòng tùy chỉnh
         OM->>PROD: Release dòng in → LSX ORDER / dòng (Order: In Production)
         OPER->>PROD: Prepress file in (checksum): Pending Prepress → Ready
-        PROD->>PROD: Hàng đợi + Warehouse Manager gán trạm in (thuộc tính của lệnh Ready)
+        PROD->>PROD: Lệnh Ready vào hàng đợi (theo hạn hoàn thành)
         PICKER->>INVSYS: NV kho quét xuất phôi sang khu PRODUCTION (tồn In Production) → Material Issued
-        OPER->>PROD: In tại trạm (Printing), báo SL in được / phế phẩm → QC
+        OPER->>PROD: In (Printing), báo SL in được / phế phẩm → QC
         QC->>PROD: QC thành phẩm (đối chiếu mẫu đã duyệt)
         alt Thiếu SL đạt
             PROD->>INVSYS: Xuất huỷ phần hỏng
             PROD->>PICKER: LSX quay về Ready, quét xuất phôi phần thiếu (in bù)
         end
-        PROD->>INVSYS: Thành phẩm → khu PACKING
+        PROD->>INVSYS: Thành phẩm → khu PACKING, ghi tiêu thụ (CONSUMPTION)
         PROD-->>OM: Mọi lệnh Completed → Ready to Fulfill
     end
     OM->>INVSYS: Release: phân bổ dòng hàng thường vào bin & lô
@@ -268,33 +268,39 @@ sequenceDiagram
 
 ### 2.3. Vòng đời lệnh sản xuất (Production Order)
 
-Chi tiết trạng thái & điều kiện chuyển xem [19 · Production §5](../warehouse/19-production/README.md). Áp dụng cho cả LSX `SAMPLE` và `ORDER`; nhánh `Subcontracted` chỉ dành cho LSX gia công ngoài. Hàng đợi và trạm in được gán là thuộc tính của lệnh `Ready`, không phải trạng thái.
+Chi tiết trạng thái & điều kiện chuyển xem [19 · Production §5](../warehouse/19-production/README.md). Áp dụng cho cả LSX `SAMPLE` và `ORDER`; nhánh `Subcontracted` chỉ dành cho LSX gia công ngoài. Hàng đợi là cách xem các lệnh `Ready`, không phải trạng thái.
 
 ```mermaid
 stateDiagram-v2
     [*] --> PendingPrepress
     PendingPrepress --> Ready: File đạt, checksum khớp
-    Ready --> MaterialIssued: Phôi đã lên khu PRODUCTION (in nội bộ)
-    MaterialIssued --> Printing: Bắt đầu in tại trạm đã gán
+    Ready --> MaterialIssued: Đã cấp đủ phôi (in nội bộ)
+    MaterialIssued --> Printing: Bắt đầu in
     Printing --> QC: Ghi số in được, phế phẩm
-    Ready --> Subcontracted: LSX gia công — gửi nhà gia công (PO đã duyệt)
-    Subcontracted --> QC: Nhận hàng về, phiếu nhận Confirmed
-    QC --> Completed: Đủ số đạt → khu PACKING / bàn giao mẫu
+    Printing --> Ready: In hỏng hết → in bù
+    Ready --> Subcontracted: LSX gia công — gửi đi (PO đã duyệt)
+    Subcontracted --> QC: Phiếu nhận gia công xác nhận
+    QC --> Completed: Đủ số đạt
     QC --> Ready: Thiếu → in bù / gửi bù
     PendingPrepress --> OnHold
     Ready --> OnHold
     MaterialIssued --> OnHold
     Printing --> OnHold
     Subcontracted --> OnHold
+    QC --> OnHold
     OnHold --> PendingPrepress: Mở lại (về trạng thái trước)
     OnHold --> Ready: Mở lại
     OnHold --> MaterialIssued: Mở lại
     OnHold --> Printing: Mở lại
     OnHold --> Subcontracted: Mở lại
-    PendingPrepress --> Cancelled
-    Ready --> Cancelled
-    MaterialIssued --> Cancelled: Trả phôi về kho
-    Subcontracted --> Cancelled: Thu hồi phôi, huỷ PO gia công
+    OnHold --> QC: Mở lại
+    PendingPrepress --> Cancelled: Huỷ
+    Ready --> Cancelled: Huỷ
+    MaterialIssued --> Cancelled: Huỷ — trả phôi về kho
+    Printing --> Cancelled: Dừng — hàng đã in xuất huỷ
+    QC --> Cancelled: Dừng
+    Subcontracted --> Cancelled: Thu hồi, huỷ PO gia công
+    OnHold --> Cancelled: Huỷ / dừng
     Completed --> [*]
     Cancelled --> [*]
 ```
@@ -447,7 +453,7 @@ flowchart TD
     PRE -- Không --> HOLD[LSX On Hold\nSale liên hệ khách]
     HOLD --> PRE
     PRE -- Có --> CAP{Xưởng nội bộ kịp hạn?}
-    CAP -- Có --> QUEUE[LSX Ready: hàng đợi\ngán trạm in cùng kỹ thuật in]
+    CAP -- Có --> QUEUE[LSX Ready: hàng đợi\ntheo hạn hoàn thành]
     QUEUE --> ISSUE[NV kho quét xuất phôi\nsang khu PRODUCTION — Material Issued]
     CAP -- "Không — Quản lý kho tách một phần" --> SPLIT["LSX con gia công\n+ PO gia công (SUBCONTRACT)"]
     SPLIT -. phần còn lại .-> QUEUE
@@ -463,7 +469,7 @@ flowchart TD
     RCV --> QC{QC theo mẫu đã duyệt\nđủ số đạt?}
     QC -- "Thiếu — in bù nội bộ (về Ready)" --> QUEUE
     QC -- "Thiếu — gửi bù nhà gia công (về Ready)" --> SUBC
-    QC -- Đủ --> PACK[Thành phẩm sang khu PACKING\nLSX Completed]
+    QC -- Đủ --> PACK[Thành phẩm sang khu PACKING, ghi tiêu thụ\nLSX Completed]
     PACK --> ALL{Mọi LSX của đơn xong?}
     ALL -- Có --> RTF([Order: Ready to Fulfill → Packing])
     RCV -. "hoá đơn theo số đạt QC (04)" .-> AP[Đối chiếu ba chiều\ntrừ hao hụt đã duyệt]
@@ -477,16 +483,16 @@ flowchart TD
     SUB --> PRE{Prepress đạt?}
     PRE -- Không --> HOLD[LSX On Hold\nSale liên hệ khách sửa file]
     HOLD --> PRE
-    PRE -- Có --> RDY[LSX Ready\nhàng đợi, gán trạm in]
+    PRE -- Có --> RDY[LSX Ready\nhàng đợi theo hạn]
     RDY --> ISSUE[NV kho quét xuất phôi\nsang khu PRODUCTION — Material Issued]
     ISSUE --> PRINT[Printing: in mẫu\nghi phế phẩm có lý do]
     PRINT --> QC{QC đạt đủ số mẫu?}
     QC -- Thiếu, in bù --> RDY
-    QC -- Đủ --> READY[Yêu cầu mẫu: Ready\nphôi trừ tồn lý do SAMPLE]
+    QC -- Đủ --> READY[Yêu cầu mẫu: Ready\nphôi mẫu đề nghị xuất huỷ lý do SAMPLE]
     READY --> SENT[Gửi mẫu cho khách\nngoài hệ thống]
     SENT --> FB{Khách phản hồi}
     FB -- Duyệt --> APPROVED([Mẫu Approved\nkhoá thiết kế, chuẩn QC cho đơn])
-    FB -- Yêu cầu sửa --> REV[Sửa thiết kế\nlàm mẫu lần tiếp theo]
+    FB -- Yêu cầu sửa --> REV[Changes Requested — kết thúc vòng\nmở vòng mới: yêu cầu mới, vòng +1]
     REV --> REQ
 ```
 

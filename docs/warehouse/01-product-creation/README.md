@@ -48,7 +48,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | **Kiểm soát tồn kho** | Inventory Item | Có theo dõi lô (batch/lot)? Có hạn sử dụng? Có serial? Ngưỡng tồn tối thiểu/tối đa | Không (mặc định: không lô, không serial) |
 | **Yêu cầu QC khi nhận (QC required)** | Inventory Item | Bật → hàng nhận đi luồng 3 bước qua khu kiểm tra chất lượng trước khi putaway; tắt → luồng 2 bước (xem [03](../03-receipt/README.md)) | Không (mặc định: không yêu cầu) |
 | **Dữ liệu TMĐT** | Product / Variant | Mô tả, hình ảnh, giá bán, thuộc tính SEO, trạng thái hiển thị | Không (bắt buộc trước khi publish lên catalog) |
-| **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, **kỹ thuật in (print method** — in lụa, in offset khô (dry offset), in UV, flexo…; dùng để chọn trạm in ở [19](../19-production/README.md)**)**, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
+| **Dữ liệu tùy chỉnh (personalization)** | Product / Variant | Vùng in (print areas) & toạ độ, chất liệu in, **kỹ thuật in (print method** — in lụa, in offset khô (dry offset), in UV, flexo…; dùng chọn trạm in khi có trạm in — phạm vi sau, [19](../19-production/README.md)**)**, template 2D, **model 3D** để live preview, ràng buộc thiết kế (kích thước file, hệ màu) | Chỉ với sản phẩm in ấn |
 
 ### Output
 
@@ -145,7 +145,7 @@ Dữ liệu gốc được tách thành **hai lớp**, liên kết **1:1** theo 
 | [07 · Picking](../07-picking/README.md) / [08 · Packing](../08-packing/README.md) | Đơn vị quy đổi (thùng) & kích thước SKU ảnh hưởng hiển thị số lượng lấy, gợi ý thùng và cách đóng gói; cờ cho phép xoay làm giá trị mặc định cho kiện |
 | [09 · Shipping](../09-shipping/README.md) | Load Planning dùng cờ cho phép xoay (qua kiện) khi xếp hàng lên xe / container |
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Lấy template 2D, model 3D, định nghĩa print area & ràng buộc thiết kế từ đây |
-| [19 · Production](../19-production/README.md) | Kỹ thuật in quyết định trạm in nhận lệnh sản xuất; Inventory Item của SKU tùy chỉnh là phôi được cấp cho xưởng |
+| [19 · Production](../19-production/README.md) | Inventory Item của SKU tùy chỉnh là phôi được cấp cho xưởng; kỹ thuật in dùng chọn trạm in khi có trạm (phạm vi sau) |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) | Lấy nội dung hiển thị, đơn vị bán & giá bán, trạng thái `Published`; ATP tính trên Inventory Item của SKU |
 | [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | Số lượng đặt theo đơn vị bán, quy về đơn vị cơ sở bằng hệ số quy đổi khai báo ở đây |
 | [10/11 · Transfer](../10-inter-warehouse-transfer/README.md) | Giao dịch chuyển kho tham chiếu SKU |

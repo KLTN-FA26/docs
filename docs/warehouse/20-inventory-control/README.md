@@ -192,7 +192,7 @@ Trạng thái mô tả **tình trạng hàng**. Số lượng giữ cho đơn (g
 | `Quarantine` | Cách ly chờ kết luận chất lượng lại | → `Available` (đạt, cất lại); → `Blocked` | QC |
 | `Blocked` | QC từ chối, chờ trả NCC; không bao giờ bán | → rời kho (trả NCC) | NV mua hàng |
 | `Expired` | Quá hạn dùng; giữ lại để còn vết | → rời kho (điều chỉnh `EXPIRED` đã duyệt) | Quản lý kho |
-| `In Production` | Phôi đã cấp cho xưởng in hoặc gửi nhà gia công; thành phẩm gia công chờ QC sản xuất | → `Available` (thành phẩm về khu đóng gói, hoặc phôi chưa in trả lại); → rời kho (hỏng, điều chỉnh đã duyệt) | Hệ thống theo [19](../19-production/README.md) |
+| `In Production` | Phôi đã cấp cho xưởng in hoặc gửi nhà gia công; hàng đã in chờ QC; thành phẩm gia công chờ QC sản xuất | → `Available` (phôi chưa in trả lại); → rời kho: thành phẩm đơn hàng **ghi tiêu thụ** (`CONSUMPTION`) khi lệnh sản xuất hoàn tất; hỏng, phôi mẫu, hao hụt qua điều chỉnh đã duyệt | Hệ thống theo [19](../19-production/README.md) |
 
 > Hàng hỏng không có trạng thái riêng trong luồng hiện tại: phát hiện hỏng thì ghi giảm bằng điều chỉnh lý do `DAMAGED` (§4.3).
 
@@ -206,7 +206,8 @@ stateDiagram-v2
     Quarantine --> Blocked: Kiểm lại không đạt
     Available --> Expired: Quét hết hạn lúc 2 giờ sáng
     Available --> InProduction: Cấp phôi cho xưởng / gia công
-    InProduction --> Available: Thành phẩm về đóng gói / phôi chưa in trả lại
+    InProduction --> Available: Phôi chưa in trả lại
+    InProduction --> [*]: Thành phẩm ghi tiêu thụ khi LSX hoàn tất
     Blocked --> [*]: Trả NCC
     Expired --> [*]: Điều chỉnh EXPIRED đã duyệt
     InProduction --> [*]: Hỏng – điều chỉnh đã duyệt
@@ -393,7 +394,7 @@ Giữ hàng có hai tầng:
   | `STATUS_CHANGE` | Đổi trạng thái, ví dụ hết hạn |
   | `PICK` | Lấy hàng |
   | `PUT_BACK` | Cất lại hàng của đơn bị huỷ |
-  | `CONSUMPTION` | Nhà gia công dùng phôi |
+  | `CONSUMPTION` | Hàng rời kho cho sản xuất: thành phẩm đơn hàng khi lệnh sản xuất hoàn tất; phôi nhà gia công đã dùng |
 
   Dòng sổ không sửa, không xoá.
 - **BR-17 — Chống báo trùng.** Một điều kiện chỉ có một cảnh báo mở tại một thời điểm. Điều kiện vừa hết rồi quay lại trong vòng 6 giờ thì mở lại cảnh báo nhưng **không thông báo lại**.
@@ -433,7 +434,7 @@ Giữ hàng có hai tầng:
 | [07 · Picking](../07-picking/README.md) | Phân bổ theo FEFO từ tồn `Available` chưa hết hạn; short pick tự mở kiểm kê mù (4.2-f, BR-11) |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Giữ hàng cho lệnh chuyển; lệch số khi chuyển → kiểm kê + điều chỉnh có duyệt |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Lệch số khi di chuyển → kiểm kê + điều chỉnh có duyệt |
-| [19 · Production](../19-production/README.md) | Phôi `In Production`; xuất huỷ `SCRAP`, phôi mẫu `SAMPLE`, hao hụt gia công `SUBCONTRACT_LOSS` qua điều chỉnh có duyệt |
+| [19 · Production](../19-production/README.md) | Phôi `In Production`; thành phẩm ghi tiêu thụ `CONSUMPTION` khi lệnh hoàn tất; xuất huỷ `SCRAP` / `QC_FAILED`, phôi mẫu `SAMPLE`, hao hụt gia công `SUBCONTRACT_LOSS`, hàng đã in của lệnh huỷ / dừng `OTHER`, phôi hết hạn trả về `EXPIRED` qua điều chỉnh có duyệt |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) · [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | ATP (BR-01) quyết định hàng còn bán được; giữ hàng theo SKU khi đặt |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Release đơn → phân bổ; hàng giữ cho đơn bị hết hạn / short pick → đơn treo xử lý |
 | [00 · System Overview §6](../../00-system-overview/README.md) | Nguyên tắc chứng từ nguồn và công thức ATP |
