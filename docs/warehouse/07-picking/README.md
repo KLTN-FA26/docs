@@ -186,5 +186,5 @@ stateDiagram-v2
 | [08 · Packing](../08-packing/README.md) | Task `Picked` mở phần đóng gói |
 | [19 · Production](../19-production/README.md) | Dòng in không pick; phôi cấp bằng quét xuất vật tư; thành phẩm vào thẳng khu `PACKING` |
 | [05 · Putaway](../05-putaway/README.md) / [06 · Slotting](../06-warehouse-map-slotting/README.md) | Vị trí & FEFO do putaway / slotting quyết định |
-| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Bổ sung hàng từ bin dự trữ sang bin lấy hàng (`is_pickable`) khi cạn |
+| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển thủ công hàng sang bin lấy hàng (`is_pickable`); bổ sung tự động khi cạn là phạm vi sau (C24) |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 1 của luồng Fulfillment |

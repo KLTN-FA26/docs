@@ -95,7 +95,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Shelf / Kệ** | Khối kệ đặt trên bản đồ kho (toạ độ, kích thước, góc xoay), có mặt lấy hàng và lớp lưu trữ mặc định. |
 | **Shelf Level / Tầng kệ** | Một tầng của kệ; có cao độ, chiều cao lọt và tải trọng tối đa. |
 | **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; tối đa 200 bin mỗi tầng. Có sức chứa theo đơn vị, tải trọng tối đa, cờ cho phép lấy / cất hàng, loại ô (chỉ mô tả), lớp lưu trữ ghi đè. |
-| **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ, phải bổ sung sang bin picking trước khi lấy. |
+| **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ: không được phân bổ cho lấy hàng; hiện chuyển sang bin picking bằng di chuyển thủ công ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 | **Bin autogenerate / Tự sinh bin** | Tạo hàng loạt bin cho các tầng kệ chưa có bin bằng cách chia đều mặt kệ theo số hàng × số cột; mã bin đặt theo kiểu `SEQUENTIAL` (`01`, `02`…) hoặc `ROW_LETTER_COLUMN` (`A01`, `B01`…). |
 | **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUALITY_CONTROL` (kiểm tra chất lượng), `QUARANTINE` (cách ly), `PRODUCTION` (xưởng in), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). Khu chứa hàng có lớp lưu trữ, sức chứa, tải trọng, cờ cho phép lấy / cất; khu vực không thuộc zone. |
 | **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
@@ -124,7 +124,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. Không áp dụng trên catalog: không có đặt trước ([13](../ecommerce/13-catalog/README.md), [D17](../open-questions/README.md)). |
 | **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
 | **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại một bin của cùng kho, qua hàng chờ cất lại. |
-| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. |
+| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. Phạm vi sau ([C24](../open-questions/README.md)); hiện làm bằng di chuyển thủ công ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 | **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
 | **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. Tại bàn đóng gói: phạm vi sau (C17); hệ thống chỉ ước tính số thùng khi ước tính tải. |
 | **Kit / Bộ kiện (đóng bộ)** | Một đơn vị hàng đóng thành N kiện (N = `package_count` trên Inventory Item, 2–99); giao nguyên bộ, cùng một xe; huỷ một kiện là huỷ cả bộ. |
@@ -147,9 +147,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Fill rate / Tỷ lệ lấp đầy** | Phần trăm thể tích lòng thùng và phần trăm tải trọng của một xe đã được kiện sử dụng. |
 | **Rotatable / Cho phép xoay** | Cờ của SKU (mặc định cho kiện, Packer được ghi đè) cho biết kiện được xoay theo 6 hướng khi xếp lên xe hay phải giữ nguyên hướng đặt. |
 | **Inter-warehouse Transfer / Chuyển kho** | Di chuyển tồn giữa hai kho khác địa điểm. |
-| **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. |
+| **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. Hiện là thao tác di chuyển thủ công, ghi ngay, chỉ phần tự do của hàng lẻ ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 | **Transfer Order (TO) / Lệnh chuyển kho** | Chứng từ yêu cầu chuyển hàng giữa/trong kho. |
-| **Transfer discrepancy / Chênh lệch chuyển kho** | Sai khác giữa số xuất ở kho nguồn và số nhận ở kho đích. |
+| **Transfer discrepancy / Chênh lệch chuyển kho** | Sai khác giữa số xuất ở kho nguồn và số nhận ở kho đích. Ghi khi nhận tại kho đích — phạm vi sau ([10](../warehouse/10-inter-warehouse-transfer/README.md)). |
 
 ---
 

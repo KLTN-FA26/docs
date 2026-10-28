@@ -331,6 +331,8 @@ stateDiagram-v2
 
 ### 3.1. Flowchart tổng thể
 
+> ⚠️ Từ bước **Kho đích: tạo phiếu nhận** trở đi (nhận, đối chiếu chênh lệch, cất hàng, đóng lệnh) là **phạm vi giai đoạn sau** — lệnh hiện dừng ở `In Transit` ([10](../warehouse/10-inter-warehouse-transfer/README.md) §4 bước 8–11). Các bước đó vẽ **nét đứt**.
+
 ```mermaid
 flowchart TD
     NEED([Nhu cầu cân bằng tồn / đưa hàng gần vùng bán]) --> TO_CREATE[Tạo Transfer Order – Draft\nKho nguồn → Kho đích + dòng SKU]
@@ -341,7 +343,7 @@ flowchart TD
     TO_APPROVE -- Có --> TO_PENDING[Pending Approval] --> TO_APPROVED[Approved]
     TO_APPROVE -- Không --> TO_APPROVED
 
-    TO_APPROVED --> SRC_PICK["Kho nguồn: phân bổ tồn + pick\n(FEFO theo lô)"]
+    TO_APPROVED --> SRC_PICK["Kho nguồn: phân bổ tồn + pick\nFEFO / FIFO, thùng nguyên trước"]
     SRC_PICK --> SRC_PACK[Đóng kiện, ghi khối lượng]
     SRC_PACK --> TRUCK{Đi xe tải / container?}
     TRUCK -- Có --> SRC_LOADPLAN[Load Planning 3D\nchốt kế hoạch chuyến xe,\nxếp kiện theo sơ đồ]
@@ -361,6 +363,9 @@ flowchart TD
     DST_MOVE --> TO_STATUS{Đã nhận & putaway hết dòng?}
     TO_STATUS -- Chưa --> DST_RECV
     TO_STATUS -- Rồi --> TO_DONE([Transfer Order: Completed / Closed])
+
+    classDef later stroke-dasharray: 5 5
+    class DST_RECV,DST_COUNT,DISCREPANCY,INVESTIGATE,DST_PA,DST_SLOT,DST_MOVE,TO_STATUS,TO_DONE later
 ```
 
 ### 3.2. Sequence diagram (trình tự tác nhân)
@@ -380,13 +385,14 @@ sequenceDiagram
     PLAN->>TO: Tạo TO (Draft) – nguồn/đích + SKU/SL
     TO->>INV_SRC: Kiểm tra tồn Available tại kho nguồn
     TO->>TO: Duyệt (nếu vượt ngưỡng) → Approved
-    TO->>SRC: Yêu cầu pick (phân bổ tồn, FEFO)
+    TO->>SRC: Yêu cầu pick (phân bổ tồn, FEFO / FIFO, thùng nguyên trước)
     SRC->>INV_SRC: Lấy hàng khỏi vị trí
     opt Đi xe tải / container
         SRC->>SRC: Load Planning 3D → kế hoạch chuyến xe, xếp kiện theo sơ đồ
     end
     SRC->>TRANS: Xuất kho nguồn (Dispatch)
     INV_SRC->>INV_SRC: Giảm tồn → trạng thái In-Transit (gắn TO)
+    Note over DST,INV_DST: Phạm vi giai đoạn sau — chưa có trong hệ thống
     TRANS->>DST: Giao hàng tới kho đích
     DST->>TO: Tạo phiếu nhận tham chiếu TO
     DST->>DST: Kiểm đếm SL & tình trạng
@@ -496,20 +502,22 @@ flowchart TD
     REV --> REQ
 ```
 
-### 4.4. Luồng Transfer nội bộ một kho (Intra-warehouse — Replenishment)
+### 4.4. Luồng di chuyển hàng trong một kho (Intra-warehouse)
+
+Bổ sung vùng picking tự động và nhiệm vụ di chuyển là phạm vi giai đoạn sau ([11](../warehouse/11-intra-warehouse-transfer/README.md), [C24](../open-questions/README.md)).
 
 ```mermaid
 flowchart TD
-    MON[Giám sát tồn tại vị trí picking] --> LOW{Vị trí picking ≤ ngưỡng min?}
-    LOW -- Không --> MON
-    LOW -- Có --> GEN[Sinh replenishment task\nReserve → Picking bin, đưa về mức max]
-    GEN --> ASSIGN["Phân công NV kho\n(ưu tiên cao nếu đang chặn picking)"]
-    ASSIGN --> EXEC[Quét vị trí nguồn → SKU/lô →\nsố lượng → vị trí đích]
-    EXEC --> CHK{Số đặt vào = số lấy ra?}
-    CHK -- Lệch --> DISC[Ghi Discrepancy\nCycle count 2 vị trí + adjustment]
-    CHK -- Khớp --> UPD[Cập nhật tồn theo vị trí\nTổng tồn kho KHÔNG đổi]
-    DISC --> UPD
-    UPD --> DONE([Move task: Completed])
+    START[NV kho chọn SKU, lô,\nvị trí nguồn, vị trí đích, số lượng] --> SAME{Cùng kho, khác vị trí,\nthuộc kho được gán?}
+    SAME -- Không --> REJ([Từ chối — khác kho thì dùng lệnh chuyển kho])
+    SAME -- Có --> DEST{Vị trí đích dùng được?}
+    DEST -- Không --> REJ2([Từ chối])
+    DEST -- Có --> CNT{Vị trí đang bị\nphiếu kiểm kê giữ?}
+    CNT -- Có --> REJ2
+    CNT -- Không --> FREE{Đủ phần tự do\ncủa hàng lẻ ở nguồn?}
+    FREE -- Không --> REJ2
+    FREE -- Có --> MOVE[Chuyển ngay, giữ trạng thái, lô, hạn dùng\nGhi sổ MOVE — tổng tồn kho không đổi]
+    MOVE --> DONE([Xong])
 ```
 
 ---

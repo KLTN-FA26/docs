@@ -214,6 +214,6 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, lớp lưu trữ, sức chứa, tải trọng; khu `QUALITY_CONTROL` / `RECEIVING` là vị trí nguồn |
 | [01 · Product Creation](../01-product-creation/README.md) | Lớp lưu trữ và khối lượng đơn vị của SKU |
 | [07 · Picking](../07-picking/README.md) | Vị trí cất hợp lý và gom lô giúp lấy hàng nhanh; FEFO ở bước phân bổ |
-| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Công cụ sửa / tối ưu vị trí sau khi đã cất |
+| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển thủ công để sửa vị trí sau khi đã cất |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) / [14 · Order](../../ecommerce/14-cart-and-order/README.md) | Cất xong làm tăng tồn khả dụng (ATP) |
 | [20 · Inventory Control](../20-inventory-control/README.md) | Thùng LPN; dòng sổ biến động; lệch số khi cất xử lý bằng kiểm kê / điều chỉnh tồn có duyệt; `Inbound` → `Available` |

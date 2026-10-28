@@ -373,7 +373,7 @@ Giữ hàng có hai tầng:
   - nó nằm trên một phiếu `Planned` / `In Progress`; hoặc
   - nó nằm trên một phiếu `Completed` mà điều chỉnh `COUNT_VARIANCE` của dòng còn `Pending Approval`.
 
-  Dòng bận không được đưa vào phiếu mới, không được thêm tay hay đếm lại. Short pick trên dòng bận dùng lại phiếu đang giữ nó. Lý do: hai phiếu cùng sửa một chỗ sẽ sửa tồn hai lần.
+  Dòng bận không được đưa vào phiếu mới, không được thêm tay hay đếm lại. Short pick trên dòng bận dùng lại phiếu đang giữ nó. Lý do: hai phiếu cùng sửa một chỗ sẽ sửa tồn hai lần. Di chuyển thủ công ra / vào dòng bận bị từ chối ([11](../11-intra-warehouse-transfer/README.md)).
 - **BR-11 — Short pick chặn bán.** Phần tồn tự do của dòng short pick bị loại khỏi ATP và khỏi phân bổ tới khi mọi điều chỉnh của dòng đó có quyết định. Mọi điều chỉnh **thiếu** đang chờ duyệt cũng chặn phần tự do của dòng đó, bất kể nguồn phiếu.
 - **BR-12 — Phạm vi kiểm kê.** Tối đa 500 dòng mỗi phiếu, 50 zone, 200 SKU. Người đếm phải là nhân viên kho hoặc quản lý kho đang hoạt động của kho đó. Người đếm chỉ đổi được trước khi bắt đầu đếm.
 - **BR-13 — Ngưỡng cảnh báo.**
@@ -433,7 +433,7 @@ Giữ hàng có hai tầng:
 | [05 · Putaway](../05-putaway/README.md) | `Inbound` → `Available`; lệch số khi cất xử lý bằng điều chỉnh / kiểm kê ở đây |
 | [07 · Picking](../07-picking/README.md) | Phân bổ theo FEFO / FIFO từ tồn `Available` chưa hết hạn, thùng nguyên trước; dòng lấy từ thùng quét LPN; short pick tự mở kiểm kê mù (4.2-f, BR-11) |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Giữ hàng cho lệnh chuyển; lệch số khi chuyển → kiểm kê + điều chỉnh có duyệt |
-| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Lệch số khi di chuyển → kiểm kê + điều chỉnh có duyệt |
+| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển thủ công ghi sổ `MOVE`; dòng đang kiểm kê không di chuyển được (BR-10); lệch số → kiểm kê + điều chỉnh có duyệt |
 | [19 · Production](../19-production/README.md) | Phôi `In Production`; thành phẩm ghi tiêu thụ `CONSUMPTION` khi lệnh hoàn tất; xuất huỷ `SCRAP` / `QC_FAILED`, phôi mẫu `SAMPLE`, hao hụt gia công `SUBCONTRACT_LOSS`, hàng đã in của lệnh huỷ / dừng `OTHER`, phôi hết hạn trả về `EXPIRED` qua điều chỉnh có duyệt |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) · [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | ATP (BR-01) quyết định hàng còn bán được; giữ hàng theo SKU khi đặt |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Release đơn → phân bổ; hàng giữ cho đơn bị hết hạn / short pick → đơn treo xử lý |
