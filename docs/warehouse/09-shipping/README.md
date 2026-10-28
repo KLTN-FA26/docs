@@ -42,7 +42,7 @@ Module hỗ trợ **hai hình thức giao** (Điều phối chọn theo từng �
 | Shipment `Ready to Dispatch` | Sinh khi hoàn tất đóng gói ([08](../08-packing/README.md)); gồm kiện đã niêm phong (mã kiện, khối lượng, kích thước, cờ xoay), hình thức giao copy từ đơn, số tiền thu hộ | Có |
 | **Đơn vị vận chuyển** | Chọn từ **danh mục hãng** (mã, tên, người liên hệ, điện thoại, trạng thái `Active` / `Inactive`). Hãng `Inactive` không nhận chuyến mới. | Có |
 | Địa chỉ giao & người nhận | Từ đơn hàng | Có |
-| Địa chỉ gửi & địa chỉ hoàn hàng | Địa chỉ kho xuất; địa chỉ hoàn hàng lấy `return_address` của kho, nếu không khai báo thì dùng địa chỉ kho (xem [06](../06-warehouse-map-slotting/README.md)) | Có |
+| Địa chỉ gửi & địa chỉ hoàn hàng | Địa chỉ kho xuất, cũng dùng làm địa chỉ hoàn hàng trên nhãn. ⚠️ Địa chỉ hoàn hàng riêng khai báo ở [06](../06-warehouse-map-slotting/README.md) chưa được dùng | Có |
 | Thông tin bàn giao | Người đại diện hãng, biển số xe, điện thoại tài xế (tuỳ chọn), xác nhận đã ký | Có (khi bàn giao) |
 | Lịch lấy hàng (pickup schedule) / điểm gửi | Thoả thuận với hãng ngoài hệ thống | Không |
 
@@ -376,7 +376,7 @@ stateDiagram-v2
 | [08 · Packing](../08-packing/README.md) | Nhận shipment `Ready to Dispatch` (kiện, kích thước, khối lượng, cờ xoay, nhãn); nhãn lỗi thời phải in lại |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Lệnh chuyển kho đi nguyên chuyến dùng Load Planning; hàng rời kho nguồn khi xe cuối ký |
 | [01 · Product Creation](../01-product-creation/README.md) | Quy cách đóng gói & kích thước SKU cho ước tính tải; cờ cho phép xoay mặc định của kiện |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu chờ xuất (`DISPATCH`); địa chỉ kho & địa chỉ hoàn hàng in trên nhãn kiện và biên bản |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu chờ xuất (`DISPATCH`); địa chỉ kho in trên nhãn kiện và biên bản |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Hình thức giao chọn ở đơn; giao một phần do Sale quyết; trạng thái `Shipped` / `Partially Fulfilled` / `Delivered` / `Delivery Failed` / `Returned`; huỷ đơn → gỡ / dỡ kiện |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Chặn bàn giao khi còn nợ tiền phải thu trước giao; tiền thu hộ chốt theo shipment; giao hàng phát sinh khoản công nợ |
 | [03 · Receipt](../03-receipt/README.md) | Hàng hoàn (RTO) nhập lại kho qua luồng Receipt dạng "return" |

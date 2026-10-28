@@ -52,7 +52,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | # | Câu hỏi | Giả định tạm thời | Ảnh hưởng | Module |
 |---|---------|-------------------|-----------|--------|
 | C1 | **Tiêu chí & trọng số của thuật toán gợi ý vị trí (slotting)**: thứ tự ưu tiên giữa (gần khu đóng gói / gom cùng SKU / FEFO / cân bằng tải / công thái học / mật độ)? Cấu hình được không? | ✅ **Đã chốt một phần 2026-10-28:** gợi ý cất hàng hiện xếp hạng **cùng lô → cùng SKU → bin trống → còn chỗ**, rồi bin còn nhiều chỗ hơn, rồi mã vị trí; chỉ bin cho phép cất, cùng lớp lưu trữ, còn sức chứa / tải trọng ([05](../warehouse/05-putaway/README.md) §4.2). **Còn mở:** tiêu chí nâng cao (gần khu đóng gói, velocity / ABC, FEFO, cân bằng tải) và trọng số cấu hình — bộ tiêu chí mặc định trong [06](../warehouse/06-warehouse-map-slotting/README.md) §4.2 | 🔴 | 06, 05, 11 |
-| C2 | Slotting là **rule-based** hay có **học từ dữ liệu (ML)**? Mức độ tự động vs cần người duyệt? | Rule-based + feedback loop; re-slotting cần Manager duyệt | 🟡 | 06 |
+| C2 | Slotting là **rule-based** hay có **học từ dữ liệu (ML)**? Mức độ tự động vs cần người duyệt? | Hiện **quy tắc cố định** (lọc ràng buộc cứng, xếp cùng lô → cùng SKU → bin trống → còn chỗ — [05](../warehouse/05-putaway/README.md), [06 §4.4](../warehouse/06-warehouse-map-slotting/README.md)); không trọng số, không học từ dữ liệu. Chấm điểm mềm theo khoảng cách / tần suất và re-slotting có duyệt là phạm vi sau | 🟡 | 06 |
 | C3 | Tồn khả dụng để bán (**ATP**) tính theo **tổng toàn hệ thống** hay theo **kho phục vụ khu vực giao** của khách? | Hiện tính **toàn hệ thống** ([13](../ecommerce/13-catalog/README.md) BR-06); theo kho phục vụ khu vực giao là phạm vi sau | 🔴 | 13, 14, 10 |
 | C4 | Tồn **In-Transit** (chuyển kho) có được tính vào ATP của kho đích để bán trước không? | Không tính cho tới khi nhận & putaway | 🟡 | 10, 13, 14 |
 | C5 | Tồn khả dụng cộng **ngay khi Receipt** hay **chỉ sau Putaway**? | Chỉ sau Putaway (`Inbound` chưa khả dụng) | 🟡 | 03, 05, 13 |
@@ -72,6 +72,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | C19 | Có làm **Bảng đề xuất nhập hàng** do MRP tự sinh (chuyển thành PO nháp) và **nhận hàng không PO** (blind receipt) không? | Phạm vi giai đoạn sau. Hiện Procurement tạo PO trực tiếp từ cảnh báo tồn `REORDER` / `SAFETY`; mọi phiếu nhận phải tham chiếu một PO ([02](../warehouse/02-purchase-order/README.md), [03](../warehouse/03-receipt/README.md)) | 🟡 | 02, 03, 20 |
 | C20 | **Hạn mức duyệt PO** cho từng role (theo tiền tệ, thời gian hiệu lực) do ai khai báo, mức mặc định bao nhiêu? | Chưa có màn hình / dữ liệu khai báo; vì vậy mọi PO đều vào `Pending Approval` và người duyệt không bị giới hạn số tiền ([02](../warehouse/02-purchase-order/README.md) §4.3) | 🟡 | 02, 00 |
 | C21 | **Thông số logistics** (khối lượng, kích thước) có bắt buộc trước khi SKU được nhận hàng / cất hàng không? | Hiện không bắt buộc; nên khai báo vì gợi ý vị trí, đóng gói, ước tính tải dùng dữ liệu này ([01](../warehouse/01-product-creation/README.md) BR-03) | 🟡 | 01, 05, 06, 09 |
+| C22 | Có chặn **ngưng vị trí (kệ / bin / khu vực / kho) còn tồn** và **đổi lớp lưu trữ** của vị trí đang chứa hàng khác lớp không? | Nên chặn ngưng vị trí còn tồn; đổi lớp thì cảnh báo, chỉ chặn cất thêm. **Hiện hệ thống chưa kiểm cả hai** ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-04) | 🟡 | 06, 20 |
 
 ---
 

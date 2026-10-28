@@ -91,24 +91,25 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **WMS** (Warehouse Management System) | Hệ thống quản lý kho. |
 | **Warehouse Map / Bản đồ kho** | Mô hình không gian kho (2D mặt bằng / 3D khối kệ) kèm trạng thái lấp đầy. |
 | **Phân cấp không gian kho** | **Kho (Warehouse) → Kệ (Shelf) → Tầng kệ (Shelf Level) → Ô (Bin)**; kệ và khu vực có thể thuộc một **Zone** (tùy chọn). Hàng trên sàn nằm ở **Area**. Không khai báo dãy/lối đi riêng. |
-| **Zone** | Nhóm logic **tùy chọn** gom kệ/khu vực (có màu hiển thị), dùng cho hiển thị và zone picking; không mang quy tắc lưu trữ. |
+| **Zone** | Nhóm **kệ** tùy chọn (tên, màu hiển thị), dùng để hiển thị và chọn nhãn in; khu vực không thuộc zone; không mang quy tắc lưu trữ. Zone picking là phạm vi sau (C17). |
 | **Shelf / Kệ** | Khối kệ đặt trên bản đồ kho (toạ độ, kích thước, góc xoay), có mặt lấy hàng và lớp lưu trữ mặc định. |
 | **Shelf Level / Tầng kệ** | Một tầng của kệ; có cao độ, chiều cao lọt và tải trọng tối đa. |
-| **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; có sức chứa theo đơn vị, cờ cho phép lấy hàng / cất hàng, loại ô, lớp lưu trữ ghi đè. |
+| **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; tối đa 200 bin mỗi tầng. Có sức chứa theo đơn vị, tải trọng tối đa, cờ cho phép lấy / cất hàng, loại ô (chỉ mô tả), lớp lưu trữ ghi đè. |
 | **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ, phải bổ sung sang bin picking trước khi lấy. |
 | **Bin autogenerate / Tự sinh bin** | Tạo hàng loạt bin cho các tầng kệ chưa có bin bằng cách chia đều mặt kệ theo số hàng × số cột; mã bin đặt theo kiểu `SEQUENTIAL` (`01`, `02`…) hoặc `ROW_LETTER_COLUMN` (`A01`, `B01`…). |
-| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUALITY_CONTROL` (kiểm tra chất lượng), `QUARANTINE` (cách ly), `PRODUCTION` (xưởng in), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). |
+| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUALITY_CONTROL` (kiểm tra chất lượng), `QUARANTINE` (cách ly), `PRODUCTION` (xưởng in), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). Khu chứa hàng có lớp lưu trữ, sức chứa, tải trọng, cờ cho phép lấy / cất; khu vực không thuộc zone. |
 | **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
 | **Obstacle / Vật cản** | Kệ hoặc khu vực đánh dấu không đi xuyên được khi tính đường đi. |
 | **Pick face / Mặt lấy hàng** | Phía của kệ (bắc/đông/nam/tây) mà NV kho tiếp cận để lấy/cất hàng. |
 | **Storage class / Lớp lưu trữ** | Phân loại điều kiện lưu trữ: `NORMAL`, `COLD`, `HAZMAT`, `FRAGILE`, `OVERSIZE`. SKU chỉ được cất vào bin có lớp lưu trữ hiệu lực trùng lớp của SKU. |
-| **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin** hoặc một **Area chứa hàng**. |
-| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng, do hệ thống ghép khi tạo vị trí và không đổi: bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`); khu vực = prefix kho + mã khu vực (ví dụ `HN-RCV01`). Duy nhất toàn hệ thống. |
+| **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin**, một **Area chứa hàng**, hoặc **vị trí tại nhà gia công** (vị trí ảo, không trên bản đồ). |
+| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng, do hệ thống ghép khi tạo vị trí và không đổi: bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`); khu vực = prefix kho + mã khu vực (ví dụ `HN-RCV01`). Duy nhất toàn hệ thống. Vị trí tại nhà gia công = prefix kho + `SUB` + mã NCC. In nhãn kèm QR và Code 128. |
+| **Effective status / Trạng thái hiệu lực** | Trạng thái thực dùng của một vị trí = trạng thái hẹp nhất trong (kho, kệ, vị trí), theo thứ tự `Inactive` > `Maintenance` > `Blocked` > `Active`; tính khi đọc, không ghi lan. Vị trí **dùng được** khi trạng thái hiệu lực là `Active`. |
 | **Warehouse prefix / Tiền tố kho** | Mã ngắn duy nhất của kho, dùng làm tiền tố cho mã vị trí và mã chứng từ phát sinh tại kho. Không sửa được sau khi tạo. |
 | **Capacity / Sức chứa** | Giới hạn của vị trí: số đơn vị tối đa của bin; tải trọng tối đa & chiều cao lọt của tầng kệ. |
-| **Slotting / Slotting Suggestion / Gợi ý vị trí** | Đề xuất vị trí lưu trữ tối ưu cho một SKU dựa trên quy tắc & dữ liệu. |
+| **Slotting / Slotting Suggestion / Gợi ý vị trí** | Đề xuất bin khi cất hàng. Hiện theo **quy tắc cố định**: lọc ràng buộc cứng rồi xếp cùng lô → cùng SKU → bin trống → còn chỗ, tối đa 10 bin ([05](../warehouse/05-putaway/README.md)). Chấm điểm theo dữ liệu là phạm vi sau (C2). |
 | **Putaway recommendation** | Tên gọi khác của gợi ý vị trí khi cất hàng. |
-| **Re-slotting / Tối ưu vị trí** | Sắp xếp lại vị trí SKU định kỳ khi nhu cầu/tần suất xuất thay đổi. |
+| **Re-slotting / Tối ưu vị trí** | Sắp xếp lại vị trí SKU định kỳ khi nhu cầu/tần suất xuất thay đổi. Phạm vi sau (C2). |
 | **Golden zone** | Khu vực dễ với tay nhất (ngang hông–vai), ưu tiên cho hàng bán chạy. |
 | **Honeycombing** | Tình trạng vị trí bị chiếm dở dang, còn trống nhưng không dùng được → lãng phí chỗ. |
 | **Velocity / Tần suất xuất** | Mức độ một SKU được lấy ra để giao (nhanh/chậm). |

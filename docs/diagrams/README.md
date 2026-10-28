@@ -356,7 +356,7 @@ flowchart TD
     DISCREPANCY -- Khớp --> DST_PA
     INVESTIGATE --> DST_PA[Sinh Putaway task tại kho đích]
 
-    DST_PA --> DST_SLOT[Slotting Engine kho đích gợi ý vị trí]
+    DST_PA --> DST_SLOT[Gợi ý bin cất hàng tại kho đích — 05]
     DST_SLOT --> DST_MOVE[Đặt hàng vào vị trí\nTồn: In-Transit → Available tại kho đích]
     DST_MOVE --> TO_STATUS{Đã nhận & putaway hết dòng?}
     TO_STATUS -- Chưa --> DST_RECV
@@ -374,7 +374,7 @@ sequenceDiagram
     participant INV_SRC as Tồn kho nguồn
     participant TRANS as Vận chuyển
     actor DST as Kho đích
-    participant SLOT as Slotting Engine (kho đích)
+    participant SLOT as Gợi ý bin (kho đích)
     participant INV_DST as Tồn kho đích
 
     PLAN->>TO: Tạo TO (Draft) – nguồn/đích + SKU/SL
