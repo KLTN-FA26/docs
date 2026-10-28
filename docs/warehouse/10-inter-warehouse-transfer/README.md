@@ -72,7 +72,7 @@ Lệnh chuyển kho có **hai cách giao**:
    - **Gửi kiện:** nhân viên kho lấy & đóng hàng (ngoài phiên đóng gói chuyển kho).
 5. **Xuất kho nguồn (Dispatch):**
    - **Nguyên chuyến:** lập **kế hoạch chuyến xe** cho đúng lệnh này (một kế hoạch chỉ một lệnh, không trộn đơn khách), xếp xe & ký bàn giao từng xe ([09 §4.2](../09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)). Lệnh đi **nguyên lô**: không được để lại kiện. Khi **xe cuối cùng** ký → TO `In Transit`, tồn kho nguồn giảm đúng phần đã đóng.
-   - **Gửi kiện:** nhân viên kho xác nhận xuất, nhập **số lượng thực xuất** từng dòng (0 tới số yêu cầu, tổng ≥ 1) → TO `In Transit`. Tồn kho nguồn giảm theo FIFO / FEFO, không đụng hàng đã giữ cho đơn khách.
+   - **Gửi kiện:** nhân viên kho xác nhận xuất, nhập **số lượng thực xuất** từng dòng (0 tới số yêu cầu, tổng ≥ 1) → TO `In Transit`. Tồn kho nguồn giảm theo FIFO / FEFO, thùng nguyên trước ([07](../07-picking/README.md) BR-03), không đụng hàng đã giữ cho đơn khách.
 
    Tồn đã xuất **thuộc về lệnh**, không thuộc kho nào.
 6. **Huỷ lấy hàng** — khi hàng **chưa rời kho**, TO `Picking` → `Approved`:

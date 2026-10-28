@@ -160,7 +160,7 @@ Các module khác **ghi** tồn: nhận ([03](../03-receipt/README.md)), cất (
 
 1. Tại [03 · Receipt](../03-receipt/README.md), mỗi thùng nguyên đai được dán một mã LPN trên dòng nhận → `Receiving`.
 2. Phiếu nhận `Confirmed` → `In Stock`. Hàng bên trong là tồn của thùng, ở vị trí của thùng.
-3. Lấy, cấp phôi, xuất huỷ dần hết hàng trong thùng → `Consumed`.
+3. Lấy, cấp phôi, xuất huỷ dần hết hàng trong thùng → `Consumed`. Phân bổ ưu tiên **thùng nguyên** cho phần chẵn; dòng lấy hàng từ thùng ghi LPN và chỉ xác nhận bằng quét LPN ([07](../07-picking/README.md) BR-03, BR-10). Hàng cất lại không vào lại thùng.
 4. Kiểm kê không tìm thấy thùng → quản lý duyệt điều chỉnh `COUNT_VARIANCE` → `Lost`. Thùng `Lost` tìm lại được thì quay về `In Stock`.
 5. Phiếu nhận bị huỷ trước khi xác nhận → `Void`.
 
@@ -431,7 +431,7 @@ Giữ hàng có hai tầng:
 | [02 · Purchase Order](../02-purchase-order/README.md) | Cảnh báo `REORDER` là tín hiệu lập PO bổ sung |
 | [03 · Receipt](../03-receipt/README.md) | Ghi tồn `Inbound`, dán nhãn thùng LPN, nguồn gốc cho truy xuất lô; cảnh báo cận hạn dùng chung cửa sổ ngày |
 | [05 · Putaway](../05-putaway/README.md) | `Inbound` → `Available`; lệch số khi cất xử lý bằng điều chỉnh / kiểm kê ở đây |
-| [07 · Picking](../07-picking/README.md) | Phân bổ theo FEFO từ tồn `Available` chưa hết hạn; short pick tự mở kiểm kê mù (4.2-f, BR-11) |
+| [07 · Picking](../07-picking/README.md) | Phân bổ theo FEFO / FIFO từ tồn `Available` chưa hết hạn, thùng nguyên trước; dòng lấy từ thùng quét LPN; short pick tự mở kiểm kê mù (4.2-f, BR-11) |
 | [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Giữ hàng cho lệnh chuyển; lệch số khi chuyển → kiểm kê + điều chỉnh có duyệt |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Lệch số khi di chuyển → kiểm kê + điều chỉnh có duyệt |
 | [19 · Production](../19-production/README.md) | Phôi `In Production`; thành phẩm ghi tiêu thụ `CONSUMPTION` khi lệnh hoàn tất; xuất huỷ `SCRAP` / `QC_FAILED`, phôi mẫu `SAMPLE`, hao hụt gia công `SUBCONTRACT_LOSS`, hàng đã in của lệnh huỷ / dừng `OTHER`, phôi hết hạn trả về `EXPIRED` qua điều chỉnh có duyệt |

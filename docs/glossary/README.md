@@ -41,7 +41,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng: một **khoản giữ** trên tồn `Available` (mỗi bin / lô một khoản), không có hạn. "`Allocated`" là cách gọi phần tồn đang có khoản phân bổ, không phải một trạng thái riêng của hàng. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
 | **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do) khi phát hiện chênh lệch. Duyệt **bốn mắt** (người duyệt ≠ người đề nghị); duyệt là ghi tồn ngay. Xem [20 §4.3](../warehouse/20-inventory-control/README.md). |
 | **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một phạm vi vị trí / SKU, không dừng toàn kho; mặc định **kiểm mù** (người đếm không thấy số sổ sách). Chênh lệch thành điều chỉnh `COUNT_VARIANCE` chờ duyệt. Xem [20 §4.2](../warehouse/20-inventory-control/README.md). |
-| **LPN** (License Plate Number) / **Thùng hàng** | Mã định danh một thùng nguyên đai, dán khi nhận hàng; thùng được theo dõi, kiểm kê và điều chỉnh như một đơn vị. Thùng không tự mang số lượng: hàng bên trong là tồn ở vị trí của thùng. Xem [20 §4.6](../warehouse/20-inventory-control/README.md). |
+| **LPN** (License Plate Number) / **Thùng hàng** | Mã định danh một thùng nguyên đai, dán khi nhận hàng; thùng được theo dõi, kiểm kê và điều chỉnh như một đơn vị. Thùng không tự mang số lượng: hàng bên trong là tồn ở vị trí của thùng. Phân bổ ưu tiên thùng nguyên; dòng lấy hàng từ thùng xác nhận bằng quét LPN ([07](../warehouse/07-picking/README.md)). Xem [20 §4.6](../warehouse/20-inventory-control/README.md). |
 | **Stock movement ledger / Sổ biến động tồn** | Nhật ký mọi thay đổi tồn: loại biến động, vị trí đi / đến, SKU, lô, số lượng, người, thời điểm, chứng từ nguồn. Không sửa, không xoá. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
 | **Lot traceability / Truy xuất lô** | Báo cáo một lô từ nguồn gốc (NCC, phiếu nhận) tới tồn còn lại, khoản đang giữ và đơn khách đã nhận hàng. Lô không có phiếu nhận ghi nguồn gốc `UNTRACED`. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
 | **FIFO** (First-In-First-Out) | Nhập trước xuất trước. |
@@ -116,7 +116,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm khi cất hàng: trạng thái vị trí, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng. |
 | **Hazmat** (Hazardous materials) | Hàng nguy hiểm, có khu vực & quy tắc lưu trữ riêng. |
 | **Picking / Lấy hàng** | Lấy hàng từ các vị trí để gom thành đơn chuẩn bị giao. |
-| **Pick list / Danh sách lấy hàng** | Danh sách dòng lấy hàng (vị trí – SKU – lô – số lượng) của một task, sắp theo mã vị trí. |
+| **Pick list / Danh sách lấy hàng** | Danh sách dòng lấy hàng (vị trí – SKU – lô – thùng LPN nếu có – số lượng) của một task, sắp theo mã vị trí. |
 | **Fulfillment task / Pick task — Nhiệm vụ xuất hàng** | **Mỗi đơn một task**, gồm phần lấy hàng (`Pending` → `Picking` → `Picked`) và phần đóng gói; Điều phối / Quản lý kho tạo và giao cho một nhân viên kho ([07](../warehouse/07-picking/README.md)). |
 | **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. Phạm vi sau ([open-questions C17](../open-questions/README.md)). |
 | **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. Phạm vi sau (C17). |

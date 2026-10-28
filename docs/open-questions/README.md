@@ -74,6 +74,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | C20 | **Hạn mức duyệt PO** cho từng role (theo tiền tệ, thời gian hiệu lực) do ai khai báo, mức mặc định bao nhiêu? | Chưa có màn hình / dữ liệu khai báo; vì vậy mọi PO đều vào `Pending Approval` và người duyệt không bị giới hạn số tiền ([02](../warehouse/02-purchase-order/README.md) §4.3) | 🟡 | 02, 00 |
 | C21 | **Thông số logistics** (khối lượng, kích thước) có bắt buộc trước khi SKU được nhận hàng / cất hàng không? | Hiện không bắt buộc; nên khai báo vì gợi ý vị trí, đóng gói, ước tính tải dùng dữ liệu này ([01](../warehouse/01-product-creation/README.md) BR-03) | 🟡 | 01, 05, 06, 09 |
 | C22 | Có chặn **ngưng vị trí (kệ / bin / khu vực / kho) còn tồn** và **đổi lớp lưu trữ** của vị trí đang chứa hàng khác lớp không? | Nên chặn ngưng vị trí còn tồn; đổi lớp thì cảnh báo, chỉ chặn cất thêm. **Hiện hệ thống chưa kiểm cả hai** ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-04) | 🟡 | 06, 20 |
+| C23 | Có cho **giao nguyên thùng làm kiện** (thùng nhà cung cấp đủ chuẩn, không mở ra đóng lại), **đổi khoản giữ sang thùng thực tế quét được** (cùng SKU, lô, bin), và **quét LPN khi xuất phôi / xuất chuyển kho** không? | Phạm vi giai đoạn sau. Hiện thùng lấy nguyên vẫn đóng gói như hàng lẻ; quét thùng khác bị từ chối; xuất phôi và xuất chuyển kho theo thứ tự thùng nhưng không quét LPN ([07](../warehouse/07-picking/README.md)) | 🟢 | 07, 08, 10, 19 |
 
 ---
 

@@ -151,7 +151,7 @@ flowchart TD
     HAS_STD -- Không --> PACK_CHECK
 
     READY --> TASK[Điều phối / Quản lý kho tạo task\ngiao người — dòng lấy theo bin & lô\nđã phân bổ khi release]
-    TASK --> PICK[Picker lấy hàng\nquét vị trí + SKU + số lượng\ntồn bị trừ ngay khi quét]
+    TASK --> PICK[Picker lấy hàng\nquét vị trí + SKU hoặc LPN thùng + số lượng\ntồn bị trừ ngay khi quét]
 
     PICK --> SHORT{Đủ hàng?}
     SHORT -- Thiếu --> SHORT_HOLD[Báo thiếu: đơn On Hold INVENTORY\nkiểm kê mù vị trí đó]
@@ -227,7 +227,7 @@ sequenceDiagram
     end
     OM->>INVSYS: Release: phân bổ dòng hàng thường vào bin & lô
     OM->>PICKER: Điều phối tạo task, giao picker (nếu còn dòng hàng thường)
-    PICKER->>INVSYS: Lấy hàng (quét vị trí + SKU + số lượng) → trừ tồn
+    PICKER->>INVSYS: Lấy hàng (quét vị trí + SKU hoặc LPN thùng + số lượng) → trừ tồn
     alt Thiếu hàng
         PICKER-->>OM: Báo thiếu → đơn On Hold INVENTORY
         PICKER->>INVSYS: Kiểm kê mù vị trí đó
