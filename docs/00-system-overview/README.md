@@ -33,7 +33,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất được gán cho trạm của mình; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO; lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)); **duyệt kỹ thuật bộ file thiết kế** trước khi gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất; duyệt Đạt / Không đạt bản thiết kế được giao |
-| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, **công nợ phải thu của khách sỉ**, hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
+| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, **ghi nhận & phân bổ tiền khách chuyển khoản**, **công nợ phải thu của khách sỉ**, hoàn tiền; **duyệt / từ chối đơn công nợ bị treo** và **duyệt điều khoản thanh toán của khách** ([15](../ecommerce/15-payment/README.md)) | Tạo & xử lý Invoice; ghi nhận, phân bổ, đảo phân bổ tiền về; duyệt tín dụng & hạn mức; chạy đối soát |
 
 > ✅ Đã chốt 2026-10-06 (B1): có module **Sản xuất in** riêng — [19 · Production](../warehouse/19-production/README.md), xưởng in nội bộ (tách một phần lệnh đơn hàng đưa gia công ngoài khi thiếu công suất), hai loại sản xuất (mẫu và đơn hàng).
 
@@ -41,9 +41,9 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
-| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)) | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán được phép theo khách; lập & đổi phân công bản thiết kế |
-| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, thiết kế (tải bộ file) & gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)), tạo đơn từ báo giá, CSKH qua chat, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; giảm giá trong hạn mức |
-| **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn | Thao tác trên mọi đơn; ghi đè kho xuất |
+| **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)); **đổi trạng thái khách** và quản lý **nhóm khách** ([18](../ecommerce/18-customer-information/README.md)) | Xuất bản/ẩn sản phẩm; lập & đổi phân công bản thiết kế; chặn / gỡ chặn / đóng / mở lại khách |
+| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, thiết kế (tải bộ file) & gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)), chuyển báo giá đã chấp nhận thành đơn, CSKH qua chat, **duyệt / từ chối yêu cầu huỷ**, **quyết định cho phép giao một phần** ([17](../ecommerce/17-order-management/README.md)), xử lý khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; huỷ đơn / đóng phần còn lại; giảm giá trong hạn mức |
+| **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, **treo / gỡ treo đơn**, phân bổ kho xuất, **chọn cách giao** (gửi kiện / nguyên chuyến), gộp/tách đơn, chuyển báo giá thành đơn, duyệt yêu cầu huỷ ([17](../ecommerce/17-order-management/README.md)) | Thao tác trên mọi đơn; ghi đè kho xuất |
 
 ### 2.2. Vai thao tác (operational hat — không phải role riêng)
 
@@ -66,7 +66,8 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 |-------|----------|------------------|
 | Duyệt PO vượt hạn mức | Phê duyệt / từ chối PO | Quản lý kho hoặc System Admin |
 | Duyệt TO vượt ngưỡng | Phê duyệt / từ chối lệnh chuyển kho | Quản lý kho |
-| Duyệt chi / hoàn tiền vượt hạn mức | Phê duyệt thanh toán, refund | Kế toán (mức cao hơn: System Admin) |
+| Duyệt tín dụng & điều khoản thanh toán | Duyệt / từ chối đơn công nợ bị treo (vượt hạn mức, khách quá hạn); duyệt hạn mức, kỳ hạn, % cọc, điều khoản được phép của khách | Kế toán |
+| Hoàn tiền | Tạo lệnh hoàn tiền dư cho khách; xử lý lệnh hoàn khi huỷ / đóng phần còn lại | Kế toán (System Admin có toàn quyền) |
 | Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị sàn hoặc Sales Staff được chỉ định |
 
 > ⚠️ Giả định: phân bổ quyền mặc định ở trên do tài liệu đề xuất, chưa được đề bài xác nhận — thuộc câu hỏi A2 (RBAC). Xem [open-questions](../open-questions/README.md).
@@ -113,7 +114,7 @@ flowchart TB
         direction TB
         DSN[12 · Product Design]
         CAT[13 · Catalog]
-        CO[14 · Cart & Order]
+        CO[14 · Quote & Order]
         PAY[15 · Payment]
         CHAT[16 · Sales Chat]
         OM[17 · Order Management]

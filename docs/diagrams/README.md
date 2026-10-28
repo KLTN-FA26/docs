@@ -416,19 +416,23 @@ flowchart TD
     SAMPLE_OK -- Yêu cầu sửa --> FORK["Tạo bản sửa\ntừ snapshot"]
     FORK --> DESIGN
     SAMPLE_OK -- Duyệt --> ACCEPT[Khách chấp nhận báo giá]
-    PATH -- "Không (hàng sẵn / đặt lại)" --> QUICK[Đặt nhanh / đặt lại trên cổng\ngiá riêng của khách]
-    ACCEPT --> ORDER[Tạo Order\nkiểm tồn phôi, MOQ, chốt giá]
+    PATH -- "Không (hàng sẵn)" --> QUICK[Đặt nhanh hàng sẵn trên cổng\ngiá riêng của khách]
+    PATH -- "Đặt lại đơn có thiết kế" --> REQUOTE[Hệ thống tạo báo giá mới\ntheo giá hiện hành] --> QUOTE
+    ACCEPT --> CONVERT[Sale / Điều phối\nchuyển báo giá thành đơn]
+    CONVERT --> ORDER[Tạo Order\nkiểm tồn phôi, MOQ, chốt giá]
     QUICK --> ORDER
     ORDER --> RESERVE["Giữ hàng (reservation)"]
-    RESERVE --> METHOD{Phương thức thanh toán\nđược phép cho khách}
-    METHOD -- Trả trước 100% --> BANK[Pending Payment\nkế toán đối chiếu sao kê]
+    RESERVE --> METHOD{Điều khoản thanh toán\nđược phép cho khách}
+    METHOD -- Trả trước 100% --> BANK[Pending Payment\nkế toán ghi nhận tiền theo sao kê]
     METHOD -- Đặt cọc --> DEPOSIT[Pending Payment\nchờ tiền cọc]
-    METHOD -- Công nợ --> CREDIT{Dư nợ + đơn ≤ hạn mức?}
+    METHOD -- Công nợ --> CREDIT{Không quá hạn và\ndư nợ + đơn ≤ hạn mức?}
     BANK -- Đủ tiền --> CONFIRMED
     DEPOSIT -- Đủ cọc --> CONFIRMED
     CREDIT -- Có --> CONFIRMED[Order: Confirmed]
-    CREDIT -- Không --> HOLD[Order: On Hold\nchờ duyệt vượt hạn mức]
+    CREDIT -- Không --> HOLD[Order: On Hold\nkế toán duyệt tín dụng]
     HOLD -- Duyệt --> CONFIRMED
+    HOLD -- "Từ chối: đổi trả trước / đặt cọc" --> DEPOSIT
+    HOLD -- "Từ chối: huỷ" --> CANCEL
     BANK -- Hết hạn --> CANCEL[Cancelled\ngiải phóng reservation]
     DEPOSIT -- Hết hạn --> CANCEL
 

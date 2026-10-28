@@ -190,10 +190,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Design snapshot / artifact / Bản thiết kế chốt** | Bộ file (theo vai trò) và đặc tả mà khách đã **xác nhận**, kèm checksum SHA-256 từng file và cả bộ. **Bất biến** từ lúc xác nhận; được kiểm lại checksum mỗi lần dùng (báo giá, đặt hàng, prepress, đóng gói). Đổi nội dung = tạo bản sửa (bản thiết kế mới). |
 | **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). Bản tự động (`Pass` / `Warning` / `Fail`) thuộc phạm vi giai đoạn sau (B18); hiện tại việc này là **duyệt kỹ thuật** do QC thực hiện. |
 | **Print-ready file / File sẵn sàng in** | File xuất bản in đúng chuẩn kỹ thuật cho xưởng. |
-| **Cart / Giỏ hàng** | Nơi tạm gom sản phẩm trước khi đặt hàng. |
-| **Cart line / Dòng giỏ hàng** | Một mục trong giỏ: SKU + số lượng (+ design snapshot nếu tùy chỉnh). |
-| **Checkout / Thanh toán (bước đặt hàng)** | Quy trình biến giỏ hàng thành đơn hàng: địa chỉ, vận chuyển, thanh toán. |
-| **Abandoned cart / Giỏ hàng bị bỏ** | Giỏ quá hạn không thao tác, chưa chuyển thành đơn. |
+| **Cart / Cart line / Checkout / Abandoned cart — Giỏ hàng** | Không áp dụng (chỉ bán sỉ, chốt 2026-10-06): đơn tạo từ báo giá hoặc đặt nhanh hàng sẵn trên cổng ([14](../ecommerce/14-cart-and-order/README.md)). |
 | **Order / Đơn hàng** | Chứng từ bán hàng chính thức sau khi khách đặt. |
 | **Order number / Mã đơn hàng** | Mã định danh duy nhất của đơn. |
 | **Order line / Dòng đơn hàng** | Một mục hàng trong đơn với giá đã chốt. |
@@ -203,16 +200,28 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt / từ nhiều kho. |
 | **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
 | **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
-| **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). |
-| **Authorize / Capture / Void** | Giữ tiền (authorize) → trừ tiền (capture); huỷ khoản đã giữ chưa trừ (void). |
+| **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). Không áp dụng: khách sỉ chỉ chuyển khoản (open-questions D1). |
+| **Authorize / Capture / Void** | Giữ tiền (authorize) → trừ tiền (capture); huỷ khoản đã giữ chưa trừ (void). Không áp dụng (D2). |
 | **COD** (Cash On Delivery) — **Thanh toán khi nhận hàng** | Khách trả tiền khi nhận hàng. Không áp dụng cho bán lẻ (hệ thống chỉ bán sỉ); với đơn đặt cọc, phần còn lại có thể thu khi giao. |
 | **Prepaid / Trả trước** | Khách thanh toán trước khi hàng được giao. |
 | **Deposit / Partial payment — Đặt cọc / Trả một phần** | Trả trước một phần (thường % giá trị đơn); đơn đặt cọc chỉ được release sang sản xuất khi tiền cọc đã về. |
-| **Refund / Hoàn tiền** | Trả lại tiền cho khách (toàn phần / một phần). |
-| **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. |
+| **Refund / Hoàn tiền** | Trả lại tiền cho khách (toàn phần / một phần). Lệnh hoàn `Pending` → `Completed` / `Failed` ([15](../ecommerce/15-payment/README.md)). |
+| **Payment term / Điều khoản thanh toán** | Trả trước 100% / đặt cọc / công nợ — cấu hình cho từng khách (kế toán duyệt); đơn chỉ dùng điều khoản được phép. |
+| **Balance policy / Chính sách thu phần còn lại** | Với đơn đặt cọc: `BEFORE_DELIVERY` (chuyển khoản trước khi giao), `ON_DELIVERY` (nhà vận chuyển thu khi giao), `ON_CREDIT` (thành công nợ). Copy từ khách, chỉ được siết lại. |
+| **Customer transfer / Khoản tiền về** | Một khoản khách chuyển khoản, kế toán ghi nhận theo **mã tham chiếu sao kê** (duy nhất); số tiền không đổi, chỉ thêm dòng phân bổ / đảo. |
+| **Allocation (payment) / Phân bổ tiền** | Gán tiền của một khoản tiền về cho đơn hoặc khoản công nợ; không chỉ định → khoản đến hạn sớm nhất trước. Khác "Allocation" tồn kho. |
+| **Reversal / Đảo phân bổ** | Sửa phân bổ sai bằng một dòng đảo mới (không sửa dòng cũ); tiền quay về tiền dư; đơn đã xác nhận bị thiếu tiền thì phải treo. |
+| **Customer credit / Tiền dư của khách** | Phần tiền về chưa phân bổ; tự trả khoản công nợ mới, phân bổ sau, hoặc hoàn theo yêu cầu. |
+| **Receivable / Khoản công nợ phải thu** | Ba loại: `CREDIT_ORDER`, `DEPOSIT_BALANCE`, `CANCELLATION_FEE`. Khoản do **nhà vận chuyển thu hộ** là nợ của nhà vận chuyển, không tính vào dư nợ của khách. |
+| **Exposure / Dư nợ & Credit position / Vị thế tín dụng** | Dư nợ = đơn công nợ chưa giao + phần còn lại `ON_CREDIT` chưa giao + khoản công nợ chưa trả do khách trả; hạn mức còn lại = hạn mức − dư nợ. Khách xem được trên cổng. |
+| **Credit hold / Treo tín dụng** | Đơn công nợ vượt hạn mức hoặc khách có khoản quá hạn → `On Hold`; kế toán duyệt, hoặc từ chối (huỷ / đổi sang trả trước / đặt cọc). |
+| **Cancellation request / Yêu cầu huỷ** | Khách gửi khi đơn đã release nhưng chưa đóng gói xong; Sale / Điều phối duyệt hoặc từ chối; tự `Expired` khi đơn không còn huỷ được ([17](../ecommerce/17-order-management/README.md) §4.5). |
+| **Cancellation fee / Phí huỷ** | Chỉ tính khi đơn đã bắt đầu in; theo % tiền đã thu hoặc số tiền thoả thuận; tiền đã thu bù phí trước, phần thiếu thành khoản công nợ `CANCELLATION_FEE`. |
+| **Remainder closure / Đóng phần còn lại** | Đóng các đơn vị chưa giao của đơn giao một phần; tiền thừa trả phí trước rồi hoàn, hàng in chưa giao xuất huỷ. |
+| **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. Không áp dụng (không có cổng thanh toán). |
 | **Reconciliation / Đối soát** | So khớp giao dịch hệ thống với báo cáo của cổng thanh toán / hãng vận chuyển. |
 | **Settlement report** | Báo cáo quyết toán tiền từ cổng thanh toán về doanh nghiệp. |
-| **COD remittance** | Tiền hãng vận chuyển thu hộ (COD) chuyển trả về doanh nghiệp. |
+| **COD remittance / Tiền nhà vận chuyển nộp** | Tiền hãng vận chuyển thu hộ chuyển trả về doanh nghiệp; kế toán ghi theo dòng sao kê vào khoản công nợ do nhà vận chuyển thu ([15](../ecommerce/15-payment/README.md) §4.6). |
 | **PCI-DSS** | Bộ tiêu chuẩn bảo mật dữ liệu thẻ thanh toán. |
 | **Order Management / Quản lý đơn hàng** | Lớp điều phối & theo dõi vòng đời đơn (không tự pick/pack/ship). |
 | **Order timeline / Dòng thời gian đơn** | Chuỗi sự kiện của đơn theo thời gian. |
@@ -261,7 +270,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Open` / `Acknowledged` / `Resolved` | Cảnh báo tồn | Đang xảy ra / đã có người xác nhận đã xem / điều kiện đã hết |
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
 | `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
-| `Paid` | Order (payment_status) | Đã thu đủ tiền |
+| `Unpaid` / `Partially Paid` / `On Credit` / `Paid` | Order (trạng thái thanh toán — tính ra từ số tiền, không lưu riêng) | Chưa thu / đã thu một phần (thường là cọc) / đơn công nợ / đã thu đủ |
 | `In Production` | Order, Sample request, Tồn kho | Order / Sample request: đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed`. Tồn kho: phôi đã cấp cho xưởng hoặc gửi nhà gia công, không bán ([20 §5.1](../warehouse/20-inventory-control/README.md)) |
 | `Pending Prepress` | Lệnh sản xuất | Chờ kiểm file in |
 | `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi (vị trí hàng đợi, trạm in được gán), chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
@@ -271,9 +280,14 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Submitted` | Sample request | Đã gửi xưởng, đã sinh LSX `SAMPLE` |
 | `Sent to Customer` / `Approved` / `Changes Requested` | Sample request | Đã gửi mẫu / khách duyệt / khách yêu cầu sửa |
 | `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý (với dòng in: đã sản xuất xong) |
-| `On Hold` | Order, Lệnh sản xuất | Tạm giữ (vượt hạn mức, file lỗi, thiếu phôi, máy hỏng…) |
+| `On Hold` | Order, Lệnh sản xuất | Tạm giữ. Order: tín dụng, thanh toán, thiết kế lệch, địa chỉ, thiếu hàng, khách, gian lận, khác ([17](../ecommerce/17-order-management/README.md) §4.6); gỡ treo quay về trạng thái trước. LSX: file lỗi, thiếu phôi, máy hỏng… |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
-| `Refunded` / `Partially Refunded` | Order, Payment | Đã hoàn tiền toàn phần / một phần |
+| `Return Requested` | Order | Khách yêu cầu trả hàng; từ chối thì đơn quay về `Delivered` |
+| `Refunded` / `Partially Refunded` | Order | Đã hoàn tiền toàn phần / một phần (trạng thái của đơn, không phải trạng thái thanh toán) |
+| `Pending` / `Approved` / `Rejected` / `Expired` | Yêu cầu huỷ | Chờ quyết / đã duyệt (đơn bị huỷ) / từ chối / hết hiệu lực vì đơn không còn huỷ được |
+| `Pending` / `Completed` / `Failed` | Lệnh hoàn tiền | Chờ kế toán chuyển khoản / đã hoàn / hoàn lỗi |
+| `Open` / `Partially Paid` / `Overdue` / `Paid` | Khoản công nợ phải thu | Chưa trả / trả một phần / quá hạn / đã tất toán |
+| `Pending Activation` / `Active` / `Blocked` / `Inactive` | Hồ sơ khách | Chờ kích hoạt / bình thường / bị chặn / đã đóng ([18](../ecommerce/18-customer-information/README.md)) |
 
 ---
 
