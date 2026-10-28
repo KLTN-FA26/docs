@@ -85,7 +85,7 @@ Catalog không có "chứng từ". Trạng thái hiển thị của một sản 
 | `Visible – Out of stock` | Hiển thị nhưng không cho mua (hoặc chỉ cho đặt trước) | `Published` + ATP ≤ 0 |
 | `Visible – Pre-order` | Cho đặt trước, giao sau | Chính sách pre-order bật |
 | `Hidden` | Không hiển thị (ẩn thủ công / hết hàng lâu / hết mùa) | Admin hoặc rule |
-| `Unpublished` | Sản phẩm rời khỏi catalog | `Active`/`Inactive` ở [01](../../warehouse/01-product-creation/README.md) |
+| `Unpublished` | Sản phẩm rời khỏi catalog | `Approved` (ẩn) / `Inactive` / `Discontinued` ở [01](../../warehouse/01-product-creation/README.md) |
 
 ---
 

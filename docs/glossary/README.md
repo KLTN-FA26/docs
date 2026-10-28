@@ -11,7 +11,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Ly PP 500 ml – miệng 95 – trong") là một SKU riêng. |
 | **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Ly nhựa PP" có nhiều dung tích). |
 | **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (dung tích × chất liệu × đường kính miệng…), tương ứng một SKU. |
-| **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, lô/hạn dùng/serial, ngưỡng tồn, thông tin mua hàng. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
+| **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, **chính sách tồn** (lô / hạn dùng / serial, ngưỡng), thông tin mua hàng tham chiếu. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
+| **Category / Danh mục** | Cây phân loại sản phẩm, tối đa 11 cấp; mã không đổi; di chuyển một danh mục mang theo cả nhánh con. Mỗi sản phẩm có một danh mục chính. |
+| **Brand / Thương hiệu** | Thương hiệu của sản phẩm; mã không đổi; bắt buộc trước khi gửi duyệt sản phẩm. |
+| **Attribute dictionary / Từ điển thuộc tính** | Danh sách thuộc tính dùng chung (kiểu `TEXT`, `NUMBER`, `BOOLEAN`, `SELECT`, `MULTISELECT`, `COLOR`); chỉ `SELECT` và `COLOR` làm được trục biến thể. Thuộc tính đang dùng chỉ ngưng, không xoá. Mỗi danh mục có mẫu thuộc tính gợi ý. |
+| **Tax class / Nhóm thuế** | Nhóm thuế của sản phẩm: `STANDARD` / `REDUCED` / `EXEMPT`; bắt buộc trước khi gửi duyệt. |
+| **Maker–checker / Bốn mắt** | Người duyệt khác người làm: sản phẩm (duyệt ≠ gửi), ảnh sản phẩm (đăng ≠ tải), điều chỉnh tồn, PO, thiết kế… |
 | **UoM** (Unit of Measure) | Đơn vị tính (cái, cây, thùng…). |
 | **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
 | **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
@@ -152,7 +157,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **Phôi / Blank** | Ly, hộp, túi chưa in (ly trơn, túi giấy trơn…) — Inventory Item của SKU; tồn kho và ATP tính trên phôi; được cấp cho xưởng theo lệnh sản xuất. |
-| **Print method / Kỹ thuật in** | Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…), khai báo ở [01](../warehouse/01-product-creation/README.md); hiện chỉ là thuộc tính sản phẩm — dùng chọn trạm in khi có trạm in (phạm vi sau, [B10](../open-questions/README.md)). |
+| **Print method / Kỹ thuật in** | **(Phạm vi sau — [B18](../open-questions/README.md))** Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…); chưa khai báo được ([01 §4.9](../warehouse/01-product-creation/README.md)); dùng chọn trạm in khi có trạm in ([B10](../open-questions/README.md)). |
 | **Print Station / Trạm in** | **(Phạm vi sau — [B10](../open-questions/README.md))** Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái. Chưa triển khai: lệnh sản xuất không gán trạm. |
 | **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
 | **Production Order (MO) / Lệnh sản xuất (LSX)** | Chứng từ xưởng in cho **một dòng đơn tùy chỉnh** (`ORDER`) hoặc **một yêu cầu làm mẫu** (`SAMPLE`): SKU phôi, số lượng, design snapshot, print-ready file, hạn hoàn thành, chế độ (in nội bộ / gia công). Mã `LSX-yyyyMMdd-NNNN`, ví dụ `LSX-20261028-0001`. Xem [19](../warehouse/19-production/README.md). |
@@ -263,7 +268,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
 | `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request | Bản nháp, sửa tự do, chưa có hiệu lực |
-| `Pending Approval` | PO, TO, Điều chỉnh tồn | Chờ phê duyệt |
+| `Pending Approval` | PO, TO, Điều chỉnh tồn, Sản phẩm | Chờ phê duyệt |
+| `Approved` / `Published` / `Inactive` / `Discontinued` | Sản phẩm | Đã duyệt, dùng nội bộ / đang hiển thị trên catalog / tạm ngưng / ngừng kinh doanh ([01](../warehouse/01-product-creation/README.md)) |
+| `Active` / `Blocked` / `Obsolete` | Biến thể (SKU) | Dùng được / tạm khoá / ngừng dùng ([01 §5.2](../warehouse/01-product-creation/README.md)) |
 | `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
 | `Planned` | Load Plan, Load, Kiểm kê | Load Plan: đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay. Load: một xe của kế hoạch đã chốt, chưa đặt xe. Kiểm kê: đã lập phiếu, chưa đếm dòng nào |
 | `Vehicle Booked` / `Loading` | Load (chuyến bàn giao) | Đã ghi nhận đặt xe / đang quét kiện lên xe (kế hoạch bị khoá) |
@@ -348,16 +355,16 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm. |
+| **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm; tạm ngưng / ngừng kinh doanh sản phẩm. |
 | **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO (kể cả PO gia công), chốt PO, xử lý tranh chấp hoá đơn. |
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
-| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên, quyết định tách lệnh đưa gia công ngoài). |
+| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (mở lại / huỷ / dừng lệnh sản xuất, quyết định tách lệnh đưa gia công ngoài); cập nhật logistics & chính sách tồn của SKU. |
 | **Production Staff / Nhân viên sản xuất** | Tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng in được / phế phẩm kèm lý do, treo lệnh, bàn giao thành phẩm cho QC. |
-| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn. |
+| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn; cập nhật logistics & chính sách tồn của SKU. |
 | **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
-| **E-commerce Admin / Quản trị bán hàng** | Quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. |
-| **Sales Staff / Nhân viên Sale** | Tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, thiết kế (tải bộ file) & gửi khách xác nhận, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
+| **E-commerce Admin / Quản trị bán hàng** | Tạo & duyệt sản phẩm (bốn mắt), quản lý danh mục, thương hiệu, thuộc tính; quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. |
+| **Sales Staff / Nhân viên Sale** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, thiết kế (tải bộ file) & gửi khách xác nhận, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
 | **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
 | **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
 | **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |
