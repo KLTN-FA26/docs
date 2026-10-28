@@ -68,7 +68,7 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | Duyệt TO vượt ngưỡng | Phê duyệt / từ chối lệnh chuyển kho | Quản lý kho |
 | Duyệt tín dụng & điều khoản thanh toán | Duyệt / từ chối đơn công nợ bị treo (vượt hạn mức, khách quá hạn); duyệt hạn mức, kỳ hạn, % cọc, điều khoản được phép của khách | Kế toán |
 | Hoàn tiền | Tạo lệnh hoàn tiền dư cho khách; xử lý lệnh hoàn khi huỷ / đóng phần còn lại | Kế toán (System Admin có toàn quyền) |
-| Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị sàn hoặc Sales Staff được chỉ định |
+| Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị bán hàng hoặc Sales Staff được chỉ định |
 
 Phân bổ trên là cấu hình mặc định khi cài đặt; người có quyền duyệt phân quyền sửa được ma trận quyền của từng role (§2.5.3).
 

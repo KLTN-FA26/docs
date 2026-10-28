@@ -108,7 +108,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
       - Đơn đặt cọc mang **chính sách thu phần còn lại**, copy từ khách, chỉ được siết lại ([15](../15-payment/README.md) BR-10).
       - Phần còn lại `ON_CREDIT` mà khách quá hạn / vượt hạn mức thì **từ chối đặt**.
     - **Công nợ** → hệ thống kiểm tín dụng: không quá hạn và dư nợ + giá trị đơn ≤ hạn mức → Order `Confirmed`. Nếu không → Order `On Hold` (tín dụng) chờ **kế toán** duyệt.
-15. **Giữ hàng (Reservation)** — giữ phôi theo SKU cho các dòng (giảm ATP). Với đơn chờ thanh toán, giữ hàng có thời hạn.
+15. **Giữ hàng (Reservation)** — giữ phôi theo SKU cho các dòng (giảm ATP). Với đơn chờ thanh toán, giữ hàng có thời hạn (**mặc định 30 phút**, cấu hình hệ thống).
 16. **Kết quả:**
     - Tiền đủ (trả trước / cọc), hoặc công nợ hợp lệ / được duyệt → Order `Confirmed`; đẩy sang [Order Management](../17-order-management/README.md) để release. Dòng in → [sản xuất](../../warehouse/19-production/README.md), dòng sẵn → [Picking](../../warehouse/07-picking/README.md).
     - Hết hạn giữ hàng mà chưa thanh toán → Order `Cancelled`, giải phóng hàng. Riêng đơn đã bắt đầu in thì chuyển nhân viên quyết ([17](../17-order-management/README.md) §4.5).
@@ -201,7 +201,7 @@ stateDiagram-v2
 - **BR-04:** Số lượng mỗi dòng phải **≥ MOQ** (bậc giá thấp nhất của báo giá / bảng giá). Bậc giá chọn theo **tổng số lượng của phôi** trên mọi dòng của báo giá.
 - **BR-05:** Chỉ dùng **điều khoản thanh toán được phép** cho khách đó (trả trước, đặt cọc, công nợ). % cọc chỉ có ở báo giá đặt cọc, 0 < % < 100.
 - **BR-06:** Đơn công nợ: khách **không có khoản quá hạn** và **dư nợ + giá trị đơn ≤ hạn mức**. Không đạt → `On Hold` cho tới khi **kế toán** duyệt; kế toán từ chối thì huỷ hoặc đổi sang trả trước / đặt cọc.
-- **BR-07:** Giữ hàng có **thời hạn** với đơn chờ trả trước / chờ cọc. Hết hạn mà chưa thanh toán → giải phóng hàng, đơn `Cancelled` (đơn đã in thì chuyển nhân viên quyết).
+- **BR-07:** Giữ hàng có **thời hạn** (mặc định 30 phút, cấu hình hệ thống) với đơn chờ trả trước / chờ cọc. Hết hạn mà chưa thanh toán → giải phóng hàng, đơn `Cancelled` (đơn đã in thì chuyển nhân viên quyết).
 - **BR-08:** Tổng tiền đơn = subtotal + phí giao + thuế − chiết khấu; mọi khoản phải minh bạch trước khi khách xác nhận.
 - **BR-09:** Đơn `Confirmed` chỉ được sửa nội dung (SKU / số lượng / địa chỉ) qua [Order Management](../17-order-management/README.md), theo quy tắc và phê duyệt; không sửa tự do.
 - **BR-10:** Sale giảm giá vượt hạn mức được cấp → phải có người có quyền duyệt trước khi gửi báo giá.

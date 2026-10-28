@@ -184,7 +184,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **B2B / Bán sỉ** | Hệ thống chỉ bán cho khách doanh nghiệp đã liên hệ trước; không có khách vãng lai. |
 | **Customer portal / Cổng khách hàng** | Trang dành cho khách sỉ đã đăng nhập: catalog & giá riêng, báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ. |
 | **In-app notification / Thông báo trong ứng dụng** | Hộp thông báo theo người, mức `INFO` / `WARN` / `CRITICAL`; đã đọc tự xoá sau 90 ngày. Xem [00 §6](../00-system-overview/README.md). |
-| **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận → thành đơn bán. |
+| **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận thì Sale được báo; **Sale / Điều phối chuyển** báo giá đã chấp nhận thành đơn ([14](../ecommerce/14-cart-and-order/README.md)). |
 | **Giá riêng theo khách / Customer price list** | Giá theo (khách, SKU) gồm 1–20 bậc số lượng; bậc đầu là MOQ của khách. Ưu tiên cao nhất, rồi giá nhóm, rồi giá gốc ([13](../ecommerce/13-catalog/README.md)). |
 | **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ với đơn bán theo công nợ. |
 | **Hạn mức tín dụng / Credit limit** | Mức dư nợ tối đa của một khách; đơn công nợ vượt hạn mức bị giữ chờ duyệt. |
@@ -197,7 +197,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Availability indicator / Chỉ báo còn hàng** | `In stock` / `Low stock` (ATP ≤ 5, cấu hình được) / `Out of stock` cho từng SKU; không bao giờ hiện số ATP cho khách. |
 | **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. |
 | **Print-on-demand / In theo yêu cầu** | Sản phẩm chỉ được in/sản xuất sau khi có đơn của khách. |
-| **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. |
+| **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. Phạm vi sau ([B18](../open-questions/README.md)): hiện nhân viên lập bộ file thiết kế, khách xác nhận ([12](../ecommerce/12-product-design/README.md)). |
 | **Print area / Vùng in** | Khu vực cho phép in nội dung trên sản phẩm. |
 | **Safe area / Vùng an toàn** | Phần bên trong vùng in, tránh bị xén khi sản xuất. |
 | **Bleed / Vùng tràn lề** | Phần mở rộng ngoài mép để tránh viền trắng khi cắt. |
@@ -217,7 +217,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Price lock / Chốt giá** | Cố định giá dòng hàng vào đơn tại thời điểm đặt; không đổi theo giá catalog sau đó. |
 | **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn confirmed đến khi giao hàng cho khách (pick–pack–ship). |
 | **Fulfillment sourcing / Chọn kho xuất** | Quyết định đơn được giao từ kho nào. |
-| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt / từ nhiều kho. |
+| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt (giao một phần — Sale cho phép theo từng đơn, [17](../ecommerce/17-order-management/README.md) §4.2). Mỗi đơn xuất từ **một kho**. |
 | **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
 | **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
 | **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). Không áp dụng: khách sỉ chỉ chuyển khoản (open-questions D1). |
@@ -239,10 +239,10 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Cancellation fee / Phí huỷ** | Chỉ tính khi đơn đã bắt đầu in; theo % tiền đã thu hoặc số tiền thoả thuận; tiền đã thu bù phí trước, phần thiếu thành khoản công nợ `CANCELLATION_FEE`. |
 | **Remainder closure / Đóng phần còn lại** | Đóng các đơn vị chưa giao của đơn giao một phần; tiền thừa trả phí trước rồi hoàn, hàng in chưa giao xuất huỷ. |
 | **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. Không áp dụng (không có cổng thanh toán). |
-| **Reconciliation / Đối soát** | So khớp giao dịch hệ thống với báo cáo của cổng thanh toán / hãng vận chuyển. |
-| **Settlement report** | Báo cáo quyết toán tiền từ cổng thanh toán về doanh nghiệp. |
+| **Reconciliation / Đối soát** | So khớp tiền ghi trong hệ thống với **sao kê ngân hàng**: khoản khách chuyển khoản, tiền nhà vận chuyển nộp ([15](../ecommerce/15-payment/README.md)). |
+| **Settlement report** | Báo cáo quyết toán tiền từ cổng thanh toán về doanh nghiệp. Không áp dụng (không có cổng thanh toán — D1). |
 | **COD remittance / Tiền nhà vận chuyển nộp** | Tiền hãng vận chuyển thu hộ chuyển trả về doanh nghiệp; kế toán ghi theo dòng sao kê vào khoản công nợ do nhà vận chuyển thu ([15](../ecommerce/15-payment/README.md) §4.6). |
-| **PCI-DSS** | Bộ tiêu chuẩn bảo mật dữ liệu thẻ thanh toán. |
+| **PCI-DSS** | Bộ tiêu chuẩn bảo mật dữ liệu thẻ thanh toán. Không áp dụng (không có cổng thanh toán — D1). |
 | **Order Management / Quản lý đơn hàng** | Lớp điều phối & theo dõi vòng đời đơn (không tự pick/pack/ship). |
 | **Order timeline / Dòng thời gian đơn** | Chuỗi sự kiện của đơn theo thời gian. |
 | **Order amendment / Sửa đơn** | Thay đổi nội dung đơn sau khi tạo (theo quy tắc trạng thái). |
@@ -260,11 +260,11 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. **Không áp dụng** (hệ thống chỉ bán sỉ). |
 | **Address book / Sổ địa chỉ** | Danh sách địa chỉ giao & xuất hoá đơn của khách. |
 | **Segment / Nhóm khách / Phân khúc** | Nhóm khách theo tiêu chí (VIP, doanh nghiệp, mới, rủi ro…) để áp giá/ưu đãi. |
-| **Consent / Đồng ý (nhận tin)** | Sự cho phép của khách để gửi marketing, có lưu thời điểm. |
-| **Right to be forgotten / Quyền được xoá** | Quyền của khách yêu cầu xoá/ẩn danh dữ liệu cá nhân. |
-| **Anonymize / Ẩn danh** | Tách bỏ thông tin cá nhân khỏi dữ liệu, giữ lại phần chứng từ bắt buộc. |
-| **Merge / Hợp nhất hồ sơ** | Gộp hai hồ sơ khách trùng thành một. |
-| **Risk profile / blacklist — Hồ sơ rủi ro / danh sách chặn** | Đánh dấu khách có rủi ro (chargeback, gian lận, RTO cao). |
+| **Consent / Đồng ý (nhận tin)** | Sự cho phép của khách để gửi marketing, có lưu thời điểm. Phạm vi sau ([D16](../open-questions/README.md)). |
+| **Right to be forgotten / Quyền được xoá** | Quyền của khách yêu cầu xoá/ẩn danh dữ liệu cá nhân. Phạm vi sau ([D16](../open-questions/README.md)). |
+| **Anonymize / Ẩn danh** | Tách bỏ thông tin cá nhân khỏi dữ liệu, giữ lại phần chứng từ bắt buộc. Phạm vi sau ([D16](../open-questions/README.md)). |
+| **Merge / Hợp nhất hồ sơ** | Gộp hai hồ sơ khách trùng thành một. Phạm vi sau ([D16](../open-questions/README.md)). |
+| **Risk profile / blacklist — Hồ sơ rủi ro / danh sách chặn** | Đánh dấu khách có rủi ro (chargeback, gian lận, RTO cao). Phạm vi sau ([D16](../open-questions/README.md)). |
 
 ---
 
@@ -272,7 +272,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
-| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request | Bản nháp, sửa tự do, chưa có hiệu lực |
+| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request, Báo giá | Bản nháp, sửa tự do, chưa có hiệu lực |
 | `Pending Approval` | PO, TO, Điều chỉnh tồn, Sản phẩm | Chờ phê duyệt |
 | `Approved` / `Published` / `Inactive` / `Discontinued` | Sản phẩm | Đã duyệt, dùng nội bộ / đang hiển thị trên catalog / tạm ngưng / ngừng kinh doanh ([01](../warehouse/01-product-creation/README.md)) |
 | `Active` / `Blocked` / `Obsolete` | Biến thể (SKU) | Dùng được / tạm khoá / ngừng dùng ([01 §5.2](../warehouse/01-product-creation/README.md)) |
@@ -281,7 +281,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Vehicle Booked` / `Loading` | Load (chuyến bàn giao) | Đã ghi nhận đặt xe / đang quét kiện lên xe (kế hoạch bị khoá) |
 | `Dispatched` | Load Plan, Load | Load: đã ký bàn giao, xe rời kho. Load Plan: mọi xe của kế hoạch đã rời kho |
 | `Pending` / `Picking` / `Picked` | Task lấy hàng | Chờ bắt đầu / đang lấy / mọi dòng đã lấy (mở đóng gói) |
+| `Open` / `Picked` / `Short` / `Put Back` | Dòng lấy hàng | Chờ lấy / đã lấy, tồn đã trừ / vị trí thiếu, chờ phân bổ lại / đã cất lại bin ([07 §5.2](../warehouse/07-picking/README.md)) |
 | `Pending` / `In Progress` / `Done` | Nhiệm vụ cất (putaway) | Chưa cất / đã cất một phần lẻ / đã cất hết |
+| `In Progress` / `Completed` | Kiểm kê | Đang đếm / đã nộp, chênh lệch thành điều chỉnh chờ duyệt ([20 §5.2](../warehouse/20-inventory-control/README.md)) |
 | `Not Sent` / `Pending` / `Confirmed` / `Rejected` | Phản hồi của NCC (PO) | Chưa gửi / chờ NCC trả lời / NCC xác nhận / NCC từ chối |
 | `Withdrawn` | Dòng PO | Bị bỏ khỏi bản nháp sau khi đã nằm trong một bản sửa (giữ làm lịch sử) |
 | `Packing` / `Packed` | Phiên đóng gói, Order | Đang đóng / đã đóng đủ |
@@ -291,8 +293,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
 | `Cancelled` | Hầu hết chứng từ | Bị huỷ trước khi hoàn tất |
 | `In QC` | Receipt | Còn dòng hàng cần QC chưa có kết luận |
+| `In Putaway` | Receipt | Mọi dòng cần QC đã có kết luận, đang cất hàng; cất xong thì `Closed` ([03](../warehouse/03-receipt/README.md)) |
 | `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
-| `Reserved` | Order (giữ hàng) | Đã giữ số lượng cho đơn, chưa gắn vị trí/lô; làm giảm ATP |
+| `Held` / `Allocated` / `Consumed` / `Released` / `Expired` | Khoản giữ hàng | Đang giữ / giữ theo SKU đã thay bằng phân bổ ở bin & lô / hàng đã lấy, tồn đã trừ / nhả giữ có lý do / hết hạn mà đơn chưa thanh toán ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
 | `Allocated` | Tồn kho (theo vị trí) | Phần tồn `Available` có khoản phân bổ ở vị trí & lô cho một đơn/lệnh cụ thể — khoản giữ, không phải trạng thái riêng của hàng ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
 | `Expired` | Tồn kho | Quá hạn dùng (quét hằng đêm); không bán, chỉ rời kho bằng điều chỉnh đã duyệt |
 | `Posted` / `Rejected` / `Withdrawn` | Điều chỉnh tồn | Đã duyệt và ghi tồn / bị từ chối / người đề nghị rút lại |
@@ -311,6 +314,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý (với dòng in: đã sản xuất xong) |
 | `On Hold` | Order, Lệnh sản xuất | Tạm giữ. Order: tín dụng, thanh toán, thiết kế lệch, địa chỉ, thiếu hàng, khách, gian lận, khác ([17](../ecommerce/17-order-management/README.md) §4.6); gỡ treo quay về trạng thái trước. LSX: file lỗi, thiếu phôi, máy hỏng… |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
+| `Partially Fulfilled` | Order | Đã giao một phần; phần còn lại chờ giao hoặc bị đóng ([17](../ecommerce/17-order-management/README.md) §5) |
+| `Delivery Failed` / `Returned` | Order, Shipment | Hãng báo giao không thành / hàng đã về kho |
 | `Return Requested` | Order | Khách yêu cầu trả hàng; từ chối thì đơn quay về `Delivered` |
 | `Refunded` / `Partially Refunded` | Order | Đã hoàn tiền toàn phần / một phần (trạng thái của đơn, không phải trạng thái thanh toán) |
 | `Pending` / `Approved` / `Rejected` / `Expired` | Yêu cầu huỷ | Chờ quyết / đã duyệt (đơn bị huỷ) / từ chối / hết hiệu lực vì đơn không còn huỷ được |
@@ -318,6 +323,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Open` / `Partially Paid` / `Overdue` / `Paid` | Khoản công nợ phải thu | Chưa trả / trả một phần / quá hạn / đã tất toán |
 | `Pending Activation` / `Active` / `Blocked` / `Inactive` | Hồ sơ khách | Chờ kích hoạt / bình thường / bị chặn / đã đóng ([18](../ecommerce/18-customer-information/README.md)) |
 | `Active` / `Locked` / `Disabled` | Tài khoản nhân viên | Dùng được / bị người quản trị khoá / ngừng dùng ([00 §2.5](../00-system-overview/README.md)) |
+| `Sent` / `Changes Requested` / `Accepted` / `Expired` / `Converted` | Báo giá | Đã gửi khách / khách yêu cầu sửa (Sale mở bản sửa mới) / khách chấp nhận / hết hiệu lực / đã sinh đơn ([14 §5.1](../ecommerce/14-cart-and-order/README.md)) |
+| `Receiving` / `In Stock` / `Consumed` / `Lost` / `Void` | Thùng LPN | Đã dán nhãn trên phiếu nhận chưa xác nhận / đang chứa hàng / đã lấy hết / kiểm kê không thấy / phiếu nhận bị huỷ ([20 §5.5](../warehouse/20-inventory-control/README.md)) |
 
 ---
 
@@ -376,4 +383,4 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **RBAC / Phân quyền theo vai trò** | Quyền = tài nguyên × hành động (`VIEW_PAGE`, `READ`, `CREATE`, `UPDATE`, `DELETE`, `APPROVE`, `EXPORT`), gom thành role. Một tài khoản nhiều role = hợp quyền. Xem [00 §2.5](../00-system-overview/README.md). |
 | **Data scope / Phạm vi dữ liệu** | Phạm vi dữ liệu của role: `WAREHOUSE` (các kho được gán cho tài khoản), `ALL` (toàn hệ thống), `OWN` (của chính mình — khách). Nhiều role lấy phạm vi rộng nhất. |
 | **Customer (role) / Khách hàng** | Role của tài khoản người liên hệ phía khách trên cổng; ma trận quyền cố định; không gán cho nhân viên. |
-| **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |
+| **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị bán hàng hoặc Sales Staff được chỉ định. |
