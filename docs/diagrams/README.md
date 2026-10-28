@@ -17,17 +17,18 @@ Mục lục:
 
 ```mermaid
 flowchart TD
-    START([Nhu cầu bổ sung tồn kho]) --> MRP[MRP đối soát tồn\nsinh Replenishment Proposal]
-    MRP --> PLAN_REV[Planner đánh giá\nConvert to Draft PO]
-    PLAN_REV --> PO_CREATE[Tạo PO – Draft]
-    PO_CREATE --> PO_APPROVE{Vượt hạn mức?}
-    PO_APPROVE -- Có --> PO_PENDING[Pending Approval] --> PO_APPROVED[Approved]
-    PO_APPROVE -- Không --> PO_APPROVED
-    PO_APPROVED --> PO_CONFIRM[Chốt PO\nPO: Confirmed]
-    PO_CONFIRM --> WAIT[Chờ hàng về]
+    START([Nhu cầu bổ sung tồn kho]) --> ALERT[Cảnh báo REORDER / SAFETY\n20 · Inventory Control]
+    ALERT --> PO_CREATE[Procurement tạo PO – Draft\ndòng theo danh mục hàng của NCC]
+    PO_CREATE --> PO_APPROVE{Tự duyệt\ntrong hạn mức?}
+    PO_APPROVE -- Không --> PO_PENDING[Pending Approval\nQuản lý kho duyệt — bốn mắt] --> PO_APPROVED[Approved]
+    PO_APPROVE -- Có --> PO_APPROVED
+    PO_APPROVED --> PO_CONFIRM[Chốt & gửi PO cho NCC\nPO: Confirmed]
+    PO_CONFIRM --> SUPPLIER{NCC phản hồi}
+    SUPPLIER -- Xác nhận --> WAIT[Chờ hàng về]
+    SUPPLIER -- Từ chối --> PO_CANCEL([Huỷ PO, đặt NCC khác])
 
-    WAIT --> RC_CREATE[Tạo Receipt tham chiếu PO]
-    RC_CREATE --> RC_COUNT[Kiểm đếm & quét mã\nGhi lô/hạn dùng/serial]
+    WAIT --> RC_CREATE[Tạo Receipt tham chiếu một PO]
+    RC_CREATE --> RC_COUNT[Kiểm đếm & quét mã\nGhi lô / hạn dùng\nDán nhãn thùng LPN]
     RC_COUNT --> RC_CONFIRM[Xác nhận Receipt\nCập nhật SL đã nhận trên PO\nTồn Inbound tại WH/Input - RECEIVING]
 
     RC_CONFIRM --> PO_STATUS{PO đã nhận đủ?}
@@ -39,14 +40,12 @@ flowchart TD
     RC_NEEDQC -- Có, 3 bước --> QC_MOVE[Chuyển hàng sang\nWH/Quality Control - QUALITY_CONTROL]
     QC_MOVE --> RC_QC{Kiểm tra chất lượng}
     RC_QC -- Rejected --> RTV[Chuyển sang khu QUARANTINE\nTồn Blocked, chờ trả NCC]
-    RC_QC -- Quarantine --> QUAR[Chuyển sang khu QUARANTINE\nCách ly chờ kết luận]
-    QUAR -- Kết luận Accepted --> PA_TASK
-    QUAR -- Kết luận Rejected --> RTV
-    RC_QC -- Accepted --> PA_TASK[Sinh Putaway task\ntừ khu chờ cất]
+    RC_QC -- Quarantine --> QUAR[Chuyển sang khu QUARANTINE khác\nTồn Quarantine]
+    RC_QC -- Accepted --> PA_TASK[Mở nhiệm vụ cất\nmỗi thùng LPN + phần lẻ]
 
-    PA_TASK --> PA_SUGGEST[Slotting Engine gợi ý vị trí]
-    PA_SUGGEST --> PA_MOVE[NV kho di chuyển & quét vị trí đích]
-    PA_MOVE --> PA_DONE[Putaway Completed - WH/Stock\nTồn: Inbound → Available]
+    PA_TASK --> PA_SUGGEST[Hệ thống gợi ý tối đa 10 bin\ncùng lô → cùng SKU → bin trống]
+    PA_SUGGEST --> PA_MOVE[NV kho quét bin đích\nkiểm lại ràng buộc cứng]
+    PA_MOVE --> PA_DONE[Nhiệm vụ cất Done - WH/Stock\nTồn: Inbound → Available]
     PA_DONE --> RC_CLOSE[Receipt: Closed]
 
     RC_CONFIRM --> INV_MATCH
@@ -60,9 +59,9 @@ flowchart TD
         INV_OK --> INV_PAID[Paid]
     end
 
-    PO_RECEIVED --> PO_CLOSE{Hàng nhận đủ\n& hoá đơn đã đối chiếu?}
-    INV_PAID --> PO_CLOSE
-    PO_CLOSE -- Có --> PO_CLOSED([PO: Closed])
+    PO_RECEIVED --> PO_CLOSE{Procurement đóng PO\nđối chiếu hoá đơn khi có 04}
+    INV_PAID -.-> PO_CLOSE
+    PO_CLOSE -- Đóng --> PO_CLOSED([PO: Closed])
 ```
 
 ### 1.2. Sequence diagram (trình tự tác nhân)
@@ -76,17 +75,20 @@ sequenceDiagram
     actor WH as NV kho
     actor QC as NV QC
     participant RC as Receipt
-    participant SLOT as Slotting Engine
+    participant SLOT as Gợi ý bin
     participant INVSYS as Inventory
     actor AP as Kế toán
     participant INV as Invoice
 
-    PROC->>PO: Tạo PO (Draft) + dòng hàng
-    PO->>PO: Duyệt (nếu vượt hạn mức) → Approved
-    PO->>PO: Chốt PO → Confirmed
+    PROC->>PO: Tạo PO (Draft) + dòng hàng theo danh mục NCC
+    PO->>PO: Gửi duyệt: tự duyệt trong hạn mức, hoặc Quản lý kho duyệt → Approved
+    PROC->>PO: Chốt PO → Confirmed
+    PO->>VENDOR: Gửi PO (email / API)
+    VENDOR-->>PROC: Xác nhận / từ chối PO
+    PROC->>PO: Ghi phản hồi của NCC
     VENDOR->>WH: Giao hàng + phiếu giao
-    WH->>RC: Tạo Receipt tham chiếu PO
-    WH->>RC: Kiểm đếm, ghi lô/hạn dùng, xác nhận
+    WH->>RC: Tạo Receipt tham chiếu một PO
+    WH->>RC: Kiểm đếm, ghi lô / hạn dùng, dán nhãn thùng LPN, xác nhận
     RC->>INVSYS: Ghi tồn Inbound tại WH/Input (RECEIVING)
     RC->>PO: Cập nhật SL đã nhận / open qty
     opt SKU yêu cầu QC (luồng 3 bước)
@@ -94,10 +96,10 @@ sequenceDiagram
         QC->>RC: Kết luận Accepted / Quarantine / Rejected
         RC->>INVSYS: Phần Quarantine / Rejected → khu QUARANTINE
     end
-    RC->>WH: Sinh Putaway task (hàng Accepted / không cần QC)
-    WH->>SLOT: Yêu cầu gợi ý vị trí
-    SLOT-->>WH: Danh sách vị trí xếp hạng
-    WH->>INVSYS: Đặt hàng vào bin (WH/Stock) → tồn Available
+    RC->>WH: Mở nhiệm vụ cất (mỗi thùng LPN + phần lẻ, hàng đạt / không cần QC)
+    WH->>SLOT: Xem nhiệm vụ cất
+    SLOT-->>WH: Tối đa 10 bin xếp hạng
+    WH->>INVSYS: Quét bin, cất hàng (WH/Stock) → tồn Available
     RC->>RC: Closed
     VENDOR->>AP: Gửi hoá đơn
     AP->>INV: Nhập hoá đơn, chọn PO/Receipt
@@ -111,7 +113,7 @@ sequenceDiagram
         INV->>AP: Matched → Paid
     end
     AP->>PO: Hoá đơn đã đối chiếu
-    PO->>PO: Closed
+    PROC->>PO: Đóng PO → Closed
 ```
 
 ---

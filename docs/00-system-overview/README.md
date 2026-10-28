@@ -27,11 +27,11 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
-| **Nhân viên mua hàng (Procurement Staff)** | Tạo & theo dõi PO, làm việc với NCC, đối chiếu hoá đơn (invoice matching) | Tạo/sửa PO ở trạng thái Draft; chốt PO; tạo Invoice |
+| **Nhân viên mua hàng (Procurement Staff)** | Quản lý **hồ sơ & danh mục hàng của NCC**, tạo & theo dõi PO, **chốt & gửi PO cho NCC**, ghi **phản hồi của NCC**, đối chiếu hoá đơn (invoice matching) ([02](../warehouse/02-purchase-order/README.md)) | Tạo/sửa PO ở trạng thái Draft; gửi duyệt; chốt PO; huỷ / đóng PO; tạo Invoice |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
 | **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: khai báo trạm in, gán lệnh sản xuất cho trạm, đổi ưu tiên, xử lý lệnh tạm dừng, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; gán/gán lại lệnh sản xuất |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất được gán cho trạm của mình; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO; lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
+| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO (phạm vi giai đoạn sau — [open-questions C19](../open-questions/README.md)); lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)); **duyệt kỹ thuật bộ file thiết kế** trước khi gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất; duyệt Đạt / Không đạt bản thiết kế được giao |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, **ghi nhận & phân bổ tiền khách chuyển khoản**, **công nợ phải thu của khách sỉ**, hoàn tiền; **duyệt / từ chối đơn công nợ bị treo** và **duyệt điều khoản thanh toán của khách** ([15](../ecommerce/15-payment/README.md)) | Tạo & xử lý Invoice; ghi nhận, phân bổ, đảo phân bổ tiền về; duyệt tín dụng & hạn mức; chạy đối soát |
 
@@ -167,7 +167,7 @@ Luồng "hạnh phúc" (happy path) từ lúc tạo sản phẩm đến lúc gia
 
 ```mermaid
 flowchart LR
-    A[Tạo sản phẩm\nProduct Creation] --> A1[Hoạch định nhu cầu\nReplenishment Proposal]
+    A[Tạo sản phẩm\nProduct Creation] --> A1[Cảnh báo tồn\nREORDER / SAFETY]
     A1 --> B[Lập PO\nPurchase Order]
     B --> C[Nhận hàng\nReceipt]
     C --> D[Đối chiếu hoá đơn\nInvoice matching]

@@ -15,7 +15,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **UoM** (Unit of Measure) | Đơn vị tính (cái, cây, thùng…). |
 | **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
 | **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
-| **Purchase UoM / Đơn vị mua** | Đơn vị quy đổi dùng mặc định khi đặt hàng NCC trên PO (thường là *thùng*). |
+| **Purchase UoM / Đơn vị mua** | Đơn vị đóng gói NCC bán (thường là *thùng*). Dòng PO ghi số lượng theo **đơn vị tồn** của SKU; quy cách đóng gói của NCC được ép bằng bội số (số lượng phải là bội số quy cách, [02](../warehouse/02-purchase-order/README.md)). |
 | **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt trên storefront, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi; giá bán niêm yết theo đơn vị bán. |
 | **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
@@ -31,7 +31,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. Tồn dùng được ≤ ngưỡng sinh cảnh báo `REORDER` ([20](../warehouse/20-inventory-control/README.md)). |
 | **Safety stock / Tồn an toàn** | Mức tồn doanh nghiệp muốn luôn giữ, khai báo theo SKU trên Inventory Item. Tồn dùng được < mức này sinh cảnh báo `SAFETY`. **Chỉ để cảnh báo, không trừ vào ATP** (open-questions C11). |
 | **Stock alert / Cảnh báo tồn** | Thông báo tự động khi tồn chạm ngưỡng đặt lại (`REORDER`), dưới tồn an toàn (`SAFETY`), lô sắp hết hạn (`EXPIRING`) hoặc đã hết hạn (`EXPIRED`). Vòng đời `Open` → `Acknowledged` → `Resolved`. Xem [20 §4.4](../warehouse/20-inventory-control/README.md). |
-| **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. |
+| **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. Phạm vi giai đoạn sau ([open-questions C19](../open-questions/README.md)); hiện dùng cảnh báo tồn `REORDER` / `SAFETY` ([20](../warehouse/20-inventory-control/README.md)). |
 | **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán, **chưa gắn vị trí/lô**. Làm giảm ATP; hết hạn thì giải phóng; khi đơn được phân bổ thì chuyển thành allocation. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
 | **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng: một **khoản giữ** trên tồn `Available` (mỗi bin / lô một khoản), không có hạn. "`Allocated`" là cách gọi phần tồn đang có khoản phân bổ, không phải một trạng thái riêng của hàng. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
 | **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do) khi phát hiện chênh lệch. Duyệt **bốn mắt** (người duyệt ≠ người đề nghị); duyệt là ghi tồn ngay. Xem [20 §4.3](../warehouse/20-inventory-control/README.md). |
@@ -50,11 +50,14 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **Procurement / Mua hàng** | Quy trình mua hàng từ nhà cung cấp về kho. |
-| **Supplier / Vendor / Nhà cung cấp (NCC)** | Đối tác bán hàng hoá cho doanh nghiệp. |
+| **Supplier / Vendor / Nhà cung cấp (NCC)** | Đối tác bán hàng hoá cho doanh nghiệp. Mã cố định, mã số thuế duy nhất; `Active` / `Inactive` / `Blacklisted`; chỉ `Active` nhận PO mới. |
+| **Supplier catalog / Danh mục hàng của NCC** | Các SKU một NCC bán: mã hàng phía NCC, đơn giá (có lịch sử giá), MOQ, quy cách đóng gói, lead time. Dòng PO phải có trong danh mục; giá trống lấy giá danh mục. |
+| **Supplier confirmation / Phản hồi của NCC** | Trục trạng thái riêng của PO đã gửi: `Not Sent` → `Pending` → `Confirmed` / `Rejected`; chốt một lần, không đổi trạng thái PO. |
+| **Approval limit / Hạn mức duyệt PO** | Số tiền tối đa theo role + tiền tệ + thời gian hiệu lực. PO trong hạn mức của người gửi được tự duyệt; người duyệt không duyệt PO vượt hạn mức của mình. Xem [02](../warehouse/02-purchase-order/README.md) §4.3. |
 | **PO** (Purchase Order) — **Đơn đặt hàng** | Chứng từ cam kết mua: SKU nào, số lượng, giá, giao về kho nào, khi nào. |
 | **PO line / Dòng hàng PO** | Một dòng trong PO: một SKU + số lượng + đơn giá. |
 | **Open quantity / Số lượng còn chờ nhận** | SL đặt − SL đã nhận của một dòng PO. |
-| **PO revision / amendment** | Bản chỉnh sửa PO sau khi đã `Confirmed` (tăng version, có log). |
+| **PO revision / amendment** | **Bản sửa** bất biến của PO, ghi **mỗi lần gửi duyệt** (bản 0, rồi +1 sau mỗi lần bị từ chối). PO thường đã `Confirmed` không sửa được; PO gia công có **bản bổ sung** chờ duyệt. |
 | **MOQ** (Minimum Order Quantity) | Số lượng đặt hàng tối thiểu NCC yêu cầu. |
 | **Lead time / Thời gian giao** | Khoảng thời gian từ khi đặt đến khi hàng về. |
 | **Receipt / Goods Receipt — Nhận hàng** | Ghi nhận hàng thực tế về kho theo PO: kiểm đếm, ghi lô, đưa vào khu nhận hàng; với SKU yêu cầu QC thì chuyển sang khu QC và ghi kết quả QC. |
@@ -64,13 +67,14 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **QC area / Khu kiểm tra chất lượng** | Khu chứa hàng đã nhận đang chờ QC kiểm — Area loại `QUALITY_CONTROL`. Khác khu cách ly (`QUARANTINE`) là nơi chứa hàng **sau khi** QC kết luận cách ly hoặc không đạt. |
 | **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng lại, chưa cho vào tồn khả dụng; hàng nằm ở Area loại `QUARANTINE`. |
 | **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
-| **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt. |
+| **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt, khai báo **theo từng NCC** (trống = 0); vượt luôn bị chặn. |
 | **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. |
 | **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. |
 | **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
 | **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
 | **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
 | **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu chờ cất (khu QC với hàng đạt QC, hoặc khu nhận hàng với SKU không yêu cầu QC) lên vị trí lưu trữ chính thức. |
+| **Putaway task / Nhiệm vụ cất** | Mở tự động khi hàng sẵn sàng cất: mỗi thùng LPN một nhiệm vụ (cất nguyên thùng), phần lẻ của dòng nhận một nhiệm vụ (cất từng phần được). `Pending` → `In Progress` → `Done`. Hệ thống gợi ý tối đa 10 bin. Xem [05](../warehouse/05-putaway/README.md). |
 | **Inbound area / Staging area / Khu nhận hàng** | Khu tạm chứa hàng vừa nhận (WH/Input), chờ chuyển sang khu QC hoặc chờ putaway — Area loại `RECEIVING`. |
 
 ---
@@ -264,6 +268,9 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Vehicle Booked` / `Loading` | Load (chuyến bàn giao) | Đã ghi nhận đặt xe / đang quét kiện lên xe (kế hoạch bị khoá) |
 | `Dispatched` | Load Plan, Load | Load: đã ký bàn giao, xe rời kho. Load Plan: mọi xe của kế hoạch đã rời kho |
 | `Pending` / `Picking` / `Picked` | Task lấy hàng | Chờ bắt đầu / đang lấy / mọi dòng đã lấy (mở đóng gói) |
+| `Pending` / `In Progress` / `Done` | Nhiệm vụ cất (putaway) | Chưa cất / đã cất một phần lẻ / đã cất hết |
+| `Not Sent` / `Pending` / `Confirmed` / `Rejected` | Phản hồi của NCC (PO) | Chưa gửi / chờ NCC trả lời / NCC xác nhận / NCC từ chối |
+| `Withdrawn` | Dòng PO | Bị bỏ khỏi bản nháp sau khi đã nằm trong một bản sửa (giữ làm lịch sử) |
 | `Packing` / `Packed` | Phiên đóng gói, Order | Đang đóng / đã đóng đủ |
 | `Open` / `Sealed` / `Voided` | Kiện (package) | Đang cho hàng vào / đã niêm phong (có kích thước, khối lượng) / đã huỷ |
 | `Partially Received` | PO, TO | Đã nhận một phần |
@@ -345,7 +352,7 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
 | **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (gán lệnh sản xuất cho trạm, đổi ưu tiên, quyết định tách lệnh đưa gia công ngoài). |
 | **Production Staff / Nhân viên sản xuất** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng đạt / hỏng kèm lý do, bàn giao thành phẩm cho QC. |
-| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO. |
+| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn. |
 | **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
 | **E-commerce Admin / Quản trị bán hàng** | Quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. |

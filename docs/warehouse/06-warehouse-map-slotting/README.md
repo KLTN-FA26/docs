@@ -86,7 +86,7 @@ Mục tiêu: giảm quãng đường di chuyển, tăng mật độ lưu trữ h
 
 1. **Nhận yêu cầu** — module 05/11 gọi Slotting Engine kèm: SKU, số lượng, lô/hạn dùng, kho, vị trí nguồn.
 2. **Lọc vị trí hợp lệ (hard constraints)** — chỉ giữ bin thoả mãn:
-   - Bin **cho phép cất hàng** (`is_putaway_bin`), bin/kệ ở trạng thái `Active`.
+   - Bin **cho phép cất hàng** (`is_putaway_target`), bin/kệ ở trạng thái `Active`.
    - **Lớp lưu trữ hiệu lực** của bin (lớp ghi đè của bin, nếu không có thì lớp mặc định của kệ) **trùng** lớp lưu trữ của SKU.
    - Còn đủ **sức chứa theo đơn vị** (`capacity_units`, nếu khai báo).
    - Tổng khối lượng trên tầng không vượt **tải trọng tối đa** của tầng; chiều cao hàng không vượt **chiều cao lọt** của tầng (nếu khai báo).
@@ -155,7 +155,7 @@ Kệ ở trạng thái khác `Active` kéo theo mọi bin của kệ đó không
 | `Zone` | `id`, `warehouse_id`, `name`, `color?` |
 | `Shelf` | `id`, `warehouse_id`, `zone_id?`, `code`, `name`, `description?`, `x`, `y`, `width`, `length`, `rotation`, `is_obstacle`, `pick_north`, `pick_east`, `pick_south`, `pick_west`, `default_storage_class`, `status` |
 | `ShelfLevel` | `id`, `shelf_id`, `level_index`, `elevation?`, `usable_height?`, `max_weight?` |
-| `Bin` | `id`, `level_id`, `code`, `location_code`, `description?`, `x`, `y` (tương đối trong kệ), `width`, `length`, `rotation`, `capacity_units?`, `is_pickable`, `is_putaway_bin`, `type`, `storage_class_override?`, `status` |
+| `Bin` | `id`, `level_id`, `code`, `location_code`, `description?`, `x`, `y` (tương đối trong kệ), `width`, `length`, `rotation`, `capacity_units?`, `is_pickable`, `is_putaway_target`, `type`, `storage_class_override?`, `status` |
 | `Area` | `id`, `warehouse_id`, `zone_id?`, `code`, `location_code`, `type`, `name`, `x`, `y`, `width`, `length`, `rotation`, `is_obstacle`, `status` |
 | `Boundary` | `id`, `warehouse_id`, `type` (`WALL` / `DOOR`), `start_x`, `start_y`, `end_x`, `end_y`, `is_passable`, `operational_status?` |
 
