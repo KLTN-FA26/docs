@@ -106,23 +106,28 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm khi cất hàng: trạng thái vị trí, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng. |
 | **Hazmat** (Hazardous materials) | Hàng nguy hiểm, có khu vực & quy tắc lưu trữ riêng. |
 | **Picking / Lấy hàng** | Lấy hàng từ các vị trí để gom thành đơn chuẩn bị giao. |
-| **Pick list / Danh sách lấy hàng** | Danh sách SKU–vị trí–số lượng cần lấy cho một hoặc nhiều đơn. |
-| **Pick task / Nhiệm vụ lấy hàng** | Đơn vị công việc picking giao cho một NV kho. |
-| **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. |
-| **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. |
-| **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. |
+| **Pick list / Danh sách lấy hàng** | Danh sách dòng lấy hàng (vị trí – SKU – lô – số lượng) của một task, sắp theo mã vị trí. |
+| **Fulfillment task / Pick task — Nhiệm vụ xuất hàng** | **Mỗi đơn một task**, gồm phần lấy hàng (`Pending` → `Picking` → `Picked`) và phần đóng gói; Điều phối / Quản lý kho tạo và giao cho một nhân viên kho ([07](../warehouse/07-picking/README.md)). |
+| **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. Phạm vi sau ([open-questions C17](../open-questions/README.md)). |
+| **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. Phạm vi sau (C17). |
+| **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. Dòng `Short`, đơn treo `INVENTORY`, mở kiểm kê mù; Điều phối phân bổ lại từ bin khác cùng kho. |
 | **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. |
 | **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
-| **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại vị trí lưu trữ. |
+| **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại một bin của cùng kho, qua hàng chờ cất lại. |
 | **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. |
 | **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
-| **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. |
+| **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. Tại bàn đóng gói: phạm vi sau (C17); hệ thống chỉ ước tính số thùng khi ước tính tải. |
+| **Kit / Bộ kiện (đóng bộ)** | Một đơn vị hàng đóng thành N kiện (N = `package_count` trên Inventory Item, 2–99); giao nguyên bộ, cùng một xe; huỷ một kiện là huỷ cả bộ. |
+| **Label outdated / Nhãn lỗi thời** | Nhãn kiện in trước khi kiện đổi shipment hoặc số tiền thu hộ đổi; phải in lại trước khi xếp xe / bàn giao. |
 | **Packing slip / Phiếu đóng gói** | Phiếu liệt kê nội dung kiện, đặt kèm trong hoặc ngoài kiện. |
 | **Dimensional weight / Khối lượng quy đổi** | Khối lượng tính cước theo thể tích kiện (khi hàng cồng kềnh nhẹ cân). |
 | **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao kiện (gửi kiện qua hãng, hoặc xếp lên xe khi giao nguyên chuyến) cho hãng vận chuyển ngoài để giao đến khách. Hệ thống không theo dõi hành trình sau bàn giao. |
 | **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận), hoạt động ngoài hệ thống. |
 | **Package label / Nhãn kiện** | Nhãn nội bộ in khi đóng gói: mã đơn, mã kiện, người nhận, địa chỉ, số tiền thu khi giao (nếu có). Hệ thống không lấy vận đơn / mã theo dõi của hãng. |
-| **Manifest / Bảng kê bàn giao** | Danh sách kiện giao cho hãng vận chuyển trong một lần, hai bên ký. |
+| **Manifest / Bảng kê bàn giao** | Danh sách kiện của một chuyến bàn giao, kèm người đại diện hãng, biển số, tài xế; hai bên ký. |
+| **Load / Chuyến bàn giao** | Một lần bàn giao cho một hãng trên một xe: gửi kiện thì mở chuyến là `Loading`; giao nguyên chuyến thì mỗi xe của kế hoạch là một chuyến `Planned` → `Vehicle Booked` → `Loading` → `Dispatched`. Bàn giao là tất cả hoặc không ([09](../warehouse/09-shipping/README.md) §5.2). |
+| **Load estimate / Ước tính tải** | Ước tính số thùng, thể tích, khối lượng, số xe của một đơn / lệnh chuyển kho từ quy cách đóng gói, trước khi đóng gói; chỉ để tham khảo, được đối chiếu với kế hoạch chuyến xe. |
+| **Transfer pack / Phiên đóng gói chuyển kho** | Phiên đóng gói của lệnh chuyển kho nguyên chuyến: giữ hàng tại kho nguồn, cho phép gửi nguyên thùng LPN ([10](../warehouse/10-inter-warehouse-transfer/README.md)). |
 | **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện không giao được, quay về kho gửi. |
 | **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái giao chung (`Ready to Dispatch` → `Handed Over` → `Delivered` / `Delivery Failed` → `Returned`); không có lịch sử tracking từ hãng. |
 | **FTL** (Full Truckload) / **Giao nguyên chuyến** | Hình thức giao thuê nguyên xe tải / container (cho đơn sỉ khối lượng lớn được chỉ định, hoặc lệnh chuyển kho), khác với gửi từng kiện qua hãng vận chuyển. |
@@ -255,8 +260,12 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request | Bản nháp, sửa tự do, chưa có hiệu lực |
 | `Pending Approval` | PO, TO, Điều chỉnh tồn | Chờ phê duyệt |
 | `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
-| `Planned` | Load Plan, Kiểm kê | Load Plan: đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay. Kiểm kê: đã lập phiếu, chưa đếm dòng nào |
-| `Dispatched` | Load Plan | Mọi xe của kế hoạch đã xếp hàng, ký manifest & rời kho |
+| `Planned` | Load Plan, Load, Kiểm kê | Load Plan: đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay. Load: một xe của kế hoạch đã chốt, chưa đặt xe. Kiểm kê: đã lập phiếu, chưa đếm dòng nào |
+| `Vehicle Booked` / `Loading` | Load (chuyến bàn giao) | Đã ghi nhận đặt xe / đang quét kiện lên xe (kế hoạch bị khoá) |
+| `Dispatched` | Load Plan, Load | Load: đã ký bàn giao, xe rời kho. Load Plan: mọi xe của kế hoạch đã rời kho |
+| `Pending` / `Picking` / `Picked` | Task lấy hàng | Chờ bắt đầu / đang lấy / mọi dòng đã lấy (mở đóng gói) |
+| `Packing` / `Packed` | Phiên đóng gói, Order | Đang đóng / đã đóng đủ |
+| `Open` / `Sealed` / `Voided` | Kiện (package) | Đang cho hàng vào / đã niêm phong (có kích thước, khối lượng) / đã huỷ |
 | `Partially Received` | PO, TO | Đã nhận một phần |
 | `Received` | PO, TO | Đã nhận đủ |
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |

@@ -53,9 +53,9 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 |--------------|-----------|--------|
 | Receiver | Nhận hàng, kiểm đếm | [03](../warehouse/03-receipt/README.md) |
 | Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
-| Picker | Lấy hàng theo pick list | [07](../warehouse/07-picking/README.md) |
-| Packer | Đóng gói, dán nhãn | [08](../warehouse/08-packing/README.md) |
-| Dispatch Staff | Gom chuyến, lập kế hoạch xếp hàng lên xe (Load Planning) khi giao nguyên chuyến, xếp kiện lên xe, bàn giao vận chuyển | [09](../warehouse/09-shipping/README.md) |
+| Picker | Lấy hàng theo task được giao (mỗi đơn một task), báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
+| Packer | Đóng & niêm phong kiện (cân đo), mở bộ kiện, in nhãn, hoàn tất đóng gói | [08](../warehouse/08-packing/README.md) |
+| Dispatch Staff | Mở chuyến bàn giao, quét kiện, ký bàn giao; lập kế hoạch xếp hàng lên xe (Load Planning) khi giao nguyên chuyến, ghi nhận đặt xe, xếp kiện lên xe | [09](../warehouse/09-shipping/README.md) |
 | NV kho nguồn / kho đích | Xuất & nhận hàng chuyển kho | [10](../warehouse/10-inter-warehouse-transfer/README.md) |
 
 ### 2.3. Quyền theo ngữ cảnh (permission — không phải role)
@@ -80,7 +80,7 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: nhận kiện khi bàn giao, vận chuyển, giao cho khách, thu hộ phần còn lại (nếu có), hoàn hàng về kho (RTO); cung cấp xe tải / container cho giao nguyên chuyến. Hệ thống không tích hợp API và không theo dõi hành trình; nhân viên cập nhật kết quả giao khi hãng báo lại |
 
-Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner, Cartonization, Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (Slotting Engine, Wave/Route Planner và Cartonization (phạm vi giai đoạn sau — [open-questions C17](../open-questions/README.md)), Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
 
 > ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) — phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể — chưa được đề bài xác định, xem [open-questions](../open-questions/README.md).
 

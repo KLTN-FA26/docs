@@ -168,7 +168,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
     | Lý do | Ai đặt | Ai gỡ |
     |-------|--------|-------|
     | `CREDIT` — tín dụng (vượt hạn mức / quá hạn) | Hệ thống, lúc đặt đơn công nợ | Kế toán duyệt / từ chối ([15](../15-payment/README.md) §4.4) |
-    | `DESIGN_MISMATCH` — thiết kế lệch checksum lúc đóng gói | Hệ thống ([08](../../warehouse/08-packing/README.md)) | QC / Quản lý kho xác minh lại thiết kế |
+    | `DESIGN_MISMATCH` — thiết kế lệch checksum lúc đóng gói | Hệ thống ([08](../../warehouse/08-packing/README.md)) | Quản lý kho xác minh lại thiết kế ([08](../../warehouse/08-packing/README.md) §4.4) |
     | `PAYMENT` — thiếu tiền sau khi đảo phân bổ | Kế toán (khi đảo) hoặc Điều phối | Điều phối, **chỉ khi tiền đã đủ lại** |
     | `ADDRESS`, `INVENTORY`, `CUSTOMER`, `FRAUD`, `OTHER` (bắt buộc ghi chú) | Điều phối | Điều phối |
 

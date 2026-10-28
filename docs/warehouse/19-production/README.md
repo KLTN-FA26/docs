@@ -30,13 +30,13 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 | **Nhân viên sản xuất (Production Staff)** | Kiểm file in (prepress); nhận lệnh tại trạm, in, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC |
 | **Quản lý kho (Warehouse Manager)** | Điều phối xưởng: khai báo trạm in & công suất, gán lệnh cho trạm in, đổi ưu tiên, xử lý lệnh `On Hold`; duyệt huỷ lệnh đã in; **quyết định tách LSX đưa gia công ngoài**; duyệt chênh lệch đối soát phôi gia công |
 | **Nhân viên QC (QC Staff)** | Kiểm mẫu và thành phẩm (in nội bộ hoặc gia công) so với design snapshot / mẫu đã duyệt; kết luận đạt / không đạt |
-| **Nhân viên kho (Warehouse Staff)** | Vai *Picker*: lấy phôi từ bin mang lên khu `PRODUCTION`; xuất phôi gửi nhà gia công (khi mình cấp phôi); chuyển thành phẩm đạt sang khu `PACKING` |
+| **Nhân viên kho (Warehouse Staff)** | **Quét xuất phôi** từ bin sang khu `PRODUCTION` (không qua pick task); xuất phôi gửi nhà gia công (khi mình cấp phôi); chuyển thành phẩm đạt sang khu `PACKING` |
 | **Nhân viên mua hàng (Procurement Staff)** | Hoàn thiện và gửi duyệt **PO gia công** sinh ra khi tách LSX ([02](../02-purchase-order/README.md)) |
 | **Nhà gia công (Subcontractor)** | Nhà cung cấp có năng lực in gia công; nhận file in (và phôi, nếu mình cấp), in, trả thành phẩm. **Không dùng hệ thống** — mọi trạng thái do nhân viên mình ghi nhận |
 | **Nhân viên Sale (Sales Staff)** | Tạo yêu cầu làm mẫu; gửi mẫu cho khách; ghi nhận khách duyệt hoặc yêu cầu sửa; liên hệ khách khi file in lỗi |
 | **Điều phối đơn hàng (Order Coordinator)** | Release đơn — điểm sinh LSX `ORDER` ([17](../../ecommerce/17-order-management/README.md)) |
 | **Khách hàng sỉ (B2B Customer)** | Duyệt mẫu hoặc yêu cầu sửa trên cổng khách hàng |
-| **Hệ thống (Production Scheduler)** | Sinh LSX, kiểm checksum thiết kế, sinh lệnh lấy phôi, chặn vượt số lượng, xếp hàng đợi các lệnh `Ready` theo ưu tiên, ước tính ngày xong theo công suất trạm, đồng bộ trạng thái đơn |
+| **Hệ thống (Production Scheduler)** | Sinh LSX, kiểm checksum thiết kế, giữ phôi cho lệnh, chặn cấp phôi vượt số cần, xếp hàng đợi các lệnh `Ready` theo ưu tiên, ước tính ngày xong theo công suất trạm, đồng bộ trạng thái đơn |
 
 ---
 
@@ -60,7 +60,7 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 | Kết quả | Dùng bởi |
 |---------|----------|
 | **Lệnh sản xuất** (mã theo prefix kho, ví dụ `HN-MO-000123`) + dòng thời gian trạng thái, số in được, số đạt, số phế phẩm kèm lý do | Warehouse Manager, Production Staff, [17](../../ecommerce/17-order-management/README.md), báo cáo |
-| **Lệnh lấy phôi** (pick task có đích là khu `PRODUCTION`) | [07 · Picking](../07-picking/README.md) |
+| **Phiếu xuất phôi** (quét xuất vật tư sang khu `PRODUCTION`; danh sách phôi còn chờ cấp) | Nhân viên kho, [20 · Inventory Control](../20-inventory-control/README.md) |
 | **Ngày xong dự kiến** của từng lệnh | [17](../../ecommerce/17-order-management/README.md), [16 · Sales Chat](../../ecommerce/16-sales-chat/README.md) (trả lời khách) |
 | **Kết quả QC thành phẩm** (đạt / không đạt + lý do) | Warehouse Manager, báo cáo chất lượng |
 | **Thành phẩm đạt** tại khu `PACKING`, gắn với dòng đơn | [08 · Packing](../08-packing/README.md) |
@@ -118,9 +118,9 @@ Hàng đợi và trạm in là **thuộc tính của lệnh `Ready`**, không ph
 
 ### 4.5. Cấp phôi
 
-1. **Sinh lệnh lấy phôi** — với lệnh `Ready` in nội bộ, hệ thống phân bổ phôi (reservation của dòng đơn / yêu cầu mẫu chuyển thành allocation tại bin & lô cụ thể) và sinh pick task sang [07 · Picking](../07-picking/README.md), **đích là khu `PRODUCTION`**. Chỉ cấp phôi theo LSX và **không vượt số còn thiếu** của LSX (BR-03).
-2. **Picker lấy phôi** theo luồng picking chuẩn (quét vị trí → SKU/lô → số lượng), mang lên khu `PRODUCTION` và quét bàn giao. Phôi vẫn ở trạng thái `Allocated` cho dòng đơn, đổi vị trí sang khu `PRODUCTION`. Lệnh chuyển `Material Issued`.
-   - Không đủ phôi (short pick không phân bổ lại được) → lệnh `On Hold` (thiếu phôi); báo bộ phận mua hàng ([02](../02-purchase-order/README.md)); [17](../../ecommerce/17-order-management/README.md) xử lý như thiếu hàng.
+1. **Danh sách phôi chờ cấp** — với lệnh `Ready` in nội bộ (không phải lệnh gia công), phôi đã được **giữ cho lệnh** tại bin & lô cụ thể. Nhân viên kho xem danh sách các khoản phôi còn chờ cấp. **Không qua pick task** của [07](../07-picking/README.md).
+2. **Quét xuất phôi** — nhân viên kho quét vị trí và SKU / mã vạch (tuỳ chọn), xuất **trọn một khoản giữ** sang khu `PRODUCTION` của kho đó. Phôi chuyển sang trạng thái tồn **`In Production`**, vẫn giữ cho lệnh ([20](../20-inventory-control/README.md) §5.1). Chỉ cấp theo LSX và **không vượt số còn thiếu** (BR-03); quét lại không cấp hai lần. Lệnh chuyển `Material Issued`.
+   - Không đủ phôi → lệnh `On Hold` (thiếu phôi); báo bộ phận mua hàng ([02](../02-purchase-order/README.md)); [17](../../ecommerce/17-order-management/README.md) xử lý như thiếu hàng.
 
 > ⚠️ Giả định: **không xuất dư phôi** để bù hao hụt; hao hụt được bù bằng vòng in bù (§4.6). Xem [open-questions](../../open-questions/README.md).
 
@@ -224,10 +224,10 @@ stateDiagram-v2
 
 | Chặng | Vị trí | Trạng thái tồn |
 |-------|--------|----------------|
-| Chưa cấp | Bin lưu trữ | `Available` (đã giữ hàng cho dòng đơn / yêu cầu mẫu) → `Allocated` khi sinh lệnh lấy phôi |
-| Đã cấp, đang in, chờ QC | Area `PRODUCTION` | `Allocated` cho dòng đơn |
+| Chưa cấp | Bin lưu trữ | `Available`, đã giữ cho lệnh sản xuất / yêu cầu mẫu |
+| Đã cấp, đang in, chờ QC | Area `PRODUCTION` | `In Production`, vẫn giữ cho lệnh; không bán ([20](../20-inventory-control/README.md) §5.1) |
 | Gửi gia công (`SUPPLIED_BLANKS`) | Vị trí ảo "tại nhà gia công" | Tồn của mình, **không tính ATP**; chỉ rời vị trí qua phiếu nhận hoặc điều chỉnh có lý do (hao hụt) |
-| Thành phẩm đạt (`ORDER`) | Area `PACKING` | `Staged`, chờ Packing |
+| Thành phẩm đạt (`ORDER`) | Area `PACKING` | `Available`, giữ cho đơn, chờ Packing |
 | Phôi dùng làm mẫu (`SAMPLE`) | — | Trừ tồn bằng điều chỉnh có lý do `SAMPLE` |
 | In hỏng / QC không đạt | — | Xuất huỷ (scrap): giảm tồn qua chứng từ điều chỉnh lý do `SCRAP`, có lệnh sản xuất làm nguồn |
 
@@ -303,7 +303,7 @@ stateDiagram-v2
 | Khách huỷ khi lệnh đã `Printing` hoặc sau đó | Theo BR-10 |
 | Khách không phản hồi mẫu | Yêu cầu mẫu ở `Sent to Customer`; Sale nhắc khách; quá hạn báo giá thì báo giá hết hiệu lực |
 | Khách yêu cầu sửa mẫu nhiều lần | Mỗi lần là một vòng mẫu mới; lưu lịch sử góp ý và số lần |
-| Packing phát hiện thành phẩm không khớp thiết kế / mẫu đã duyệt (lọt QC) | Packing `Verification Failed` → thành phẩm lỗi xuất huỷ, lệnh mở lại ở `Ready` để in bù |
+| Packing phát hiện thành phẩm không khớp thiết kế / mẫu đã duyệt (lọt QC) | Hoàn tất đóng gói kiểm lệch checksum → phiên đóng gói và đơn treo `DESIGN_MISMATCH`; Quản lý kho xác minh lại ([08](../08-packing/README.md) §4.4). Thành phẩm in sai thì xử lý như hàng lỗi (xuất huỷ, in bù) |
 | Hạn giao dự kiến vượt cam kết với khách do hàng đợi dài | Cảnh báo Warehouse Manager nâng ưu tiên / gán trạm khác / tách một phần đưa gia công (§4.7); 17 & Sale thông báo khách ngày giao mới |
 | Đơn hỗn hợp, hàng thường đã staged nhưng lệnh in chậm | Hàng thường chờ tại khu `PACKING`; hoặc tách giao theo chính sách split shipment ([17](../../ecommerce/17-order-management/README.md), open-questions D9) |
 | Nhà gia công trả hàng trễ | LSX con `On Hold` (nhà gia công trễ); Quản lý kho nhắc nhà gia công, hoặc tách phần còn thiếu in bù nội bộ |
@@ -326,7 +326,7 @@ stateDiagram-v2
 | [12 · Product Design](../../ecommerce/12-product-design/README.md) | Cung cấp design snapshot (đã khách xác nhận, bất biến), checksum và print-ready file cho lệnh; nhận yêu cầu sửa thiết kế khi file lỗi hoặc khách yêu cầu sửa mẫu |
 | [14 · Cart & Order](../../ecommerce/14-cart-and-order/README.md) | Báo giá cần mẫu `Approved` (thiết kế mới) trước khi khách chấp nhận |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Đơn đặt cọc chỉ release khi tiền cọc đã về; hoàn tiền / cấn trừ khi huỷ |
-| [07 · Picking](../07-picking/README.md) | Lấy phôi từ bin lên khu `PRODUCTION` (pick task đích `PRODUCTION`); put-back khi huỷ; thành phẩm không pick lại trên kệ |
+| [07 · Picking](../07-picking/README.md) | Dòng in không có dòng lấy hàng; phôi cấp bằng quét xuất vật tư (không qua pick task); thành phẩm không pick lại trên kệ |
 | [08 · Packing](../08-packing/README.md) | Nhận thành phẩm đạt QC tại khu `PACKING`, đối chiếu thiết kế / mẫu đã duyệt; báo ngược khi phát hiện sai thiết kế |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khai báo khu `PRODUCTION`; mã vị trí để quét bàn giao phôi & thành phẩm; vị trí ảo "tại nhà gia công" |
 | [01 · Product Creation](../01-product-creation/README.md) | Kỹ thuật in của sản phẩm; Inventory Item của SKU là phôi |

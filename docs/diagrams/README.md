@@ -131,7 +131,7 @@ flowchart TD
     PREPRESS -- Không --> MO_HOLD[Lệnh On Hold\nSale liên hệ khách sửa file]
     MO_HOLD --> PREPRESS
     PREPRESS -- Có --> QUEUE[LSX Ready: vào hàng đợi\nWarehouse Manager gán trạm in\ncùng kỹ thuật in]
-    QUEUE --> BLANK[Lấy phôi từ bin → khu PRODUCTION\nLSX Material Issued]
+    QUEUE --> BLANK[NV kho quét xuất phôi từ bin\nsang khu PRODUCTION\nLSX Material Issued]
     BLANK --> PRINTING[Production Staff in tại trạm đã gán\nLSX Printing → báo SL in được / phế phẩm]
     PRINTING --> PQC{LSX QC: theo mẫu đã duyệt\nđủ SL đạt?}
     PQC -- Không --> REWORK[Phần hỏng xuất huỷ\nLSX quay về Ready để in bù]
@@ -143,43 +143,38 @@ flowchart TD
     ALL_DONE -- Chưa --> WAIT_MO[Chờ các lệnh còn lại]
     WAIT_MO --> ALL_DONE
     ALL_DONE -- Rồi --> READY_P[Order: Ready to Fulfill]
-    MO -. đơn hỗn hợp: dòng hàng thường\npick song song .-> ALLOC
-    READY_P --> HAS_STD{Còn dòng hàng thường\nchưa pick?}
-    HAS_STD -- Có --> ALLOC
+    MO -. đơn hỗn hợp: dòng hàng thường\nlấy song song .-> TASK
+    READY_P --> HAS_STD{Còn dòng hàng thường\nchưa lấy?}
+    HAS_STD -- Có --> TASK
     HAS_STD -- Không --> PACK_CHECK
 
-    READY --> ALLOC[Phân bổ tồn theo vị trí & lô\nTồn: Available → Allocated]
-    ALLOC --> WAVE[Lập wave / batch\nSinh pick list + lộ trình]
-    WAVE --> PICK[Picker lấy hàng\nquét vị trí + SKU/lô + số lượng]
+    READY --> TASK[Điều phối / Quản lý kho tạo task\ngiao người — dòng lấy theo bin & lô\nđã phân bổ khi release]
+    TASK --> PICK[Picker lấy hàng\nquét vị trí + SKU + số lượng\ntồn bị trừ ngay khi quét]
 
     PICK --> SHORT{Đủ hàng?}
-    SHORT -- Thiếu --> REALLOC[Phân bổ lại từ vị trí/lô khác]
-    REALLOC --> PICK
-    SHORT -- Vẫn thiếu --> PARTIAL[Short pick →\nbackorder / giao một phần]
-    SHORT -- Đủ --> STAGE[Gom về khu đóng gói\nTồn: Picked → Staged]
-    PARTIAL --> STAGE
+    SHORT -- Thiếu --> SHORT_HOLD[Báo thiếu: đơn On Hold INVENTORY\nkiểm kê mù vị trí đó]
+    SHORT_HOLD --> REALLOC{Điều phối phân bổ lại\ntừ bin khác cùng kho?}
+    REALLOC -- Được --> PICK
+    REALLOC -- Không đủ hàng --> PARTIAL[Điều phối + Sale quyết:\ngiao một phần / đóng phần còn lại / huỷ]
+    SHORT -- Đủ --> PACK_CHECK
 
-    STAGE --> PACK_CHECK[Packing: kiểm đơn\nquét từng SKU / serial]
-    PACK_CHECK --> PACK_DESIGN{Sản phẩm in ấn?}
-    PACK_DESIGN -- Có --> PACK_VERIFY[Đối chiếu thành phẩm\nvới design snapshot & mẫu đã duyệt]
-    PACK_DESIGN -- Không --> PACK_BOX
-    PACK_VERIFY --> PACK_FAIL{Khớp?}
-    PACK_FAIL -- Không --> INVESTIGATE[Verification Failed →\nxuất huỷ thành phẩm lỗi,\nLSX quay về Ready để in bù]
-    PACK_FAIL -- Có --> PACK_BOX[Chọn thùng, đóng gói,\ncân & đo]
-    INVESTIGATE --> REWORK
-
+    PACK_CHECK[Packing: Packer bắt đầu phiên\nmở kiện, cho hàng vào] --> PACK_BOX[Niêm phong kiện\ncân & đo bắt buộc\nkit: đủ N kiện]
     PACK_BOX --> LABEL[In nhãn kiện nội bộ\nmã đơn, mã kiện, địa chỉ,\nsố tiền thu khi giao nếu có]
-    LABEL --> LABEL_OK{Địa chỉ hợp lệ?}
-    LABEL_OK -- Không --> HOLD[Order: On Hold\nCSKH liên hệ khách]
-    HOLD --> LABEL
-    LABEL_OK -- Có --> PACKED[Order: Packed\nDán nhãn, niêm phong\nShipment: Ready to Dispatch]
+    LABEL --> COMPLETE[Hoàn tất đóng gói\nthiếu hàng: chỉ khi được giao một phần]
+    COMPLETE --> PACK_DESIGN{Có dòng in?}
+    PACK_DESIGN -- Không --> PACKED
+    PACK_DESIGN -- Có --> PACK_FAIL{Checksum thiết kế khớp?}
+    PACK_FAIL -- Không --> DESIGN_HOLD[Phiên + đơn On Hold\nDESIGN_MISMATCH]
+    DESIGN_HOLD --> REVERIFY[Quản lý kho xác minh lại]
+    REVERIFY --> COMPLETE
+    PACK_FAIL -- Có --> PACKED[Order: Packed / Partially Fulfilled\nShipment: Ready to Dispatch]
 
     PACKED --> MODE{Hình thức giao?}
-    MODE -- Gửi kiện qua hãng --> PICKUP[Gom kiện theo hãng\nchờ hãng lấy hàng]
-    PICKUP --> HANDOVER[Bàn giao + manifest\nShipment: Handed Over]
-    MODE -- Giao nguyên chuyến --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed]
-    LOADPLAN --> BOOK[Đặt xe với hãng\nngoài hệ thống]
-    BOOK --> LOAD[Xếp kiện theo sơ đồ, quét kiện\nmanifest theo từng xe]
+    MODE -- Gửi kiện qua hãng --> PICKUP[Mở chuyến bàn giao cho một hãng\nquét đủ kiện]
+    PICKUP --> HANDOVER[Ký bàn giao — tất cả hoặc không\nShipment: Handed Over]
+    MODE -- Giao nguyên chuyến --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed\nmỗi xe một chuyến bàn giao]
+    LOADPLAN --> BOOK[Đặt xe với hãng ngoài hệ thống\nghi nhận đặt xe]
+    BOOK --> LOAD[Bắt đầu xếp → khoá kế hoạch\nquét kiện theo sơ đồ từng xe]
     LOAD --> HANDOVER
     HANDOVER --> SHIPPED[Order: Shipped\nkhông theo dõi hành trình]
     SHIPPED --> DELIV{Hãng báo kết quả\nOrder Coordinator cập nhật}
@@ -218,34 +213,37 @@ sequenceDiagram
         OM->>PROD: Release dòng in → LSX ORDER / dòng (Order: In Production)
         OPER->>PROD: Prepress file in (checksum): Pending Prepress → Ready
         PROD->>PROD: Hàng đợi + Warehouse Manager gán trạm in (thuộc tính của lệnh Ready)
-        PROD->>PICKER: Lệnh lấy phôi (đích khu PRODUCTION)
-        PICKER->>INVSYS: Lấy phôi, bàn giao khu PRODUCTION (Allocated) → Material Issued
+        PICKER->>INVSYS: NV kho quét xuất phôi sang khu PRODUCTION (tồn In Production) → Material Issued
         OPER->>PROD: In tại trạm (Printing), báo SL in được / phế phẩm → QC
         QC->>PROD: QC thành phẩm (đối chiếu mẫu đã duyệt)
         alt Thiếu SL đạt
             PROD->>INVSYS: Xuất huỷ phần hỏng
-            PROD->>PICKER: LSX quay về Ready, cấp phôi phần thiếu (in bù)
+            PROD->>PICKER: LSX quay về Ready, quét xuất phôi phần thiếu (in bù)
         end
-        PROD->>INVSYS: Thành phẩm → khu PACKING (Staged)
+        PROD->>INVSYS: Thành phẩm → khu PACKING
         PROD-->>OM: Mọi lệnh Completed → Ready to Fulfill
     end
-    OM->>INVSYS: Phân bổ tồn dòng hàng thường (Allocated)
-    OM->>PICKER: Release lệnh xuất / pick list (nếu còn dòng hàng thường)
-    PICKER->>INVSYS: Lấy hàng (quét vị trí + SKU/lô)
+    OM->>INVSYS: Release: phân bổ dòng hàng thường vào bin & lô
+    OM->>PICKER: Điều phối tạo task, giao picker (nếu còn dòng hàng thường)
+    PICKER->>INVSYS: Lấy hàng (quét vị trí + SKU + số lượng) → trừ tồn
     alt Thiếu hàng
-        PICKER->>INVSYS: Re-allocate lô/vị trí khác
-        PICKER-->>OM: Short pick → backorder/partial
+        PICKER-->>OM: Báo thiếu → đơn On Hold INVENTORY
+        PICKER->>INVSYS: Kiểm kê mù vị trí đó
+        OM->>INVSYS: Điều phối phân bổ lại từ bin khác cùng kho
     end
-    PICKER->>PACKER: Bàn giao hàng đã pick (Staged)
-    PACKER->>PACKER: Kiểm đơn + (dòng tùy chỉnh) đối chiếu thành phẩm với design snapshot & mẫu đã duyệt
-    PACKER->>PACKER: In nhãn kiện nội bộ, dán nhãn
-    PACKER-->>OM: Order = Packed
+    PICKER->>PACKER: Task Picked → mở đóng gói
+    PACKER->>PACKER: Đóng & niêm phong kiện (cân đo), in nhãn kiện nội bộ
+    PACKER->>PACKER: Hoàn tất → hệ thống kiểm checksum thiết kế (dòng in)
+    alt Lệch thiết kế
+        PACKER-->>OM: Đơn On Hold DESIGN_MISMATCH → Quản lý kho xác minh lại
+    end
+    PACKER-->>OM: Order = Packed, shipment Ready to Dispatch
     alt Gửi kiện qua hãng
-        PACKER->>CARRIER: Bàn giao kiện + manifest (hãng tới lấy hàng)
+        SHIP->>CARRIER: Mở chuyến cho hãng, quét đủ kiện, ký bàn giao
     else Giao nguyên chuyến
-        SHIP->>SHIP: Load Planning 3D → kế hoạch chuyến xe Confirmed
-        SHIP->>CARRIER: Đặt xe (ngoài hệ thống)
-        SHIP->>CARRIER: Xếp kiện theo sơ đồ + manifest theo từng xe
+        SHIP->>SHIP: Load Planning 3D → kế hoạch Confirmed, mỗi xe một chuyến
+        SHIP->>CARRIER: Đặt xe (ngoài hệ thống), ghi nhận đặt xe
+        SHIP->>CARRIER: Xếp kiện theo sơ đồ, quét, ký bàn giao từng xe
     end
     SHIP-->>OM: Shipped
     CARRIER-->>CUST: Giao hàng (ngoài hệ thống, không tracking)
@@ -448,7 +446,7 @@ flowchart TD
     HOLD --> PRE
     PRE -- Có --> CAP{Xưởng nội bộ kịp hạn?}
     CAP -- Có --> QUEUE[LSX Ready: hàng đợi\ngán trạm in cùng kỹ thuật in]
-    QUEUE --> ISSUE[Lấy phôi qua Picking\nsang khu PRODUCTION — Material Issued]
+    QUEUE --> ISSUE[NV kho quét xuất phôi\nsang khu PRODUCTION — Material Issued]
     CAP -- "Không — Quản lý kho tách một phần" --> SPLIT["LSX con gia công\n+ PO gia công (SUBCONTRACT)"]
     SPLIT -. phần còn lại .-> QUEUE
     ISSUE --> PRINT[Printing: in, ghi phế phẩm có lý do]
@@ -478,7 +476,7 @@ flowchart TD
     PRE -- Không --> HOLD[LSX On Hold\nSale liên hệ khách sửa file]
     HOLD --> PRE
     PRE -- Có --> RDY[LSX Ready\nhàng đợi, gán trạm in]
-    RDY --> ISSUE[Lấy phôi qua Picking\nsang khu PRODUCTION — Material Issued]
+    RDY --> ISSUE[NV kho quét xuất phôi\nsang khu PRODUCTION — Material Issued]
     ISSUE --> PRINT[Printing: in mẫu\nghi phế phẩm có lý do]
     PRINT --> QC{QC đạt đủ số mẫu?}
     QC -- Thiếu, in bù --> RDY

@@ -67,6 +67,7 @@ Ký hiệu mức độ ảnh hưởng: 🔴 Cao (ảnh hưởng kiến trúc/nhi
 | C14 | Chứng từ liên quan **hai kho** (Transfer Order) dùng **prefix** của kho nào? | Prefix của kho nguồn | 🟢 | 00, 10 |
 | C15 | Hàng nghi hỏng khi kiểm đếm (thùng móp, nghi hụt) của **SKU không bật cờ Yêu cầu QC** có bắt buộc đi qua khu kiểm tra chất lượng không? | Có — dòng nhận có điều kiện luôn đi luồng 3 bước, bất kể cờ của SKU | 🟢 | 03, 05 |
 | C16 | Có **kiểm kê theo lịch** (định kỳ) và **tự mở phiếu kiểm kê** khi lệch số lúc di chuyển trong kho / chuyển kho không? | Chưa: nguồn `SCHEDULED`, `MOVE_DISCREPANCY`, `TRANSFER_DISCREPANCY` mới được dành chỗ; hiện lập phiếu tay (nguồn `MANUAL`). Chỉ short pick tự mở phiếu | 🟢 | 10, 11, 20 |
+| C17 | Có làm **lấy hàng theo đợt / theo zone** (wave, batch, zone picking), **tối ưu lộ trình** trên bản đồ kho, và **gợi ý thùng tự động** (cartonization) tại bàn đóng gói không? | Phạm vi giai đoạn sau. Hiện mỗi đơn một task, dòng lấy sắp theo mã vị trí; Packer tự chọn loại kiện và nhập kích thước ([07](../warehouse/07-picking/README.md), [08](../warehouse/08-packing/README.md)) | 🟢 | 07, 08, 06 |
 
 ---
 

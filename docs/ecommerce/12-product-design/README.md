@@ -138,7 +138,7 @@ Quản lý **bản thiết kế in** (logo, nhận diện thương hiệu của 
 17. **Xưởng ([19](../../warehouse/19-production/README.md)):** Production Staff tải file `PRINT_READY` của snapshot gắn với lệnh sản xuất. Hệ thống chỉ cấp link khi checksum còn khớp (prepress).
 18. **Đóng gói ([08](../../warehouse/08-packing/README.md)):**
     - Nhân viên đóng gói và QC xem file theo vai trò, trong phạm vi task của mình.
-    - Khi hoàn tất đóng gói, hệ thống kiểm lại checksum. Lệch thì treo đóng gói và đơn (`DESIGN_MISMATCH`) cho tới khi QC / Quản lý kho xác minh lại.
+    - Khi hoàn tất đóng gói, hệ thống kiểm lại checksum. Lệch thì treo đóng gói và đơn (`DESIGN_MISMATCH`) cho tới khi Quản lý kho xác minh lại ([08](../../warehouse/08-packing/README.md) §4.4).
 
 ### 4.9. Đổi phân công
 

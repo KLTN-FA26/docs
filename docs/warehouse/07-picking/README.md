@@ -2,9 +2,15 @@
 
 ## 1. Mục đích (Purpose)
 
-Lấy đúng **SKU, số lượng, lô** từ các vị trí lưu trữ trong kho để **gom thành đơn hàng chuẩn bị giao**, theo yêu cầu từ [Order Management](../../ecommerce/17-order-management/README.md) / lệnh xuất kho.
+Lấy đúng **SKU, số lượng, lô** từ các vị trí lưu trữ trong kho cho **dòng hàng sẵn** của đơn đã release, và đưa về khu đóng gói. Yêu cầu đến từ [Order Management](../../ecommerce/17-order-management/README.md).
 
-Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](../08-packing/README.md) → [Shipping](../09-shipping/README.md)). Chất lượng picking quyết định độ chính xác đơn hàng (order accuracy) và tốc độ giao.
+Picking là **bước mở đầu luồng Fulfillment**: Picking → [Packing](../08-packing/README.md) → [Shipping](../09-shipping/README.md). Chất lượng picking quyết định độ chính xác đơn hàng và tốc độ giao.
+
+- **Mỗi đơn có một nhiệm vụ (task)** gồm phần lấy hàng và phần đóng gói. Điều phối hoặc Quản lý kho tạo task và giao cho một nhân viên.
+- **Tồn bị trừ ngay khi quét xác nhận lấy**, không có trạng thái trung gian "đã lấy / đã gom".
+- **Dòng in không pick trên kệ.** Phôi cấp cho xưởng bằng **quét xuất vật tư** ở [19](../19-production/README.md), không qua pick task. Thành phẩm đạt QC đi thẳng sang khu `PACKING`.
+
+> ⚠️ Giả định: lấy hàng theo **đợt (wave / batch)**, **theo zone**, và **tối ưu lộ trình** trên bản đồ kho thuộc phạm vi giai đoạn sau. Hiện tại mỗi đơn một task, các dòng lấy được sắp theo mã vị trí rồi SKU. Xem [open-questions C17](../../open-questions/README.md).
 
 ---
 
@@ -12,10 +18,12 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 | Actor | Vai trò |
 |-------|---------|
-| **Nhân viên kho (Picker)** | Nhận pick list, di chuyển theo lộ trình, lấy hàng, quét xác nhận SKU/vị trí/số lượng |
-| **Hệ thống (Wave/Route Planner)** | Gom đơn thành đợt (wave/batch), tối ưu lộ trình, phân bổ (allocate) tồn theo vị trí & lô |
-| **Quản lý kho (Warehouse Manager)** | Cấu hình chiến lược picking, xử lý thiếu hàng (short pick), phân công lại |
-| **Nhân viên Packing** | Nhận hàng đã pick tại khu đóng gói |
+| **Nhân viên kho (Picker)** | Bắt đầu task được giao; tại mỗi dòng: quét vị trí, quét SKU (hoặc mã vạch), nhập số lượng; **báo thiếu (short pick)**; hoàn tất phần lấy hàng. Cất lại hàng của đơn bị huỷ (put-back). |
+| **Điều phối đơn hàng (Order Coordinator)** / **Quản lý kho (Warehouse Manager)** | Xem danh sách đơn chờ tạo task, **tạo task và giao người**, đổi người khi task chưa bắt đầu. **Phân bổ lại** dòng bị thiếu. Theo dõi mọi task trong kho. |
+| **Hệ thống** | Lập dòng lấy hàng từ phần đã phân bổ (bin, lô) của đơn. Trừ tồn khi quét. Treo đơn khi thiếu hàng, tự mở kiểm kê mù ([20](../20-inventory-control/README.md)), gỡ treo khi đã phân bổ lại xong. Đưa hàng của đơn huỷ vào hàng chờ cất lại. |
+
+- Người được giao là **nhân viên kho hoặc quản lý kho đang hoạt động, được gán vào kho đó**.
+- Mọi thao tác chỉ trong phạm vi kho được gán.
 
 ---
 
@@ -25,71 +33,100 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Lệnh xuất / đơn cần giao | Order number + dòng hàng (SKU, số lượng theo đơn vị cơ sở) + hạn giao; pick list hiển thị quy đổi thành **số thùng nguyên + cái lẻ** theo đơn vị quy đổi của [01](../01-product-creation/README.md) | Có |
-| Lệnh lấy phôi (với dòng đơn tùy chỉnh) | Lệnh sản xuất + SKU phôi + số lượng; **đích là khu `PRODUCTION`** thay vì khu `PACKING` (xem [19](../19-production/README.md)) | Có (nếu áp dụng) |
-| Chiến lược picking | Single-order / batch / zone / wave (cấu hình) | Có |
-| Phân bổ tồn (allocation) | Hệ thống chọn vị trí & lô nguồn theo FEFO/FIFO & khoảng cách | Có |
-| Thiết bị (handheld scanner, xe đẩy, tote) | | Không |
-| Ưu tiên đơn | Hạn giao gần, đơn hoả tốc, khách VIP | Không |
+| Đơn cần lấy | Đơn `Ready to Fulfill`, hoặc đơn `In Production` có dòng hàng sẵn (lấy song song trong lúc in) | Có |
+| Phân bổ tồn (allocation) | Bin & lô được phân bổ cho đơn khi release, theo FEFO / FIFO, chỉ từ bin cho phép lấy (`is_pickable`) — [20](../20-inventory-control/README.md) §5.6 | Có |
+| Người được giao | Nhân viên kho / quản lý kho của kho đó | Có |
+| Số liệu quét | Mã vị trí, SKU hoặc mã vạch của SKU, số lượng | Có |
 
 ### Output
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Pick list / pick task** đã hoàn tất | 08 Packing |
-| **Cập nhật tồn**: giảm tồn tại vị trí nguồn; chuyển sang trạng thái `Picked` / `Staged` | Tồn kho, 17 Order Management |
-| **Hàng đã gom** tại khu đóng gói (staging outbound) | 08 Packing |
-| **Bản ghi short pick / thiếu hàng** nếu có | Manager, 17 Order Management |
-| Số liệu năng suất (lines/hour, độ chính xác) & velocity theo SKU | 06 Slotting (re-slotting) |
+| **Dòng lấy hàng** đã lấy (`Picked`) / thiếu (`Short`) / huỷ | 08 Packing, 17 Order Management |
+| **Trừ tồn** tại vị trí nguồn + dòng sổ biến động `PICK` | [20](../20-inventory-control/README.md) |
+| **Báo thiếu**: đơn treo lý do `INVENTORY`, phiếu kiểm kê mù | 17, 20 |
+| **Hàng chờ cất lại (put-back)** của task bị huỷ | Nhân viên kho |
+| Task lấy hàng `Picked` → mở đóng gói | 08 Packing |
 
 ---
 
 ## 4. Luồng nghiệp vụ từng bước (Step-by-step)
 
-1. **Nhận yêu cầu xuất** — [Order Management](../../ecommerce/17-order-management/README.md) chuyển các đơn `Confirmed` / `Ready to Fulfill` sang kho; [Production](../19-production/README.md) gửi **lệnh lấy phôi** cho dòng đơn tùy chỉnh.
-2. **Phân bổ tồn (Allocation)** — hệ thống phân bổ số lượng cần lấy tại bin & lô cụ thể theo FEFO/FIFO, chỉ từ bin cho phép lấy hàng (`is_pickable`). Tồn chuyển `Available` → `Allocated`, không khả dụng cho đơn khác. Phần giữ hàng (reservation) của đơn từ [14](../../ecommerce/14-cart-and-order/README.md) được chuyển thành allocation ở bước này.
-3. **Lập đợt lấy hàng (Wave / Batch planning)** — gom nhiều đơn theo tiêu chí (khu vực, hạn giao, loại đóng gói); sinh **pick list** và **lộ trình tối ưu** (giảm quãng đường). Lộ trình tính trên [bản đồ kho](../06-warehouse-map-slotting/README.md): không đi xuyên tường, kệ hay vật cản; chỉ qua cửa đang mở; tiếp cận kệ từ mặt lấy hàng.
-4. **Chọn chiến lược:**
-   | Chiến lược | Mô tả |
-   |------------|-------|
-   | Discrete / single-order | Một picker lấy trọn một đơn |
-   | Batch picking | Lấy nhiều đơn cùng lúc, tách ra sau |
-   | Zone picking | Mỗi picker phụ trách một zone; đơn đi qua nhiều zone (chỉ áp dụng cho kệ đã gán zone) |
-   | Wave picking | Thả đợt theo lịch (theo chuyến xe của hãng vận chuyển) |
-5. **Phân công picker** — pick task vào hàng đợi của từng NV.
-6. **Đi lấy hàng theo lộ trình** — tại mỗi chặng: quét **mã vị trí** → quét **SKU/lô** → nhập/quét **số lượng lấy** → đặt vào tote/thùng. Hệ thống kiểm tra khớp phân bổ.
-7. **Xử lý thiếu hàng (Short pick)** — nếu vị trí không đủ:
-   - Hệ thống thử **phân bổ lại** từ vị trí/lô khác.
-   - Nếu vẫn thiếu: ghi nhận short pick; đơn chuyển trạng thái chờ (backorder) hoặc giao một phần (partial) theo chính sách; thông báo Order Management & Manager; kích hoạt kiểm kê vị trí lệch.
-8. **Gom về khu đóng gói (Staging)** — picker mang hàng đã lấy đến khu đóng gói (Area `PACKING`); quét bàn giao. Hàng chuyển trạng thái `Picked` → `Staged`.
-   - Với **lệnh lấy phôi**: picker mang phôi lên khu xưởng in (Area `PRODUCTION`) và quét bàn giao; phôi giữ trạng thái `Allocated` cho dòng đơn, lệnh sản xuất chuyển `Material Issued` (xem [19](../19-production/README.md)).
-9. **Đóng pick task** — khi mọi dòng đã lấy đủ (hoặc chốt short). Sinh/nối tiếp **Packing task** cho đơn (không áp dụng cho lệnh lấy phôi).
+### 4.1. Tạo & giao task
+
+1. **Danh sách chờ** — Điều phối / Quản lý kho xem các đơn của kho mình chưa có task. Gồm đơn `Ready to Fulfill`, và đơn `In Production` có ít nhất một dòng hàng sẵn. Đơn release sớm nhất đứng trước.
+2. **Tạo task** — chọn đơn và người được giao. Hệ thống:
+   - tạo **một task** cho đơn: phần lấy hàng `Pending` và phần đóng gói `Pending`. Tạo lại thì trả về task cũ, không sinh task thứ hai;
+   - lập **dòng lấy hàng**: mỗi phần phân bổ (bin + lô) một dòng, sắp theo mã vị trí rồi SKU. Dòng in không có dòng lấy hàng;
+   - chuyển đơn `Ready to Fulfill` → `Picking`. Đơn `In Production` giữ nguyên trạng thái.
+   - Hàng giữ cho đơn nằm ở kho khác, hoặc rải ở nhiều kho → **không tạo được task**.
+3. **Đổi người** — chỉ khi task còn `Pending`.
+
+### 4.2. Lấy hàng
+
+4. **Bắt đầu** — người được giao bấm bắt đầu → task `Picking`.
+5. **Tại mỗi dòng** — quét **mã vị trí** → quét **SKU hoặc mã vạch** → nhập **số lượng**. Hệ thống kiểm:
+   - đúng vị trí;
+   - đúng SKU;
+   - số lượng **đúng bằng** phần phân bổ (lấy nhiều hơn bị chặn; ít hơn thì phải báo thiếu, bước 7).
+
+   Hợp lệ → dòng `Picked`, **tồn bị trừ ngay** và ghi một dòng sổ `PICK`. Quét lại cùng dòng không trừ thêm.
+6. **Hoàn tất lấy hàng** — khi mọi dòng đã `Picked` (hoặc đã huỷ) → task `Picked`. Hàng mang về khu `PACKING`; phần đóng gói mở cho Packer ([08](../08-packing/README.md)).
+
+### 4.3. Thiếu hàng (Short pick)
+
+7. **Báo thiếu** — vị trí không đủ hàng → picker báo thiếu kèm vị trí và **số lượng thực thấy** (0 tới phân bổ − 1). Hệ thống:
+   - chuyển dòng → `Short`, **không trừ tồn**;
+   - treo đơn lý do **`INVENTORY`** ([17](../../ecommerce/17-order-management/README.md) §4.6);
+   - tự mở **phiếu kiểm kê mù** cho đúng bin + SKU + lô đó, hoặc dùng lại phiếu đang giữ vị trí đó ([20](../20-inventory-control/README.md) §4.2-f).
+8. **Phân bổ lại** — Điều phối / Quản lý kho phân bổ lại dòng thiếu:
+   - lấy cùng số lượng theo **FEFO** từ bin cho phép lấy khác **của cùng kho**, không bao giờ lấy lại bin vừa thiếu;
+   - dòng cũ huỷ, thêm dòng mới để picker lấy tiếp;
+   - khi đơn không còn dòng thiếu nào, hệ thống **tự gỡ treo** `INVENTORY`.
+9. **Không đủ hàng để phân bổ lại** — đơn ở lại trạng thái treo. Điều phối quyết với Sale theo [17](../../ecommerce/17-order-management/README.md): chờ hàng, giao một phần rồi đóng phần còn lại, hoặc huỷ dòng / đơn.
+
+### 4.4. Huỷ đơn & cất lại hàng (Put-back)
+
+10. Đơn bị huỷ khi task đã bắt đầu → task `Cancelled` và được đánh dấu **cần cất lại**.
+11. Các dòng đã `Picked` của task đó vào **hàng chờ cất lại** của kho, task huỷ sớm nhất đứng trước.
+12. Nhân viên / quản lý kho của kho đó cất lại **cả dòng một lần** vào một **bin đang hoạt động của cùng kho** → dòng `Put Back`. Tồn quay về `Available`, ghi một dòng sổ `PUT_BACK`.
 
 ---
 
 ## 5. Trạng thái / Vòng đời (Lifecycle)
 
-### 5.1. Trạng thái pick task
+### 5.1. Phần lấy hàng của task
 
-| Trạng thái | Ý nghĩa | Chuyển tiếp | Ai |
-|------------|---------|-------------|----|
-| `Created` | Đã sinh từ allocation, chờ lập đợt | → `Released`, → `Cancelled` | System |
-| `Released` | Đã vào wave/batch, chờ phân công | → `Assigned` | System / Manager |
-| `Assigned` | Đã giao cho picker | → `In Progress`, → `Released` (trả lại) | Picker / Manager |
-| `In Progress` | Picker đang lấy hàng | → `Completed`, → `Short` , → `On Hold` | Picker |
-| `Short` | Không lấy đủ, chờ xử lý (re-allocate / backorder) | → `In Progress` (có hàng), → `Completed` (chốt giao một phần) | Manager |
-| `On Hold` | Tạm dừng | → `In Progress`, → `Cancelled` | Manager |
-| `Completed` | Đã lấy đủ & gom về staging | *(cuối)* | Picker |
-| `Cancelled` | Đơn bị huỷ / gộp lại | *(cuối)* | Manager |
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Pending` | Đã tạo, chờ người được giao bắt đầu; đổi người được | → `Picking`, → `Cancelled` | Điều phối / Quản lý kho |
+| `Picking` | Đang lấy hàng | → `Picked`, → `Cancelled` | Picker |
+| `Picked` | Mọi dòng đã lấy (hoặc huỷ); mở đóng gói | → `Cancelled` (đơn huỷ — cần cất lại) | Picker |
+| `Cancelled` | Đơn bị huỷ; nếu đã bắt đầu lấy thì hàng đã lấy vào hàng chờ cất lại | *(cuối)* | Hệ thống |
 
-### 5.2. Trạng thái tồn trong luồng
+```mermaid
+stateDiagram-v2
+    [*] --> Pending: Tạo task
+    Pending --> Picking: Bắt đầu
+    Picking --> Picked: Mọi dòng đã lấy
+    Pending --> Cancelled: Đơn huỷ
+    Picking --> Cancelled: Đơn huỷ (cần cất lại)
+    Picked --> Cancelled: Đơn huỷ (cần cất lại)
+    Picked --> [*]
+    Cancelled --> [*]
+```
 
-| Trạng thái | Ý nghĩa |
-|------------|---------|
-| `Available` | Khả dụng, chưa gán đơn |
-| `Allocated` | Đã phân bổ cho một đơn/lệnh cụ thể tại vị trí & lô, còn ở vị trí |
-| `Picked` | Đã lấy khỏi vị trí, đang trên đường ra staging |
-| `Staged` | Đã ở khu đóng gói, chờ Packing |
+### 5.2. Dòng lấy hàng
+
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Open` | Chờ lấy | → `Picked`, → `Short` | Picker |
+| `Picked` | Đã lấy; tồn đã trừ | → `Put Back` (task bị huỷ) | Picker |
+| `Short` | Vị trí thiếu; chưa trừ tồn | → `Cancelled` (đã phân bổ lại sang dòng mới) | Picker báo; Điều phối / Quản lý kho phân bổ lại |
+| `Cancelled` | Bị thay bằng dòng phân bổ lại | *(cuối)* | Hệ thống |
+| `Put Back` | Hàng đã cất lại bin | *(cuối)* | Nhân viên / Quản lý kho |
+
+> Không có trạng thái tồn `Picked` / `Staged`. Hàng đã lấy **rời khỏi tồn ngay khi quét**; phần giữ hàng của đơn chuyển sang `Consumed` ([20](../20-inventory-control/README.md) §5.6).
 
 ---
 
@@ -97,40 +134,40 @@ Picking là **bước mở đầu luồng Fulfillment** (Picking → [Packing](.
 
 ### Business rules
 
-- **BR-01:** Chỉ picking khi đơn đã `Confirmed` và thanh toán hợp lệ theo chính sách (trả trước đã nhận đủ tiền; đặt cọc đã nhận cọc; công nợ trong hạn mức hoặc đã duyệt — xem [15](../../ecommerce/15-payment/README.md)).  Xem [15 Payment](../../ecommerce/15-payment/README.md).
-- **BR-02:** Chỉ được lấy từ tồn `Available` và được phân bổ; không lấy từ hàng `Blocked` / `Quarantine` / `Allocated cho đơn khác`.
-- **BR-03:** SKU FEFO → phải lấy lô hạn dùng gần nhất trước; lệch phải có lý do.
-- **BR-04:** Số lượng lấy không vượt số lượng phân bổ của dòng; muốn lấy thêm phải re-allocate.
-- **BR-05:** Hàng đã `Picked`/`Staged` mà đơn bị huỷ → phải làm **put-back** (trả về vị trí) qua quy trình có kiểm soát, không "biến mất".
-- **BR-06:** Dòng đơn in theo thiết kế: khi release, dòng đó sinh lệnh sản xuất ([19](../19-production/README.md)); picking **chỉ lấy phôi** cho xưởng in theo lệnh sản xuất (đích khu `PRODUCTION`), **không lấy thành phẩm** — thành phẩm đạt QC được xưởng chuyển thẳng sang khu `PACKING`.
+- **BR-01:** Chỉ đơn **đã release** mới có task. Điều kiện thanh toán được kiểm **trước release** ([17](../../ecommerce/17-order-management/README.md) BR-02) và **khi bàn giao** cho nhà vận chuyển ([09](../09-shipping/README.md)); lúc lấy hàng không kiểm lại.
+- **BR-02:** Chỉ lấy từ phần **đã phân bổ** cho đơn (bin + lô cụ thể); không lấy hàng `Blocked` / `Quarantine` / của đơn khác.
+- **BR-03:** Phân bổ (kể cả phân bổ lại) theo **FEFO**, chỉ từ bin cho phép lấy và còn dùng được của **cùng kho**.
+- **BR-04:** Số lượng quét phải **đúng bằng** phần phân bổ của dòng. Thiếu thì báo thiếu; muốn lấy thêm phải phân bổ lại.
+- **BR-05:** Hàng đã lấy mà đơn bị huỷ phải **cất lại có kiểm soát** vào bin của cùng kho, không "biến mất".
+- **BR-06:** Dòng in không có dòng lấy hàng. Phôi cấp cho xưởng bằng quét xuất vật tư ([19](../19-production/README.md)); thành phẩm đạt QC chuyển thẳng sang khu `PACKING`.
+- **BR-07:** **Mỗi đơn một task.** Hàng giữ cho đơn phải nằm trong một kho, là kho của đơn.
+- **BR-08:** Chỉ người được giao thao tác lấy hàng của task. Đổi người chỉ khi task còn `Pending`.
+- **BR-09:** Báo thiếu luôn **treo đơn** và **mở kiểm kê mù**. Phần tồn tự do của vị trí đó bị chặn bán tới khi chênh lệch được duyệt ([20](../20-inventory-control/README.md) BR-11). Phân bổ lại do Điều phối / Quản lý kho làm, không tự động.
 
 ### Edge case
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Vị trí báo có hàng nhưng thực tế trống | Short pick → re-allocate → hệ thống tự mở phiếu kiểm kê mù cho vị trí đó ([20 §4.2-f](../20-inventory-control/README.md)) |
-| Hàng hỏng phát hiện khi lấy | Không lấy; đánh dấu `Blocked` tại vị trí + adjustment ([20 §4.3](../20-inventory-control/README.md)); re-allocate lô khác |
-| Đơn hoả tốc chen vào giữa wave | Cho phép tạo pick task ưu tiên, chèn lộ trình |
-| Khách đổi/huỷ đơn khi đang pick | Order Management gửi tín hiệu; task `On Hold`/`Cancelled`; hàng đã lấy làm put-back |
-| Một SKU nằm rải nhiều vị trí/lô | Phân bổ gộp nhiều dòng lấy; gom trong cùng tote |
-| Đơn hỗn hợp, phần tùy chỉnh chưa in xong | Dòng hàng thường được pick song song và chờ tại khu `PACKING`; packing bắt đầu khi thành phẩm in cũng đã về khu `PACKING` |
-| Thiếu phôi khi lấy cho lệnh sản xuất | Như short pick: thử phân bổ lại; vẫn thiếu → lệnh sản xuất `On Hold` (thiếu phôi), báo Order Management |
-| Lệnh sản xuất bị huỷ khi phôi đã lên khu `PRODUCTION` | Put-back phôi về bin theo BR-05 |
-| Lấy dư do quét nhầm | Hệ thống chặn khi số lượng > phân bổ; nếu đã xảy ra → điều chỉnh + put-back |
+| Vị trí báo có hàng nhưng thực tế trống | Báo thiếu với số thấy = 0 → đơn treo → kiểm kê mù → Điều phối phân bổ lại từ bin khác |
+| Hàng hỏng phát hiện khi lấy | Báo thiếu phần hỏng; ghi giảm bằng điều chỉnh `DAMAGED` ([20 §4.3](../20-inventory-control/README.md)); phân bổ lại lô khác |
+| Không còn tồn để phân bổ lại | Đơn ở lại treo `INVENTORY`; Điều phối + Sale quyết: chờ hàng / giao một phần + đóng phần còn lại / huỷ ([17](../../ecommerce/17-order-management/README.md)) |
+| Khách huỷ đơn khi đang lấy | Task `Cancelled`; dòng đã lấy vào hàng chờ cất lại |
+| Một SKU nằm rải nhiều vị trí / lô | Mỗi phần phân bổ một dòng; picker đi theo thứ tự mã vị trí |
+| Đơn hỗn hợp, phần in chưa xong | Dòng hàng sẵn được lấy trong lúc in và chờ tại khu `PACKING`; đóng gói trước chỉ khi Sale cho phép giao một phần ([08](../08-packing/README.md)) |
+| Quét nhầm vị trí / SKU | Hệ thống từ chối, báo lệch vị trí / lệch hàng |
+| Nhập số lượng nhiều hơn phân bổ | Hệ thống chặn |
+| Hàng của đơn hàng giữ ở hai kho | Không tạo được task; Điều phối xử lý phân bổ về một kho |
 
-> ✅ Đã chốt 2026-09-28 / 2026-10-06 (B1, B2): bước sản xuất in là module riêng [19 · Production](../19-production/README.md); kho lấy phôi cho xưởng qua picking, không pick thành phẩm trên kệ.
 ---
 
 ## 7. Liên kết với các module khác
 
 | Module | Quan hệ |
 |--------|---------|
-| [19 · Production](../19-production/README.md) | Dòng in không pick trên kệ: kho xuất phôi sang khu `PRODUCTION`, thành phẩm chuyển thẳng sang `PACKING` |
-| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn cần xuất; nhận cập nhật picked/short/partial |
-| [15 · Payment](../../ecommerce/15-payment/README.md) | Điều kiện thanh toán quyết định đơn có được release để pick hay không |
-| [05 · Putaway](../05-putaway/README.md) / [06 · Slotting](../06-warehouse-map-slotting/README.md) | Vị trí & FEFO do putaway/slotting quyết định; velocity từ picking phản hồi lại slotting |
-| [08 · Packing](../08-packing/README.md) | Nhận hàng đã pick tại staging; pick task hoàn tất → packing task |
-| [19 · Production](../19-production/README.md) | Gửi lệnh lấy phôi cho dòng đơn tùy chỉnh; picking mang phôi lên khu `PRODUCTION`; put-back khi lệnh bị huỷ |
-| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Replenishment: bổ sung hàng từ bin dự trữ sang bin picking (`is_pickable`) khi cạn |
+| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn đã release; treo / gỡ treo `INVENTORY`; huỷ đơn → cất lại |
+| [20 · Inventory Control](../20-inventory-control/README.md) | Phân bổ bin / lô; trừ tồn khi quét; kiểm kê mù khi thiếu; cất lại tồn |
+| [08 · Packing](../08-packing/README.md) | Task `Picked` mở phần đóng gói |
+| [19 · Production](../19-production/README.md) | Dòng in không pick; phôi cấp bằng quét xuất vật tư; thành phẩm vào thẳng khu `PACKING` |
+| [05 · Putaway](../05-putaway/README.md) / [06 · Slotting](../06-warehouse-map-slotting/README.md) | Vị trí & FEFO do putaway / slotting quyết định |
+| [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Bổ sung hàng từ bin dự trữ sang bin lấy hàng (`is_pickable`) khi cạn |
 | [00 · System Overview §5](../../00-system-overview/README.md) | Bước 1 của luồng Fulfillment |
-| [20 · Inventory Control](../20-inventory-control/README.md) | Short pick tự mở phiếu kiểm kê mù cho vị trí đó và chặn bán phần tồn tự do tới khi chênh lệch được duyệt; hàng hỏng khi lấy ghi giảm bằng điều chỉnh |
