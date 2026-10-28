@@ -48,8 +48,8 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 | **Dòng in được release** (sinh lệnh sản xuất tại kho xuất đã chọn) | [19 Production](../../warehouse/19-production/README.md) |
 | **Yêu cầu huỷ** và quyết định | Khách, Sale, Điều phối |
 | **Tiền hoàn / phí huỷ** khi huỷ hoặc đóng phần còn lại | [15 Payment](../15-payment/README.md) |
-| **Thông báo** (yêu cầu huỷ mới, huỷ cần nhân viên quyết…) | Sale, Điều phối |
-| **Báo cáo** (đơn theo trạng thái, doanh thu theo ngày) | Quản lý |
+| **Thông báo trong ứng dụng**: đơn đã bắt đầu in mà thanh toán thất bại / không về, cần nhân viên quyết huỷ ([00 §6](../../00-system-overview/README.md)) | Sale, Điều phối |
+| **Dashboard bán hàng** — đơn & doanh thu theo ngày, SKU bán chạy, đơn theo trạng thái (§4.8) | Quản trị bán hàng, Kế toán, Quản lý kho, Điều phối, System Admin |
 
 ---
 
@@ -183,6 +183,24 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 30. **Hoàn tiền** ([15](../15-payment/README.md)) toàn phần / một phần; đơn → `Returned` → `Refunded` / `Partially Refunded`.
 31. **Đổi hàng (exchange):** = trả + tạo đơn mới (hoặc bù trừ giá trị), tuỳ chính sách.
 > ✅ Đã chốt 2026-10-06: ly và bao bì in theo thiết kế **chỉ đổi / trả khi lỗi sản xuất**, không đổi / trả vì đổi ý.
+
+### 4.8. Dashboard bán hàng
+
+1. **Ai xem** — Quản trị bán hàng, Kế toán, System Admin, Quản lý kho, Điều phối đơn hàng; phạm vi **toàn hệ thống**. Sale, Inventory Planner, Procurement **không** xem (chưa có góc nhìn "khách của tôi" cho Sale).
+2. **Kỳ báo cáo** — tính theo **lịch Việt Nam** (Asia/Ho_Chi_Minh); mặc định **30 ngày** tính đến hôm nay, tối đa **366 ngày**.
+3. **Chỉ số:**
+
+   | Chỉ số | Cách tính |
+   |--------|-----------|
+   | **Đơn & doanh thu theo ngày** | Mỗi ngày (kể cả ngày không có đơn): số đơn, doanh thu. **Doanh thu = tổng tiền đơn đã đặt − đơn đã huỷ**, ghi vào **ngày đặt đơn**. Đơn treo vẫn tính; đơn nháp không tính |
+   | **Tổng kỳ** | Số đơn, doanh thu, **giá trị đơn trung bình**, so sánh % với kỳ liền trước cùng độ dài |
+   | **SKU bán chạy** | Xếp theo doanh thu rồi số lượng; mặc định 10, tối đa 100 |
+   | **Đơn theo trạng thái** | Số đơn hiện tại ở từng trạng thái (§5.1), không theo kỳ |
+
+4. Chỉ tính đơn **VND**; chỉ nhóm **theo ngày** (theo tuần / tháng, khách hàng mua nhiều nhất, xuất file: phạm vi sau — [open-questions D18](../../open-questions/README.md)).
+5. Người có quyền xuất báo cáo có thể yêu cầu **tính lại** số liệu tổng hợp.
+
+Báo cáo khác: dashboard xưởng ([19 §4.10](../../warehouse/19-production/README.md)), PO theo trạng thái và chi tiêu theo NCC ([02](../../warehouse/02-purchase-order/README.md)), cảnh báo tồn ([20](../../warehouse/20-inventory-control/README.md)), công nợ phải thu ([15](../15-payment/README.md)).
 
 ---
 
@@ -338,7 +356,7 @@ stateDiagram-v2
 | Thanh toán lỗi / hết hạn giữ hàng ở đơn đã in | Hệ thống không tự huỷ; chuyển Sale / Điều phối quyết |
 | Khách gửi yêu cầu huỷ rồi đơn kịp đóng gói xong | Yêu cầu tự `Expired`; khách đi luồng trả hàng |
 | Lệnh sản xuất `On Hold` vì thiếu phôi | Xử lý như thiếu hàng: liên hệ khách chờ, đổi biến thể, hoặc huỷ dòng + hoàn tiền |
-| Ngày xong dự kiến của lệnh sản xuất trễ so với cam kết | Thông báo khách ngày giao mới qua Sale; đề nghị xưởng nâng ưu tiên hoặc tách một phần đưa gia công ngoài ([19](../../warehouse/19-production/README.md) §4.7) |
+| Lệnh sản xuất quá hạn so với cam kết (dashboard xưởng) | Sale báo khách ngày giao mới; Quản lý kho tách một phần đưa gia công ngoài ([19](../../warehouse/19-production/README.md) §4.8) |
 | Giao `Delivered` nhưng khách khiếu nại không nhận | Trạng thái tranh chấp; CSKH xác minh với hãng (ngoài hệ thống); đơn không tự hoàn tất khi còn yêu cầu trả hàng mở |
 | Hàng trả về không nguyên vẹn | Nhập `Quarantine`; hoàn một phần / từ chối hoàn theo chính sách; ghi hồ sơ khách |
 | Trùng đơn (khách đặt 2 lần) | Huỷ một đơn với lý do `DUPLICATE_ORDER` + hoàn tiền |

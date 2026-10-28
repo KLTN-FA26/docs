@@ -41,7 +41,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
-| **Quản trị bán hàng (E-commerce Admin)** | Quản lý **dữ liệu sản phẩm** — tạo, **duyệt (bốn mắt)**, đăng ảnh, danh mục, thương hiệu, thuộc tính ([01](../warehouse/01-product-creation/README.md)); quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)); **đổi trạng thái khách** và quản lý **nhóm khách** ([18](../ecommerce/18-customer-information/README.md)) | Duyệt / từ chối sản phẩm; xuất bản / ẩn sản phẩm; lập & đổi phân công bản thiết kế; chặn / gỡ chặn / đóng / mở lại khách |
+| **Quản trị bán hàng (E-commerce Admin)** | Quản lý **dữ liệu sản phẩm** — tạo, **duyệt (bốn mắt)**, đăng ảnh, danh mục, thương hiệu, thuộc tính ([01](../warehouse/01-product-creation/README.md)); quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)); **đổi trạng thái khách** và quản lý **nhóm khách** ([18](../ecommerce/18-customer-information/README.md)); **quản trị tài khoản nhân viên & phân quyền** trong giới hạn quyền mình có (§2.5) | Duyệt / từ chối sản phẩm; xuất bản / ẩn sản phẩm; lập & đổi phân công bản thiết kế; chặn / gỡ chặn / đóng / mở lại khách |
 | **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm ([01](../warehouse/01-product-creation/README.md)), tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, thiết kế (tải bộ file) & gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)), chuyển báo giá đã chấp nhận thành đơn, CSKH qua chat, **duyệt / từ chối yêu cầu huỷ**, **quyết định cho phép giao một phần** ([17](../ecommerce/17-order-management/README.md)), xử lý khiếu nại | Tạo / sửa sản phẩm nháp; xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; huỷ đơn / đóng phần còn lại; giảm giá trong hạn mức |
 | **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, **treo / gỡ treo đơn**, phân bổ kho xuất, **chọn cách giao** (gửi kiện / nguyên chuyến), gộp/tách đơn, chuyển báo giá thành đơn, duyệt yêu cầu huỷ ([17](../ecommerce/17-order-management/README.md)) | Thao tác trên mọi đơn; ghi đè kho xuất |
 
@@ -70,7 +70,7 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | Hoàn tiền | Tạo lệnh hoàn tiền dư cho khách; xử lý lệnh hoàn khi huỷ / đóng phần còn lại | Kế toán (System Admin có toàn quyền) |
 | Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị sàn hoặc Sales Staff được chỉ định |
 
-> ⚠️ Giả định: phân bổ quyền mặc định ở trên do tài liệu đề xuất, chưa được đề bài xác nhận — thuộc câu hỏi A2 (RBAC). Xem [open-questions](../open-questions/README.md).
+Phân bổ trên là cấu hình mặc định khi cài đặt; người có quyền duyệt phân quyền sửa được ma trận quyền của từng role (§2.5.3).
 
 ### 2.4. Đối tác ngoài & actor hệ thống
 
@@ -80,9 +80,82 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: nhận kiện khi bàn giao, vận chuyển, giao cho khách, thu hộ phần còn lại (nếu có), hoàn hàng về kho (RTO); cung cấp xe tải / container cho giao nguyên chuyến. Hệ thống không tích hợp API và không theo dõi hành trình; nhân viên cập nhật kết quả giao khi hãng báo lại |
 
-Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (gợi ý bin khi cất hàng, Wave/Route Planner và Cartonization (phạm vi giai đoạn sau — [open-questions C17](../open-questions/README.md)), Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Routing + Notification…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (gợi ý bin khi cất hàng, Wave/Route Planner và Cartonization (phạm vi giai đoạn sau — [open-questions C17](../open-questions/README.md)), Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Notification (hộp thông báo — §6)…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
 
-> ⚠️ Giả định: Một tài khoản nhân sự có thể mang nhiều vai trò (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ). Mô hình phân quyền chi tiết (RBAC) — phạm vi dữ liệu theo kho/nhóm khách, hạn mức cụ thể — chưa được đề bài xác định, xem [open-questions](../open-questions/README.md).
+Một tài khoản có thể mang nhiều role (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ): quyền là hợp các role, phạm vi dữ liệu là phạm vi rộng nhất. Chi tiết tài khoản và phân quyền ở §2.5.
+
+### 2.5. Tài khoản & phân quyền (Accounts & RBAC)
+
+#### 2.5.1. Tài khoản nhân viên
+
+| Trường | Ghi chú |
+|--------|---------|
+| Tên đăng nhập | Không đổi được |
+| Email, họ tên | Sửa được |
+| Role | Một hoặc nhiều role (§2.1) |
+| Kho được gán | Một hoặc nhiều kho; quyết định phạm vi dữ liệu với role theo kho (§2.5.3) |
+| Trạng thái | `Active` / `Locked` / `Disabled` |
+
+1. **Tạo tài khoản** — người quản trị nhập thông tin, role, kho. Không nhập mật khẩu thì hệ thống sinh **mật khẩu tạm 16 ký tự**, hiện **một lần**; tài khoản bị đánh dấu **phải đổi mật khẩu**.
+2. **Mật khẩu** — 10–72 ký tự, có ít nhất một chữ hoa, một chữ thường, một chữ số.
+   - Người dùng tự đổi mật khẩu (phải nhập đúng mật khẩu cũ, mật khẩu mới khác mật khẩu cũ); tuỳ chọn đăng xuất các thiết bị khác.
+   - Người quản trị đặt lại mật khẩu (nhập hoặc sinh mật khẩu tạm) → mọi phiên của tài khoản bị huỷ, phải đổi mật khẩu.
+3. **Đăng nhập** — sai mật khẩu **5 lần liên tiếp** → **tự khoá 15 phút**, hết hạn tự mở; trong lúc khoá, hệ thống trả lời giống hệt sai mật khẩu. Mỗi địa chỉ IP tối đa 5 lần đăng nhập / phút.
+4. **Phiên đăng nhập** — mỗi lần đăng nhập là một phiên, hiệu lực **8 giờ** (không có làm mới phiên); hệ thống kiểm phiên ở mọi thao tác. Người dùng xem được các phiên của mình, đăng xuất, đăng xuất các thiết bị khác.
+5. **Phiên bị huỷ ngay** khi: đổi role của tài khoản, khoá, vô hiệu hoá, người quản trị đặt lại mật khẩu, hoặc người dùng đổi mật khẩu và chọn đăng xuất thiết bị khác.
+6. **Đổi kho được gán** — có hiệu lực từ thao tác kế tiếp, không cần đăng nhập lại.
+
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Active` | Đăng nhập được (trừ khi đang tự khoá 15 phút do sai mật khẩu) | → `Locked` (khoá), → `Disabled` (vô hiệu hoá) | Người quản trị tài khoản |
+| `Locked` | Bị người quản trị khoá; chỉ **mở khoá** mới hết | → `Active` (mở khoá — cũng xoá khoá tự động), → `Disabled` | Người quản trị tài khoản |
+| `Disabled` | Ngừng dùng; tài khoản được giữ để tra lịch sử | → `Active` (kích hoạt lại) | Người quản trị tài khoản |
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: Tạo tài khoản
+    Active --> Locked: Khoá
+    Locked --> Active: Mở khoá
+    Active --> Disabled: Vô hiệu hoá
+    Locked --> Disabled: Vô hiệu hoá
+    Disabled --> Active: Kích hoạt lại
+```
+
+**Ràng buộc với người quản trị tài khoản:**
+
+- Chỉ **cấp được** quyền, role (hoặc bản sao role) mà **chính mình đang có đủ**.
+- Chỉ **quản lý được** tài khoản không có quyền nào vượt mình — vì vậy chỉ System Admin cấp được role System Admin.
+- **Không tự quản lý tài khoản của mình** (khoá, đổi role… cho chính mình).
+- Luôn giữ **ít nhất một System Admin đang hoạt động**: không khoá, vô hiệu hoá hay thu role của System Admin cuối cùng.
+- Luôn có **ít nhất một role giữ quyền sửa phân quyền**.
+- Role khách hàng (`CUSTOMER`) không gán cho tài khoản nhân viên; tài khoản khách không mang role khác.
+
+> ⚠️ Giả định: **quên mật khẩu tự phục vụ qua email**, **xác thực hai lớp (2FA)** và **làm mới phiên** thuộc phạm vi giai đoạn sau. Hiện người quên mật khẩu nhờ người quản trị đặt lại. Xem [open-questions A10](../open-questions/README.md).
+
+#### 2.5.2. Tài khoản khách hàng sỉ
+
+1. Khách **không tự đăng ký**. Sale tạo hồ sơ khách ([18](../ecommerce/18-customer-information/README.md)) → hệ thống tạo tài khoản cho người liên hệ (chưa có mật khẩu) và gửi **email mời**.
+2. Link mời hiệu lực **72 giờ**; Sale gửi lại được sau tối thiểu 1 phút.
+3. Người liên hệ mở link, **đặt mật khẩu** → kích hoạt. Tên đăng nhập là **email**.
+4. Trạng thái hồ sơ khách quyết định đăng nhập: `Active` / `Pending Activation` đăng nhập được; `Blocked` / `Inactive` → tài khoản bị vô hiệu hoá, mọi phiên bị huỷ ([18](../ecommerce/18-customer-information/README.md)).
+
+#### 2.5.3. Role, quyền và phạm vi dữ liệu
+
+1. **Quyền** = **tài nguyên × hành động**, ví dụ `production-orders:APPROVE`. Hành động gồm: xem trang (`VIEW_PAGE`), đọc (`READ`), tạo (`CREATE`), sửa (`UPDATE`), xoá (`DELETE`), duyệt (`APPROVE`), xuất dữ liệu (`EXPORT`). Ba hành động cuối là **nhạy cảm**.
+2. **Role** là tập quyền kèm **phạm vi dữ liệu**:
+
+   | Phạm vi | Ý nghĩa | Role mặc định |
+   |---------|---------|---------------|
+   | `WAREHOUSE` | Chỉ dữ liệu của **các kho được gán** cho tài khoản; không được gán kho thì không thấy gì | Warehouse Staff, Warehouse Manager, QC Staff, Production Staff |
+   | `ALL` | Toàn hệ thống | Mọi role nhân viên khác |
+   | `OWN` | Chỉ dữ liệu của chính mình | Dùng cho các chức năng của khách trên cổng (đơn, công nợ, báo giá của chính khách) |
+
+   Phạm vi theo nhóm (`TEAM`) chưa dùng.
+3. **12 role hệ thống**: 11 role nhân viên ở §2.1 và role **Khách hàng** (`CUSTOMER`). Role hệ thống không xoá, không đổi tên.
+4. **Role tự tạo** — người có quyền tạo role tạo được role mới (tuỳ chọn sao chép từ role khác), đổi tên, đổi phạm vi; xoá được khi không còn ai mang role đó.
+5. **Sửa ma trận quyền** của role (thay cả ma trận, hoặc cấp / thu từng quyền) cần quyền **duyệt phân quyền**. Ma trận của `CUSTOMER` và `SYSTEM_ADMIN` cố định. Thay đổi có hiệu lực từ thao tác kế tiếp của người mang role, không cần đăng nhập lại.
+6. **Nhiều role** — một tài khoản mang nhiều role thì quyền là **hợp** các role, phạm vi là phạm vi **rộng nhất**.
+7. **Ai quản trị tài khoản & phân quyền** — System Admin (toàn quyền) và **Quản trị bán hàng** (tạo / sửa tài khoản, role, ma trận quyền — trong giới hạn quyền mình có). Chỉ System Admin xoá được role.
 
 ---
 
@@ -235,6 +308,24 @@ flowchart LR
 9. **Tiền tố kho (warehouse prefix)**: mỗi kho có một prefix duy nhất, không sửa được sau khi tạo, dùng cho **mã vị trí** (bin: prefix + mã kệ + tầng + mã bin, ví dụ `HN-A01-2-03`; khu vực: prefix + mã khu vực, ví dụ `HN-RCV01`) và **mã chứng từ phát sinh tại kho** (ví dụ `HN-RC-000123`). Xem [06](../warehouse/06-warehouse-map-slotting/README.md).
 
 > ⚠️ Giả định: chứng từ liên quan hai kho (Transfer Order) dùng prefix của **kho nguồn**. Xem [open-questions](../open-questions/README.md).
+
+### Thông báo trong ứng dụng (In-app notifications)
+
+1. Mỗi tài khoản (nhân viên và khách) có **hộp thông báo** riêng. Mỗi thông báo có nhóm, **mức độ** (`INFO` / `WARN` / `CRITICAL`), tiêu đề, nội dung, đường dẫn tới màn hình liên quan, trạng thái đã đọc.
+2. Người nhận được xác định **theo role** (và theo kho, nếu có) **tại lúc gửi**; mỗi người một bản. Cùng một sự việc không tạo thông báo trùng cho cùng người.
+3. Người dùng xem danh sách (lọc chưa đọc), số chưa đọc, đánh dấu đã đọc từng cái hoặc tất cả. Màn hình **tự hỏi lại số chưa đọc** theo chu kỳ (chưa đẩy thời gian thực).
+4. **Thông báo đã đọc tự xoá sau 90 ngày**; thông báo chưa đọc được giữ.
+
+| Sự việc | Mức độ | Người nhận | Kèm email |
+|---------|--------|------------|-----------|
+| Khách **chấp nhận / yêu cầu sửa / yêu cầu đặt lại** báo giá ([14](../ecommerce/14-cart-and-order/README.md)) | `INFO` | Sale phụ trách báo giá; tài khoản đó ngừng hoạt động thì mọi Sale (đánh dấu bàn giao) | Có |
+| Đơn đã bắt đầu in mà **thanh toán thất bại / không về**, cần nhân viên quyết huỷ ([17](../ecommerce/17-order-management/README.md) §4.5) | `WARN` | Mọi Sale và Điều phối đơn hàng | Không |
+| **Lệnh sản xuất bị treo** ([19](../warehouse/19-production/README.md) §4.9) | `WARN` | File lỗi / chờ khách → Sale; thiếu phôi → Procurement; máy hỏng / gia công trễ / lý do khác → Quản lý kho của kho đó | Có |
+| **Cảnh báo tồn** ([20](../warehouse/20-inventory-control/README.md)) | `REORDER`, `EXPIRING`: `WARN`; `SAFETY`, `EXPIRED`: `CRITICAL` | Đặt lại / tồn an toàn → Inventory Planner, System Admin; sắp hết hạn / hết hạn → Quản lý kho, Inventory Planner, System Admin (theo kho được gán hoặc toàn hệ thống). Tối đa một lần mỗi loại, mỗi kho, mỗi ngày | Tắt mặc định |
+
+Email ngoài hộp thông báo: **email mời** người liên hệ của khách (§2.5.2), **gửi PO cho NCC** ([02](../warehouse/02-purchase-order/README.md)).
+
+> ⚠️ Giả định: **thông báo cho khách** (đơn đã đặt, thanh toán thất bại, đã bàn giao / đã giao) và **thông báo yêu cầu huỷ mới cho nhân viên** thuộc phạm vi giai đoạn sau — hiện hệ thống chỉ ghi nhật ký, không gửi. Xem [open-questions A10](../open-questions/README.md).
 
 ---
 

@@ -107,7 +107,7 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Hoạch định nhu cầu nhập hàng, cân bằng tồn giữa các kho, tạo lệnh chuyển kho, lập kiểm kê, theo dõi cảnh báo tồn | 02, 10, 20 |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng hàng nhập, mẫu và thành phẩm in; duyệt kỹ thuật bản thiết kế trước khi gửi khách | 03, 12, 19 |
 | **Kế toán (Accountant)** | Đối chiếu ba chiều, công nợ NCC, ghi nhận & phân bổ tiền về, công nợ phải thu của khách sỉ, duyệt tín dụng & điều khoản thanh toán | 04, 14, 15, 17, 18 |
-| **Quản trị bán hàng (E-commerce Admin)** | Tạo & duyệt sản phẩm, danh mục, thuộc tính; quản lý catalog, bảng giá theo khách, nội dung; lập & phân công bản thiết kế cho khách; trạng thái & nhóm khách | 01, 12, 13, 14, 18 |
+| **Quản trị bán hàng (E-commerce Admin)** | Tạo & duyệt sản phẩm, danh mục, thuộc tính; quản lý catalog, bảng giá theo khách, nội dung; lập & phân công bản thiết kế cho khách; trạng thái & nhóm khách; quản trị tài khoản & phân quyền | 00, 01, 12, 13, 14, 18 |
 | **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, thiết kế (tải bộ file) & gửi khách xác nhận, báo giá, yêu cầu làm mẫu, tạo đơn từ báo giá, tư vấn qua chat | 01, 12, 14, 16, 17, 18, 19 |
 | **Điều phối đơn hàng (Order Coordinator)** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất | 17 |
 | **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước: xác nhận / yêu cầu sửa thiết kế, xem catalog & giá riêng, chấp nhận báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ | 12, 13, 14, 15, 16, 19 |

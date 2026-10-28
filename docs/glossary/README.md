@@ -183,6 +183,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 |-----------|--------------------------|
 | **B2B / Bán sỉ** | Hệ thống chỉ bán cho khách doanh nghiệp đã liên hệ trước; không có khách vãng lai. |
 | **Customer portal / Cổng khách hàng** | Trang dành cho khách sỉ đã đăng nhập: catalog & giá riêng, báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ. |
+| **In-app notification / Thông báo trong ứng dụng** | Hộp thông báo theo người, mức `INFO` / `WARN` / `CRITICAL`; đã đọc tự xoá sau 90 ngày. Xem [00 §6](../00-system-overview/README.md). |
 | **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận → thành đơn bán. |
 | **Giá riêng theo khách / Customer price list** | Giá theo (khách, SKU) gồm 1–20 bậc số lượng; bậc đầu là MOQ của khách. Ưu tiên cao nhất, rồi giá nhóm, rồi giá gốc ([13](../ecommerce/13-catalog/README.md)). |
 | **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ với đơn bán theo công nợ. |
@@ -316,6 +317,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Pending` / `Completed` / `Failed` | Lệnh hoàn tiền | Chờ kế toán chuyển khoản / đã hoàn / hoàn lỗi |
 | `Open` / `Partially Paid` / `Overdue` / `Paid` | Khoản công nợ phải thu | Chưa trả / trả một phần / quá hạn / đã tất toán |
 | `Pending Activation` / `Active` / `Blocked` / `Inactive` | Hồ sơ khách | Chờ kích hoạt / bình thường / bị chặn / đã đóng ([18](../ecommerce/18-customer-information/README.md)) |
+| `Active` / `Locked` / `Disabled` | Tài khoản nhân viên | Dùng được / bị người quản trị khoá / ngừng dùng ([00 §2.5](../00-system-overview/README.md)) |
 
 ---
 
@@ -367,8 +369,11 @@ Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00
 | **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn; cập nhật logistics & chính sách tồn của SKU. |
 | **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
 | **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
-| **E-commerce Admin / Quản trị bán hàng** | Tạo & duyệt sản phẩm (bốn mắt), quản lý danh mục, thương hiệu, thuộc tính; quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. |
+| **E-commerce Admin / Quản trị bán hàng** | Tạo & duyệt sản phẩm (bốn mắt), quản lý danh mục, thương hiệu, thuộc tính; quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. Quản trị tài khoản nhân viên & phân quyền trong giới hạn quyền mình có. |
 | **Sales Staff / Nhân viên Sale** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, thiết kế (tải bộ file) & gửi khách xác nhận, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
 | **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
 | **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
+| **RBAC / Phân quyền theo vai trò** | Quyền = tài nguyên × hành động (`VIEW_PAGE`, `READ`, `CREATE`, `UPDATE`, `DELETE`, `APPROVE`, `EXPORT`), gom thành role. Một tài khoản nhiều role = hợp quyền. Xem [00 §2.5](../00-system-overview/README.md). |
+| **Data scope / Phạm vi dữ liệu** | Phạm vi dữ liệu của role: `WAREHOUSE` (các kho được gán cho tài khoản), `ALL` (toàn hệ thống), `OWN` (của chính mình — khách). Nhiều role lấy phạm vi rộng nhất. |
+| **Customer (role) / Khách hàng** | Role của tài khoản người liên hệ phía khách trên cổng; ma trận quyền cố định; không gán cho nhân viên. |
 | **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị sàn hoặc Sales Staff được chỉ định. |
