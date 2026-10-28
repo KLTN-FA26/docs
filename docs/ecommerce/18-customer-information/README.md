@@ -14,7 +14,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu liên qua
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời; quản lý người liên hệ, địa chỉ, mật khẩu, tuỳ chọn nhận tin; xem công nợ; yêu cầu tải/xoá dữ liệu |
+| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời; quản lý người liên hệ, địa chỉ, mật khẩu, tuỳ chọn nhận tin; xem công nợ — gồm hạn mức, dư nợ, hạn mức còn lại, kỳ hạn và cờ quá hạn của chính mình *(Quyết định 21/10/2026; hồ sơ rủi ro vẫn là dữ liệu nội bộ, không hiện cho khách)*; yêu cầu tải/xoá dữ liệu |
 | **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi lời mời kích hoạt; xem hồ sơ (theo quyền) để tư vấn & xử lý đơn; cập nhật thông tin thay khách; thêm ghi chú |
 | **Người giữ quyền duyệt hạn mức** | Thiết lập / thay đổi phương thức thanh toán được phép, hạn mức công nợ, kỳ hạn của khách |
 | **Quản trị sàn (E-commerce Admin)** | Quản lý nhóm khách, phân khúc, chính sách dữ liệu, hợp nhất hồ sơ trùng; phân quyền truy cập hồ sơ (phối hợp System Admin) |

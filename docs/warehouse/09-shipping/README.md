@@ -15,7 +15,7 @@ Module hỗ trợ **hai hình thức giao**:
 | **Gửi kiện qua hãng vận chuyển (Parcel)** | Đơn khách thông thường | Kiện dán **nhãn kiện nội bộ** (in ở [08](../08-packing/README.md)); gom theo hãng, bàn giao cho tài xế hãng theo manifest ([§4.1](#41-gửi-kiện-qua-hãng-vận-chuyển-parcel)) |
 | **Giao nguyên chuyến (Full Truckload – FTL)** | Đơn sỉ khối lượng lớn được chỉ định giao nguyên chuyến; lệnh chuyển kho ([10](../10-inter-warehouse-transfer/README.md)) đi xe tải / container | Thuê nguyên xe tải hoặc container; trước khi thuê xe, **lập kế hoạch xếp hàng 3D (Load Planning)** để biết cần loại xe nào, bao nhiêu chiếc, mỗi kiện đặt ở đâu trong thùng xe ([§4.2](#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)) |
 
-> ⚠️ Giả định: đơn khách giao nguyên chuyến do **Điều phối đơn hàng (Order Coordinator)** chỉ định khi release đơn, khách không tự chọn hình thức này trên cổng khách hàng; phí vận chuyển và cách thu phần còn lại (đơn đặt cọc) cho đơn giao nguyên chuyến chưa xác định. Xem [open-questions](../../open-questions/README.md).
+> ⚠️ Giả định: đơn khách giao nguyên chuyến do **Điều phối đơn hàng (Order Coordinator)** chỉ định khi release đơn, khách không tự chọn hình thức này trên cổng khách hàng; phí vận chuyển cho đơn giao nguyên chuyến chưa xác định. Xem [open-questions](../../open-questions/README.md). *(Cách thu phần còn lại đã chốt 21/10/2026: đơn giao nguyên chuyến **không thu khi giao**, phải trả đủ trước khi bàn giao — BR-16.)*
 
 ---
 
@@ -87,6 +87,8 @@ Module hỗ trợ **hai hình thức giao**:
 1. **Chờ xuất** — kiện `Packed` (đã dán nhãn kiện nội bộ ở [Packing](../08-packing/README.md)) được đưa vào khu chờ xuất (khu `DISPATCH`). Các kiện của cùng một đơn (và cùng hãng) gộp thành một **shipment**, trạng thái `Ready to Dispatch`.
 2. **Lên chuyến / chờ hãng lấy hàng** — xếp kiện theo hãng & khung giờ pickup đã hẹn với hãng (**ngoài hệ thống**: gọi điện, email…); hoặc chuẩn bị mang ra điểm gửi.
 3. **Bàn giao (Handover / Manifest)** — khi tài xế hãng đến: quét từng kiện, đối chiếu danh sách, in **biên bản bàn giao (manifest)**, hai bên ký xác nhận. Shipment → `Handed Over`; đơn chuyển `Shipped`; gửi khách email/SMS báo đơn đã giao cho đơn vị vận chuyển (không kèm tracking).
+   - **Biên bản bàn giao:** bắt buộc tích "đã ký" và nhập biển số xe; mã chữ ký / ảnh biên bản là **tuỳ chọn cho tới khi có chức năng tải ảnh lên, sau đó bắt buộc** *(Quyết định 21/10/2026)*.
+   - **Điều kiện chặn bàn giao** *(Quyết định 19/10 và 21/10/2026)*: đơn chuyển khoản trước khi giao chưa đủ tiền (15 BR-10); đơn đang `On Hold`; số tiền thu hộ trên nhãn khác số hệ thống tính lại lúc bàn giao (phải in lại nhãn, BR-04); shipment làm sót hàng của đơn trong khi Sale chưa cho phép giao một phần ([17](../../ecommerce/17-order-management/README.md) §4.2a). Khi từ chối, hệ thống nêu rõ shipment bị chặn.
 4. **Ghi nhận kết quả giao** — theo §4.3.
 
 ### 4.2. Giao nguyên chuyến — Lập kế hoạch xếp hàng 3D (Load Planning)
@@ -127,9 +129,9 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 
 ### 4.3. Ghi nhận kết quả giao & sau giao (chung cho hai hình thức)
 
-1. **Ghi nhận giao thành công** — khi hãng báo đã giao (ngoài hệ thống), Order Coordinator cập nhật shipment → `Delivered`; đơn chuyển `Delivered`.
+1. **Ghi nhận giao thành công** — khi hãng báo đã giao (ngoài hệ thống), Order Coordinator cập nhật shipment → `Delivered`; đơn chuyển `Delivered`. Kết quả giao **luôn ghi theo shipment** khi đơn đã có shipment (không ghi trực tiếp ở mức đơn); với đơn nhiều shipment, trạng thái đơn đi theo các shipment ([17](../../ecommerce/17-order-management/README.md) §4.2a) *(Quyết định 19/10/2026)*.
 2. **Ghi nhận giao thất bại** — khi hãng báo không giao được (khách vắng, từ chối, sai địa chỉ), Order Coordinator cập nhật shipment → `Delivery Failed` kèm lý do; CSKH liên hệ khách. Hãng có thể giao lại (ngoài hệ thống) — giao lại thành công thì cập nhật `Delivered`.
-3. **Hoàn hàng về kho (RTO / Return)** — hãng trả kiện về kho; kho tiếp nhận qua luồng [Receipt](../03-receipt/README.md) dạng "hàng hoàn", kiểm tra tình trạng, nhập lại tồn (`Available` nếu nguyên vẹn / `Quarantine` nếu nghi hư / huỷ nếu hỏng). Shipment → `Returned`; đơn chuyển `Returned`.
+3. **Hoàn hàng về kho (RTO / Return)** — hãng trả kiện về kho; kho tiếp nhận qua luồng [Receipt](../03-receipt/README.md) dạng "hàng hoàn", kiểm tra tình trạng, nhập lại tồn (`Available` nếu nguyên vẹn / `Quarantine` nếu nghi hư / huỷ nếu hỏng). Shipment → `Returned`; đơn chuyển `Returned`. Việc ghi nhận "bị trả về" do **Order Coordinator hoặc Quản lý kho** thực hiện; khi có chức năng nhận hàng trả về, việc ghi này chuyển sang đi cùng **phiếu nhận hàng trả về** *(Quyết định 21/10/2026)*.
 4. **Đối soát thu tiền & cước** — đơn có thu hộ phần còn lại: đối chiếu tiền hãng chuyển về; đơn công nợ: ghi khoản công nợ phải thu từ ngày giao ([15 Payment](../../ecommerce/15-payment/README.md)). Đối soát bảng cước thực tế với hãng.
 5. **Đóng đơn** — khi `Delivered` và tiền đã thu đủ (hoặc công nợ đã tất toán) → [Order Management](../../ecommerce/17-order-management/README.md) chuyển đơn `Completed` / `Closed`.
 
@@ -195,9 +197,9 @@ stateDiagram-v2
 ### Business rules
 
 - **BR-01:** Chỉ bàn giao / đưa vào kế hoạch chuyến xe các kiện `Packed` hợp lệ (có khối lượng và kích thước, địa chỉ hợp lệ, đã dán nhãn kiện nội bộ).
-- **BR-02:** Hệ thống **không theo dõi hành trình** sau bàn giao. Trạng thái `Delivered` / `Delivery Failed` chỉ do nhân viên có quyền (Order Coordinator) cập nhật, dựa trên thông báo của hãng; mỗi lần cập nhật ghi người thực hiện và thời điểm.
-- **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn đã `Handed Over` — trừ khi chính sách cho phép giao lệch chuyến (split shipment).
-- **BR-04:** Với đơn có thu hộ (phần còn lại của đơn đặt cọc), số tiền thu hộ ghi trên nhãn kiện và biên bản bàn giao phải khớp số phải thu của đơn (đã trừ phần đã thanh toán trước).
+- **BR-02:** Hệ thống **không theo dõi hành trình** sau bàn giao. Trạng thái `Delivered` / `Delivery Failed` chỉ do nhân viên có quyền (Order Coordinator) cập nhật, dựa trên thông báo của hãng; riêng `Returned` Quản lý kho cũng ghi được *(Quyết định 21/10/2026)*; mỗi lần cập nhật ghi người thực hiện và thời điểm.
+- **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn đã `Handed Over` — trừ khi chính sách cho phép giao lệch chuyến (split shipment); chính sách này do **Sale quyết định trên từng đơn** ([17](../../ecommerce/17-order-management/README.md) §4.2a) *(Quyết định 21/10/2026)*.
+- **BR-04:** Với đơn có thu hộ (phần còn lại của đơn đặt cọc), số tiền thu hộ ghi trên nhãn kiện và biên bản bàn giao phải khớp số phải thu của đơn (đã trừ phần đã thanh toán trước). Số này được **tính chặt từ sổ tiền lúc bàn giao**; lệch nhãn thì bàn giao bị từ chối cho tới khi in lại nhãn *(Quyết định 21/10/2026)*.
 - **BR-05:** Trạng thái đơn phía khách hàng phản ánh trạng thái shipment gần nhất; nhiều kiện → hiển thị trạng thái tổng hợp (ví dụ "giao một phần" khi có kiện `Delivered` và kiện `Delivery Failed`).
 - **BR-06:** RTO nhập lại kho phải qua [Receipt](../03-receipt/README.md) (không cộng thẳng tồn) để kiểm tra tình trạng hàng.
 - **BR-07:** Chi phí vận chuyển thu của khách (nếu có) và cước trả hãng là hai khoản độc lập; đối soát riêng.
@@ -217,6 +219,7 @@ stateDiagram-v2
 - **BR-13:** Kế hoạch chỉ được `Confirmed` khi mọi kiện đã có vị trí, hoặc các kiện không xếp được đã được Dispatch Staff xác nhận để lại.
 - **BR-14:** Sau `Confirmed`, danh sách kiện và sơ đồ xếp bị khoá. Muốn sửa phải mở lại về `Planned` khi **chưa bắt đầu xếp lên xe**; đã bắt đầu xếp thì chỉ được huỷ kế hoạch có kiểm soát (dỡ kiện về khu `DISPATCH`).
 - **BR-15:** Mỗi xe của kế hoạch có **manifest riêng**. Kế hoạch chỉ `Dispatched` khi **mọi xe** đã xếp theo sơ đồ, ký manifest & rời kho.
+- **BR-16:** Đơn giao nguyên chuyến **không có thu hộ**: không được chọn *thu khi giao* và luôn phải **trả đủ tiền trước khi bàn giao** *(Quyết định 21/10/2026; thực hiện cùng chức năng chọn hình thức giao của đơn — chưa triển khai ở thời điểm ghi nhận)*.
 
 ### Edge case
 

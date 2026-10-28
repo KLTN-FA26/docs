@@ -29,11 +29,11 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
 | **Nhân viên mua hàng (Procurement Staff)** | Tạo & theo dõi PO, làm việc với NCC, đối chiếu hoá đơn (invoice matching) | Tạo/sửa PO ở trạng thái Draft; chốt PO; tạo Invoice |
 | **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
-| **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: khai báo trạm in, gán lệnh sản xuất cho trạm, đổi ưu tiên, xử lý lệnh tạm dừng, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; gán/gán lại lệnh sản xuất |
+| **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: khai báo trạm in, gán lệnh sản xuất cho trạm, đổi ưu tiên, xử lý lệnh tạm dừng, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; gán/gán lại lệnh sản xuất; kiểm lại thiết kế khi kiện bị giữ do lệch thiết kế *(Quyết định 22/10/2026 — không gán cho QC Staff)* |
 | **Nhân viên sản xuất (Production Staff)** | Vận hành trạm in tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng đạt / hỏng (phế phẩm kèm lý do), bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất được gán cho trạm của mình; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
 | **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
 | **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất |
-| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, **công nợ phải thu của khách sỉ**, hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát |
+| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, **công nợ phải thu của khách sỉ**, hoàn tiền | Tạo & xử lý Invoice; duyệt chi trong hạn mức; chạy đối soát; phân bổ tiền khách vào đơn / công nợ trên sổ chung ([15](../ecommerce/15-payment/README.md) §4.6); **xem chi tiết & lịch sử đơn (chỉ đọc)** *(Quyết định 21/10/2026)* |
 
 > ✅ Đã chốt 2026-10-06 (B1): có module **Sản xuất in** riêng — [19 · Production](../warehouse/19-production/README.md), xưởng in nội bộ (tách một phần lệnh đơn hàng đưa gia công ngoài khi thiếu công suất), hai loại sản xuất (mẫu và đơn hàng).
 
@@ -42,7 +42,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
 | **Quản trị bán hàng (E-commerce Admin)** | Quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; cấu hình template thiết kế | Xuất bản/ẩn sản phẩm; cấu hình phương thức thanh toán được phép theo khách |
-| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, chốt thiết kế, tạo đơn từ báo giá, CSKH qua chat, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; giảm giá trong hạn mức |
+| **Nhân viên Sale (Sales Staff)** | Tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, chốt thiết kế, tạo đơn từ báo giá, CSKH qua chat, xử lý yêu cầu thay đổi/huỷ/khiếu nại | Xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; giảm giá trong hạn mức; **bật / tắt cờ cho phép giao một phần** của đơn *(Quyết định 21/10/2026)* |
 | **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, xử lý đơn treo, phân bổ kho xuất, gộp/tách đơn | Thao tác trên mọi đơn; ghi đè kho xuất |
 
 ### 2.2. Vai thao tác (operational hat — không phải role riêng)
@@ -62,9 +62,14 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 
 Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, không phải chức danh riêng. Trong tài liệu, "Người duyệt (Approver)" là cách gọi tắt của *người giữ quyền phê duyệt tương ứng*.
 
+> **Quyết định 22/10/2026:** mọi kiểm tra truy cập trong hệ thống đi qua **mã quyền**, không chức năng nào bị khoá cứng theo tên vai trò. Cột "Gán mặc định cho" dưới đây (và "Quyền hạn tiêu biểu" ở §2.1) chỉ là cấu hình ban đầu: System Admin cấp một quyền cho vai trò khác trên màn phân quyền thì chức năng đó mở cho vai trò ấy, không cần sửa mã. Phạm vi dữ liệu (theo kho, đơn của chính khách) vẫn là điều kiện riêng, không phải kiểm tra vai trò.
+
 | Quyền | Nội dung | Gán mặc định cho |
 |-------|----------|------------------|
 | Duyệt PO vượt hạn mức | Phê duyệt / từ chối PO | Quản lý kho hoặc System Admin |
+| Cấu hình hạn mức duyệt PO | Đặt / sửa hạn mức duyệt PO theo vai trò *(Quyết định 21/10/2026)* | System Admin (Procurement Staff, Warehouse Manager, Accountant chỉ xem) |
+| Quyết định giao một phần | Bật / tắt cờ cho phép giao một phần của đơn ([17](../ecommerce/17-order-management/README.md) §4.2a) *(Quyết định 21/10/2026)* | Sales Staff, System Admin |
+| Kiểm lại thiết kế | Đưa kiện bị giữ do lệch thiết kế về đóng gói lại ([08](../warehouse/08-packing/README.md)) *(Quyết định 22/10/2026)* | Warehouse Manager, System Admin (không gán mặc định cho QC Staff) |
 | Duyệt TO vượt ngưỡng | Phê duyệt / từ chối lệnh chuyển kho | Quản lý kho |
 | Duyệt chi / hoàn tiền vượt hạn mức | Phê duyệt thanh toán, refund | Kế toán (mức cao hơn: System Admin) |
 | Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị sàn hoặc Sales Staff được chỉ định |

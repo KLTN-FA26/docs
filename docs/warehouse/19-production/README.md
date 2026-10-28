@@ -227,11 +227,13 @@ stateDiagram-v2
 | Chưa cấp | Bin lưu trữ | `Available` (đã giữ hàng cho dòng đơn / yêu cầu mẫu) → `Allocated` khi sinh lệnh lấy phôi |
 | Đã cấp, đang in, chờ QC | Area `PRODUCTION` | `Allocated` cho dòng đơn |
 | Gửi gia công (`SUPPLIED_BLANKS`) | Vị trí ảo "tại nhà gia công" | Tồn của mình, **không tính ATP**; chỉ rời vị trí qua phiếu nhận hoặc điều chỉnh có lý do (hao hụt) |
-| Thành phẩm đạt (`ORDER`) | Area `PACKING` | `Staged`, chờ Packing |
+| Thành phẩm đạt (`ORDER`) | Area `PACKING` | `Staged`, chờ Packing; **tồn phôi của dòng in được trừ ngay khi LSX `Completed`** *(Quyết định 19/10 và 21/10/2026)* |
 | Phôi dùng làm mẫu (`SAMPLE`) | — | Trừ tồn bằng điều chỉnh có lý do `SAMPLE` |
 | In hỏng / QC không đạt | — | Xuất huỷ (scrap): giảm tồn qua chứng từ điều chỉnh lý do `SCRAP`, có lệnh sản xuất làm nguồn |
 
 Thành phẩm **vẫn là Inventory Item của SKU phôi** (không sinh SKU mới); dấu hiệu phân biệt là liên kết tới lệnh sản xuất và design snapshot.
+
+> *(Quyết định 19/10 và 21/10/2026 — điểm trừ tồn của dòng in, câu hỏi G4-Q2.)* Phôi của dòng in bị **trừ tồn lúc lệnh sản xuất `Completed`** (thuộc module sản xuất): thành phẩm vừa chuyển sang khu `PACKING` vừa được ghi xuất tồn, ATP không đổi vì hàng đã được giữ cho đơn. **Bước đóng gói ([08](../08-packing/README.md)) không trừ tồn** thành phẩm in nữa — chỉ cho hàng vào kiện, như hàng đã pick.
 
 ### 5.3. Yêu cầu làm mẫu (Sample Request)
 
@@ -276,7 +278,7 @@ stateDiagram-v2
 - **BR-07:** Design snapshot và print-ready file của lệnh **không sửa được**; không đổi thiết kế sau khi LSX đã sang `Printing` (LSX con: `Subcontracted`). Muốn đổi thiết kế trước mốc đó phải huỷ dòng & tạo lại.
 - **BR-08:** Dòng đơn có **thiết kế mới** (chưa có mẫu `Approved` cho cặp thiết kế + phôi) **không được release** sang sản xuất. Đặt lại thiết kế đã có mẫu duyệt thì không cần làm mẫu.
 - **BR-09:** Đơn **đặt cọc** chỉ được release sang sản xuất khi tiền cọc đã về ([15](../../ecommerce/15-payment/README.md)).
-- **BR-10:** Huỷ khi LSX đã `Printing` (hoặc LSX con đã `Subcontracted` và nhà gia công đã in): theo chính sách [17](../../ecommerce/17-order-management/README.md) — từ chối huỷ, hoặc huỷ có tính phí sản xuất; sản phẩm đã in tính là phế phẩm.
+- **BR-10:** Huỷ khi LSX đã `Printing` (hoặc LSX con đã `Subcontracted` và nhà gia công đã in): theo chính sách [17](../../ecommerce/17-order-management/README.md) — từ chối huỷ, hoặc huỷ có tính phí sản xuất; sản phẩm đã in tính là phế phẩm. **Đã chốt 19/10/2026: cho huỷ, tính phí sản xuất; ly / bao bì đã in xuất huỷ (`SCRAP`).** Vì thành phẩm đã bị trừ tồn lúc LSX `Completed`, khi đơn bị huỷ (hoặc phần chưa giao bị đóng) sau khi đã in, đúng số lượng sẽ **không giao** được đưa trở lại khu đóng gói rồi xuất huỷ qua chứng từ điều chỉnh `SCRAP` (đủ bốn mắt như mọi điều chỉnh) — tổng cộng chỉ trừ tồn **một lần**, không bao giờ vượt số đã trừ.
 - **BR-11:** Chỉ LSX `ORDER` được đưa gia công ngoài. LSX `SAMPLE` **luôn in nội bộ** vì mẫu là chuẩn QC cho các đơn sau.
 - **BR-12:** Chỉ tách phần **chưa xuất phôi** của LSX gốc, khi LSX gốc đang `Pending Prepress`, `Ready` hoặc `On Hold`; số tách phải lớn hơn 0 và nhỏ hơn phần chưa xuất phôi.
 - **BR-13:** Nhà gia công phải là nhà cung cấp `Active` được đánh dấu **gia công in**; LSX con chỉ được gửi đi khi **PO gia công đã `Approved`**.

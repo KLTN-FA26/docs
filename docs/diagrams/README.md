@@ -143,7 +143,7 @@ flowchart TD
     ALL_DONE -- Chưa --> WAIT_MO[Chờ các lệnh còn lại]
     WAIT_MO --> ALL_DONE
     ALL_DONE -- Rồi --> READY_P[Order: Ready to Fulfill]
-    MO -. đơn hỗn hợp: dòng hàng thường\npick song song .-> ALLOC
+    MO -. đơn hỗn hợp: dòng hàng thường pick song song;\nSale cho phép giao một phần thì giao trước khi in xong .-> ALLOC
     READY_P --> HAS_STD{Còn dòng hàng thường\nchưa pick?}
     HAS_STD -- Có --> ALLOC
     HAS_STD -- Không --> PACK_CHECK
@@ -176,7 +176,7 @@ flowchart TD
 
     PACKED --> MODE{Hình thức giao?}
     MODE -- Gửi kiện qua hãng --> PICKUP[Gom kiện theo hãng\nchờ hãng lấy hàng]
-    PICKUP --> HANDOVER[Bàn giao + manifest\nShipment: Handed Over]
+    PICKUP --> HANDOVER[Bàn giao + manifest\nShipment: Handed Over\nchặn nếu đơn trả trước khi giao chưa đủ tiền]
     MODE -- Giao nguyên chuyến --> LOADPLAN[Load Planning 3D\nKế hoạch chuyến xe:\nDraft → Planned → Confirmed]
     LOADPLAN --> BOOK[Đặt xe với hãng\nngoài hệ thống]
     BOOK --> LOAD[Xếp kiện theo sơ đồ, quét kiện\nmanifest theo từng xe]
