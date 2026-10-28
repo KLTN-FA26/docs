@@ -53,7 +53,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU:
 | **Hình ảnh** | Variant | Ảnh JPEG / PNG / WebP ≤ 10 MB, ≤ 25 megapixel; tối đa 20 ảnh mỗi biến thể; một **ảnh bìa** | Có ít nhất một ảnh đã đăng trước khi xuất bản |
 | **Đơn vị cơ sở (base UoM)** | Inventory Item | Đơn vị ghi tồn, mặc định `EACH` (cái) | Có (mặc định) |
 | **Đơn vị quy đổi (UoM conversion)** | Inventory Item | Đơn vị đóng gói kèm **hệ số nguyên ≥ 1** quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái); một **đơn vị mua mặc định** và một **đơn vị giao mặc định** | Không (mặc định chỉ có đơn vị cơ sở) |
-| **Đơn vị bán (sales unit)** | Variant | Đơn vị khách được đặt, chọn từ đơn vị quy đổi; đơn vị khác đơn vị cơ sở mang **giá riêng** (VND nguyên dương) | Không (mặc định: đơn vị cơ sở, giá gốc của SKU) |
+| **Đơn vị bán (sales unit)** | Variant | Đơn vị khách được đặt, chọn từ đơn vị quy đổi; đơn vị khác đơn vị cơ sở mang **giá riêng** (VND nguyên dương). ⚠️ Catalog và đơn chưa dùng đơn vị bán và giá này (phạm vi sau — [13](../../ecommerce/13-catalog/README.md)) | Không (mặc định: đơn vị cơ sở, giá gốc của SKU) |
 | **Giá gốc (base price)** | Variant | Giá bán theo SKU, VND nguyên dương; giá theo khách / nhóm khách khai báo ở [13](../../ecommerce/13-catalog/README.md) | Có trước khi xuất bản |
 | **Thông số logistics** | Inventory Item | **Mã vạch** (≤ 64, duy nhất), khối lượng, kích thước (D×R×C), khối lượng & kích thước kiện, **số kiện mỗi đơn vị** (bộ kiện — [08](../08-packing/README.md)), quy cách đóng gói | Không (nếu nhập: số dương) — xem ⚠️ BR-03 |
 | **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` / `COLD` / `HAZMAT` / `FRAGILE` / `OVERSIZE` — quyết định loại bin được phép cất ([06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |

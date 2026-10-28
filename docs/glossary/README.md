@@ -21,7 +21,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
 | **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
 | **Purchase UoM / Đơn vị mua** | Đơn vị đóng gói NCC bán (thường là *thùng*). Dòng PO ghi số lượng theo **đơn vị tồn** của SKU; quy cách đóng gói của NCC được ép bằng bội số (số lượng phải là bội số quy cách, [02](../warehouse/02-purchase-order/README.md)). |
-| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt trên storefront, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi; giá bán niêm yết theo đơn vị bán. |
+| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi, có giá riêng. **Chưa dùng trên catalog / đơn** (phạm vi sau — [D17](../open-questions/README.md)): hiện giá và số lượng theo đơn vị cơ sở. |
 | **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
@@ -120,7 +120,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. Phạm vi sau ([open-questions C17](../open-questions/README.md)). |
 | **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. Phạm vi sau (C17). |
 | **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. Dòng `Short`, đơn treo `INVENTORY`, mở kiểm kê mù; Điều phối phân bổ lại từ bin khác cùng kho. |
-| **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. |
+| **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. Không áp dụng trên catalog: không có đặt trước ([13](../ecommerce/13-catalog/README.md), [D17](../open-questions/README.md)). |
 | **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
 | **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại một bin của cùng kho, qua hàng chờ cất lại. |
 | **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. |
@@ -183,13 +183,16 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **B2B / Bán sỉ** | Hệ thống chỉ bán cho khách doanh nghiệp đã liên hệ trước; không có khách vãng lai. |
 | **Customer portal / Cổng khách hàng** | Trang dành cho khách sỉ đã đăng nhập: catalog & giá riêng, báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ. |
 | **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận → thành đơn bán. |
-| **Giá riêng theo khách / Customer price list** | Giá theo từng khách sỉ, có bậc theo số lượng. |
+| **Giá riêng theo khách / Customer price list** | Giá theo (khách, SKU) gồm 1–20 bậc số lượng; bậc đầu là MOQ của khách. Ưu tiên cao nhất, rồi giá nhóm, rồi giá gốc ([13](../ecommerce/13-catalog/README.md)). |
 | **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ với đơn bán theo công nợ. |
 | **Hạn mức tín dụng / Credit limit** | Mức dư nợ tối đa của một khách; đơn công nợ vượt hạn mức bị giữ chờ duyệt. |
 | **Kỳ hạn thanh toán / Payment term** | Số ngày khách được trả chậm (ví dụ 30 ngày) với đơn công nợ. |
 | **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày trên cổng khách hàng để khách sỉ xem & đặt. |
 | **PLP** (Product Listing Page) — **Trang danh sách sản phẩm** | Trang liệt kê nhiều sản phẩm (có lọc, sắp xếp). |
 | **PDP** (Product Detail Page) — **Trang chi tiết sản phẩm** | Trang một sản phẩm: hình ảnh, mô tả, chọn biến thể, giá, tình trạng còn hàng. |
+| **Base price / Giá gốc** | Giá bán một mức của một SKU (VND), dùng khi khách không có giá riêng và không thuộc nhóm có giá. Bắt buộc cho mọi SKU `Active` trước khi xuất bản. |
+| **Segment price / Giá nhóm khách** | Một giá cho (nhóm khách, SKU), không có bậc; dùng khi khách chưa có giá riêng. |
+| **Availability indicator / Chỉ báo còn hàng** | `In stock` / `Low stock` (ATP ≤ 5, cấu hình được) / `Out of stock` cho từng SKU; không bao giờ hiện số ATP cho khách. |
 | **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. |
 | **Print-on-demand / In theo yêu cầu** | Sản phẩm chỉ được in/sản xuất sau khi có đơn của khách. |
 | **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. |

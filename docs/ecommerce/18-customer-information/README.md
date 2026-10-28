@@ -56,7 +56,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | **Customer profile** | 14, 15, 16, 17, báo cáo |
 | **Địa chỉ & người nhận** cho đơn | 14 Quote & Order |
 | **Điều khoản thương mại** | 13 Catalog, 14 Quote & Order, 15 Payment |
-| **Nhóm khách** | Giá nhóm khi chưa có bảng giá riêng ([13](../13-catalog/README.md)) |
+| **Nhóm khách** | Giá nhóm (một mức, không bậc) khi khách chưa có giá riêng ([13](../13-catalog/README.md)) |
 | **Lịch sử trạng thái** (kèm lý do) và **lịch sử thay đổi** tên công ty / mã số thuế | Quản trị bán hàng, Sale |
 | **Tình trạng lời mời** (chờ kích hoạt / hết hạn / đã kích hoạt…) | Sale |
 

@@ -39,7 +39,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 | Hiệu lực, điều khoản thanh toán, % cọc | % cọc chỉ với báo giá đặt cọc, 0 < % < 100; để trống thì lấy % mặc định của khách | Có |
 | Mẫu đã duyệt | Với dòng in có thiết kế mới: mẫu `Approved` ([19](../../warehouse/19-production/README.md)) | Có (thiết kế mới, khi khách chấp nhận) |
 | Số lượng khách chấp nhận | Khách chọn số lượng cho từng dòng khi chấp nhận | Có (khi chấp nhận) |
-| Dòng đơn tự đặt | SKU hàng sẵn, **đơn vị bán** (ví dụ *thùng*), số lượng | Có (đơn tự đặt) |
+| Dòng đơn tự đặt | SKU hàng sẵn, số lượng theo **đơn vị cơ sở** (giá theo đơn vị bán là phạm vi sau — [13](../13-catalog/README.md)) | Có (đơn tự đặt) |
 | Địa chỉ giao & người nhận | Từ sổ địa chỉ của khách | Có (khi tạo đơn) |
 | Điều khoản thanh toán | **Trả trước 100%**, **đặt cọc**, **công nợ** — trong các điều khoản được phép của khách | Có (khi tạo đơn) |
 
@@ -89,7 +89,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 
 ### 4.2. Khách tự đặt & đặt lại trên cổng
 
-8. **Đặt nhanh hàng sẵn** — từ [catalog](../13-catalog/README.md) trên cổng (giá riêng của khách), theo SKU / số lượng theo **đơn vị bán**. Hệ thống quy về đơn vị cơ sở (ví dụ 3 thùng × 1.000 = 3.000 cái) và kiểm tồn khả dụng.
+8. **Đặt nhanh hàng sẵn** — từ [catalog](../13-catalog/README.md) trên cổng (giá riêng của khách), theo SKU / số lượng theo **đơn vị cơ sở**, và kiểm tồn khả dụng. Đặt theo đơn vị bán (ví dụ 3 thùng × 1.000 = 3.000 cái) là phạm vi sau ([13](../13-catalog/README.md)).
 9. **Dòng in không tự đặt được** — mọi dòng có thiết kế phải đi qua báo giá (§4.1).
 10. **Đặt lại** — khách chọn một đơn cũ **có nguồn từ báo giá** → hệ thống tạo **báo giá mới ở `Draft`** và báo Sale:
     - giá theo bảng giá **hiện hành**; dòng không có giá để Sale định giá;
@@ -205,7 +205,7 @@ stateDiagram-v2
 - **BR-08:** Tổng tiền đơn = subtotal + phí giao + thuế − chiết khấu; mọi khoản phải minh bạch trước khi khách xác nhận.
 - **BR-09:** Đơn `Confirmed` chỉ được sửa nội dung (SKU / số lượng / địa chỉ) qua [Order Management](../17-order-management/README.md), theo quy tắc và phê duyệt; không sửa tự do.
 - **BR-10:** Sale giảm giá vượt hạn mức được cấp → phải có người có quyền duyệt trước khi gửi báo giá.
-- **BR-11:** Số lượng dòng báo giá / đơn nhập theo **đơn vị bán** được phép của biến thể và phải là số nguyên. Reservation, allocation và lệnh sản xuất dùng số lượng đã quy về **đơn vị cơ sở**. Đơn vị bán và hệ số được chốt vào dòng đơn cùng giá (BR-03). ⚠️ Giả định — xem [open-questions](../../open-questions/README.md).
+- **BR-11:** Số lượng dòng báo giá / đơn nhập theo **đơn vị cơ sở**, số nguyên ≥ 1; reservation, allocation và lệnh sản xuất dùng cùng số lượng đó. ⚠️ Giả định: đặt theo **đơn vị bán** (quy về đơn vị cơ sở, chốt hệ số vào dòng đơn cùng giá) là phạm vi sau — xem [open-questions A9, D17](../../open-questions/README.md).
 - **BR-12:** **Dòng có thiết kế chỉ vào đơn qua báo giá**; khách không tự đặt dòng in trên cổng.
 - **BR-13:** **Chỉ khách** chấp nhận hoặc yêu cầu sửa báo giá. **Chỉ nhân viên** (Sale / Điều phối) chuyển báo giá thành đơn. Chuyển lại lần nữa trả về cùng một đơn.
 - **BR-14:** Mọi thao tác trên báo giá gửi kèm **số phiên bản** người dùng đang xem. Ai đó đã đổi trước thì thao tác bị từ chối. Mỗi lần mở lại sau yêu cầu sửa là một **bản sửa** mới.
