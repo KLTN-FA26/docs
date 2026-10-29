@@ -247,7 +247,7 @@ stateDiagram-v2
 - **BR-08:** Inventory Item chỉ chứa dữ liệu hàng vật lý, kiểm soát tồn và mua hàng tham chiếu; **không** chứa nội dung bán hàng.
 - **BR-09:** Tồn kho và mọi chứng từ kho lưu số lượng theo **đơn vị cơ sở**. Hệ số quy đổi là số nguyên ≥ 1. Không sinh SKU mới cho từng quy cách.
 - **BR-10:** Đơn vị quy đổi đã có chứng từ dùng thì **không sửa được hệ số**. Đổi quy cách = khai báo đơn vị mới, ngưng đơn vị cũ.
-- **BR-11:** Đơn vị bán của Variant chọn trong danh sách đơn vị quy đổi của Inventory Item. ⚠️ Giả định: khách chỉ đặt số nguyên đơn vị bán. Xem [open-questions A9](../../open-questions/README.md).
+- **BR-11:** Đơn vị bán của Variant chọn trong danh sách đơn vị quy đổi của Inventory Item. Giá của **đơn vị cơ sở** là **giá gốc trong catalog**, không nhập hai lần; chỉ đơn vị bán khác (ví dụ *thùng*) mới có giá riêng *(Quyết định 19/10/2026)*. ⚠️ Giả định: khách chỉ đặt số nguyên đơn vị bán. Xem [open-questions A9](../../open-questions/README.md).
 - **BR-12:** **Bốn mắt:** người duyệt sản phẩm ≠ người gửi duyệt; người đăng ảnh ≠ người tải ảnh.
 - **BR-13:** Gửi duyệt đòi danh mục, thương hiệu, tên tiếng Anh và nhóm thuế. Thông tin chính chỉ sửa khi `Draft`; sản phẩm `Pending Approval` không sửa được gì.
 - **BR-14:** Tạm ngưng và ngừng kinh doanh chỉ do **System Admin**, lý do bắt buộc. Ngừng kinh doanh **cảnh báo** chứng từ đang mở nhưng **không chặn**.

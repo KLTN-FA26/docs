@@ -96,7 +96,7 @@ PO là **chứng từ gốc của luồng Procurement**. Mọi lần nhận hàn
 ### 4.3. Gửi duyệt & duyệt
 
 10. **Gửi duyệt (Submit)** — hệ thống kiểm lại SKU còn mua được và ghi **một bản sửa (revision)**: lần đầu là bản 0, mỗi lần gửi lại sau khi bị từ chối +1. Sau đó:
-    - **Tự duyệt** → `Approved` khi:
+    - **Tự duyệt** → `Approved`, hệ thống ghi lý do *"tự duyệt trong hạn mức"* kèm hạn mức đã dùng *(Quyết định 21/10/2026)*, khi:
       - người gửi có **hạn mức duyệt** > 0 theo tiền tệ của PO;
       - tổng giá trị (sau thuế) ≤ hạn mức;
       - PO **chưa từng bị từ chối**;
@@ -233,6 +233,7 @@ stateDiagram-v2
 - **BR-12:** Chốt PO là **gửi PO cho NCC**. Đổi ngày giao đã thoả thuận phải có lý do. Gửi lại PO thất bại chỉ do Quản lý kho, có lý do và xác nhận đã đối chiếu.
 - **BR-13:** Phản hồi của NCC chốt một lần; từ chối chỉ trước khi nhận hàng và phải có ghi chú.
 - **BR-14:** **Phạm vi kho:** người dùng gắn với kho chỉ thấy / thao tác PO của kho được gán. Báo cáo mua hàng từ chối người dùng gắn với kho.
+- **BR-15:** *(Quyết định 21/10/2026)* **Cấu hình hạn mức duyệt PO** là một quyền riêng: mặc định chỉ **System Admin** được sửa; Procurement Staff / Warehouse Manager / Accountant được xem; System Admin cấp quyền sửa cho vai trò khác qua màn phân quyền.
 
 ### Edge case
 

@@ -132,6 +132,8 @@ stateDiagram-v2
 | `Sealed` | Đã niêm phong, có kích thước & khối lượng; in được nhãn | → `Open` (mở lại, khi chưa thuộc shipment / kế hoạch xe), → `Voided` (khi chưa giao) | Packer |
 | `Voided` | Đã huỷ; hàng tính là chưa đóng; nhãn bị huỷ | *(cuối)* | Packer / Hệ thống |
 
+> Kiểm lại thiết kế (đưa kiện bị giữ do lệch thiết kế từ `Verification Failed` về `In Progress`) do **Packer / Quản lý kho** thực hiện; **QC Staff không có quyền này** — QC chỉ xuất hiện ở khâu QC sản xuất ([19](../19-production/README.md)) *(Quyết định 22/10/2026)*.
+
 ---
 
 ## 6. Ràng buộc nghiệp vụ (Business Rules) & Edge case
@@ -152,6 +154,7 @@ stateDiagram-v2
   - ép kiện thường phải có lý do.
 - **BR-09:** Nhãn in khi kiện đã niêm phong. Nhãn **lỗi thời** (kiện đổi shipment, số tiền thu hộ đổi) phải in lại trước khi xếp xe / bàn giao.
 - **BR-10:** Khối lượng quy đổi = D × R × C (cm) / 6.000 (hệ số cấu hình được).
+- **BR-11:** Đóng gói **không trừ tồn** thành phẩm in: tồn đã trừ lúc lệnh sản xuất `Completed` ([19](../19-production/README.md) §5.2). Đơn đã `Packed` không huỷ được ([17](../../ecommerce/17-order-management/README.md) §4.5), nên kho không phải mở kiện chỉ vì huỷ đơn *(Quyết định 19/10 và 21/10/2026)*.
 
 ### Edge case
 

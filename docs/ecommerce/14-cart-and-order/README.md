@@ -103,10 +103,10 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 11. **Kiểm tra cuối** — còn tồn phôi khả dụng? giá còn đúng (báo giá còn hiệu lực / bảng giá hiện hành)? đủ MOQ? SKU còn bán được?
 12. **Địa chỉ giao & người nhận** — chọn từ sổ địa chỉ của khách ([18](../18-customer-information/README.md)).
 13. **Chốt giá cuối** — subtotal + phí giao + thuế − chiết khấu = **tổng tiền đơn**. Giá dòng hàng được **chốt (price lock)** vào đơn.
-14. **Điều khoản thanh toán** — chỉ trong các điều khoản được phép cho khách:
+14. **Điều khoản thanh toán** — chỉ trong các điều khoản được phép cho khách; trên cổng, khách đọc danh sách điều khoản được phép và chọn trong đó *(Quyết định 21/10/2026)*:
     - **Trả trước 100%** hoặc **đặt cọc** → Order `Pending Payment`, chuyển sang [15 Payment](../15-payment/README.md).
       - Đơn đặt cọc mang **chính sách thu phần còn lại**, copy từ khách, chỉ được siết lại ([15](../15-payment/README.md) BR-10).
-      - Phần còn lại `ON_CREDIT` mà khách quá hạn / vượt hạn mức thì **từ chối đặt**.
+      - Phần còn lại `ON_CREDIT` mà khách quá hạn / vượt hạn mức (kiểm trên phần còn lại, ngay lúc đặt) thì **từ chối đặt** để Sale đổi cách trả, không treo đơn *(Quyết định 21/10/2026)*.
     - **Công nợ** → hệ thống kiểm tín dụng: không quá hạn và dư nợ + giá trị đơn ≤ hạn mức → Order `Confirmed`. Nếu không → Order `On Hold` (tín dụng) chờ **kế toán** duyệt.
 15. **Giữ hàng (Reservation)** — giữ phôi theo SKU cho các dòng (giảm ATP). Với đơn chờ thanh toán, giữ hàng có thời hạn (**mặc định 30 phút**, cấu hình hệ thống).
 16. **Kết quả:**
@@ -157,7 +157,8 @@ stateDiagram-v2
 | `Confirmed` | Đủ điều kiện thanh toán; phôi đã giữ | → `In Production` / `Ready to Fulfill`, → `Cancelled` | Hệ thống |
 | `In Production` | Các dòng in đang sản xuất ([19](../../warehouse/19-production/README.md)) | → `Ready to Fulfill` (mọi lệnh sản xuất `Completed`) | 19 Production |
 | `Ready to Fulfill` | Sẵn sàng cho kho xử lý | → `Picking` …, → `Packed` (đơn chỉ gồm hàng in) | 07 / 08 |
-| `Picking` / `Packed` / `Shipped` / `Delivered` | Theo luồng Fulfillment (sau `Shipped` không theo dõi hành trình — xem 09) | | 07 / 08 / 09 |
+| `Picking` / `Packed` / `Shipped` / `Delivered` | Theo luồng Fulfillment (sau `Shipped` không theo dõi hành trình — xem 09); đơn `Packed` không huỷ được *(Quyết định 21/10/2026)* | | 07 / 08 / 09 |
+| `Partially Fulfilled` | Một phần hàng đã giao, phần còn lại chờ hoặc bị đóng — chỉ khi Sale cho phép giao một phần *(Quyết định 19/10 và 21/10/2026, [17](../17-order-management/README.md) §4.2)* | → `Packed` / `Shipped` / `Delivered` | 17 |
 | `Completed` | Giao xong, hết hạn đổi / trả, không còn nợ | → `Closed` | 17 Order Management |
 | `Cancelled` | Huỷ (trước khi đóng gói) | *(cuối)* | Khách / Sale / Điều phối / Hệ thống |
 | `Returned` / `Refunded` | Hoàn hàng / hoàn tiền (chỉ khi lỗi sản xuất) | | 17 / 15 Payment |
@@ -175,7 +176,10 @@ stateDiagram-v2
     Confirmed --> InProduction: Release dòng in
     Confirmed --> ReadyToFulfill: Chỉ hàng sẵn
     InProduction --> ReadyToFulfill: Mọi lệnh sản xuất xong
+    InProduction --> PartiallyFulfilled: Hàng sẵn đi trước
     ReadyToFulfill --> Picking
+    Picking --> PartiallyFulfilled
+    PartiallyFulfilled --> Packed
     ReadyToFulfill --> Packed: Đơn chỉ gồm hàng tùy chỉnh
     Picking --> Packed
     Packed --> Shipped

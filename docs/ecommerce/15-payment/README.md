@@ -243,6 +243,8 @@ Trạng thái thanh toán **tính ra từ số tiền**, không lưu riêng.
 - **BR-14:** Khoản **do nhà vận chuyển thu** không tính vào dư nợ / quá hạn của khách, không hiện cho khách, và không trả bằng tiền khách chuyển khoản.
 - **BR-15:** Đảo phân bổ làm đơn đã xác nhận thiếu tiền → bắt buộc **treo đơn** (lý do thanh toán); không âm thầm đưa đơn về chưa thanh toán.
 - **BR-16:** Hạn mức, kỳ hạn, % cọc và điều khoản được phép do **kế toán duyệt** (ghi người và thời điểm duyệt). Sale chỉ đặt trả trước / đặt cọc khi tạo khách. Đơn đã đặt giữ điều khoản cũ.
+- **BR-17:** Đơn giao nhiều lần: mỗi lần giao mở **một khoản công nợ riêng** cho phần hàng của lần đó, trừ tiền khách đã trả trước (áp vào các lần giao sớm nhất trước) — đóng phần còn lại không bao giờ khiến khách trả nhiều hơn hàng đã nhận *(Quyết định 19/10/2026)*.
+- **BR-18:** Số tiền thu khi giao được **tính chặt từ sổ tiền lúc bàn giao**, không bao giờ thu dư khách *(Quyết định 21/10/2026)*. Đơn giao nguyên chuyến không thu khi giao và phải trả đủ trước khi bàn giao ([09](../../warehouse/09-shipping/README.md) BR-21).
 
 ### Edge case
 

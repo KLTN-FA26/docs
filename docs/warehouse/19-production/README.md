@@ -326,11 +326,13 @@ stateDiagram-v2
 | Đã cấp, đang in, chờ QC | Area `PRODUCTION` | `In Production`, vẫn giữ cho lệnh; không bán ([20](../20-inventory-control/README.md) §5.1) |
 | Gửi gia công (`SUPPLIED_BLANKS`) | Vị trí ảo "tại nhà gia công" | `In Production`, tồn của mình, **không tính ATP**; chỉ rời vị trí qua phiếu nhận, đối soát hoặc xuất huỷ có duyệt |
 | Phôi chưa in trả về (huỷ / dừng / hoàn tất) | Bin / khu lưu trữ | `Available` (vẫn giữ cho đơn nếu đơn còn cần) |
-| Thành phẩm đạt (`ORDER`) khi hoàn tất | Area `PACKING` | Chuyển sang khu đóng gói rồi **ghi tiêu thụ ngay** (`CONSUMPTION`): **không còn là tồn** |
+| Thành phẩm đạt (`ORDER`) khi hoàn tất | Area `PACKING` | Chuyển sang khu đóng gói rồi **ghi tiêu thụ ngay** (`CONSUMPTION`): **không còn là tồn** *(Quyết định 19/10 và 21/10/2026: trừ tồn khi LSX `Completed`, không phải lúc đóng gói)* |
 | Phôi dùng làm mẫu (`SAMPLE`) | — | Đề nghị xuất huỷ lý do `SAMPLE`, giảm tồn khi được duyệt |
 | In hỏng / QC không đạt | — | Rời khoản giữ ngay; đề nghị xuất huỷ lý do `SCRAP` / `QC_FAILED`, giảm tồn khi được duyệt (vẫn là `In Production`, không bán, trong lúc chờ) |
 
 Thành phẩm **vẫn là Inventory Item của SKU phôi** (không sinh SKU mới); dấu hiệu phân biệt là liên kết tới lệnh sản xuất và design snapshot.
+
+> *(Quyết định 19/10 và 21/10/2026 — điểm trừ tồn của dòng in, câu hỏi G4-Q2.)* Phôi của dòng in bị **trừ tồn lúc lệnh sản xuất `Completed`** (thuộc module sản xuất): thành phẩm vừa chuyển sang khu `PACKING` vừa được ghi xuất tồn, ATP không đổi vì hàng đã được giữ cho đơn. **Bước đóng gói ([08](../08-packing/README.md)) không trừ tồn** thành phẩm in nữa — chỉ cho hàng vào kiện, như hàng đã pick.
 
 ### 5.3. Yêu cầu làm mẫu (Sample Request)
 
@@ -379,7 +381,7 @@ stateDiagram-v2
   - vòng mẫu `Approved` cho cặp (thiết kế, phôi) của khách;
   - thiết kế đó **đã từng được sản xuất xong** cho một đơn khác (đặt lại).
 - **BR-09:** Đơn **đặt cọc** chỉ được release sang sản xuất khi tiền cọc đã về ([15](../../ecommerce/15-payment/README.md)).
-- **BR-10:** **Huỷ** lệnh chỉ trước khi in (`Pending Prepress` / `Ready` / `Material Issued`). Lệnh đang `Printing` / `QC` thì **dừng**: hàng đã in thành phế phẩm. Huỷ và dừng đều do Quản lý kho, có lý do. Phí huỷ với khách theo [17](../../ecommerce/17-order-management/README.md) BR-11. Hệ thống không tự huỷ lệnh đã in.
+- **BR-10:** **Huỷ** lệnh chỉ trước khi in (`Pending Prepress` / `Ready` / `Material Issued`). Lệnh đang `Printing` / `QC` thì **dừng**: hàng đã in thành phế phẩm. Huỷ và dừng đều do Quản lý kho, có lý do. Phí huỷ với khách theo [17](../../ecommerce/17-order-management/README.md) BR-11. Hệ thống không tự huỷ lệnh đã in. Đơn bị huỷ (hoặc đóng phần còn lại) sau khi đã in: **được huỷ, tính phí sản xuất**; hàng đã in không giao được xuất huỷ (`SCRAP`) qua điều chỉnh có duyệt, tồn chỉ bị trừ **một lần** *(Quyết định 19/10/2026)*.
 - **BR-11:** Chỉ LSX `ORDER` được đưa gia công ngoài. LSX `SAMPLE` **luôn in nội bộ** vì mẫu là chuẩn QC cho các đơn sau.
 - **BR-12:** Chỉ tách phần **chưa xuất phôi** của LSX gốc in nội bộ, khi LSX gốc đang `Pending Prepress`, `Ready` hoặc `On Hold`. Số tách > 0 và nhỏ hơn phần chưa xuất phôi. Chuyển toàn bộ chỉ khi chưa cấp / in gì.
 - **BR-13:** Nhà gia công phải là nhà cung cấp `Active` được đánh dấu **gia công in**. LSX con chỉ được gửi đi khi **PO gia công đã `Approved`**.

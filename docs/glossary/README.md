@@ -217,7 +217,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Price lock / Chốt giá** | Cố định giá dòng hàng vào đơn tại thời điểm đặt; không đổi theo giá catalog sau đó. |
 | **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn confirmed đến khi giao hàng cho khách (pick–pack–ship). |
 | **Fulfillment sourcing / Chọn kho xuất** | Quyết định đơn được giao từ kho nào. |
-| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt (giao một phần — Sale cho phép theo từng đơn, [17](../ecommerce/17-order-management/README.md) §4.2). Mỗi đơn xuất từ **một kho**. |
+| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt (giao một phần — Sale cho phép theo từng đơn, *Quyết định 21/10/2026*, [17](../ecommerce/17-order-management/README.md) §4.2). Mỗi đơn xuất từ **một kho**. |
 | **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
 | **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
 | **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). Không áp dụng: khách sỉ chỉ chuyển khoản (open-questions D1). |

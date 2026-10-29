@@ -15,7 +15,7 @@ Module hỗ trợ **hai hình thức giao** (Điều phối chọn theo từng �
 | **Gửi kiện qua hãng vận chuyển (Parcel)** — mặc định | Đơn khách thông thường | Mở một **chuyến bàn giao** cho một hãng, quét kiện, ký biên bản ([§4.1](#41-gửi-kiện-qua-hãng-vận-chuyển-parcel)) |
 | **Giao nguyên chuyến (Full Truckload – FTL)** | Đơn sỉ khối lượng lớn được chỉ định giao nguyên chuyến; lệnh chuyển kho ([10](../10-inter-warehouse-transfer/README.md)) đi xe tải / container | Thuê nguyên xe tải hoặc container. Trước khi thuê xe, **lập kế hoạch xếp hàng 3D (Load Planning)** để biết cần loại xe nào, bao nhiêu chiếc, mỗi kiện đặt ở đâu; mỗi xe là một chuyến bàn giao ([§4.2](#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning)) |
 
-> ⚠️ Giả định: khách không tự chọn hình thức giao nguyên chuyến trên cổng khách hàng; phí vận chuyển cho đơn giao nguyên chuyến chưa xác định. Xem [open-questions](../../open-questions/README.md).
+> ⚠️ Giả định: khách không tự chọn hình thức giao nguyên chuyến trên cổng khách hàng; phí vận chuyển cho đơn giao nguyên chuyến chưa xác định *(cách thu đã chốt 21/10/2026: không thu khi giao, trả đủ trước khi bàn giao — BR-21)*. Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -113,7 +113,7 @@ Module hỗ trợ **hai hình thức giao** (Điều phối chọn theo từng �
    - có **nhãn lỗi thời** (phải in lại — [08](../08-packing/README.md) BR-09).
 4. **Bàn giao & ký** — khi tài xế hãng đến, ký bàn giao. Điều kiện:
    - **đã quét đủ mọi kiện** (thiếu thì hệ thống liệt kê từng kiện chưa quét);
-   - nhập người đại diện hãng, biển số (nếu chưa có), xác nhận **đã ký**.
+   - nhập người đại diện hãng, biển số (nếu chưa có), xác nhận **đã ký**; mã chữ ký / ảnh biên bản tuỳ chọn cho tới khi có chức năng tải ảnh *(Quyết định 21/10/2026)*.
 
    Bàn giao là **tất cả hoặc không**: chỉ một shipment không được phép đi (đơn còn nợ tiền phải thu trước giao, đơn đang treo, đơn không cho giao một phần mà thiếu kiện) thì **cả chuyến bị từ chối**. Bỏ shipment đó khỏi chuyến để các shipment còn lại đi.
 5. **Kết quả** — chuyến `Dispatched`; shipment → `Handed Over`; **số tiền thu hộ chốt theo từng shipment**. Đơn chuyển `Shipped` (hoặc `Partially Fulfilled` nếu còn phần chưa giao). Gửi khách thông báo đơn đã giao cho đơn vị vận chuyển (không kèm tracking).
@@ -344,6 +344,7 @@ stateDiagram-v2
   - mọi shipment phải được đơn cho phép đi: không còn nợ tiền phải thu trước giao, không đang treo, không thiếu phần khi đơn không cho giao một phần.
 - **BR-19:** Huỷ chuyến gửi kiện qua hãng chỉ do **Quản lý kho**, kèm lý do, khi chuyến chưa rời kho. Chuyến của kế hoạch xe chỉ thay đổi qua kế hoạch.
 - **BR-20:** Ước tính tải **chỉ để tham khảo**; không chốt kế hoạch, không chặn đóng gói.
+- **BR-21:** Đơn giao nguyên chuyến **không thu khi giao** (đã có — [15](../../ecommerce/15-payment/README.md) §4.3) và **phải trả đủ tiền trước khi bàn giao** *(Quyết định 21/10/2026)*. ⚠️ Giả định: vế "trả đủ trước khi bàn giao" chưa triển khai — hiện đơn công nợ giao nguyên chuyến vẫn bàn giao được. Xem [open-questions E7](../../open-questions/README.md).
 
 ### Edge case
 

@@ -28,7 +28,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời. Sửa tên công ty và số điện thoại. Quản lý sổ địa chỉ. Đổi mật khẩu, xem / thu hồi phiên đăng nhập. Xem công nợ và vị thế tín dụng. |
+| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời. Sửa tên công ty và số điện thoại. Quản lý sổ địa chỉ. Đổi mật khẩu, xem / thu hồi phiên đăng nhập. Xem công nợ và vị thế tín dụng: hạn mức, dư nợ, hạn mức còn lại, kỳ hạn, cờ quá hạn của chính mình *(Quyết định 21/10/2026; hồ sơ rủi ro vẫn là dữ liệu nội bộ)*. |
 | **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi / gửi lại lời mời kích hoạt. Đặt điều khoản ban đầu (chỉ trả trước / đặt cọc). Xem hồ sơ, sửa thông tin thay khách, quản lý địa chỉ. |
 | **Quản trị bán hàng (E-commerce Admin)** | Tạo hồ sơ khách. **Đổi trạng thái khách** (chặn / gỡ chặn / đóng / mở lại). Quản lý **nhóm khách** và gán khách vào nhóm. Quản lý địa chỉ. |
 | **Kế toán (Accountant)** | **Duyệt điều khoản thanh toán**: điều khoản được phép, hạn mức, kỳ hạn, % cọc, chính sách thu phần còn lại ([15](../15-payment/README.md) BR-16) |

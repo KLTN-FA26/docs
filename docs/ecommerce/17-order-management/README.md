@@ -20,7 +20,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 |-------|---------|
 | **Nhân viên Sale (Sales Staff)** | Tra cứu đơn, CSKH. **Duyệt / từ chối yêu cầu huỷ** của khách. Huỷ đơn thay khách. **Đóng phần còn lại** của đơn giao một phần. **Quyết định cho phép giao một phần**. |
 | **Điều phối đơn hàng (Order Coordinator)** | Release đơn cho kho, chọn kho xuất, **chọn cách giao** (gửi kiện / nguyên chuyến). **Treo / gỡ treo đơn**. Ghi nhận giao thành công / thất bại. Duyệt / từ chối yêu cầu huỷ, huỷ đơn, đóng phần còn lại. |
-| **Kế toán (Accountant)** | **Duyệt / từ chối đơn treo vì tín dụng** ([15](../15-payment/README.md) §4.4); hoàn tiền; đối soát |
+| **Kế toán (Accountant)** | **Duyệt / từ chối đơn treo vì tín dụng** ([15](../15-payment/README.md) §4.4); hoàn tiền; đối soát; **xem chi tiết & lịch sử đơn (chỉ đọc)** *(Quyết định 21/10/2026)* |
 | **Nhân viên kho (Warehouse Staff)** | Nhận lệnh xuất; cập nhật picked / packed / shipped |
 | **Khách hàng sỉ** | Xem đơn trên cổng (trạng thái rút gọn, §5.2). **Tự huỷ** đơn chưa vào sản xuất / kho, hoặc **gửi yêu cầu huỷ**. Gửi yêu cầu trả hàng. Đặt lại từ đơn cũ ([14](../14-cart-and-order/README.md)). |
 | **Hệ thống** | Hợp nhất trạng thái từ Payment / Production / Picking / Packing / Shipping. Treo đơn khi tín dụng / thiết kế lệch. Đóng yêu cầu huỷ không còn quyết được. Tự hoàn tất và tự đóng đơn mỗi đêm. Thông báo Sale / Điều phối. |
@@ -85,7 +85,8 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 6. **Đơn hỗn hợp** — Dòng hàng sẵn được pick **song song** trong lúc in và chờ tại khu `PACKING`. Khi **mọi lệnh sản xuất** đã `Completed` → `Ready to Fulfill`:
    - Còn dòng hàng sẵn chưa pick → release **lệnh xuất** → [Picking](../../warehouse/07-picking/README.md); đơn → `Picking`.
    - Mọi dòng đã ở khu `PACKING` → đơn đi thẳng `Ready to Fulfill` → `Packed`, **không qua `Picking`**.
-7. **Giao một phần** — Sale quyết định **cho phép giao một phần** theo từng đơn (bật / tắt, ghi chú ≤ 500 ký tự; mọi lần quyết định được ghi lại).
+7. **Giao một phần** — Sale quyết định **cho phép giao một phần** theo từng đơn (mặc định tắt; bật / tắt, ghi chú ≤ 500 ký tự; mọi lần quyết định được ghi lại); kho chỉ làm theo *(Quyết định 19/10 và 21/10/2026)*.
+   - Nhiều đơn đi chung một xe: xử lý ở lập kế hoạch chuyến xe ([09 §4.2](../../warehouse/09-shipping/README.md)); mỗi kiện vẫn thuộc một đơn.
    - Có cho phép: hàng sẵn được đóng gói và **bàn giao trước** trong lúc dòng in còn sản xuất (PACK-EARLY); đơn → `Partially Fulfilled`.
    - Không cho phép: không được để lại hàng khi bàn giao.
    - Quyết định **khoá** từ khi đơn `Shipped` trở đi. Cũng không tắt được khi đã có hàng giao trước dòng in, hoặc đã có hàng rời kho trên một chuyến xe.
@@ -93,12 +94,12 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
 ### 4.3. Hoàn tất & đóng đơn
 
-9. **`Delivered`** — Điều phối cập nhật khi hãng báo giao thành công.
+9. **`Delivered`** — Điều phối cập nhật khi hãng báo giao thành công. Đơn đã có shipment thì kết quả giao ghi **theo từng shipment** *(Quyết định 19/10/2026)*.
 10. **Đối soát tài chính** ([15](../15-payment/README.md)):
     - trả trước: đã `Paid`;
     - đặt cọc: thu phần còn lại theo chính sách của đơn;
     - công nợ: mở **khoản công nợ phải thu**.
-11. **Tự hoàn tất** — mỗi đêm (00:30) hệ thống chuyển `Delivered` → `Completed` khi đủ ba điều kiện:
+11. **Tự hoàn tất** *(Quyết định 21/10/2026)* — mỗi đêm (00:30) hệ thống chuyển `Delivered` → `Completed` khi đủ ba điều kiện:
     - hết **thời hạn đổi / trả 7 ngày** kể từ khi giao;
     - đơn **không còn tiền phải thu**;
     - không có yêu cầu trả hàng đang mở.
@@ -129,7 +130,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
       - **Duyệt** → huỷ đơn ngay, kèm phí nếu có (bước 19);
       - **Từ chối**, bắt buộc ghi lý do.
     - Đơn tiến tới mức không huỷ được nữa (đóng gói xong, hoặc đã huỷ) trong lúc yêu cầu còn chờ → yêu cầu tự **hết hiệu lực** (`Expired`), kèm ghi chú hướng khách sang trả hàng.
-18. **Mã lý do huỷ** (BR-12):
+18. **Mã lý do huỷ** (BR-12) — khách chỉ chọn 3 lý do đầu *(Quyết định 21/10/2026)*:
 
     | Mã | Nghĩa | Khách được chọn |
     |----|-------|-----------------|
@@ -147,16 +148,16 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 
     **Trước khi bắt đầu in:** **hoàn toàn bộ**, không được tính phí (BR-11).
 
-    **Sau khi đã in:**
+    **Sau khi đã in:** được huỷ, tính phí sản xuất; hàng đã in xuất huỷ (`SCRAP`) *(Quyết định 19/10/2026)*.
     - Được tính phí theo **% số tiền đã thu**, hoặc theo **số tiền thoả thuận**.
     - Số tiền thoả thuận phải là số nguyên dương, ≤ tổng đơn, kèm lý do (≤ 500 ký tự) và chi tiết (≤ 2.000 ký tự).
     - Tiền đã thu **trả phí trước**. Phần thừa thành **lệnh hoàn tiền** (`Pending`). Phần phí còn thiếu thành **khoản công nợ phí huỷ** ([15](../15-payment/README.md) §4.8).
 20. **Hệ thống không tự huỷ đơn đã in** — Thanh toán thất bại, hoặc hết hạn giữ hàng, ở một đơn **đã bắt đầu in** thì hệ thống **chuyển cho nhân viên quyết** và báo Sale / Điều phối, không tự huỷ.
-21. **Mốc đóng gói** — Khi **một kiện của đơn đã đóng gói xong** (hoặc đã bàn giao), đơn **không huỷ được nữa**; mọi thay đổi đi qua **trả hàng** (§4.7).
+21. **Mốc đóng gói** *(Quyết định 21/10/2026: đơn `Packed` không huỷ được)* — Khi **một kiện của đơn đã đóng gói xong** (hoặc đã bàn giao), đơn **không huỷ được nữa**; mọi thay đổi đi qua **trả hàng** (§4.7).
     - Ngoại lệ: hàng sẵn đóng gói trước dòng in (PACK-EARLY) trong lúc đơn còn `In Production`, chưa bàn giao gì.
 22. **Dừng tác vụ kho khi huỷ** — huỷ pick task, put-back hàng đã lấy, huỷ nhãn kiện / gỡ kiện khỏi kế hoạch xếp hàng, dừng lệnh sản xuất ([19](../../warehouse/19-production/README.md)).
-23. **Đóng phần còn lại** — Đơn `Partially Fulfilled` mà phần còn lại sẽ không giao nữa → Sale / Điều phối **đóng phần còn lại** (kèm mã lý do; đơn đang treo thì phải gỡ treo trước):
-    - Mọi đơn vị chưa giao bị đóng; đơn đi theo trạng thái các chuyến đã giao.
+23. **Đóng phần còn lại** — Đơn `Partially Fulfilled` mà phần còn lại sẽ không giao nữa → Sale / Điều phối **đóng phần còn lại** (kèm mã lý do — Sale chọn trong 6 lý do của màn hình *(Quyết định 21/10/2026)*; đơn đang treo thì phải gỡ treo trước):
+    - Mọi đơn vị chưa giao bị đóng; đơn đi theo trạng thái các chuyến đã giao, không chuyển thẳng `Completed` *(Quyết định 21/10/2026)*.
     - Phí chỉ tính khi đã in, ≤ giá trị các đơn vị in bị đóng, kèm lý do và chi tiết.
     - Tiền thừa trả phí trước, phần còn lại hoàn. Thiếu thì thành công nợ phí.
     - Hàng in chưa giao bị xuất huỷ.
@@ -173,7 +174,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
     | `ADDRESS`, `INVENTORY`, `CUSTOMER`, `FRAUD`, `OTHER` (bắt buộc ghi chú) | Điều phối | Điều phối |
 
 25. Điều phối treo tay được đơn ở `Confirmed`, `In Production`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`. Đơn đang treo thì không treo thêm lần nữa.
-26. **Gỡ treo** (bắt buộc ghi chú) → đơn **quay về trạng thái trước khi treo**, rồi cập nhật theo các chuyến hàng đã có.
+26. **Gỡ treo** (bắt buộc ghi chú) → đơn **quay về trạng thái trước khi treo**, rồi cập nhật theo các chuyến hàng đã có *(Quyết định 19/10/2026)*. Khách chỉ thấy lý do công khai ("đang được xem xét"), không thấy mã lý do nội bộ hay ghi chú.
 
 ### 4.7. Đổi / Trả hàng & Hoàn tiền (Returns & Refunds)
 
