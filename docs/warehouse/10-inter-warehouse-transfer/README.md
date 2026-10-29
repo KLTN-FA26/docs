@@ -90,7 +90,7 @@ Lệnh chuyển kho có **hai cách giao**:
 10. **Putaway tại kho đích** — hàng nhận sinh putaway task ([05](../05-putaway/README.md)) với gợi ý vị trí từ [Slotting](../06-warehouse-map-slotting/README.md) của kho đích. Tồn `In-Transit` → tồn `Available` tại kho đích.
 11. **Đóng lệnh chuyển (Close TO)** — khi toàn bộ dòng đã nhận & putaway (hoặc chốt chênh lệch) → `Completed` / `Closed`.
 
-> Ghi chú hiện trạng: các bước 8–11 (nhận tại kho đích, đối chiếu chênh lệch, đóng lệnh) **chưa có trong hệ thống**. Lệnh hiện dừng ở `In Transit` sau khi xuất kho nguồn.
+> ⚠️ Giả định: các bước 8–11 (nhận tại kho đích, đối chiếu chênh lệch, cất hàng, đóng lệnh) thuộc **phạm vi giai đoạn sau** — hệ thống chưa có chức năng nhận hàng của lệnh chuyển kho. Lệnh hiện dừng ở `In Transit` sau khi xuất kho nguồn. Xem [open-questions C26](../../open-questions/README.md).
 
 ---
 
@@ -103,9 +103,9 @@ Lệnh chuyển kho có **hai cách giao**:
 | `Approved` | Đã duyệt, chờ đóng gói tại nguồn | → `Picking`, → `Cancelled` | Kho nguồn |
 | `Picking` | Đang đóng gói tại kho nguồn; hàng đã giữ | → `In Transit`, → `Approved` (huỷ lấy hàng, khi hàng chưa rời kho) | Kho nguồn |
 | `In Transit` | Đã xuất kho nguồn, đang trên đường | → `Partially Received`, → `Received` | Vận chuyển / Kho đích |
-| `Partially Received` | Kho đích đã nhận một phần | → `Received`, → `Closed` (short-close) | Kho đích |
-| `Received` | Kho đích đã nhận đủ (chờ putaway) | → `Completed` | Kho đích |
-| `Completed` / `Closed` | Đã putaway & đối chiếu xong | *(cuối)* | System / Manager |
+| `Partially Received` | Kho đích đã nhận một phần *(phạm vi sau)* | → `Received`, → `Closed` (short-close) | Kho đích |
+| `Received` | Kho đích đã nhận đủ, chờ putaway *(phạm vi sau)* | → `Completed` | Kho đích |
+| `Completed` / `Closed` | Đã putaway & đối chiếu xong *(phạm vi sau)* | *(cuối)* | System / Manager |
 | `Cancelled` | Huỷ (có lý do) khi **chưa xuất** kho nguồn | *(cuối)* | Planner / Quản lý kho |
 
 ```mermaid

@@ -60,7 +60,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 
 ### 4.1. Báo giá (Quote)
 
-1. **Tiếp nhận yêu cầu** — khách liên hệ Sale (qua [chat](../16-sales-chat/README.md), điện thoại, hoặc yêu cầu trên cổng): loại ly / bao bì, số lượng, logo / thiết kế.
+1. **Tiếp nhận yêu cầu** — khách liên hệ Sale (điện thoại, email; [chat](../16-sales-chat/README.md) là phạm vi sau): loại ly / bao bì, số lượng, logo / thiết kế.
 2. **Lập báo giá** — Sale chọn phôi, gắn thiết kế đã xác nhận ([12](../12-product-design/README.md)), nhập **bậc giá** (mặc định từ bảng giá riêng của khách), hiệu lực, điều khoản thanh toán đề xuất. Báo giá ở `Draft`, **bản sửa số 1**.
 3. **Thiết kế mới → làm mẫu** — nếu cặp (thiết kế, phôi) chưa có mẫu được duyệt, Sale tạo **yêu cầu làm mẫu** ([19](../../warehouse/19-production/README.md)) song song.
 4. **Gửi báo giá** → `Sent`; khách xem trên cổng. Hệ thống chỉ cho gửi khi:

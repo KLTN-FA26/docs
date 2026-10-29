@@ -22,7 +22,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 > - sắp xếp theo giá / độ phổ biến;
 > - thứ tự hiển thị và sản phẩm nổi bật do Quản trị bán hàng đặt;
 > - **giá và tồn theo đơn vị bán** (thùng…) — hiện mọi giá và số lượng trên catalog tính theo **đơn vị cơ sở** ([open-questions A9](../../open-questions/README.md));
-> - khách **tự gửi yêu cầu báo giá / yêu cầu thiết kế** từ trang sản phẩm — hiện khách liên hệ Sale qua [chat](../16-sales-chat/README.md).
+> - khách **tự gửi yêu cầu báo giá / yêu cầu thiết kế** từ trang sản phẩm — hiện khách liên hệ Sale ngoài hệ thống ([chat](../16-sales-chat/README.md) là phạm vi sau).
 
 ---
 
@@ -128,7 +128,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 
    - **Không bao giờ hiện số ATP** cho khách.
    - ATP tính **toàn hệ thống**, theo đơn vị cơ sở. Kết quả có thể trễ tối đa 10 giây.
-4. **Sản phẩm tùy chỉnh** (`CUSTOMIZABLE`) hiển thị như hàng thường, kèm loại sản phẩm. Phôi có thể đặt như hàng sẵn; **dòng có thiết kế chỉ vào đơn qua báo giá** ([14](../14-cart-and-order/README.md) BR-12). Thiết kế mới: khách liên hệ Sale qua [chat](../16-sales-chat/README.md); quy trình ở [12](../12-product-design/README.md).
+4. **Sản phẩm tùy chỉnh** (`CUSTOMIZABLE`) hiển thị như hàng thường, kèm loại sản phẩm. Phôi có thể đặt như hàng sẵn; **dòng có thiết kế chỉ vào đơn qua báo giá** ([14](../14-cart-and-order/README.md) BR-12). Thiết kế mới: khách liên hệ Sale (ngoài hệ thống; [chat](../16-sales-chat/README.md) là phạm vi sau); quy trình ở [12](../12-product-design/README.md).
 
 ### 4.5. Đặt hàng từ catalog
 

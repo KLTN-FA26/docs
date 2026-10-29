@@ -73,8 +73,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng lại, chưa cho vào tồn khả dụng; hàng nằm ở Area loại `QUARANTINE`. |
 | **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
 | **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt, khai báo **theo từng NCC** (trống = 0); vượt luôn bị chặn. |
-| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. |
-| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. |
+| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. Phạm vi sau ([C25](../open-questions/README.md)). |
+| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. Phạm vi sau ([C25](../open-questions/README.md)). |
 | **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
 | **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
 | **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
@@ -248,7 +248,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Order amendment / Sửa đơn** | Thay đổi nội dung đơn sau khi tạo (theo quy tắc trạng thái). |
 | **RMA** (Return Merchandise Authorization) — **Phiếu cho phép trả hàng** | Chứng từ chấp thuận & hướng dẫn khách trả hàng. |
 | **Exchange / Đổi hàng** | Trả hàng cũ + nhận hàng mới (thường xử lý như trả + đơn mới). |
-| **Sales Chat / Messaging / Nhắn tin với Sale** | Kênh hội thoại trực tiếp khách ↔ nhân viên Sale. |
+| **Sales Chat / Messaging / Nhắn tin với Sale** | Kênh hội thoại trực tiếp khách ↔ nhân viên Sale. Phạm vi sau ([F7](../open-questions/README.md)). |
 | **Conversation / Thread / Hội thoại** | Một chuỗi tin nhắn giữa khách và Sale, gắn ngữ cảnh (sản phẩm/đơn/thiết kế). |
 | **Routing / Định tuyến** | Gán hội thoại đến agent phù hợp (kỹ năng, tải, lịch sử). |
 | **SLA** (Service Level Agreement) | Cam kết mức dịch vụ (ví dụ thời gian phản hồi tối đa). |

@@ -11,7 +11,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | G3 | **Truy vết đầu-cuối (end-to-end traceability)** | Từ PO của nhà cung cấp → lô hàng nhận → vị trí lưu kho → đơn hàng khách → kiện hàng giao đi, tất cả liên kết bằng chứng từ. |
 | G4 | **Tối ưu thao tác kho** | Kho Map 2D/3D + gợi ý vị trí (slotting) + lộ trình picking giúp giảm quãng đường di chuyển và sai sót. |
 | G5 | **Từ thiết kế tới sản xuất** | Thiết kế logo 2D lên ly / bao bì, xem trước 3D, báo giá, **làm mẫu và khách duyệt mẫu** trước khi sản xuất số lượng lớn; thiết kế đã khoá đi theo đơn tới xưởng in và khâu đóng gói. |
-| G6 | **Kết nối Sale – Khách hàng** | Kênh chat trực tiếp để tư vấn, chốt thiết kế, xử lý phát sinh trong đơn. |
+| G6 | **Kết nối Sale – Khách hàng** | Kênh chat trực tiếp để tư vấn, chốt thiết kế, xử lý phát sinh trong đơn (phạm vi giai đoạn sau — [16](../ecommerce/16-sales-chat/README.md)). |
 | G7 | **Bán sỉ có kiểm soát tín dụng** | Mỗi khách có giá riêng và phương thức thanh toán riêng (đặt cọc, trả trước, công nợ có hạn mức); đơn vượt hạn mức bị giữ lại chờ duyệt. |
 
 ---
@@ -76,7 +76,7 @@ Phân bổ trên là cấu hình mặc định khi cài đặt; người có quy
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên cổng khách hàng: xem catalog & giá riêng, **xác nhận / yêu cầu sửa thiết kế**, chấp nhận báo giá, **duyệt mẫu**, đặt hàng / đặt lại, theo dõi đơn & công nợ, chat với Sale. **Không có khách vãng lai (guest).** |
+| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên cổng khách hàng: xem catalog & giá riêng, **xác nhận / yêu cầu sửa thiết kế**, chấp nhận báo giá, **duyệt mẫu**, đặt hàng / đặt lại, theo dõi đơn & công nợ; chat với Sale là phạm vi sau. **Không có khách vãng lai (guest).** |
 | **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: nhận kiện khi bàn giao, vận chuyển, giao cho khách, thu hộ phần còn lại (nếu có), hoàn hàng về kho (RTO); cung cấp xe tải / container cho giao nguyên chuyến. Hệ thống không tích hợp API và không theo dõi hành trình; nhân viên cập nhật kết quả giao khi hãng báo lại |
 

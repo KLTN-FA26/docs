@@ -125,7 +125,7 @@ Receipt là **điểm hàng hoá chính thức thuộc quyền kiểm soát củ
 **Chặng 3 — Bàn giao và đóng phiếu**
 
 10. **Bàn giao cho Putaway** — hệ thống mở **nhiệm vụ cất hàng** cho hàng sẵn sàng cất ([05](../05-putaway/README.md)): mỗi thùng một nhiệm vụ, phần lẻ của dòng một nhiệm vụ.
-11. **Thông báo Invoice matching** — Receipt trở thành một vế trong three-way matching với [Invoice](../04-invoice/README.md); phần được đối chiếu thanh toán là phần không bị loại.
+11. **Thông báo Invoice matching** *(phạm vi sau — [04](../04-invoice/README.md))* — Receipt trở thành một vế trong three-way matching với [Invoice](../04-invoice/README.md); phần được đối chiếu thanh toán là phần không bị loại.
 12. **Đóng phiếu nhận** — khi mọi dòng đã cất xong số phải cất (toàn bộ số nhận với dòng không QC, phần đạt với dòng có QC) → `Closed` tự động.
 
 ---
