@@ -6,6 +6,8 @@ Kênh **hội thoại trực tiếp giữa khách sỉ và nhân viên Sale** đ
 
 Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chiếu sản phẩm, thiết kế, báo giá, yêu cầu làm mẫu, hoặc đơn hàng cụ thể.
 
+> ⚠️ Giả định: Sales Chat thuộc **phạm vi giai đoạn sau** — hệ thống mới có khung, chưa có chức năng nhắn tin. Hiện khách liên hệ Sale ngoài hệ thống (điện thoại, email); thông báo nội bộ dùng hộp thông báo trong ứng dụng ([00 §6](../../00-system-overview/README.md)). Xem [open-questions F7](../../open-questions/README.md).
+
 ---
 
 ## 2. Actor liên quan
@@ -14,8 +16,8 @@ Chat gắn ngữ cảnh (context-aware): mỗi hội thoại có thể tham chi�
 |-------|---------|
 | **Khách hàng sỉ** | Mở hội thoại (trên cổng khách hàng), gửi câu hỏi / logo / ảnh, nhận tư vấn, báo giá, thông tin mẫu |
 | **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn, chỉnh thiết kế hộ, lập báo giá, tạo yêu cầu làm mẫu, tạo đơn từ báo giá, gửi thông tin thanh toán, chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
-| **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản trị sàn hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
-| **Hệ thống (Routing + Notification)** | Định tuyến hội thoại đến agent phù hợp/rảnh; nhắc SLA; lưu lịch sử; (tuỳ chọn) chatbot trả lời câu hỏi cơ bản |
+| **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản trị bán hàng hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
+| **Hệ thống (định tuyến & nhắc SLA)** | Định tuyến hội thoại đến agent phù hợp/rảnh; nhắc SLA; lưu lịch sử; (tuỳ chọn) chatbot trả lời câu hỏi cơ bản |
 
 > ⚠️ Giả định: Phạm vi là **chat 1–1 khách sỉ ↔ Sale trong cổng khách hàng**. Việc tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI chưa được đề bài xác định — xem [open-questions](../../open-questions/README.md).
 

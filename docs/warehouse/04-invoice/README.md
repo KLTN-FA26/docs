@@ -12,6 +12,8 @@ Mục tiêu: **chỉ thanh toán cho hàng đã thực nhận, đúng giá đã 
 
 > ⚠️ Giả định: StockFlowCommerce quản lý invoice ở mức **đối chiếu & duyệt thanh toán (AP matching & approval)**, còn hạch toán sổ cái và chi tiền có thể do hệ thống kế toán riêng đảm nhận (tích hợp). Phạm vi tính năng "Invoice" theo đề bài chưa nêu rõ mức độ kế toán — xem [open-questions](../../open-questions/README.md).
 
+> ⚠️ Giả định: toàn bộ module này thuộc **phạm vi giai đoạn sau** — hệ thống hiện **chưa ghi nhận hoá đơn NCC** và chưa đối chiếu ba chiều. Đóng PO không kiểm hoá đơn ([02](../02-purchase-order/README.md)); quyết toán gia công ([19](../19-production/README.md) §4.7) cho ra số phải trả làm cơ sở đối chiếu khi có module này. Xem [open-questions C25](../../open-questions/README.md).
+
 ---
 
 ## 2. Actor liên quan
