@@ -1,12 +1,18 @@
 # 15 — Thanh toán & Công nợ khách sỉ (Payment & Receivables)
 
-> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách sỉ thanh toán bằng **chuyển khoản**, theo một trong ba phương thức được cấu hình cho từng khách: **trả trước 100%**, **đặt cọc**, **công nợ có hạn mức**. Cổng thanh toán online (thẻ / ví) và COD bán lẻ **tạm gác**.
+> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách sỉ thanh toán bằng **chuyển khoản**, theo một trong ba **điều khoản thanh toán** được cấu hình cho từng khách: **trả trước 100%**, **đặt cọc**, **công nợ có hạn mức**. Không có cổng thanh toán online (thẻ / ví), không có COD bán lẻ, và không có trạng thái "thanh toán thất bại" (chuyển khoản không có lỗi để báo về).
 
 ## 1. Mục đích (Purpose)
 
-Xử lý **thu tiền cho đơn bán sỉ** và **công nợ phải thu** của khách: xác nhận tiền chuyển khoản (trả trước, tiền cọc, phần còn lại), ghi nhận và theo dõi **công nợ có hạn mức & kỳ hạn**, các luồng ngược (**hoàn tiền**) và **đối soát** với sao kê ngân hàng.
+Ghi nhận **tiền khách chuyển khoản** vào một **sổ tiền vào (transfer ledger)**, phân bổ tiền đó cho **đơn hàng** hoặc **khoản công nợ phải thu**. Ngoài ra module:
 
-Payment quyết định thời điểm đơn hàng **đủ điều kiện thanh toán** để [xác nhận](../14-cart-and-order/README.md); đơn đặt cọc chỉ được release sang [sản xuất](../../warehouse/19-production/README.md) khi tiền cọc đã về.
+- theo dõi **công nợ có hạn mức & kỳ hạn**, kể cả phần tiền nhà vận chuyển thu hộ;
+- xử lý các luồng ngược: **đảo phân bổ** khi phân bổ sai, **hoàn tiền**.
+
+Payment quyết định thời điểm đơn **đủ điều kiện thanh toán**:
+
+- Tiền phân bổ cho đơn đủ theo điều khoản của đơn → hệ thống tự chuyển đơn `Confirmed` ([14](../14-cart-and-order/README.md)).
+- Đơn đặt cọc chỉ được release sang [sản xuất](../../warehouse/19-production/README.md) khi tiền cọc đã về.
 
 ---
 
@@ -14,11 +20,11 @@ Payment quyết định thời điểm đơn hàng **đủ điều kiện thanh 
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ** | Chuyển khoản theo đơn / theo kỳ công nợ; xem công nợ và lịch sử thanh toán trên cổng khách hàng — gồm **hạn mức công nợ, dư nợ hiện tại, hạn mức còn lại, kỳ hạn và cờ quá hạn của chính mình**, ở trang tài khoản và lúc chọn trả công nợ *(Quyết định 21/10/2026)* |
-| **Nhân viên Sale (Sales Staff)** | Gửi thông tin thanh toán cho khách, nhắc thanh toán / nhắc công nợ qua [chat](../16-sales-chat/README.md) |
-| **Kế toán (Accountant)** | Đối chiếu sao kê, xác nhận tiền về và **phân bổ vào đơn / khoản công nợ trên sổ chung** (§4.6), đảo phân bổ nhầm, theo dõi công nợ phải thu, duyệt hoàn tiền |
-| **Người giữ quyền duyệt hạn mức** | Duyệt đơn công nợ vượt hạn mức; cấu hình hạn mức, kỳ hạn cho khách |
-| **Hệ thống (Payment Service)** | Tạo yêu cầu thanh toán, ghi giao dịch, cập nhật `payment_status`, tính dư nợ, cảnh báo quá hạn |
+| **Khách hàng sỉ** | Chuyển khoản theo hướng dẫn trên cổng (số tiền, nội dung = mã đơn). Xem công nợ của mình (chỉ phần khách phải trả) và vị thế tín dụng. |
+| **Kế toán (Accountant)** | Ghi nhận tiền về theo sao kê, phân bổ, đảo phân bổ, hoàn tiền dư cho khách, ghi nhận tiền nhà vận chuyển nộp lại. **Duyệt / từ chối đơn công nợ bị treo** ([17](../17-order-management/README.md) §4.6). **Duyệt điều khoản thanh toán** của khách (hạn mức, kỳ hạn). |
+| **Nhân viên Sale (Sales Staff)** | Đặt điều khoản ban đầu khi tạo khách: chỉ trả trước hoặc đặt cọc ([18](../18-customer-information/README.md)). Xem công nợ; nhắc khách thanh toán qua [chat](../16-sales-chat/README.md). |
+| **Điều phối đơn hàng (Order Coordinator)** | Xem công nợ. Gỡ treo đơn lý do thanh toán khi tiền đã đủ trở lại. |
+| **Hệ thống** | Tự dùng tiền dư của khách trả khoản mới; tính trạng thái thanh toán của đơn; tự xác nhận đơn khi đủ tiền; đánh dấu quá hạn mỗi đêm; chặn bàn giao khi chưa thu đủ phần phải thu trước giao. |
 
 ---
 
@@ -28,140 +34,190 @@ Payment quyết định thời điểm đơn hàng **đủ điều kiện thanh 
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Order + số tiền phải thu | Từ [14 Quote & Order](../14-cart-and-order/README.md) | Có |
-| Phương thức thanh toán của đơn | Trả trước 100% / đặt cọc / công nợ — phải nằm trong các phương thức được phép của khách ([18](../18-customer-information/README.md)) | Có |
-| % cọc | Theo cấu hình khách hoặc báo giá | Với đặt cọc |
-| Hạn mức & kỳ hạn công nợ | Theo hồ sơ khách | Với công nợ |
-| Sao kê / mã tham chiếu chuyển khoản | Nội dung chuyển khoản = mã đơn (hoặc mã kỳ công nợ) | Có (khi xác nhận tiền) |
-| Yêu cầu hoàn tiền | Order, số tiền, lý do | Khi refund |
+| **Khoản tiền về** | Khách, **mã tham chiếu sao kê** (≤ 100 ký tự, duy nhất), số tiền > 0, tiền tệ (mặc định VND), ngày nhận (không ở tương lai), ghi chú | Có |
+| Chỉ định phân bổ | Các đơn (mỗi đơn một số tiền) và / hoặc các khoản công nợ được trả. Không chỉ định → trả khoản đến hạn sớm nhất. | Không |
+| **Điều khoản thanh toán của khách** | Điều khoản được phép (trả trước / đặt cọc / công nợ, ít nhất một), điều khoản mặc định, % cọc (0 < % < 100), chính sách thu phần còn lại, hạn mức (≥ 0), kỳ hạn (0–365 ngày) — [18](../18-customer-information/README.md) | Có |
+| Điều khoản của đơn | Copy từ khách khi đặt; chỉ được **siết lại** (BR-10) | Có |
+| Yêu cầu đảo phân bổ | Phân bổ cần đảo + lý do (≤ 500); có treo đơn hay không | Khi đảo |
+| Yêu cầu hoàn tiền dư | Số tiền ≤ tiền dư chưa phân bổ + lý do | Khi hoàn |
+| Tiền nhà vận chuyển nộp lại | Khoản công nợ do nhà vận chuyển thu, dòng sao kê, số tiền | Khi đối soát thu hộ |
 
 ### Output
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Payment transaction** (mã giao dịch, số tiền, loại: trả trước / cọc / phần còn lại / thanh toán công nợ / hoàn) | 17 Order Management, kế toán |
-| **Cập nhật trạng thái đơn**: `Confirmed` / `Payment Failed`; `payment_status` | 14, 17 |
-| **Khoản công nợ phải thu** theo đơn công nợ (số tiền, ngày đến hạn) | Kế toán, khách (trên cổng) |
-| **Dư nợ của khách** và cảnh báo quá hạn | Kiểm hạn mức khi đặt đơn mới ([14](../14-cart-and-order/README.md)), Sale |
-| **Refund transaction** | 17, kế toán |
-| **Dữ liệu đối soát** với sao kê ngân hàng | Kế toán |
+| **Khoản tiền về** + các **dòng phân bổ** / **dòng đảo** (chỉ thêm, không sửa) | Kế toán, đối soát |
+| **Tiền dư của khách (credit)** = phần chưa phân bổ | Tự trả khoản công nợ mới; hoàn khi khách yêu cầu |
+| **Trạng thái thanh toán của đơn** (§5.2) và tự xác nhận đơn | 14, 17 |
+| **Khoản công nợ phải thu** (§5.1) | Kế toán, khách (trên cổng), kiểm hạn mức |
+| **Vị thế tín dụng** của khách: dư nợ, hạn mức còn lại, quá hạn | 14 (đặt đơn), 17 (release), khách |
+| **Lệnh hoàn tiền** (`Pending`) | Kế toán |
 
 ---
 
 ## 4. Các luồng thanh toán (Payment Flows)
 
-### 4.1. Trả trước 100% bằng chuyển khoản
+### 4.1. Ghi nhận tiền về & phân bổ
 
-1. Order `Pending Payment` → hệ thống tạo **yêu cầu thanh toán**, hiển thị thông tin tài khoản & **nội dung chuyển khoản = mã đơn**; transaction `Awaiting Confirmation`.
-2. Khách chuyển khoản.
-3. Kế toán **đối chiếu sao kê**, xác nhận đã nhận đủ → transaction `Captured` → `payment_status = Paid` → Order `Confirmed`.
-4. Quá hạn chưa nhận tiền → nhắc khách; hết thời hạn giữ đơn → Order `Cancelled`, giải phóng hàng.
+1. Khách chuyển khoản theo **hướng dẫn chuyển khoản** trên cổng. Hướng dẫn cho biết:
+   - số tiền cần chuyển và nội dung chuyển khoản (= mã đơn);
+   - thời điểm cần chuyển: **để xác nhận đơn** (trả trước / tiền cọc), **trước khi giao** (phần còn lại), hoặc **chưa cần chuyển**.
+2. Kế toán đối chiếu sao kê, **ghi nhận khoản tiền về**:
+   - Một mã tham chiếu sao kê chỉ ghi một lần (BR-07).
+   - Số tiền của khoản không bao giờ đổi.
+3. Phân bổ ngay khi ghi nhận, theo thứ tự:
+   - **(a)** các **đơn được chỉ định**, mỗi đơn đúng số tiền ghi;
+   - **(b)** các **khoản công nợ được chỉ định**;
+   - **(c)** không chỉ định gì → các khoản công nợ chưa trả của khách, **đến hạn sớm nhất trước** (BR-09).
 
-### 4.2. Đặt cọc (Deposit)
+   Chỉ định đơn mà không chỉ định khoản → phần còn lại để làm **tiền dư**.
+4. Phần chưa phân bổ là **tiền dư của khách**.
+   - Kế toán phân bổ sau cho một đơn hoặc một khoản.
+   - Khi có khoản công nợ mới, hệ thống **tự lấy tiền dư trả trước**.
+5. Không phân bổ được cho:
+   - đơn đã huỷ;
+   - đơn công nợ (đơn này trả qua khoản công nợ của nó);
+   - đơn không ở trạng thái nhận tiền.
+6. Tiền phân bổ cho đơn đủ theo điều khoản (đủ trả trước, đủ cọc) → đơn tự `Confirmed`.
 
-1. Order `Pending Payment` → yêu cầu **tiền cọc** = % giá trị đơn (theo cấu hình khách hoặc báo giá).
-2. Kế toán xác nhận tiền cọc về → transaction cọc `Captured` → `payment_status = Partially Paid` → Order `Confirmed`. **Chỉ khi đó** đơn mới được release sang [sản xuất](../../warehouse/19-production/README.md).
-3. **Phần còn lại** thu theo **chính sách thu phần còn lại** của khách (cấu hình theo khách, chụp lại trên từng đơn; Sale chỉ được siết chặt hơn, không được nới lỏng):
-   - **Chuyển khoản trước khi giao** — việc bàn giao cho hãng bị **chặn** cho tới khi đủ tiền; màn đóng gói chỉ **cảnh báo sớm** số còn phải thu, kho vẫn soạn và đóng hàng song song lúc chờ tiền *(Quyết định 19/10/2026)*.
-   - **Thu khi giao (COD)** — số thu hộ được **cố định cho từng shipment lúc bàn giao** (ghi trên nhãn kiện / biên bản), hãng thu rồi chuyển trả; tiền hãng chuyển về ghi vào khoản phải thu thu hộ theo tham chiếu sao kê (một dòng sao kê có thể phủ nhiều kiện). Số COD **tính chặt**: lúc bàn giao hệ thống đọc trực tiếp sổ tiền và khoá đơn trong lúc tính, nên không bao giờ thu dư khách *(Quyết định 21/10/2026)*.
-   - **Ghi công nợ** *(Quyết định 21/10/2026)* — chỉ cho khách được phép công nợ. Hệ thống kiểm hạn mức trên **phần còn lại (tổng đơn − tiền cọc) ngay lúc đặt đơn**; vượt hạn mức hoặc khách đang quá hạn → **báo lỗi để Sale đổi cách trả, không giữ đơn chờ duyệt** (để không có đơn nào bị kẹt sau khi đã sản xuất). Khi chính sách này lấy từ điều khoản của khách (đặt trên cổng, hoặc Sale không chọn riêng) mà phần còn lại không vừa hạn mức, đơn tự dùng *chuyển khoản trước khi giao* thay vì bị từ chối. Chỉ **tiền cọc** phải về trước khi bàn giao; không thu khi giao; mỗi lần giao ghi một khoản công nợ cho phần hàng đã giao (§4.3 bước 2), đến hạn sau kỳ hạn của khách.
-   - **Giao nguyên chuyến (FTL)** — không được chọn *thu khi giao*; luôn phải trả đủ tiền trước khi bàn giao *(Quyết định 21/10/2026; thực hiện cùng chức năng chọn hình thức giao của đơn)*.
-4. Đủ tiền → `payment_status = Paid`.
+### 4.2. Trả trước 100%
 
-### 4.3. Công nợ có hạn mức (Credit / Receivable)
+1. Đơn `Pending Payment`; hướng dẫn chuyển khoản "để xác nhận đơn" = toàn bộ giá trị đơn.
+2. Phân bổ đủ → `Paid` → đơn `Confirmed`.
+3. Hết hạn giữ hàng mà chưa đủ tiền → đơn `Cancelled`, giải phóng hàng ([14](../14-cart-and-order/README.md) BR-07).
 
-1. Đơn chọn phương thức công nợ → hệ thống kiểm **dư nợ hiện tại + giá trị đơn ≤ hạn mức** ([14](../14-cart-and-order/README.md) BR-06).
-   - Trong hạn mức → Order `Confirmed`, `payment_status = On Credit`.
-   - Vượt → Order `On Hold`; người có quyền duyệt chấp thuận (→ `Confirmed`) hoặc từ chối (khách chuyển sang trả trước / đặt cọc, hoặc huỷ).
-2. Khi giao hàng (`Delivered`) → ghi **khoản công nợ phải thu**, **ngày đến hạn = ngày giao + kỳ hạn** của khách. Đơn giao nhiều lần thì **mỗi shipment đã giao ghi một khoản riêng** cho phần hàng của shipment đó, **trừ phần tiền khách đã trả trước** (tiền trả trước được áp vào các lần giao sớm nhất trước) — nhờ vậy đóng phần còn lại không bao giờ khiến khách phải trả nhiều hơn hàng đã nhận *(Quyết định 19/10/2026)*.
-3. Khách chuyển khoản trả nợ (theo đơn hoặc gộp nhiều đơn); kế toán đối chiếu → phân bổ vào các khoản → khoản `Paid` / `Partially Paid`.
-4. Quá hạn → khoản `Overdue`; nhắc khách; theo chính sách có thể **chặn đơn công nợ mới** cho tới khi thanh toán phần quá hạn.
+### 4.3. Đặt cọc
 
-### 4.4. Hoàn tiền (Refund)
+1. Đơn `Pending Payment`; tiền cọc = % giá trị đơn (theo báo giá, hoặc % mặc định của khách).
+2. Phân bổ đủ cọc → `Partially Paid` → đơn `Confirmed`. **Chỉ khi đó** đơn mới được release sang sản xuất.
+3. **Phần còn lại** thu theo **chính sách thu phần còn lại** của đơn:
 
-1. Nguồn phát sinh (bán sỉ, sản phẩm in theo thiết kế):
-   - Khách huỷ đơn **trước khi in** → hoàn tiền cọc / tiền trả trước (trừ phí theo chính sách nếu có);
-   - Huỷ khi **đang in** → **cho huỷ, có tính phí sản xuất**; thành phẩm đã in xuất huỷ *(Quyết định 19/10/2026 — xem [17](../17-order-management/README.md) §4.5 bước 16a và bước 5 dưới đây)*;
-   - Hàng **lỗi sản xuất** / giao thiếu được duyệt → hoàn một phần hoặc làm lại hàng.
-2. Hoàn bằng chuyển khoản về tài khoản của khách; với đơn công nợ chưa thu → **ghi giảm công nợ** thay vì chuyển tiền.
-3. Refund vượt hạn mức → cần kế toán / người có quyền duyệt.
-4. Cập nhật đơn: `Refunded` / `Partially Refunded`; ghi log & thông báo khách.
-5. **Phí khi đóng phần còn lại / huỷ sau khi đã in** *(Quyết định 21/10/2026, theo các quyết định về huỷ ngày 17/10 và 19/10)*: Sale có thể giữ một **phí đã thoả thuận**, tối đa bằng giá trị phần in bị đóng (vượt → bị từ chối); chưa bắt đầu in thì không tính phí. Tiền khách đã trả vượt giá trị mới của đơn **trả phí trước** (kể cả tiền cọc), phần còn lại **hoàn khách**; nếu vẫn thiếu thì ghi **khoản phải thu "phí huỷ"** (một khoản cho mỗi lần đóng). Lần đóng sau chỉ tính phần phí đã thực giữ hoặc đã trả, nên không bao giờ tính phí hai lần.
+   | Chính sách | Thu thế nào | Chặn gì |
+   |------------|-------------|---------|
+   | `BEFORE_DELIVERY` | Khách chuyển khoản trước khi bàn giao | Bàn giao bị chặn cho tới khi đủ tiền (BR-11) |
+   | `ON_DELIVERY` | Nhà vận chuyển thu khi giao. Hệ thống mở khoản công nợ **do nhà vận chuyển thu** (§4.6). | Không được kết hợp với giao nguyên chuyến ([17](../17-order-management/README.md)) |
+   | `ON_CREDIT` | Phần còn lại thành **công nợ** của khách, đến hạn = ngày giao + kỳ hạn | Lúc đặt, kiểm như đơn công nợ: quá hạn hoặc vượt hạn mức thì **từ chối đặt**, không treo (BR-12) |
 
-### 4.5. Đối soát (Reconciliation)
+4. Thu đủ → `Paid`.
 
-- **Sao kê ngân hàng:** đối chiếu từng khoản tiền về với yêu cầu thanh toán / khoản công nợ theo mã tham chiếu.
-- **Tiền thu khi giao** (phần còn lại của đơn đặt cọc, nếu có): đối chiếu với biên bản bàn giao.
-- Chênh lệch (thiếu, thừa, sai nội dung) → tạo ticket xử lý; không đóng tài chính đơn cho tới khi khớp.
+### 4.4. Công nợ có hạn mức
 
-> ⚠️ Giả định: ngưỡng hạn mức, kỳ hạn, % cọc mặc định, chính sách chặn khi quá hạn chưa chốt — câu hỏi D13. Xem [open-questions](../../open-questions/README.md). *(Đã chốt một phần 19–21/10/2026: thời điểm kiểm hạn mức cho phần còn lại của đơn đặt cọc ghi công nợ — §4.2 bước 3; các ngưỡng cụ thể vẫn mở.)*
+1. Lúc đặt đơn công nợ, hệ thống tính **vị thế tín dụng** (BR-13):
+   - Khách có khoản **quá hạn** → `OVERDUE`.
+   - Dư nợ + giá trị đơn > hạn mức → `OVER_LIMIT`.
+   - Còn lại → `WITHIN_LIMIT` → đơn `Confirmed`, trạng thái thanh toán `On Credit`.
+2. `OVERDUE` / `OVER_LIMIT` → đơn **`On Hold` lý do tín dụng**. Kế toán quyết định:
+   - **Duyệt** (bắt buộc ghi chú) → đơn `Confirmed`.
+   - **Từ chối** (bắt buộc ghi chú) kèm một hành động:
 
-### 4.6. Sổ tiền vào chung (customer transfer ledger)
+     | Hành động | Kết quả |
+     |-----------|---------|
+     | Huỷ đơn | Lý do `CREDIT_REJECTED` |
+     | Chuyển sang trả trước | Chỉ khi khách được phép. Đơn về `Pending Payment`, giữ hàng có hạn lại. |
+     | Chuyển sang đặt cọc | Chỉ khi khách được phép; % cọc mặc định của khách. Phần còn lại `ON_CREDIT` đổi thành `BEFORE_DELIVERY`. Đơn về `Pending Payment`, giữ hàng có hạn lại. |
 
-> *(Quyết định 19/10/2026.)*
+   Mọi quyết định tín dụng được ghi lịch sử: `WITHIN_LIMIT` / `OVER_LIMIT` / `OVERDUE` / `APPROVED` / `REJECTED`.
+3. Khi giao (`Delivered`) → mở **khoản công nợ** `CREDIT_ORDER`, đến hạn = ngày giao + kỳ hạn của đơn.
+4. Khách chuyển khoản trả nợ → phân bổ như §4.1.
+5. **Mỗi đêm 00:15** hệ thống đánh dấu `Overdue` các khoản quá hạn chưa trả đủ.
+6. Khách đang có khoản quá hạn thì:
+   - không release được đơn công nợ hoặc đơn `ON_CREDIT` ([17](../17-order-management/README.md));
+   - đơn công nợ mới bị treo như bước 2.
 
-- Mọi khoản khách chuyển khoản — trả trước, tiền cọc, phần còn lại trước khi giao, trả công nợ — được ghi vào **một sổ duy nhất** (sổ chuyển khoản của khách). Kế toán **phân bổ** từng khoản chuyển vào một hoặc nhiều **đơn** hoặc **khoản công nợ**; không có đường ghi tiền riêng cho đơn, để cùng một khoản chuyển không bị ghi hai lần (BR-07).
-- Tổng phân bổ cho một đơn **không vượt số còn phải thu** của đơn (đã trừ tiền đã nhận, công nợ đang mở và số COD đang trên đường).
-- Phân bổ **chỉ thêm, không sửa** (BR-06). Phân bổ nhầm được sửa bằng **dòng đảo (số âm)** kèm lý do của kế toán, mỗi phân bổ đảo tối đa một lần.
-- Đảo phân bổ khiến đơn đã `Confirmed` bị thiếu tiền → đơn chuyển `On Hold` (lý do thanh toán); hệ thống **không âm thầm bỏ trạng thái xác nhận**. Gỡ giữ chỉ được khi tiền đủ lại ([17](../17-order-management/README.md) §4.7).
-- Hoàn tiền lấy từ **đúng một** nguồn: thanh toán, phân bổ, hoặc số dư có của khoản chuyển; hoàn khi huỷ chỉ yêu cầu **một lần cho mỗi đơn**.
+### 4.5. Đảo phân bổ
+
+1. Phân bổ sai (nhầm khách, nhầm đơn) → kế toán **đảo phân bổ**, bắt buộc lý do. Hệ thống:
+   - thêm **một dòng đảo** (không sửa dòng cũ);
+   - trả tiền về thành tiền dư của khách.
+2. Không đảo được khi:
+   - đã đảo rồi;
+   - đã yêu cầu hoàn số tiền đó;
+   - đơn đã `Cancelled` / `Completed` / `Closed` / đang trả hàng / đã hoàn tiền.
+3. Đảo làm một đơn `Confirmed` **không còn đủ tiền** theo điều khoản thì:
+   - kế toán phải chọn **treo đơn**, nếu không thao tác bị từ chối;
+   - đơn → `On Hold` lý do **thanh toán**;
+   - Điều phối chỉ gỡ treo được khi tiền đã đủ lại ([17](../17-order-management/README.md)).
+
+### 4.6. Tiền nhà vận chuyển thu hộ
+
+1. Đơn đặt cọc với chính sách `ON_DELIVERY`: khi giao, mở khoản công nợ `DEPOSIT_BALANCE` **do nhà vận chuyển thu**, đến hạn ngày giao.
+2. Đây là **nợ của nhà vận chuyển**, không phải của khách:
+   - không tính vào dư nợ / quá hạn của khách;
+   - khách không thấy khoản này;
+   - tiền khách chuyển khoản không trả được khoản này (BR-14).
+3. Nhà vận chuyển nộp tiền → kế toán ghi **tiền nhà vận chuyển nộp** theo dòng sao kê.
+   - Nộp thiếu → khoản `Partially Paid`, chờ phần còn lại.
+   - Nộp thừa → thành tiền dư của khách.
+
+### 4.7. Hoàn tiền
+
+1. Hệ thống tạo **lệnh hoàn tiền** `Pending` khi:
+   - **huỷ đơn / đóng phần còn lại**: tiền đã thu vượt phần phải giữ (phí huỷ) — xem [17](../17-order-management/README.md) §4.5;
+   - **khách yêu cầu hoàn tiền dư**: kế toán tạo, số tiền ≤ tiền dư, bắt buộc lý do.
+2. Kế toán chuyển khoản hoàn cho khách. Lệnh hoàn kết thúc ở `Completed` hoặc `Failed`. Lệnh hoàn tiền dư `Failed` thì tiền quay lại thành tiền dư.
+
+> ⚠️ Giả định: hệ thống hiện chỉ **tạo** lệnh hoàn `Pending`; bước kế toán đánh dấu đã hoàn (`Completed`) hoặc hoàn lỗi (`Failed`) chưa có màn hình. Việc chuyển khoản hoàn làm ngoài hệ thống. Xem [open-questions D15](../../open-questions/README.md).
+
+### 4.8. Phí huỷ
+
+- Khi huỷ đơn có phí ([17](../17-order-management/README.md) §4.5), tiền đã thu **trả phí trước**.
+- Phần phí còn thiếu thành khoản công nợ `CANCELLATION_FEE`, đến hạn ngay ngày huỷ, do khách trả.
 
 ---
 
 ## 5. Trạng thái / Vòng đời (Lifecycle)
 
-### 5.1. Trạng thái Payment Transaction
+### 5.1. Khoản công nợ phải thu (Receivable)
 
-| Trạng thái | Ý nghĩa |
-|------------|---------|
-| `Awaiting Confirmation` | Đã phát hành yêu cầu thanh toán, chờ kế toán xác nhận tiền về |
-| `Captured` | Đã nhận tiền |
-| `Cancelled` | Hết hạn / huỷ trước khi nhận tiền |
-| `Refunded` / `Partially Refunded` | Đã hoàn toàn phần / một phần |
+**Loại khoản:**
 
-```mermaid
-stateDiagram-v2
-    [*] --> AwaitingConfirmation: Phát hành yêu cầu thanh toán
-    AwaitingConfirmation --> Captured: Kế toán xác nhận tiền về
-    AwaitingConfirmation --> Cancelled: Hết hạn
-    Captured --> Refunded: Hoàn toàn phần
-    Captured --> PartiallyRefunded: Hoàn một phần
-    Captured --> [*]
-    Cancelled --> [*]
-    Refunded --> [*]
-```
+| Loại | Sinh khi | Ai trả | Đến hạn |
+|------|----------|--------|---------|
+| `CREDIT_ORDER` | Đơn công nợ được giao | Khách | Ngày giao + kỳ hạn |
+| `DEPOSIT_BALANCE` | Phần còn lại của đơn đặt cọc: `ON_CREDIT` (khách trả) hoặc `ON_DELIVERY` (nhà vận chuyển thu) | Khách / Nhà vận chuyển | `ON_CREDIT`: ngày giao + kỳ hạn. `ON_DELIVERY`: ngày giao. |
+| `CANCELLATION_FEE` | Phí huỷ / phí đóng phần còn lại chưa được tiền đã thu bù đủ | Khách | Ngày huỷ / ngày đóng |
 
-### 5.2. Trạng thái thanh toán của Order (payment_status)
+**Trạng thái:**
 
-| Trạng thái | Ý nghĩa |
-|------------|---------|
-| `Unpaid` | Chưa thu (đơn trả trước / đặt cọc vừa tạo) |
-| `Partially Paid` | Đã nhận cọc, còn phần còn lại |
-| `On Credit` | Đơn công nợ; tiền thu theo kỳ hạn |
-| `Paid` | Đã thu đủ |
-| `Refunded` / `Partially Refunded` | Đã hoàn |
-
-### 5.3. Trạng thái khoản công nợ phải thu (Receivable)
-
-| Trạng thái | Ý nghĩa | Chuyển tiếp |
-|------------|---------|-------------|
-| `Open` | Đã giao, chưa tới hạn | → `Partially Paid`, → `Paid`, → `Overdue` |
-| `Partially Paid` | Đã trả một phần | → `Paid`, → `Overdue` |
-| `Overdue` | Quá hạn chưa trả đủ | → `Partially Paid`, → `Paid` |
-| `Paid` | Đã tất toán | *(cuối)* |
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Open` | Đã phát sinh, chưa trả | → `Partially Paid`, → `Paid`, → `Overdue` | Hệ thống (phân bổ, quét đêm) |
+| `Partially Paid` | Đã trả một phần | → `Paid`, → `Overdue` | Hệ thống |
+| `Overdue` | Quá hạn, chưa trả đủ; giữ `Overdue` cho tới khi trả đủ | → `Paid` | Hệ thống |
+| `Paid` | Đã tất toán | *(cuối)* — đảo phân bổ tính lại trạng thái | Hệ thống |
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Open: Giao hàng đơn công nợ
-    Open --> PartiallyPaid: Trả một phần
-    Open --> Paid: Trả đủ
-    Open --> Overdue: Quá hạn
+    [*] --> Open: Giao hàng / huỷ có phí
+    Open --> PartiallyPaid: Phân bổ một phần
+    Open --> Paid: Phân bổ đủ
+    Open --> Overdue: Quét đêm, quá hạn
     PartiallyPaid --> Paid
     PartiallyPaid --> Overdue
-    Overdue --> PartiallyPaid
-    Overdue --> Paid
+    Overdue --> Paid: Trả đủ
     Paid --> [*]
 ```
+
+### 5.2. Trạng thái thanh toán của Order
+
+Trạng thái thanh toán **tính ra từ số tiền**, không lưu riêng.
+
+| Trạng thái | Ý nghĩa |
+|------------|---------|
+| `Unpaid` | Chưa thu gì (đơn trả trước / đặt cọc) |
+| `Partially Paid` | Đã thu một phần (thường là đã nhận cọc) |
+| `On Credit` | Đơn công nợ; tiền thu theo kỳ hạn |
+| `Paid` | Đã thu đủ |
+
+> Hoàn tiền là **trạng thái của đơn** (`Refunded` / `Partially Refunded` — [17](../17-order-management/README.md)), không phải trạng thái thanh toán.
+
+### 5.3. Lệnh hoàn tiền (Refund)
+
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Pending` | Chờ kế toán chuyển khoản hoàn | → `Completed`, → `Failed` | Hệ thống tạo; kế toán |
+| `Completed` | Đã hoàn | *(cuối)* | Kế toán |
+| `Failed` | Hoàn không thành công; tiền dư trả lại cho khách | → `Pending` (thử lại) | Kế toán |
 
 ---
 
@@ -169,32 +225,42 @@ stateDiagram-v2
 
 ### Business rules
 
-- **BR-01:** Đơn chỉ dùng phương thức thanh toán **được phép cho khách** đó.
-- **BR-02:** Đơn trả trước chỉ `Confirmed` khi đã nhận đủ tiền; đơn đặt cọc chỉ `Confirmed` (và chỉ được release sang sản xuất) khi **đã nhận đủ tiền cọc**.
-- **BR-03:** Đơn công nợ chỉ `Confirmed` khi **dư nợ + giá trị đơn ≤ hạn mức**, hoặc được người có quyền duyệt vượt hạn mức.
-- **BR-04:** Tiền chuyển khoản chỉ được ghi nhận khi kế toán **đối chiếu sao kê**; không ghi nhận theo lời khách báo. Mọi khoản được ghi vào **một sổ chung** (§4.6).
-- **BR-05:** Refund không vượt số tiền đã thu của đơn; với đơn công nợ chưa thu thì ghi giảm công nợ.
-- **BR-06:** Mọi giao dịch (thu & hoàn) là **bất biến**, chỉ thêm giao dịch mới để điều chỉnh (phân bổ nhầm → dòng đảo, §4.6); đầy đủ audit log.
-- **BR-07:** Idempotency: một khoản tiền về (cùng mã tham chiếu sao kê) không được ghi nhận hai lần — kiểm trên **toàn sổ**, kể cả các khoản ghi trước khi có sổ chung.
-- **BR-08:** Số tiền thu khi giao (nếu có) ghi trên nhãn kiện / biên bản bàn giao = phần còn phải thu của đơn (đã trừ cọc). Với đơn nhiều shipment, tiền đã trả trước được áp vào các shipment theo thứ tự tạo; số COD được **tính chặt từ sổ tiền lúc bàn giao** *(Quyết định 21/10/2026)*.
-- **BR-09:** Tiền khách trả công nợ được phân bổ vào **khoản đến hạn sớm nhất trước**, trừ khi khách ghi rõ trả cho đơn nào.
-- **BR-10:** Đơn *chuyển khoản trước khi giao* không được bàn giao khi chưa đủ tiền; chặn tại bước **bàn giao** (đóng gói xong → giao hãng), báo sớm ở màn đóng gói *(Quyết định 19/10/2026)*.
-- **BR-11:** Chính sách thu phần còn lại của đơn do khách quy định; Sale chỉ được **siết chặt hơn**, không nới lỏng (vd. khách có chính sách *trả trước khi giao* thì Sale không được chuyển đơn sang *thu khi giao*).
-- **BR-12:** Khách chọn phương thức thanh toán của đơn **trong số các phương thức được phép** cho khách đó; cổng khách hàng cho khách đọc danh sách này *(Quyết định 21/10/2026, cụ thể hoá BR-01)*.
+- **BR-01:** Đơn chỉ dùng **điều khoản thanh toán được phép** cho khách đó.
+- **BR-02:** Đơn trả trước chỉ `Confirmed` khi đã nhận đủ tiền. Đơn đặt cọc chỉ `Confirmed` (và chỉ được release sang sản xuất) khi **đã nhận đủ tiền cọc**.
+- **BR-03:** Đơn công nợ chỉ `Confirmed` khi khách **không có khoản quá hạn** và **dư nợ + giá trị đơn ≤ hạn mức**. Nếu không, đơn `On Hold` chờ **kế toán** duyệt / từ chối.
+- **BR-04:** Tiền chỉ được ghi nhận khi kế toán **đối chiếu sao kê**; không ghi nhận theo lời khách báo.
+- **BR-05:** Hoàn tiền không vượt số tiền đã thu. Hoàn tiền dư không vượt tiền dư chưa phân bổ.
+- **BR-06:** Sổ tiền **chỉ thêm**: khoản tiền về không đổi số tiền. Sửa sai bằng dòng đảo, không sửa dòng cũ. Số tiền khoản = tổng phân bổ ròng + đã hoàn + chưa phân bổ.
+- **BR-07:** Một **mã tham chiếu sao kê** chỉ ghi nhận **một lần** (kể cả tiền nhà vận chuyển nộp).
+- **BR-08:** Số tiền nhà vận chuyển thu khi giao (nếu có) trên nhãn kiện / biên bản bàn giao = phần còn phải thu của đơn (đã trừ cọc), chốt lúc bàn giao.
+- **BR-09:** Tiền trả công nợ phân bổ vào **khoản đến hạn sớm nhất trước**, trừ khi chỉ định rõ đơn / khoản.
+- **BR-10:** Điều khoản và chính sách thu phần còn lại **copy từ khách** khi đặt đơn. Người đặt chỉ được **siết lại** (về `BEFORE_DELIVERY`), không được nới:
+  - `ON_DELIVERY` chỉ khi đó là chính sách của khách;
+  - `ON_CREDIT` chỉ khi khách được công nợ.
+- **BR-11:** Phần phải thu **trước khi giao** chưa đủ → **chặn bàn giao** cho nhà vận chuyển.
+- **BR-12:** Đơn đặt cọc `ON_CREDIT` mà khách quá hạn hoặc vượt hạn mức → **từ chối đặt**, kèm số hạn mức còn lại. Riêng khi chuyển từ báo giá, đơn tự đổi sang `BEFORE_DELIVERY`.
+- **BR-13:** **Dư nợ (exposure)** = giá trị đơn công nợ chưa giao + phần còn lại `ON_CREDIT` chưa giao + các khoản công nợ chưa trả **do khách trả**. **Hạn mức còn lại** = hạn mức − dư nợ, không âm.
+- **BR-14:** Khoản **do nhà vận chuyển thu** không tính vào dư nợ / quá hạn của khách, không hiện cho khách, và không trả bằng tiền khách chuyển khoản.
+- **BR-15:** Đảo phân bổ làm đơn đã xác nhận thiếu tiền → bắt buộc **treo đơn** (lý do thanh toán); không âm thầm đưa đơn về chưa thanh toán.
+- **BR-16:** Hạn mức, kỳ hạn, % cọc và điều khoản được phép do **kế toán duyệt** (ghi người và thời điểm duyệt). Sale chỉ đặt trả trước / đặt cọc khi tạo khách. Đơn đã đặt giữ điều khoản cũ.
+- **BR-17:** Đơn giao nhiều lần: mỗi lần giao mở **một khoản công nợ riêng** cho phần hàng của lần đó, trừ tiền khách đã trả trước (áp vào các lần giao sớm nhất trước) — đóng phần còn lại không bao giờ khiến khách trả nhiều hơn hàng đã nhận *(Quyết định 19/10/2026)*.
+- **BR-18:** Số tiền thu khi giao được **tính chặt từ sổ tiền lúc bàn giao**, không bao giờ thu dư khách *(Quyết định 21/10/2026)*. Đơn giao nguyên chuyến không thu khi giao và phải trả đủ trước khi bàn giao ([09](../../warehouse/09-shipping/README.md) BR-21).
 
 ### Edge case
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Khách chuyển thiếu so với tiền cọc / trả trước | Ghi nhận phần đã nhận; đơn vẫn chờ; nhắc khách chuyển nốt |
-| Khách chuyển thừa | Ghi có cho khách: trừ vào đơn sau / công nợ, hoặc hoàn lại theo yêu cầu |
-| Nội dung chuyển khoản sai / thiếu mã đơn | Kế toán đối chiếu theo số tiền + tên khách; xác nhận với khách trước khi ghi nhận |
-| Tiền về sau khi đơn đã hết hạn & bị huỷ | Hỏi khách: tạo lại đơn hoặc hoàn tiền; không "giữ tiền không đơn" |
-| Kế toán phân bổ nhầm đơn / nhầm khách | Ghi dòng đảo kèm lý do (§4.6); đơn đã `Confirmed` bị thiếu tiền → `On Hold` chờ đủ tiền lại |
-| Khách quá hạn công nợ muốn đặt đơn công nợ mới | Chặn hoặc `On Hold` theo chính sách D13; Sale đề xuất trả trước / đặt cọc |
-| Khách huỷ đơn đã cọc khi chưa in | Hoàn cọc (trừ phí nếu chính sách quy định) |
-| Khách huỷ đơn đã cọc khi đang in | Theo chính sách huỷ khi đang in ([17](../17-order-management/README.md)): giữ cọc bù phí sản xuất hoặc từ chối huỷ |
-| Hàng lỗi sản xuất phát hiện sau giao | Làm lại hàng hoặc hoàn tiền / ghi giảm công nợ phần lỗi |
+| Khách chuyển thiếu so với tiền cọc / trả trước | Ghi nhận và phân bổ phần đã nhận; đơn vẫn `Pending Payment`; nhắc khách chuyển nốt |
+| Khách chuyển thừa | Phần thừa thành tiền dư: tự trả khoản công nợ mới, phân bổ cho đơn sau, hoặc hoàn theo yêu cầu |
+| Nội dung chuyển khoản sai / thiếu mã đơn | Kế toán ghi nhận không chỉ định → trả khoản đến hạn sớm nhất hoặc để làm tiền dư; phân bổ sau khi xác nhận với khách |
+| Ghi nhận trùng một dòng sao kê | Từ chối (BR-07) |
+| Phân bổ nhầm sang khách / đơn khác | Đảo phân bổ (§4.5), rồi phân bổ lại |
+| Tiền về sau khi đơn đã huỷ | Không phân bổ được cho đơn huỷ; tiền nằm ở tiền dư; hỏi khách: dùng cho đơn mới hoặc hoàn |
+| Khách quá hạn muốn đặt đơn công nợ mới | Đơn `On Hold` lý do tín dụng; kế toán từ chối và chuyển trả trước / đặt cọc, hoặc duyệt |
+| Nhà vận chuyển nộp thiếu tiền thu hộ | Khoản `Partially Paid`; theo dõi phần còn lại với nhà vận chuyển, không đòi khách |
+| Khách huỷ đơn đã cọc khi chưa in | Hoàn toàn bộ, không phí ([17](../17-order-management/README.md) BR-11) |
+| Khách huỷ đơn đã cọc khi đã in | Nhân viên huỷ có phí: tiền cọc trả phí trước, phần thừa hoàn, phần thiếu thành công nợ `CANCELLATION_FEE` |
+| Hàng lỗi sản xuất phát hiện sau giao | Làm lại hàng hoặc hoàn một phần qua luồng trả hàng ([17](../17-order-management/README.md) §4.7) |
 
 ---
 
@@ -202,10 +268,10 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [14 · Quote & Order](../14-cart-and-order/README.md) | Nhận Order + số tiền + phương thức; kiểm hạn mức công nợ; trả kết quả → `Confirmed` / `On Hold` / `Payment Failed` |
-| [17 · Order Management](../17-order-management/README.md) | Đồng bộ `payment_status`; điều kiện release; khởi tạo refund khi huỷ / lỗi sản xuất |
+| [14 · Quote & Order](../14-cart-and-order/README.md) | Điều khoản và chính sách thu phần còn lại của đơn; kiểm tín dụng lúc đặt; tiền đủ → `Confirmed` |
+| [17 · Order Management](../17-order-management/README.md) | Treo / duyệt đơn tín dụng; treo lý do thanh toán; chặn release khi khách quá hạn; phí huỷ và tiền hoàn khi huỷ / đóng phần còn lại |
 | [19 · Production](../../warehouse/19-production/README.md) | Đơn đặt cọc chỉ release sang sản xuất khi tiền cọc đã về |
-| [09 · Shipping](../../warehouse/09-shipping/README.md) | Số tiền thu khi giao (nếu có) trên nhãn kiện / biên bản bàn giao; giao hàng làm phát sinh khoản công nợ |
-| [16 · Sales Chat](../16-sales-chat/README.md) | Sale gửi thông tin thanh toán, nhắc thanh toán / công nợ |
-| [18 · Customer Information](../18-customer-information/README.md) | Phương thức thanh toán được phép, hạn mức, kỳ hạn, dư nợ của khách |
-| Kế toán / Ngân hàng | Đối soát sao kê |
+| [09 · Shipping](../../warehouse/09-shipping/README.md) | Chặn bàn giao khi chưa thu đủ phần phải thu trước giao; số tiền thu hộ chốt lúc bàn giao; giao hàng làm phát sinh khoản công nợ |
+| [16 · Sales Chat](../16-sales-chat/README.md) | Sale nhắc thanh toán / công nợ |
+| [18 · Customer Information](../18-customer-information/README.md) | Điều khoản thanh toán, hạn mức, kỳ hạn, % cọc, chính sách thu phần còn lại; vị thế tín dụng hiển thị cho khách |
+| Kế toán / Ngân hàng | Đối soát sao kê; chuyển khoản hoàn |
