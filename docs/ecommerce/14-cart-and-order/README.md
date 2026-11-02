@@ -36,6 +36,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 |--------|-------|----------|
 | Khách sỉ | Hồ sơ khách `Active`: điều khoản thanh toán được phép, hạn mức, kỳ hạn, % cọc, chính sách thu phần còn lại, bảng giá riêng ([18](../18-customer-information/README.md)) | Có |
 | Dòng báo giá | SKU phôi (đang bán được), thiết kế đã xác nhận nếu là hàng in ([12](../12-product-design/README.md)), **bậc giá** (số lượng tối thiểu ≥ 1, đơn giá VND nguyên dương) | Có |
+| **Ngày giao khách yêu cầu** | Ngày khách muốn nhận hàng, Sale nhập cùng báo giá khi còn `Draft`; không ở quá khứ. Không bắt buộc: để trống nghĩa là khách không nêu ngày *(Quyết định PROD-DUE 02/11/2026)* | Không |
 | Hiệu lực, điều khoản thanh toán, % cọc | % cọc chỉ với báo giá đặt cọc, 0 < % < 100; để trống thì lấy % mặc định của khách | Có |
 | Mẫu đã duyệt | Với dòng in có thiết kế mới: mẫu `Approved` ([19](../../warehouse/19-production/README.md)) | Có (thiết kế mới, khi khách chấp nhận) |
 | Số lượng khách chấp nhận | Khách chọn số lượng cho từng dòng khi chấp nhận | Có (khi chấp nhận) |
@@ -47,9 +48,9 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Báo giá** (mã, số bản sửa, dòng, bậc giá, hiệu lực) | Khách, Sale |
+| **Báo giá** (mã, số bản sửa, dòng, bậc giá, hiệu lực, ngày giao yêu cầu) | Khách, Sale |
 | **Yêu cầu làm mẫu** (thiết kế mới) | [19 Production](../../warehouse/19-production/README.md) |
-| **Order** (mã đơn, dòng đã chốt giá, địa chỉ, tổng tiền, điều khoản, chính sách thu phần còn lại) | 15 Payment, 17 Order Management |
+| **Order** (mã đơn, dòng đã chốt giá, ngày giao yêu cầu của từng dòng in, địa chỉ, tổng tiền, điều khoản, chính sách thu phần còn lại) | 15 Payment, 17 Order Management |
 | **Giữ hàng** (giữ phôi theo SKU) | [20 Inventory Control](../../warehouse/20-inventory-control/README.md) |
 | **Hướng dẫn chuyển khoản** hoặc **ghi nhận công nợ** | 15 Payment |
 | Thông báo cho Sale (khách chấp nhận / yêu cầu sửa / yêu cầu đặt lại) | Sale |
@@ -61,7 +62,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
 ### 4.1. Báo giá (Quote)
 
 1. **Tiếp nhận yêu cầu** — khách liên hệ Sale (điện thoại, email; [chat](../16-sales-chat/README.md) là phạm vi sau): loại ly / bao bì, số lượng, logo / thiết kế.
-2. **Lập báo giá** — Sale chọn phôi, gắn thiết kế đã xác nhận ([12](../12-product-design/README.md)), nhập **bậc giá** (mặc định từ bảng giá riêng của khách), hiệu lực, điều khoản thanh toán đề xuất. Báo giá ở `Draft`, **bản sửa số 1**.
+2. **Lập báo giá** — Sale chọn phôi, gắn thiết kế đã xác nhận ([12](../12-product-design/README.md)), nhập **bậc giá** (mặc định từ bảng giá riêng của khách), hiệu lực, điều khoản thanh toán đề xuất và, nếu khách nêu, **ngày giao khách yêu cầu** (một ngày cho cả báo giá). Báo giá ở `Draft`, **bản sửa số 1**.
 3. **Thiết kế mới → làm mẫu** — nếu cặp (thiết kế, phôi) chưa có mẫu được duyệt, Sale tạo **yêu cầu làm mẫu** ([19](../../warehouse/19-production/README.md)) song song.
 4. **Gửi báo giá** → `Sent`; khách xem trên cổng. Hệ thống chỉ cho gửi khi:
    - mọi dòng đã có giá;
@@ -82,6 +83,7 @@ Order là **chứng từ trung tâm của mảng bán hàng**, được [Order M
    - Hết hiệu lực mà chưa chấp nhận → `Expired`. Báo giá **được coi là hết hiệu lực ngay khi qua hạn**; hệ thống lưu lại trạng thái này định kỳ.
 6. **Chuyển thành đơn** — Sale / Điều phối chuyển báo giá `Accepted` thành đơn bán (§4.3) → `Converted`.
    - Đơn lấy đúng số lượng, giá, điều khoản và % cọc khách đã chấp nhận.
+   - **Mỗi dòng in của đơn chép ngày giao khách yêu cầu của báo giá** và không đổi nữa sau khi đơn được tạo; ngày này thành **hạn hoàn thành** của lệnh sản xuất khi đơn được release ([19](../../warehouse/19-production/README.md) §4.2, [17](../17-order-management/README.md) §4.2). Đặt lại đơn cũ ra báo giá nháp mới **không** mang ngày cũ theo: Sale nhập ngày mới nếu khách yêu cầu.
    - Chuyển lại lần nữa thì trả về chính đơn đó, không tạo đơn thứ hai.
 7. **Huỷ báo giá:**
    - Báo giá `Draft` huỷ tự do.
@@ -214,6 +216,7 @@ stateDiagram-v2
 - **BR-13:** **Chỉ khách** chấp nhận hoặc yêu cầu sửa báo giá. **Chỉ nhân viên** (Sale / Điều phối) chuyển báo giá thành đơn. Chuyển lại lần nữa trả về cùng một đơn.
 - **BR-14:** Mọi thao tác trên báo giá gửi kèm **số phiên bản** người dùng đang xem. Ai đó đã đổi trước thì thao tác bị từ chối. Mỗi lần mở lại sau yêu cầu sửa là một **bản sửa** mới.
 - **BR-15:** SKU phải **còn bán được** ở mọi bước: lập, sửa, gửi, chấp nhận, chuyển thành đơn. Hệ thống chỉ rõ từng dòng không đạt.
+- **BR-16:** **Ngày giao khách yêu cầu** thuộc báo giá: chỉ sửa được khi báo giá `Draft` (mỗi bản sửa mới Sale có thể đổi), không ở quá khứ, được lưu kèm bản báo giá đã gửi. Đơn chép ngày này vào từng dòng in lúc chuyển thành đơn và **không đổi** sau đó; lệnh sản xuất lấy ngày này làm hạn hoàn thành *(Quyết định PROD-DUE 02/11/2026)*.
 
 ### Edge case
 

@@ -60,7 +60,7 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 | Dữ liệu | Mô tả | Nguồn |
 |---------|-------|-------|
 | **Nguồn lệnh** | Yêu cầu làm mẫu (`SAMPLE`) hoặc dòng đơn đã release (`ORDER`) | Sale (§4.1) / [17 · Order Management](../../ecommerce/17-order-management/README.md) |
-| **Dòng đơn tùy chỉnh** | Order number, dòng hàng, SKU phôi, số lượng (đơn vị cơ sở), hạn giao | [17 · Order Management](../../ecommerce/17-order-management/README.md) |
+| **Dòng đơn tùy chỉnh** | Order number, dòng hàng, SKU phôi, số lượng (đơn vị cơ sở), **ngày giao khách yêu cầu** của dòng (chép từ báo giá, [14](../../ecommerce/14-cart-and-order/README.md) BR-16; có thể trống) — thành `due_date` của lệnh `ORDER` | [17 · Order Management](../../ecommerce/17-order-management/README.md) |
 | **Design snapshot + print-ready file** | Bản thiết kế chốt (đã khách xác nhận, bất biến) + checksum, file `PRINT_READY` | [12 · Product Design](../../ecommerce/12-product-design/README.md) |
 | **Mẫu đã duyệt** | Với `ORDER`: vòng mẫu `Approved` cho (khách, thiết kế, phôi) — chuẩn QC | §4.1 |
 | **Tồn phôi** | Phôi `Available` tại bin của kho xuất | Tồn kho theo vị trí ([20](../20-inventory-control/README.md)) |
@@ -121,6 +121,7 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 1. **Release đơn** — Order Coordinator chọn kho xuất và release đơn ([17](../../ecommerce/17-order-management/README.md)).
    - Dòng hàng thường đi Picking.
    - **Mỗi dòng tuỳ chỉnh sinh 1 LSX `ORDER`**, gắn design snapshot và mẫu đã duyệt. Lệnh ở `Pending Prepress`; đơn chuyển `In Production`.
+   - **Hạn hoàn thành của lệnh = ngày giao khách yêu cầu của dòng đơn** (trống nếu khách không nêu). Nhờ đó dashboard xưởng (§4.10) báo được lệnh `ORDER` quá hạn *(Quyết định PROD-DUE 02/11/2026)*.
    - Một đơn sinh đủ lệnh cho mọi dòng in, hoặc không sinh lệnh nào.
    - Dòng có **thiết kế mới chưa có mẫu được duyệt** → không được release (BR-08).
    - Đơn **đặt cọc** chưa nhận đủ tiền cọc → không được release (BR-09).

@@ -45,7 +45,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
 |---------|----------|
 | **Trạng thái đơn hợp nhất** + dòng thời gian sự kiện | Khách, Sale, kho, kế toán |
 | **Lệnh xuất kho (release)** | 07 Picking |
-| **Dòng in được release** (sinh lệnh sản xuất tại kho xuất đã chọn) | [19 Production](../../warehouse/19-production/README.md) |
+| **Dòng in được release** (sinh lệnh sản xuất tại kho xuất đã chọn), kèm ngày giao khách yêu cầu của dòng làm hạn hoàn thành | [19 Production](../../warehouse/19-production/README.md) |
 | **Yêu cầu huỷ** và quyết định | Khách, Sale, Điều phối |
 | **Tiền hoàn / phí huỷ** khi huỷ hoặc đóng phần còn lại | [15 Payment](../15-payment/README.md) |
 | **Thông báo trong ứng dụng**: đơn đã bắt đầu in mà thanh toán thất bại / không về, cần nhân viên quyết huỷ ([00 §6](../../00-system-overview/README.md)) | Sale, Điều phối |
@@ -79,7 +79,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
    - đơn công nợ / `ON_CREDIT` mà khách đang có khoản quá hạn.
 
    Khi release:
-   - **Mỗi dòng in sinh một lệnh sản xuất** ([19](../../warehouse/19-production/README.md)) tại kho xuất đã chọn; đơn → `In Production`.
+   - **Mỗi dòng in sinh một lệnh sản xuất** ([19](../../warehouse/19-production/README.md)) tại kho xuất đã chọn; đơn → `In Production`. Hạn hoàn thành của lệnh là **ngày giao khách yêu cầu** ghi trên dòng đơn (chép từ báo giá, [14](../14-cart-and-order/README.md) §4.1); dòng không có ngày thì lệnh không có hạn.
    - Đơn không có dòng in → `Ready to Fulfill`.
    - Phôi giữ theo SKU được phân bổ vào bin và lô ([20](../../warehouse/20-inventory-control/README.md) §5.6).
 6. **Đơn hỗn hợp** — Dòng hàng sẵn được pick **song song** trong lúc in và chờ tại khu `PACKING`. Khi **mọi lệnh sản xuất** đã `Completed` → `Ready to Fulfill`:
@@ -344,6 +344,7 @@ stateDiagram-v2
 - **BR-14:** Mỗi đơn chỉ có **một yêu cầu huỷ đang chờ**. Yêu cầu không còn quyết được thì tự `Expired`, không treo vô thời hạn.
 - **BR-15:** Treo tay bắt buộc mã lý do (`OTHER` kèm ghi chú). Gỡ treo bắt buộc ghi chú. Treo vì tín dụng / thiết kế chỉ gỡ qua luồng riêng của nó. Treo vì thanh toán chỉ gỡ khi tiền đã đủ lại.
 - **BR-16:** Tự hoàn tất sau **7 ngày** kể từ giao, khi không còn nợ và không có yêu cầu trả; tự đóng sau **30 ngày**. Chạy mỗi đêm.
+- **BR-17:** **Ngày giao khách yêu cầu** của dòng in cố định từ lúc đơn được tạo (chép từ báo giá, [14](../14-cart-and-order/README.md) BR-16) và là hạn hoàn thành của lệnh sản xuất khi release; hệ thống không có thao tác đổi ngày này trên đơn đã tạo. Lệnh quá hạn thì Sale báo khách ngày giao mới (bảng edge case bên dưới) *(Quyết định PROD-DUE 02/11/2026)*.
 
 ### Edge case
 
