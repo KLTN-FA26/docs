@@ -174,6 +174,13 @@ Sản xuất mặc định diễn ra tại xưởng nội bộ. Khi **xưởng n
 5. **Cập nhật đơn** — khi **mọi lệnh sản xuất** của đơn (kể cả LSX con gia công) đã `Completed`, đơn rời `In Production` → `Ready to Fulfill` ([17](../../ecommerce/17-order-management/README.md) §4.2) và đi [đóng gói](../08-packing/README.md) (đóng gói kiểm checksum thiết kế):
    - Đơn **chỉ gồm hàng tùy chỉnh**: không cần lấy hàng; đóng gói ngay.
    - Đơn **hỗn hợp**: dòng hàng thường được lấy song song trong lúc in. Đóng gói trước hàng sẵn chỉ khi Sale cho phép giao một phần (PACK-EARLY).
+6. **Hoàn tất thiếu** *(Quyết định 02/11/2026)* — khi lệnh `ORDER` in nội bộ không thể đạt đủ kế hoạch (hết phôi, in bù sẽ trễ) mà **khách đồng ý nhận thiếu**:
+   - **Sale / Điều phối ghi nhận trên dòng đơn**: khách bỏ **tối đa N đơn vị**, thoả thuận bằng cách nào (cuộc gọi, tin nhắn, ngày — ghi chú ≤ 500 ký tự), ai ghi, lúc nào. Khách phải còn **ít nhất 1 đơn vị**; bỏ cả dòng là **huỷ**, không phải đóng thiếu. Thoả thuận mới thay thoả thuận cũ (không thấp hơn số đã đóng); N = 0 rút thoả thuận khi chưa đóng đơn vị nào.
+   - **Quản lý kho** (quyền duyệt lệnh sản xuất) hoàn tất lệnh thiếu, kèm lý do ≤ 500 ký tự. **Phải là người khác** người đã ghi nhận thoả thuận (bốn mắt — lỗi `PRODUCTION_SHORTFALL_SELF_APPROVAL`); vượt số khách đã đồng ý, hoặc chưa có thoả thuận → bị từ chối, không đổi gì (`PRODUCTION_SHORTFALL_NOT_AGREED`).
+   - Điều kiện: lệnh `ORDER` **in nội bộ** (không phải `SAMPLE`, không phải LSX gia công) đang `Ready` / `Material Issued` (hoặc `On Hold` từ hai trạng thái đó); **mọi hàng đã in đã qua QC**; số đạt **ít hơn** kế hoạch; đơn bán còn đang chờ hàng in (`In Production`, treo từ đó, hoặc đã giao trước hàng sẵn mà còn chờ hàng in).
+   - **Có số đạt (> 0)** → lệnh `Completed` với đúng số đạt: bàn giao khu `PACKING` và ghi tiêu thụ như mọi lần hoàn tất (bước 3); phôi chưa in trả về kho; phần phôi đã giữ cho dòng mà chưa cấp được nhả. Dòng đơn bỏ phần chưa làm → đơn giá trị thấp hơn; tiền đã thu vượt mức đó được **hoàn** ([17](../../ecommerce/17-order-management/README.md) §4.5 mục 23).
+   - **Không có đơn vị đạt nào** → thành phẩm không có gì để giao nên lệnh → **`Cancelled`** (kể cả từ `Pending Prepress`), toàn bộ kế hoạch của lệnh rời dòng đơn; phôi trả về kho tự do. Lệnh khác của cùng dòng (LSX con gia công) vẫn chạy; khi chúng đã đủ phủ dòng thì đơn rời `In Production` (BR-06).
+   - Mọi việc trên chạy trong **một giao dịch**: bị từ chối ở bước nào thì không đổi gì.
 
 ### 4.8. Gia công ngoài (chỉ LSX `ORDER`)
 
@@ -267,15 +274,15 @@ Theo phạm vi kho của người xem; người không được gán kho thấy 
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Pending Prepress` | Vừa sinh từ dòng đơn / yêu cầu mẫu, chờ kiểm file in | → `Ready`, → `On Hold`, → `Cancelled` | Hệ thống / Production Staff |
-| `Ready` | File đạt; trong hàng đợi; chờ cấp phôi (hoặc chờ phôi in bù) | → `Material Issued` (đã cấp đủ phôi, in nội bộ), → `Subcontracted` (LSX gia công), → `On Hold`, → `Cancelled` | NV kho (cấp phôi) / Quản lý kho |
-| `Material Issued` | *Chỉ in nội bộ:* phôi đã ở khu `PRODUCTION` | → `Printing`, → `On Hold`, → `Cancelled` (trả phôi về kho) | Production Staff |
+| `Pending Prepress` | Vừa sinh từ dòng đơn / yêu cầu mẫu, chờ kiểm file in | → `Ready`, → `On Hold`, → `Cancelled` (huỷ, hoặc đóng thiếu khi chưa làm được đơn vị nào — §4.7 bước 6) *(Quyết định 02/11/2026)* | Hệ thống / Production Staff / Quản lý kho (đóng thiếu) |
+| `Ready` | File đạt; trong hàng đợi; chờ cấp phôi (hoặc chờ phôi in bù) | → `Material Issued` (đã cấp đủ phôi, in nội bộ), → `Subcontracted` (LSX gia công), → `On Hold`, → `Cancelled`; → `Completed` (hoàn tất thiếu, trong phạm vi khách đã đồng ý — §4.7 bước 6) *(Quyết định 02/11/2026)* | NV kho (cấp phôi) / Quản lý kho |
+| `Material Issued` | *Chỉ in nội bộ:* phôi đã ở khu `PRODUCTION` | → `Printing`, → `On Hold`, → `Cancelled` (trả phôi về kho); → `Completed` (hoàn tất thiếu — §4.7 bước 6) *(Quyết định 02/11/2026)* | Production Staff / Quản lý kho (hoàn tất thiếu) |
 | `Printing` | *Chỉ in nội bộ:* đang in | → `QC`, → `Ready` (in hỏng hết), → `On Hold`, → `Cancelled` (dừng) | Production Staff / Quản lý kho |
 | `Subcontracted` | *Chỉ LSX gia công:* đã gửi nhà gia công, chờ hàng về | → `QC` (phiếu nhận xác nhận), → `On Hold`, → `Cancelled` (thu hồi, huỷ PO gia công) | NV kho / Hệ thống / Quản lý kho |
 | `QC` | Đang kiểm thành phẩm theo vòng | → `Completed` (đủ số đạt), → `Ready` (thiếu → in bù / gửi bù), → `On Hold`, → `Cancelled` (dừng) | QC Staff / Quản lý kho |
-| `On Hold` | Tạm dừng kèm lý do (§4.9) | → trạng thái trước khi treo; → `Cancelled` (huỷ / dừng) | Quản lý kho (mở lại) |
-| `Completed` | Đủ thành phẩm đạt; `ORDER` đã bàn giao khu `PACKING` và ghi tiêu thụ; `SAMPLE` đã bàn giao mẫu | *(cuối)* | QC Staff / Hệ thống |
-| `Cancelled` | Bị huỷ (trước khi in) hoặc bị dừng (khi đang in / QC) | *(cuối)* | Quản lý kho / Hệ thống |
+| `On Hold` | Tạm dừng kèm lý do (§4.9) | → trạng thái trước khi treo; → `Cancelled` (huỷ / dừng); lệnh treo từ `Pending Prepress` / `Ready` / `Material Issued` có thể hoàn tất thiếu hoặc đóng thiếu (§4.7 bước 6) | Quản lý kho (mở lại) |
+| `Completed` | Đủ thành phẩm đạt; `ORDER` đã bàn giao khu `PACKING` và ghi tiêu thụ; `SAMPLE` đã bàn giao mẫu. Riêng `ORDER` in nội bộ có thể `Completed` với **số đạt ít hơn kế hoạch** khi khách đã đồng ý nhận thiếu (§4.7 bước 6) *(Quyết định 02/11/2026)* | *(cuối)* | QC Staff / Hệ thống / Quản lý kho (hoàn tất thiếu) |
+| `Cancelled` | Bị huỷ (trước khi in), bị dừng (khi đang in / QC), hoặc đóng thiếu khi chưa có đơn vị đạt nào (§4.7 bước 6) | *(cuối)* | Quản lý kho / Hệ thống |
 
 ```mermaid
 stateDiagram-v2
@@ -289,6 +296,8 @@ stateDiagram-v2
     Subcontracted --> QC: Phiếu nhận gia công xác nhận
     QC --> Completed: Đủ số đạt
     QC --> Ready: Thiếu → in bù / gửi bù
+    Ready --> Completed: Hoàn tất thiếu, khách đã đồng ý (ORDER in nội bộ)
+    MaterialIssued --> Completed: Hoàn tất thiếu, khách đã đồng ý (ORDER in nội bộ)
     PendingPrepress --> OnHold
     Ready --> OnHold
     MaterialIssued --> OnHold
@@ -301,7 +310,7 @@ stateDiagram-v2
     OnHold --> Printing: Mở lại
     OnHold --> Subcontracted: Mở lại
     OnHold --> QC: Mở lại
-    PendingPrepress --> Cancelled: Huỷ
+    PendingPrepress --> Cancelled: Huỷ / đóng thiếu, chưa có đơn vị đạt nào
     Ready --> Cancelled: Huỷ
     MaterialIssued --> Cancelled: Huỷ — trả phôi về kho
     Printing --> Cancelled: Dừng — hàng đã in xuất huỷ
@@ -375,7 +384,7 @@ stateDiagram-v2
 - **BR-03:** Chỉ cấp phôi theo LSX, và không vượt số còn thiếu của LSX. Lệnh in nội bộ chỉ sang `Printing` khi đã cấp đủ phôi (`Material Issued`). Số in mỗi lần không vượt số phôi đã cấp mà chưa in.
 - **BR-04:** Số đạt chờ QC = số in − phế phẩm. Phế phẩm bắt buộc có **lý do** (`OTHER` kèm ghi chú). Phế phẩm rời khoản giữ ngay và **xuất huỷ qua điều chỉnh tồn có duyệt bốn mắt** ([20 §4.3](../20-inventory-control/README.md)) — không trừ âm thầm. Lệnh không chờ bước duyệt.
 - **BR-05:** Phải qua QC mới được `Completed`. LSX `ORDER` QC theo **mẫu đã được khách duyệt**, LSX `SAMPLE` theo **file in**. Mỗi vòng QC phải kiểm **hết** số đang chờ (đạt + không đạt = số chờ).
-- **BR-06:** Đơn chỉ rời `In Production` khi **mọi LSX của đơn** (gốc và con) đã `Completed` (hoặc dòng đó đã huỷ).
+- **BR-06:** Đơn chỉ rời `In Production` khi **mọi LSX của đơn** (gốc và con) đã `Completed` (hoặc dòng đó đã huỷ). LSX hoàn tất thiếu (BR-25) tính là `Completed` với số đạt thực tế; phần đã đóng khỏi dòng không còn được chờ.
 - **BR-07:** Design snapshot và file in của lệnh **không sửa được**. Không đổi thiết kế sau khi LSX đã sang `Printing` (LSX con: `Subcontracted`). Muốn đổi thiết kế trước mốc đó phải huỷ dòng & tạo lại.
 - **BR-08:** Dòng đơn có **thiết kế mới** **không được release**. Được release khi có một trong hai:
   - vòng mẫu `Approved` cho cặp (thiết kế, phôi) của khách;
@@ -396,6 +405,7 @@ stateDiagram-v2
 - **BR-22:** **Khoản giữ phôi của sản xuất không hết hạn**. Gửi yêu cầu mẫu đòi ATP đủ số phôi ngay lúc gửi.
 - **BR-23:** Vòng mẫu `Changes Requested` là kết thúc; sửa mẫu = **vòng mới** (yêu cầu mới, số vòng +1, liên kết vòng trước). Mỗi vòng chỉ có một vòng tiếp theo. Khách chỉ trả lời vòng mẫu của chính mình.
 - **BR-24:** Thành phẩm `ORDER` **rời tồn khi lệnh hoàn tất** (bàn giao khu `PACKING` và ghi tiêu thụ). Đóng gói không trừ tồn lần nữa.
+- **BR-25:** *(Quyết định 02/11/2026)* Lệnh `ORDER` in nội bộ chỉ được **hoàn tất thiếu** (hoặc đóng thiếu khi không có đơn vị đạt nào) trong phạm vi khách đã đồng ý nhận thiếu do **Sale ghi nhận trên dòng đơn**, và do **người khác** người ghi nhận thực hiện; khách luôn còn ít nhất 1 đơn vị của dòng. Dòng đơn bỏ đúng số đơn vị chưa làm, tiền đã thu vượt giá trị đơn mới được hoàn ([17](../../ecommerce/17-order-management/README.md) §4.5 mục 23). Luồng chi tiết: §4.7 bước 6.
 
 ### Edge case
 
@@ -403,7 +413,7 @@ stateDiagram-v2
 |------------|-------------|
 | File in lỗi phát hiện ở prepress | Lệnh `On Hold` `FILE_REJECTED`, báo Sale. Sale liên hệ khách, sửa theo quy trình của 12; thiết kế mới → với đơn hàng phải làm mẫu lại (BR-08) |
 | Thiếu phôi khi cấp (tồn lệch thực tế) | Không đủ → `On Hold` `BLANKS_SHORT`, báo mua hàng; 17 xử lý như thiếu hàng (chờ nhập / đổi biến thể / huỷ + hoàn tiền) |
-| Hết phôi khi cần in bù | `On Hold` `BLANKS_SHORT`; Quản lý kho quyết chờ hàng hay giao thiếu (báo khách qua Sale) |
+| Hết phôi khi cần in bù | `On Hold` `BLANKS_SHORT`; Quản lý kho quyết chờ hàng hay giao thiếu (báo khách qua Sale). Giao thiếu = **hoàn tất thiếu** khi khách đã đồng ý và Sale đã ghi nhận trên dòng đơn (§4.7 bước 6, BR-25) *(Quyết định 02/11/2026)* |
 | Máy in hỏng giữa ca | Treo `MACHINE_DOWN`; số đã in được ghi khi mở lại và báo kết quả |
 | In hỏng một phần số lượng | Phần hỏng xuất huỷ (chờ duyệt); QC phần đạt; thiếu → về `Ready` in bù phần còn thiếu |
 | In hỏng toàn bộ | Lệnh về thẳng `Ready` để in bù |

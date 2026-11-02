@@ -161,6 +161,7 @@ Order Management là **lớp điều phối** (orchestration): nó không tự p
     - Phí chỉ tính khi đã in, ≤ giá trị các đơn vị in bị đóng, kèm lý do và chi tiết.
     - Tiền thừa trả phí trước, phần còn lại hoàn. Thiếu thì thành công nợ phí.
     - Hàng in chưa giao bị xuất huỷ.
+    - **Dòng in sản xuất thiếu, khách đồng ý nhận thiếu** *(Quyết định 02/11/2026)*: đơn vẫn `In Production` nhưng xưởng không làm đủ ([19](../../warehouse/19-production/README.md) §4.7 bước 6). Sale / Điều phối ghi nhận thoả thuận trên dòng đơn (tối đa N đơn vị, khách còn ít nhất 1); khi Quản lý kho (người khác) hoàn tất lệnh thiếu, hệ thống **đóng phần chưa làm** của dòng theo cách đóng phần còn lại — lý do `PRODUCTION_SHORTFALL`, **không tính phí**. Đơn giá trị thấp hơn; tiền đã thu **vượt** giá trị mới thành **lệnh hoàn tiền** (`Pending`) cho kế toán, mỗi lần đóng một lệnh ([15](../15-payment/README.md)). Huỷ đơn sau đó chỉ giữ / hoàn trên số tiền còn thuộc đơn, không hoàn hai lần phần đã hoàn.
 
 ### 4.6. Treo đơn (On Hold)
 
@@ -356,7 +357,7 @@ stateDiagram-v2
 | Khách muốn huỷ khi đã in | Khách gửi yêu cầu huỷ; nhân viên từ chối, hoặc duyệt có phí; thành phẩm cá nhân hoá xuất huỷ |
 | Thanh toán lỗi / hết hạn giữ hàng ở đơn đã in | Hệ thống không tự huỷ; chuyển Sale / Điều phối quyết |
 | Khách gửi yêu cầu huỷ rồi đơn kịp đóng gói xong | Yêu cầu tự `Expired`; khách đi luồng trả hàng |
-| Lệnh sản xuất `On Hold` vì thiếu phôi | Xử lý như thiếu hàng: liên hệ khách chờ, đổi biến thể, hoặc huỷ dòng + hoàn tiền |
+| Lệnh sản xuất `On Hold` vì thiếu phôi | Xử lý như thiếu hàng: liên hệ khách chờ, đổi biến thể, huỷ dòng + hoàn tiền, hoặc — khi khách đồng ý nhận thiếu — Sale ghi nhận thoả thuận để Quản lý kho **hoàn tất thiếu**; phần chưa làm đóng khỏi dòng, tiền thừa hoàn như đóng phần còn lại (§4.5 mục 23, [19](../../warehouse/19-production/README.md) §4.7 bước 6) *(Quyết định 02/11/2026)* |
 | Lệnh sản xuất quá hạn so với cam kết (dashboard xưởng) | Sale báo khách ngày giao mới; Quản lý kho tách một phần đưa gia công ngoài ([19](../../warehouse/19-production/README.md) §4.8) |
 | Giao `Delivered` nhưng khách khiếu nại không nhận | Trạng thái tranh chấp; CSKH xác minh với hãng (ngoài hệ thống); đơn không tự hoàn tất khi còn yêu cầu trả hàng mở |
 | Hàng trả về không nguyên vẹn | Nhập `Quarantine`; hoàn một phần / từ chối hoàn theo chính sách; ghi hồ sơ khách |
