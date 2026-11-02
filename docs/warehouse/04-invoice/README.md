@@ -12,7 +12,7 @@ Mục tiêu: **chỉ thanh toán cho hàng đã thực nhận, đúng giá đã 
 
 > ⚠️ Giả định: StockFlowCommerce quản lý invoice ở mức **đối chiếu & duyệt thanh toán (AP matching & approval)**, còn hạch toán sổ cái và chi tiền có thể do hệ thống kế toán riêng đảm nhận (tích hợp). Phạm vi tính năng "Invoice" theo đề bài chưa nêu rõ mức độ kế toán — xem [open-questions](../../open-questions/README.md).
 
-> ⚠️ Giả định: toàn bộ module này thuộc **phạm vi giai đoạn sau** — hệ thống hiện **chưa ghi nhận hoá đơn NCC** và chưa đối chiếu ba chiều. Đóng PO không kiểm hoá đơn ([02](../02-purchase-order/README.md)); quyết toán gia công ([19](../19-production/README.md) §4.7) cho ra số phải trả làm cơ sở đối chiếu khi có module này. Xem [open-questions C25](../../open-questions/README.md).
+> ✅ **Phạm vi:** module này **nằm trong phạm vi hiện tại** *(Quyết định 02/11/2026)* — hệ thống ghi nhận hoá đơn NCC và đối chiếu ba chiều. Quyết toán gia công ([19](../19-production/README.md) §4.7) cho ra số phải trả làm cơ sở đối chiếu hoá đơn gia công (BR-07). Xem [open-questions C9, C25](../../open-questions/README.md).
 
 ---
 
@@ -113,7 +113,7 @@ stateDiagram-v2
 
 - **BR-01:** Không `Approved for Payment` khi còn chênh lệch chưa được duyệt hoặc chưa giải quyết.
 - **BR-02:** Số lượng trên hoá đơn không vượt số lượng đã `Receipt` trừ phần QC kết luận `Rejected` (với SKU yêu cầu QC, phần này chỉ chốt sau khi QC tại khu kiểm tra chất lượng có kết luận) và chưa bị hoá đơn khác "tiêu thụ" (matched-against). Vượt → `Exception: over-invoice`.
-- **BR-03:** Dung sai giá (price tolerance) và dung sai số lượng cấu hình theo hệ thống hoặc theo NCC; ngoài dung sai bắt buộc `Exception`.
+- **BR-03:** *(Quyết định 02/11/2026)* Dung sai giá (price tolerance) là **2% — áp dụng toàn hệ thống, cấu hình được** (không cấu hình theo NCC); dung sai số lượng là **0%** (BR-02: không vượt số lượng đã nhận và đạt QC). Ngoài dung sai bắt buộc `Exception`.
 - **BR-04:** Số hoá đơn NCC là **duy nhất theo từng NCC** — chặn nhập trùng (chống thanh toán hai lần).
 - **BR-05:** Một Receipt có thể được đối chiếu bởi nhiều hoá đơn (giao nhiều đợt, hoá đơn từng phần) nhưng tổng không vượt SL đã nhận.
 - **BR-06:** Hoá đơn `Paid` là bất biến; điều chỉnh phải qua **credit note / debit note** riêng.

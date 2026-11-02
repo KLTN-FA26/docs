@@ -73,8 +73,8 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng lại, chưa cho vào tồn khả dụng; hàng nằm ở Area loại `QUARANTINE`. |
 | **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
 | **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt, khai báo **theo từng NCC** (trống = 0); vượt luôn bị chặn. |
-| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. Phạm vi sau ([C25](../open-questions/README.md)). |
-| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. Phạm vi sau ([C25](../open-questions/README.md)). |
+| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. Thuộc phạm vi hiện tại ([C25](../open-questions/README.md), quyết định 02/11/2026). |
+| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. Thuộc phạm vi hiện tại ([C25](../open-questions/README.md), quyết định 02/11/2026). Dung sai giá 2%, số lượng 0% ([04](../warehouse/04-invoice/README.md) BR-03). |
 | **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
 | **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
 | **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |

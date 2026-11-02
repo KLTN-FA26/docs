@@ -15,7 +15,7 @@ Mục lục:
 
 ### 1.1. Flowchart tổng thể
 
-> ⚠️ Phần **đối chiếu hoá đơn** là **phạm vi giai đoạn sau** ([04](../warehouse/04-invoice/README.md)) — vẽ **nét đứt**.
+> ✅ Phần **đối chiếu hoá đơn** nằm trong **phạm vi hiện tại** *(Quyết định 02/11/2026)* ([04](../warehouse/04-invoice/README.md)).
 
 ```mermaid
 flowchart TD
@@ -61,12 +61,9 @@ flowchart TD
         INV_OK --> INV_PAID[Paid]
     end
 
-    PO_RECEIVED --> PO_CLOSE{Procurement đóng PO\nđối chiếu hoá đơn khi có 04}
+    PO_RECEIVED --> PO_CLOSE{Procurement đóng PO\nđối chiếu hoá đơn theo 04}
     INV_PAID -.-> PO_CLOSE
     PO_CLOSE -- Đóng --> PO_CLOSED([PO: Closed])
-
-    classDef later stroke-dasharray: 5 5
-    class INV_RECV,INV_MATCH,INV_RESULT,INV_OK,INV_EXC,INV_DISPUTE,INV_PAID later
 ```
 
 ### 1.2. Sequence diagram (trình tự tác nhân)
@@ -106,7 +103,7 @@ sequenceDiagram
     SLOT-->>WH: Tối đa 10 bin xếp hạng
     WH->>INVSYS: Quét bin, cất hàng (WH/Stock) → tồn Available
     RC->>RC: Closed
-    Note over VENDOR,AP: Đối chiếu hoá đơn — phạm vi giai đoạn sau
+    Note over VENDOR,AP: Đối chiếu hoá đơn (phạm vi hiện tại, quyết định 02/11/2026)
     VENDOR->>AP: Gửi hoá đơn
     AP->>INV: Nhập hoá đơn, chọn PO/Receipt
     INV->>INV: Three-way matching
