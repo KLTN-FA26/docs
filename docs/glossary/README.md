@@ -2,85 +2,73 @@
 
 Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlowCommerce. Sắp xếp theo nhóm để dễ tra; trong mỗi nhóm theo thứ tự bảng chữ cái tiếng Anh.
 
+> Đã chốt 2026-11-04: kho chỉ là **kho thành phẩm**, sản xuất nằm **ngoài hệ thống** (hệ thống gửi **Yêu cầu sản xuất** và nhập kho thành phẩm), không có kiểm tra chất lượng (QC) tại kho, không mua hàng từ nhà cung cấp, khách thanh toán theo **các đợt của Hợp đồng mua bán**. Bổ sung cùng ngày: **không còn hàng trơn** — hàng có tồn duy nhất là **SKU thành phẩm theo mẫu của khách**; thành phẩm về kho **đã được bộ phận sản xuất đóng thùng (LPN)** và **chỉ xuất nguyên thùng**; module 08 thu gọn thành **Kiểm thùng & Dán nhãn giao hàng**. Các thuật ngữ cũ không còn áp dụng được liệt kê ở [§8](#8-thuật-ngữ-không-còn-áp-dụng-đã-bỏ-2026-11-04).
+>
+> **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng**, không đặt lẻ; **giá vẫn theo cái** — thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái; **MOQ và bậc giá tính theo số thùng**. **Mọi thùng đúng số cái chuẩn** của SKU (thùng lệch không nhận, không còn thùng lẻ); giữ hàng / phân bổ một dòng = **chọn đủ N thùng** theo FEFO / FIFO. Tồn có thể ghi nội bộ theo đơn vị cơ sở để truy vết, nhưng màn hình, chứng từ và tồn khả dụng hiển thị theo **số thùng** kèm số cái ([01 BR-09, BR-11](../warehouse/01-product-creation/README.md)).
+
 ---
 
 ## 1. Thuật ngữ chung về hàng hoá & tồn kho
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mỗi biến thể sản phẩm (ví dụ "Ly PP 500 ml – miệng 95 – trong") là một SKU riêng. |
-| **Product / Sản phẩm** | Thực thể "cha" gom nhiều SKU biến thể (ví dụ "Ly nhựa PP" có nhiều dung tích). |
-| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (dung tích × chất liệu × đường kính miệng…), tương ứng một SKU. |
-| **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một SKU: đơn vị tính, thông số logistics, **chính sách tồn** (lô / hạn dùng / serial, ngưỡng), thông tin mua hàng tham chiếu. Quan hệ **1:1** với SKU, hệ thống tạo tự động khi sinh SKU; không chứa nội dung bán hàng. Với sản phẩm tùy chỉnh là phôi (hàng chưa in) — giả định, xem [open-questions B9](../open-questions/README.md). |
+| **SKU** (Stock Keeping Unit) | Đơn vị lưu kho — mã định danh **nhỏ nhất** để quản lý tồn và giao dịch. Mã biến thể (SKU) duy nhất toàn hệ thống; **quy cách** cũng có mã nhưng không có tồn. Hàng có tồn duy nhất là **SKU thành phẩm theo mẫu của khách** ([§3a](#3a-thuật-ngữ-mẫu-thiết-kế--sku-theo-mẫu-của-khách-design), [01 BR-19](../warehouse/01-product-creation/README.md)). |
+| **Product / Sản phẩm** | Thực thể "cha" gom các biến thể (ví dụ "Ly nhựa PP in logo" có nhiều dung tích). Mọi sản phẩm là loại `CUSTOMIZABLE` (hàng in theo mẫu của khách) — [01](../warehouse/01-product-creation/README.md). |
+| **Variant / Biến thể** | Một tổ hợp thuộc tính cụ thể của sản phẩm (dung tích × chất liệu × đường kính miệng…). Có hai dạng: **quy cách** (khuôn để in, không có tồn, không có giá) và **SKU thành phẩm theo mẫu của khách** (có tồn, có giá riêng) — [01 §1](../warehouse/01-product-creation/README.md). |
+| **Inventory Item / Hàng tồn kho** | Hồ sơ **hàng vật lý** của một biến thể: đơn vị tính, đơn vị quy đổi, **quy cách thùng**, thông số logistics, lớp lưu trữ, **chính sách tồn** (lô / hạn dùng / serial, cách xuất). Quan hệ **1:1** với biến thể, hệ thống tạo tự động; không chứa nội dung bán hàng. Với SKU theo mẫu của khách, Inventory Item được sao chép từ Inventory Item của quy cách khi sinh SKU ([01 §4.8](../warehouse/01-product-creation/README.md)) — ✅ đã chốt 2026-11-04 ([open-questions B9](../open-questions/README.md)). |
+| **Carton spec / Quy cách thùng** | Khai báo trên Inventory Item: **đơn vị thùng** (một đơn vị quy đổi, hệ số = **số cái chuẩn / thùng**, cố định cho SKU), **kích thước thùng** (D × R × C), **khối lượng thùng đầy**. **Bắt buộc với SKU riêng**, kế thừa từ quy cách *(Đã chốt 2026-11-04 — [01 BR-03](../warehouse/01-product-creation/README.md))*. Là căn cứ đặt hàng theo thùng, nhập theo số thùng, cất, nhãn giao hàng và kế hoạch xếp xe. *(Đã chốt 2026-11-05)* **Mọi thùng đúng số cái chuẩn**: thùng lệch số chuẩn không được nhận ([03 BR-13](../warehouse/03-receipt/README.md)); mọi thùng của một SKU cùng kích thước, cùng khối lượng. ⚠️ Giả định: số cái / thùng của SKU riêng bị khoá khi SKU đã có tồn hoặc chứng từ; quy cách thùng mới chỉ áp cho SKU sinh sau ([01 BR-10](../warehouse/01-product-creation/README.md), [open-questions A11](../open-questions/README.md)). Không nhầm với **quy cách** (biến thể của sản phẩm `CUSTOMIZABLE`, §3a). |
 | **Category / Danh mục** | Cây phân loại sản phẩm, tối đa 11 cấp; mã không đổi; di chuyển một danh mục mang theo cả nhánh con. Mỗi sản phẩm có một danh mục chính. |
 | **Brand / Thương hiệu** | Thương hiệu của sản phẩm; mã không đổi; bắt buộc trước khi gửi duyệt sản phẩm. |
 | **Attribute dictionary / Từ điển thuộc tính** | Danh sách thuộc tính dùng chung (kiểu `TEXT`, `NUMBER`, `BOOLEAN`, `SELECT`, `MULTISELECT`, `COLOR`); chỉ `SELECT` và `COLOR` làm được trục biến thể. Thuộc tính đang dùng chỉ ngưng, không xoá. Mỗi danh mục có mẫu thuộc tính gợi ý. |
-| **Tax class / Nhóm thuế** | Nhóm thuế của sản phẩm: `STANDARD` / `REDUCED` / `EXEMPT`; bắt buộc trước khi gửi duyệt. |
-| **Maker–checker / Bốn mắt** | Người duyệt khác người làm: sản phẩm (duyệt ≠ gửi), ảnh sản phẩm (đăng ≠ tải), điều chỉnh tồn, PO, thiết kế… |
+| **Tax class / Nhóm thuế** | Nhóm thuế của sản phẩm: `STANDARD` / `REDUCED` / `EXEMPT` (mức thuế suất — không liên quan loại sản phẩm); bắt buộc trước khi gửi duyệt. |
+| **Maker–checker / Bốn mắt** | Người duyệt khác người làm: sản phẩm (duyệt ≠ gửi), ảnh sản phẩm (đăng ≠ tải), điều chỉnh tồn (duyệt ≠ đề nghị), duyệt kỹ thuật thiết kế (người duyệt ≠ người thiết kế / người sửa cuối)… |
 | **UoM** (Unit of Measure) | Đơn vị tính (cái, cây, thùng…). |
-| **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất dùng để ghi tồn và mọi chứng từ kho của một SKU (ví dụ *cái*). Không đổi được sau khi đã có tồn. |
-| **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Hệ số đã phát sinh giao dịch không được sửa. Xem [01](../warehouse/01-product-creation/README.md). |
-| **Purchase UoM / Đơn vị mua** | Đơn vị đóng gói NCC bán (thường là *thùng*). Dòng PO ghi số lượng theo **đơn vị tồn** của SKU; quy cách đóng gói của NCC được ép bằng bội số (số lượng phải là bội số quy cách, [02](../warehouse/02-purchase-order/README.md)). |
-| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt, khai báo trên Variant và chọn từ danh sách đơn vị quy đổi, có giá riêng. **Chưa dùng trên catalog / đơn** (phạm vi sau — [D17](../open-questions/README.md)): hiện giá và số lượng theo đơn vị cơ sở. |
-| **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất/nhập, thường quản lý chung hạn sử dụng. |
+| **Base UoM / Đơn vị cơ sở** | Đơn vị nhỏ nhất của một SKU (ví dụ *cái*), có thể dùng để **ghi tồn nội bộ** cho truy vết; mọi màn hình nghiệp vụ, chứng từ và tồn khả dụng hiển thị theo **số thùng** kèm số cái *(Đã chốt 2026-11-05 — [01 BR-09](../warehouse/01-product-creation/README.md))*. Đơn giá vẫn ghi theo đơn vị cơ sở (giá / cái). Không đổi được sau khi đã có tồn. |
+| **UoM conversion / Đơn vị quy đổi** | Đơn vị đóng gói khai báo trên Inventory Item kèm hệ số nguyên quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái); đơn vị thùng của quy cách thùng là một đơn vị quy đổi. Hệ số đã có chứng từ dùng không được sửa; với quy cách (khuôn), đổi quy cách thùng = khai báo đơn vị mới, ngưng đơn vị cũ. ⚠️ Giả định: số cái / thùng của SKU riêng bị khoá khi SKU đã có tồn hoặc chứng từ ([01 BR-10](../warehouse/01-product-creation/README.md), [open-questions A11](../open-questions/README.md)). |
+| **Sales UoM / Đơn vị bán** | Đơn vị khách được đặt. Với SKU riêng, đơn vị bán **luôn là đơn vị thùng** của quy cách thùng (hệ thống gán): số lượng trên báo giá, đơn, hợp đồng, Yêu cầu sản xuất là **số thùng** (số nguyên ≥ 1), hiển thị kèm số cái = số thùng × số cái / thùng; **không đặt lẻ cái**; đơn giá ghi **theo cái** *(✅ Đã chốt 2026-11-05 — [01 BR-11](../warehouse/01-product-creation/README.md), [14 BR-08](../ecommerce/14-cart-and-order/README.md), [open-questions A9](../open-questions/README.md))*. |
+| **Batch / Lot / Lô** | Nhóm hàng cùng đợt sản xuất / nhập, thường quản lý chung hạn sử dụng. |
 | **Serial** | Số định danh **duy nhất cho từng đơn vị** hàng (thường với hàng giá trị cao / điện tử). |
 | **Expiry date / Hạn sử dụng** | Ngày hết hạn dùng của lô hàng. |
 | **Inventory / Tồn kho** | Số lượng hàng hoá đang có, luôn gắn với **vị trí** hoặc trạng thái quá cảnh. |
-| **On-hand / Tồn thực tế** | Tổng số lượng vật lý đang nằm trong kho ở mọi trạng thái (`Inbound`, `Available`, `Quarantine`, `Blocked`, `Expired`, `In Production`), kể cả phần đang được giữ / phân bổ; không gồm hàng `In-Transit` (thuộc lệnh chuyển kho). Xem [20 §5.1](../warehouse/20-inventory-control/README.md). |
-| **Usable on-hand / Tồn dùng được** | Tồn `Available` chưa hết hạn, **không trừ** phần giữ hàng. Là số dùng để so với ngưỡng đặt lại và tồn an toàn khi sinh cảnh báo tồn; khác ATP. Xem [20 BR-13](../warehouse/20-inventory-control/README.md). |
+| **On-hand / Tồn thực tế** | Tổng số lượng vật lý đang nằm trong kho ở mọi trạng thái (`Inbound`, `Available`, `Quarantine`, `Expired`), kể cả phần đang được giữ / phân bổ và hàng ở khu chờ xuất; không gồm hàng `In-Transit` (thuộc lệnh chuyển kho). Xem [20 §5.1](../warehouse/20-inventory-control/README.md). |
 | **Inventory Level / Tồn theo kho** | Số lượng tồn của một Inventory Item tại **một kho**, **tổng hợp** từ tồn các vị trí trong kho đó (theo từng trạng thái). Là số tính ra, không nhập/sửa trực tiếp; tồn toàn hệ thống = tổng các kho. |
-| **Available stock / Tồn khả dụng** | Tồn ở trạng thái `Available`: đã putaway vào vị trí được phép xuất, **chưa hết hạn**, **chưa phân bổ** (allocate) và không bị giữ cho lệnh sản xuất / lệnh chuyển kho nào, không bị khoá/cách ly. **Chưa trừ** phần giữ hàng (reservation). |
-| **ATP** (Available To Promise) | Số lượng có thể "hứa bán" cho khách: **ATP = Tồn khả dụng − Phần đang giữ hàng (reservation)**. Không trừ thêm phần đã phân bổ vì hàng `Allocated` không nằm trong tồn khả dụng. Phạm vi: toàn hệ thống hoặc theo kho (câu hỏi C3). Định nghĩa đầy đủ: [20 BR-01](../warehouse/20-inventory-control/README.md). |
-| **On-order / Incoming stock** | Hàng đã đặt qua PO nhưng **chưa về kho**. |
+| **Available stock / Tồn khả dụng** | Tồn ở trạng thái `Available`: đã putaway vào vị trí được phép xuất, **chưa hết hạn**, **không có khoản phân bổ** cho đơn và không bị giữ cho lệnh chuyển kho, **không nằm ở khu chờ xuất** (`STAGING`), không bị cách ly. **Chưa trừ** phần giữ hàng theo SKU (reservation). |
+| **ATP** (Available To Promise) | Số lượng có thể "hứa bán" cho khách: **ATP = Tồn khả dụng − Phần đang giữ hàng theo SKU (reservation)**. Hàng `Inbound`, `Quarantine`, `Expired`, `In-Transit` và mọi tồn ở khu `STAGING` không thuộc ATP. Tính và hiển thị theo **số thùng** kèm số cái *(Đã chốt 2026-11-05)*. Phạm vi: toàn hệ thống hoặc theo kho (câu hỏi C3). Định nghĩa đầy đủ: [20 BR-01](../warehouse/20-inventory-control/README.md). |
+| **On-order / Incoming stock — Hàng đang chờ nhập** | Số lượng còn thiếu (chưa nhập kho) trên các **Yêu cầu sản xuất** đang mở (`Sent` / `In Production` / `Partially Received`). Không thuộc tồn, không thuộc ATP. Xem [17 §4.3](../ecommerce/17-order-management/README.md). |
 | **In-Transit / Đang quá cảnh** | Hàng đã rời kho nguồn nhưng chưa tới kho đích (trong luồng chuyển kho). |
-| **Reorder point / Ngưỡng đặt lại** | Mức tồn tối thiểu; chạm ngưỡng thì cần lập PO bổ sung. Tồn dùng được ≤ ngưỡng sinh cảnh báo `REORDER` ([20](../warehouse/20-inventory-control/README.md)). |
-| **Safety stock / Tồn an toàn** | Mức tồn doanh nghiệp muốn luôn giữ, khai báo theo SKU trên Inventory Item. Tồn dùng được < mức này sinh cảnh báo `SAFETY`. **Chỉ để cảnh báo, không trừ vào ATP** (open-questions C11). |
-| **Stock alert / Cảnh báo tồn** | Thông báo tự động khi tồn chạm ngưỡng đặt lại (`REORDER`), dưới tồn an toàn (`SAFETY`), lô sắp hết hạn (`EXPIRING`) hoặc đã hết hạn (`EXPIRED`). Vòng đời `Open` → `Acknowledged` → `Resolved`. Xem [20 §4.4](../warehouse/20-inventory-control/README.md). |
-| **Replenishment Proposal / Bảng Đề xuất Nhập hàng** | Danh sách SKU chạm ngưỡng tái đặt hàng do hệ thống MRP sinh, chờ Planner đánh giá & chuyển thành PO. Phạm vi giai đoạn sau ([open-questions C19](../open-questions/README.md)); hiện dùng cảnh báo tồn `REORDER` / `SAFETY` ([20](../warehouse/20-inventory-control/README.md)). |
-| **Reservation / Giữ hàng** | Tạm giữ một số lượng tồn cho một đơn cụ thể trong thời hạn chờ thanh toán, **chưa gắn vị trí/lô**. Làm giảm ATP; hết hạn thì giải phóng; khi đơn được phân bổ thì chuyển thành allocation. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
-| **Allocation / Phân bổ** | Gán chính thức tồn ở **vị trí & lô cụ thể** cho một đơn để đi lấy hàng: một **khoản giữ** trên tồn `Available` (mỗi bin / lô một khoản), không có hạn. "`Allocated`" là cách gọi phần tồn đang có khoản phân bổ, không phải một trạng thái riêng của hàng. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
-| **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát (kèm lý do) khi phát hiện chênh lệch. Duyệt **bốn mắt** (người duyệt ≠ người đề nghị); duyệt là ghi tồn ngay. Xem [20 §4.3](../warehouse/20-inventory-control/README.md). |
-| **Cycle count / Kiểm kê định kỳ** | Đếm lại tồn ở một phạm vi vị trí / SKU, không dừng toàn kho; mặc định **kiểm mù** (người đếm không thấy số sổ sách). Chênh lệch thành điều chỉnh `COUNT_VARIANCE` chờ duyệt. Xem [20 §4.2](../warehouse/20-inventory-control/README.md). |
-| **LPN** (License Plate Number) / **Thùng hàng** | Mã định danh một thùng nguyên đai, dán khi nhận hàng; thùng được theo dõi, kiểm kê và điều chỉnh như một đơn vị. Thùng không tự mang số lượng: hàng bên trong là tồn ở vị trí của thùng. Phân bổ ưu tiên thùng nguyên; dòng lấy hàng từ thùng xác nhận bằng quét LPN ([07](../warehouse/07-picking/README.md)). Xem [20 §4.6](../warehouse/20-inventory-control/README.md). |
-| **Stock movement ledger / Sổ biến động tồn** | Nhật ký mọi thay đổi tồn: loại biến động, vị trí đi / đến, SKU, lô, số lượng, người, thời điểm, chứng từ nguồn. Không sửa, không xoá. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
-| **Lot traceability / Truy xuất lô** | Báo cáo một lô từ nguồn gốc (NCC, phiếu nhận) tới tồn còn lại, khoản đang giữ và đơn khách đã nhận hàng. Lô không có phiếu nhận ghi nguồn gốc `UNTRACED`. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
+| **Expiry alert / Cảnh báo hạn dùng** | Thông báo tự động khi lô còn tồn sắp hết hạn (`EXPIRING`, trong cửa sổ cận hạn, mặc định 30 ngày) hoặc đã hết hạn (`EXPIRED`), theo lô và kho; chỉ cho SKU theo dõi lô / hạn dùng. Vòng đời `Open` → `Acknowledged` → `Resolved` (lý do đóng `STOCK_GONE` / `EXPIRED_OUT`). Không có cảnh báo tồn thấp. Xem [20 §4.4, BR-13](../warehouse/20-inventory-control/README.md). |
+| **Reservation / Giữ hàng** | Tạm giữ một **số thùng** tồn **theo SKU** cho một đơn, **chưa gắn vị trí / lô / thùng cụ thể**. Đơn chỉ được giữ hàng khi đã `Confirmed` (hợp đồng đã ký, đủ đợt `ON_SIGNING` — [14 BR-15](../ecommerce/14-cart-and-order/README.md), [17 §4.2](../ecommerce/17-order-management/README.md)). Làm giảm ATP; khi đơn được release thì chuyển thành allocation; nhả khi huỷ đơn. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
+| **Allocation / Phân bổ** | Gán chính thức **thùng LPN cụ thể** (và qua đó bin, lô) cho một đơn / lệnh chuyển kho để đi lấy hàng: một **khoản giữ** trên tồn `Available`, **mỗi thùng một khoản**, không có hạn. Một dòng có **đủ N thùng** (N = số thùng của dòng), hoặc k < N thùng khi chỉ có sẵn chừng đó (xem **Phân bổ nguyên thùng**). Khi thùng được lấy về **khu chờ xuất**, khoản phân bổ đi theo thùng và vẫn `Held`; thành `Consumed` khi thùng được lấy sang khu kiểm & dán nhãn. "`Allocated`" là cách gọi phần tồn đang có khoản phân bổ, không phải một trạng thái riêng của hàng. Xem [20 §5.6](../warehouse/20-inventory-control/README.md). |
+| **Whole-carton allocation / Phân bổ nguyên thùng** | Quy tắc giữ / phân bổ khi chỉ xuất nguyên thùng: dòng đơn / dòng lệnh chuyển kho ghi **số thùng N**; mọi thùng của SKU đúng số cái chuẩn nên chỉ cần **chọn đủ N thùng** của SKU, ưu tiên **FEFO / FIFO**; chỉ có sẵn k < N thùng thì giữ k thùng, **N − k thùng còn lại là thiếu** và đi Yêu cầu sản xuất *(✅ Đã chốt 2026-11-05 — [07 BR-03](../warehouse/07-picking/README.md), [17 BR-21](../ecommerce/17-order-management/README.md), [open-questions C32](../open-questions/README.md))*. Ví dụ: SKU 1.000 cái / thùng, dòng đơn 3 thùng; kho có 5 thùng thuộc hai lô → giữ 3 thùng hạn gần nhất; kho chỉ có 2 thùng → giữ 2, thiếu 1 thùng. |
+| **Inventory adjustment / Điều chỉnh tồn** | Sửa số lượng tồn có kiểm soát khi phát hiện chênh lệch, luôn **cho cả thùng** — ghi giảm cả thùng hoặc nạp lại thùng; kèm lý do `DAMAGED` / `LOST` / `FOUND` / `EXPIRED` / `DATA_CORRECTION` / `OTHER`, hoặc `COUNT_VARIANCE` do kiểm kê sinh. Duyệt **bốn mắt** (người duyệt ≠ người đề nghị); duyệt là ghi tồn ngay. Xem [20 §4.3](../warehouse/20-inventory-control/README.md). |
+| **Cycle count / Kiểm kê định kỳ** | Kiểm lại tồn ở một phạm vi vị trí / SKU, không dừng toàn kho; **theo thùng** — mỗi thùng LPN một dòng, người đếm quét LPN xác nhận thùng có mặt, **không mở thùng** (⚠️ giả định — [open-questions C33](../open-questions/README.md)); mặc định **kiểm mù** (người đếm không thấy số sổ sách). Chênh lệch thành điều chỉnh `COUNT_VARIANCE` cả thùng chờ duyệt. Xem [20 §4.2](../warehouse/20-inventory-control/README.md). |
+| **LPN** (License Plate Number) / **Thùng hàng** | Mã định danh một **thùng thành phẩm do bộ phận sản xuất đóng sẵn**, dán khi **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)). **Mọi tồn nằm trong thùng**; thùng là đơn vị cất, di chuyển, lấy, xuất, kiểm kê và điều chỉnh — không mở thùng, không lấy một phần thùng ([20 BR-14](../warehouse/20-inventory-control/README.md)). Số cái trong thùng **luôn bằng số cái chuẩn / thùng** của SKU — thùng lệch số chuẩn không được nhận ([03 BR-13](../warehouse/03-receipt/README.md)). Dòng lấy hàng xác nhận bằng quét LPN ([07](../warehouse/07-picking/README.md)); khi xuất, thùng LPN chính là **kiện giao**, mã kiện = mã LPN ([08](../warehouse/08-packing/README.md)). Xem [20 §4.6](../warehouse/20-inventory-control/README.md). |
+| **Quarantine / Cách ly hàng lỗi** | Trạng thái tồn của thùng lỗi phát hiện sau khi nhập kho (kể cả thùng phát hiện lệch số cái chuẩn — ⚠️ giả định [open-questions C34](../open-questions/README.md)), hoặc hàng hoàn về nghi hư, nằm ở Area loại `QUARANTINE` chờ xử lý: không bán, không phân bổ, không chuyển kho. Chỉ Quản lý kho cách ly / gỡ cách ly, **nguyên thùng**; cách ly chỉ đổi trạng thái nên không qua duyệt bốn mắt (⚠️ giả định); hàng lỗi rời kho bằng điều chỉnh `DAMAGED` đã duyệt, đổi trả với bộ phận sản xuất làm ngoài hệ thống. Xem [20 §4.8](../warehouse/20-inventory-control/README.md). |
+| **Stock movement ledger / Sổ biến động tồn** | Nhật ký mọi thay đổi tồn: loại biến động (`RECEIPT`, `MOVE`, `ADJUSTMENT`, `TRANSFER_OUT`, `STATUS_CHANGE`, `PICK`, `PUT_BACK`), vị trí đi / đến, SKU, lô, số lượng, người, thời điểm, chứng từ nguồn. Không sửa, không xoá. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
+| **Lot traceability / Truy xuất lô** | Báo cáo một lô từ nguồn gốc (**Yêu cầu sản xuất** và phiếu nhập kho; với hàng hoàn: phiếu nhận hàng hoàn và đơn gốc) tới tồn còn lại (kể cả khu chờ xuất, khu cách ly), khoản đang giữ và đơn khách đã nhận hàng. Lô không có phiếu nhập ghi nguồn gốc `UNTRACED`. Xem [20 §4.7](../warehouse/20-inventory-control/README.md). |
 | **FIFO** (First-In-First-Out) | Nhập trước xuất trước. |
 | **FEFO** (First-Expired-First-Out) | Hạn dùng gần thì xuất trước. |
 | **ABC / XYZ analysis** | Phân loại SKU theo mức độ quan trọng (ABC: theo giá trị/tần suất xuất; XYZ: theo độ ổn định nhu cầu). |
 
 ---
 
-## 2. Thuật ngữ mua hàng & nhập kho (Procurement / Inbound)
+## 2. Thuật ngữ nhập kho thành phẩm & Yêu cầu sản xuất (Finished Goods Inbound)
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **Procurement / Mua hàng** | Quy trình mua hàng từ nhà cung cấp về kho. |
-| **Supplier / Vendor / Nhà cung cấp (NCC)** | Đối tác bán hàng hoá cho doanh nghiệp. Mã cố định, mã số thuế duy nhất; `Active` / `Inactive` / `Blacklisted`; chỉ `Active` nhận PO mới. |
-| **Supplier catalog / Danh mục hàng của NCC** | Các SKU một NCC bán: mã hàng phía NCC, đơn giá (có lịch sử giá), MOQ, quy cách đóng gói, lead time. Dòng PO phải có trong danh mục; giá trống lấy giá danh mục. |
-| **Supplier confirmation / Phản hồi của NCC** | Trục trạng thái riêng của PO đã gửi: `Not Sent` → `Pending` → `Confirmed` / `Rejected`; chốt một lần, không đổi trạng thái PO. |
-| **Approval limit / Hạn mức duyệt PO** | Số tiền tối đa theo role + tiền tệ + thời gian hiệu lực. PO trong hạn mức của người gửi được tự duyệt; người duyệt không duyệt PO vượt hạn mức của mình. Xem [02](../warehouse/02-purchase-order/README.md) §4.3. |
-| **PO** (Purchase Order) — **Đơn đặt hàng** | Chứng từ cam kết mua: SKU nào, số lượng, giá, giao về kho nào, khi nào. |
-| **PO line / Dòng hàng PO** | Một dòng trong PO: một SKU + số lượng + đơn giá. |
-| **Open quantity / Số lượng còn chờ nhận** | SL đặt − SL đã nhận của một dòng PO. |
-| **PO revision / amendment** | **Bản sửa** bất biến của PO, ghi **mỗi lần gửi duyệt** (bản 0, rồi +1 sau mỗi lần bị từ chối). PO thường đã `Confirmed` không sửa được; PO gia công có **bản bổ sung** chờ duyệt. |
-| **MOQ** (Minimum Order Quantity) | Số lượng đặt hàng tối thiểu NCC yêu cầu. |
-| **Lead time / Thời gian giao** | Khoảng thời gian từ khi đặt đến khi hàng về. |
-| **Receipt / Goods Receipt — Nhận hàng** | Ghi nhận hàng thực tế về kho theo PO: kiểm đếm, ghi lô, đưa vào khu nhận hàng; với SKU yêu cầu QC thì chuyển sang khu QC và ghi kết quả QC. |
-| **Delivery note / Packing slip / Phiếu giao hàng** | Chứng từ NCC gửi kèm lô hàng, liệt kê nội dung giao. |
-| **QC** (Quality Control) — **Kiểm tra chất lượng** | Đánh giá hàng nhận tại khu kiểm tra chất lượng: đạt (Accepted) / cách ly (Quarantine) / từ chối (Rejected). Chỉ áp dụng cho SKU bật cờ **Yêu cầu QC khi nhận**. |
-| **Nhập kho 2 bước / 3 bước (2-step / 3-step reception)** | 3 bước: NCC → khu nhận hàng (WH/Input) → khu kiểm tra chất lượng (WH/Quality Control) → bin (WH/Stock), cho SKU yêu cầu QC. 2 bước: NCC → khu nhận hàng → bin, cho SKU không yêu cầu QC. |
-| **QC area / Khu kiểm tra chất lượng** | Khu chứa hàng đã nhận đang chờ QC kiểm — Area loại `QUALITY_CONTROL`. Khác khu cách ly (`QUARANTINE`) là nơi chứa hàng **sau khi** QC kết luận cách ly hoặc không đạt. |
-| **Quarantine / Cách ly** | Trạng thái giữ hàng chờ kết luận chất lượng lại, chưa cho vào tồn khả dụng; hàng nằm ở Area loại `QUARANTINE`. |
-| **RTV** (Return To Vendor) — **Trả hàng NCC** | Trả lại hàng không đạt cho nhà cung cấp. |
-| **Over-receipt tolerance / Dung sai nhận vượt** | Tỷ lệ % cho phép nhận nhiều hơn số đặt, khai báo **theo từng NCC** (trống = 0); vượt luôn bị chặn. |
-| **Invoice / Vendor Invoice / AP Invoice — Hoá đơn (mua hàng)** | Yêu cầu thanh toán từ NCC cho hàng đã giao. Phạm vi sau ([C25](../open-questions/README.md)). |
-| **Three-way matching / Đối chiếu ba chiều** | So khớp PO (đặt) ↔ Receipt (nhận) ↔ Invoice (đòi tiền) trước khi thanh toán. Phạm vi sau ([C25](../open-questions/README.md)). |
-| **Price / Quantity variance / Chênh lệch giá / số lượng** | Sai khác giữa hoá đơn và PO/Receipt. |
-| **Credit note / Debit note** | Chứng từ NCC/doanh nghiệp phát hành để điều chỉnh giảm/tăng số tiền hoá đơn. |
-| **AP** (Accounts Payable) — **Công nợ phải trả** | Khoản doanh nghiệp nợ nhà cung cấp. |
-| **Putaway / Cất hàng vào kho** | Di chuyển hàng từ khu chờ cất (khu QC với hàng đạt QC, hoặc khu nhận hàng với SKU không yêu cầu QC) lên vị trí lưu trữ chính thức. |
-| **Putaway task / Nhiệm vụ cất** | Mở tự động khi hàng sẵn sàng cất: mỗi thùng LPN một nhiệm vụ (cất nguyên thùng), phần lẻ của dòng nhận một nhiệm vụ (cất từng phần được). `Pending` → `In Progress` → `Done`. Hệ thống gợi ý tối đa 10 bin. Xem [05](../warehouse/05-putaway/README.md). |
-| **Inbound area / Staging area / Khu nhận hàng** | Khu tạm chứa hàng vừa nhận (WH/Input), chờ chuyển sang khu QC hoặc chờ putaway — Area loại `RECEIVING`. |
+| **Blind receipt / Nhập kho không chứng từ** | Nhập hàng không tham chiếu Yêu cầu sản xuất. Phạm vi sau ([open-questions C19](../open-questions/README.md)); hiện mọi phiếu nhập phải tham chiếu một Yêu cầu sản xuất đang mở ([03](../warehouse/03-receipt/README.md)). |
+| **Delivery note / Phiếu giao hàng** | Chứng từ bộ phận sản xuất gửi kèm hàng giao về kho, ghi số Yêu cầu sản xuất. |
+| **Finished goods / Thành phẩm** | Hàng hoàn chỉnh, sẵn sàng giao cho khách: **hàng đã in theo mẫu của khách** (SKU thành phẩm theo mẫu của khách), do bộ phận sản xuất **đóng thùng sẵn**. Kho chỉ chứa thành phẩm *(Đã chốt 2026-11-04)*. |
+| **Finished Goods Receipt / Phiếu nhập kho thành phẩm** | Chứng từ ghi nhận thành phẩm từ bộ phận sản xuất về kho theo **một** Yêu cầu sản xuất, **chỉ theo thùng**: kho **đếm số thùng**, mỗi thùng dán một nhãn LPN và mang đúng số cái chuẩn / thùng (hệ thống gán); thùng có số cái khác số chuẩn **không nhận** — trả lại bộ phận sản xuất, phần đó vẫn mở ([03 BR-13](../warehouse/03-receipt/README.md), *Đã chốt 2026-11-05*); số nhận của dòng = số thùng; kiểm đủ / thiếu / thừa theo số thùng, ghi lô / hạn dùng, đưa vào khu nhận hàng. Hàng giao rời (chưa đóng thùng) không nhận ([03 BR-12](../warehouse/03-receipt/README.md)). **Không kiểm tra chất lượng tại kho.** `Draft` → `In Putaway` → `Closed`; `Draft` → `Cancelled`. Xem [03](../warehouse/03-receipt/README.md). |
+| **Inbound area / Khu nhận hàng** | Khu tạm chứa thành phẩm vừa nhập (WH/Input), chờ putaway — Area loại `RECEIVING`. Hàng ở đây là tồn `Inbound`, chưa khả dụng. |
+| **Nhập kho 2 bước (2-step reception)** | Bộ phận sản xuất → khu nhận hàng (WH/Input — [03](../warehouse/03-receipt/README.md)) → bin (WH/Stock — [05](../warehouse/05-putaway/README.md)). Là luồng nhập duy nhất. |
+| **Over-receipt / Nhận vượt** | Tổng **số thùng** nhận luỹ kế của một dòng Yêu cầu sản xuất vượt **số thùng yêu cầu** → **chặn**; thùng làm vượt **trả nguyên thùng** lại bộ phận sản xuất. ⚠️ Giả định: không có dung sai nhận vượt (tính theo số thùng); dung sai cấu hình là phạm vi sau ([03 BR-02](../warehouse/03-receipt/README.md), [open-questions C27](../open-questions/README.md)). |
+| **Production department / Bộ phận sản xuất** | Bộ phận làm ra thành phẩm (kể cả in theo mẫu của khách), **nằm ngoài hệ thống**, tự kiểm chất lượng. Nhận phiếu Yêu cầu sản xuất kèm bộ file thiết kế đã chốt, giao thành phẩm **đã đóng thùng đúng số cái chuẩn / thùng** về kho, theo số thùng yêu cầu (✅ đã chốt 2026-11-05 — [open-questions B24](../open-questions/README.md)), nhận lại thùng thừa / thùng lỗi / thùng lệch số chuẩn. Xem [00 §2](../00-system-overview/README.md). |
+| **Production Request / Yêu cầu sản xuất** | Chứng từ thuộc [17](../ecommerce/17-order-management/README.md) §4.3, gửi bộ phận sản xuất (phiếu PDF kèm bộ file thiết kế). **Chỉ phát sinh từ đơn**: **chỉ Điều phối lập** cho phần thiếu của một đơn `Confirmed`, sau khi đã kiểm tồn SKU riêng (hàng dư, hàng trả); hàng nhập về được giữ cho đơn đó ([17 BR-05, BR-07](../ecommerce/17-order-management/README.md)). Dòng: SKU riêng của khách (phải có quy cách thùng), **số thùng** (kèm số cái = số thùng × số cái / thùng — [17 BR-05](../ecommerce/17-order-management/README.md)), design snapshot, ngày cần hàng, kho nhận, đơn liên quan. Vòng đời `Draft` → `Sent` → `In Production` → `Partially Received` → `Received`; huỷ (`Cancelled`) khi chưa nhận gì; đóng thiếu (`Closed`). Tiến độ cập nhật tay (⚠️ giả định — [open-questions B21](../open-questions/README.md)). |
+| **Putaway / Cất hàng vào kho** | Di chuyển **nguyên thùng** thành phẩm từ khu nhận hàng (`RECEIVING`) lên bin lưu trữ; cất xong hàng thành tồn `Available`. |
+| **Putaway task / Nhiệm vụ cất** | Mở tự động khi phiếu nhập được xác nhận: **mỗi thùng LPN một nhiệm vụ**, quét đúng LPN, cất cả thùng vào một bin trong một lần. `Pending` → `Done` (`Cancelled` dành sẵn, chưa có thao tác huỷ). Hệ thống gợi ý tối đa 10 bin. Xem [05](../warehouse/05-putaway/README.md). |
+| **Short close / Đóng thiếu** | Người lập đóng Yêu cầu sản xuất `Partially Received` khi bộ phận sản xuất không giao nốt → `Closed` (bắt buộc lý do). Phần thiếu của đơn: lập yêu cầu mới, hoặc giao một phần rồi đóng phần còn lại ([17](../ecommerce/17-order-management/README.md) §4.3–4.4). |
+| **Short receipt / Nhận thiếu** | Nhận ít thùng hơn số thùng yêu cầu (kể cả do thùng lệch số chuẩn bị trả lại): nhận các thùng đúng chuẩn thực có, phần thiếu **vẫn mở** trên Yêu cầu sản xuất cho lần giao sau ([03 BR-10](../warehouse/03-receipt/README.md)). |
 
 ---
 
@@ -95,15 +83,15 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Shelf / Kệ** | Khối kệ đặt trên bản đồ kho (toạ độ, kích thước, góc xoay), có mặt lấy hàng và lớp lưu trữ mặc định. |
 | **Shelf Level / Tầng kệ** | Một tầng của kệ; có cao độ, chiều cao lọt và tải trọng tối đa. |
 | **Bin / Ô** | Điểm chứa hàng nhỏ nhất trên tầng kệ; tối đa 200 bin mỗi tầng. Có sức chứa theo đơn vị, tải trọng tối đa, cờ cho phép lấy / cất hàng, loại ô (chỉ mô tả), lớp lưu trữ ghi đè. |
-| **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ: không được phân bổ cho lấy hàng; hiện chuyển sang bin picking bằng di chuyển thủ công ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
+| **Picking bin / Reserve bin — Bin picking / Bin dự trữ** | Bin cho phép lấy hàng (`is_pickable` = true) / bin chỉ để dự trữ: không được phân bổ cho lấy hàng; hiện chuyển thùng sang bin picking bằng di chuyển thủ công nguyên thùng ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 | **Bin autogenerate / Tự sinh bin** | Tạo hàng loạt bin cho các tầng kệ chưa có bin bằng cách chia đều mặt kệ theo số hàng × số cột; mã bin đặt theo kiểu `SEQUENTIAL` (`01`, `02`…) hoặc `ROW_LETTER_COLUMN` (`A01`, `B01`…). |
-| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận), `QUALITY_CONTROL` (kiểm tra chất lượng), `QUARANTINE` (cách ly), `PRODUCTION` (xưởng in), `PACKING` (đóng gói), `DISPATCH` (chờ giao), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). Khu chứa hàng có lớp lưu trữ, sức chứa, tải trọng, cờ cho phép lấy / cất; khu vực không thuộc zone. |
+| **Area / Khu vực** | Vùng trên sàn không phải kệ, có mã khu vực riêng: `RECEIVING` (khu nhận hàng), `STAGING` (khu chờ xuất), `QUARANTINE` (cách ly), `PACKING` (khu kiểm thùng & dán nhãn giao — giữ mã kỹ thuật, không đóng lại hàng), `DISPATCH` (khu chờ giao — thùng đã dán nhãn, gom theo shipment), `OVERFLOW` (khu tràn), `NON_STORAGE` (không chứa hàng). Khu chứa hàng có lớp lưu trữ, sức chứa, tải trọng, cờ cho phép lấy / cất; khu vực không thuộc zone. Xem [06](../warehouse/06-warehouse-map-slotting/README.md). |
 | **Boundary / Ranh giới** | Đoạn tường (`WALL`) hoặc cửa (`DOOR`) trên bản đồ; cửa có thể đi qua hoặc không, mở hoặc đóng. |
 | **Obstacle / Vật cản** | Kệ hoặc khu vực đánh dấu không đi xuyên được khi tính đường đi. |
 | **Pick face / Mặt lấy hàng** | Phía của kệ (bắc/đông/nam/tây) mà NV kho tiếp cận để lấy/cất hàng. |
 | **Storage class / Lớp lưu trữ** | Phân loại điều kiện lưu trữ: `NORMAL`, `COLD`, `HAZMAT`, `FRAGILE`, `OVERSIZE`. SKU chỉ được cất vào bin có lớp lưu trữ hiệu lực trùng lớp của SKU. |
-| **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin**, một **Area chứa hàng**, hoặc **vị trí tại nhà gia công** (vị trí ảo, không trên bản đồ). |
-| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng, do hệ thống ghép khi tạo vị trí và không đổi: bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`); khu vực = prefix kho + mã khu vực (ví dụ `HN-RCV01`). Duy nhất toàn hệ thống. Vị trí tại nhà gia công = prefix kho + `SUB` + mã NCC. In nhãn kèm QR và Code 128. |
+| **Location / Vị trí** | Nơi tồn kho được ghi nhận: một **Bin** hoặc một **Area chứa hàng** (`RECEIVING`, `STAGING`, `QUARANTINE`, `PACKING`, `DISPATCH`, `OVERFLOW`). |
+| **Location barcode / Mã vị trí** | Mã quét để xác nhận đúng vị trí khi cất/lấy hàng, do hệ thống ghép khi tạo vị trí và không đổi: bin = prefix kho + mã kệ + tầng + mã bin (ví dụ `HN-A01-2-03`); khu vực = prefix kho + mã khu vực (ví dụ `HN-RCV01`). Duy nhất toàn hệ thống. In nhãn kèm QR và Code 128. |
 | **Effective status / Trạng thái hiệu lực** | Trạng thái thực dùng của một vị trí = trạng thái hẹp nhất trong (kho, kệ, vị trí), theo thứ tự `Inactive` > `Maintenance` > `Blocked` > `Active`; tính khi đọc, không ghi lan. Vị trí **dùng được** khi trạng thái hiệu lực là `Active`. |
 | **Warehouse prefix / Tiền tố kho** | Mã ngắn duy nhất của kho, dùng làm tiền tố cho mã vị trí và mã chứng từ phát sinh tại kho. Không sửa được sau khi tạo. |
 | **Capacity / Sức chứa** | Giới hạn của vị trí: số đơn vị tối đa của bin; tải trọng tối đa & chiều cao lọt của tầng kệ. |
@@ -115,65 +103,68 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Velocity / Tần suất xuất** | Mức độ một SKU được lấy ra để giao (nhanh/chậm). |
 | **Hard constraint / Ràng buộc cứng** | Điều kiện không được vi phạm khi cất hàng: trạng thái vị trí, cho phép cất, lớp lưu trữ, sức chứa, tải trọng & chiều cao lọt của tầng. |
 | **Hazmat** (Hazardous materials) | Hàng nguy hiểm, có khu vực & quy tắc lưu trữ riêng. |
-| **Picking / Lấy hàng** | Lấy hàng từ các vị trí để gom thành đơn chuẩn bị giao. |
-| **Pick list / Danh sách lấy hàng** | Danh sách dòng lấy hàng (vị trí – SKU – lô – thùng LPN nếu có – số lượng) của một task, sắp theo mã vị trí. |
-| **Fulfillment task / Pick task — Nhiệm vụ xuất hàng** | **Mỗi đơn một task**, gồm phần lấy hàng (`Pending` → `Picking` → `Picked`) và phần đóng gói; Điều phối / Quản lý kho tạo và giao cho một nhân viên kho ([07](../warehouse/07-picking/README.md)). |
+| **Picking / Lấy hàng** | Lấy **nguyên thùng LPN** đã phân bổ từ các vị trí cho đơn đã release, đưa tới **đích lấy hàng** (`PACKING` hoặc `STAGING`). Mọi dòng đơn đều lấy thành phẩm từ bin; không mở thùng, không lấy lẻ ([07](../warehouse/07-picking/README.md)). |
+| **Pick destination / Đích lấy hàng** | Nơi thùng đã lấy được đưa tới, chọn theo task: `PACKING` (mặc định — khu kiểm thùng & dán nhãn; đơn xuất ngay, tồn bị trừ khi quét) hoặc `STAGING` (khu chờ xuất — giữ riêng cho đơn chưa xuất ngay, tồn chưa trừ). Đổi được khi task còn `Pending`. Xem [07](../warehouse/07-picking/README.md). |
+| **Pick list / Danh sách lấy hàng** | Danh sách dòng lấy hàng của một task — **mỗi dòng một thùng LPN** (vị trí – SKU – lô – mã LPN – số cái chuẩn / thùng), sắp theo mã vị trí rồi SKU. Dòng chỉ xác nhận bằng quét đúng LPN của thùng. |
+| **Fulfillment task / Pick task — Nhiệm vụ xuất hàng** | **Mỗi đơn một task**, gồm phần lấy hàng (`Pending` → `Picking` → `Picked` / `Staged`) và phần kiểm thùng ([08](../warehouse/08-packing/README.md)); Điều phối / Quản lý kho tạo, chọn đích lấy hàng và giao cho một nhân viên kho. Lấy bổ sung thêm dòng vào cùng task ([07](../warehouse/07-picking/README.md)). |
 | **Wave / Batch picking** | Gom nhiều đơn thành một đợt lấy hàng để tối ưu di chuyển. Phạm vi sau ([open-questions C17](../open-questions/README.md)). |
 | **Zone picking** | Mỗi NV kho phụ trách lấy hàng trong một zone; đơn đi qua nhiều zone. Phạm vi sau (C17). |
-| **Short pick / Lấy thiếu** | Không lấy đủ số lượng do vị trí không đủ hàng. Dòng `Short`, đơn treo `INVENTORY`, mở kiểm kê mù; Điều phối phân bổ lại từ bin khác cùng kho. |
-| **Backorder / Đặt hàng chờ** | Phần đơn chưa có hàng, sẽ giao sau khi bổ sung tồn. Không áp dụng trên catalog: không có đặt trước ([13](../ecommerce/13-catalog/README.md), [D17](../open-questions/README.md)). |
-| **Staging (outbound) / Khu chờ giao** | Khu gom hàng đã pick và thành phẩm in đạt QC chờ đóng gói (Area `PACKING`) / kiện chờ bàn giao vận chuyển (Area `DISPATCH`). |
-| **Put-back / Trả hàng về vị trí** | Đưa hàng đã lấy nhưng không dùng (đơn huỷ) trở lại một bin của cùng kho, qua hàng chờ cất lại. |
-| **Replenishment / Bổ sung vùng picking** | Chuyển hàng từ bin dự trữ sang bin picking khi sắp cạn. Phạm vi sau ([C24](../open-questions/README.md)); hiện làm bằng di chuyển thủ công ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
-| **Packing / Đóng gói** | Kiểm đơn lần cuối, đóng thành kiện, gắn nhãn. |
-| **Cartonization** | Gợi ý loại thùng/hộp & cách chia kiện phù hợp. Tại bàn đóng gói: phạm vi sau (C17); hệ thống chỉ ước tính số thùng khi ước tính tải. |
-| **Kit / Bộ kiện (đóng bộ)** | Một đơn vị hàng đóng thành N kiện (N = `package_count` trên Inventory Item, 2–99); giao nguyên bộ, cùng một xe; huỷ một kiện là huỷ cả bộ. |
-| **Label outdated / Nhãn lỗi thời** | Nhãn kiện in trước khi kiện đổi shipment hoặc số tiền thu hộ đổi; phải in lại trước khi xếp xe / bàn giao. |
-| **Packing slip / Phiếu đóng gói** | Phiếu liệt kê nội dung kiện, đặt kèm trong hoặc ngoài kiện. |
-| **Dimensional weight / Khối lượng quy đổi** | Khối lượng tính cước theo thể tích kiện (khi hàng cồng kềnh nhẹ cân). |
-| **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao kiện (gửi kiện qua hãng, hoặc xếp lên xe khi giao nguyên chuyến) cho hãng vận chuyển ngoài để giao đến khách. Hệ thống không theo dõi hành trình sau bàn giao. |
-| **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận), hoạt động ngoài hệ thống. |
-| **Package label / Nhãn kiện** | Nhãn nội bộ in khi đóng gói: mã đơn, mã kiện, người nhận, địa chỉ, số tiền thu khi giao (nếu có). Hệ thống không lấy vận đơn / mã theo dõi của hãng. |
-| **Manifest / Bảng kê bàn giao** | Danh sách kiện của một chuyến bàn giao, kèm người đại diện hãng, biển số, tài xế; hai bên ký. |
+| **Short pick / Lấy thiếu** | Không lấy được thùng của dòng (không thấy thùng ở vị trí, hoặc thùng hư hỏng). Dòng `Short`, đơn treo `INVENTORY`, mở kiểm kê mù cho thùng đó; Điều phối phân bổ lại **đủ số thùng thiếu** từ các thùng khác của SKU, cùng kho ([07 BR-03](../warehouse/07-picking/README.md)). |
+| **Staging area / Khu chờ xuất** | Area loại `STAGING`: hàng đã lấy cho **một đơn** được gom và **giữ riêng cho đơn** khi đơn chưa xuất ngay (còn chờ hàng từ Yêu cầu sản xuất, hoặc chờ đợt `BEFORE_DELIVERY`). Tồn ở đây vẫn là `Available` mang khoản phân bổ của đơn, **không thuộc ATP**, không phân bổ cho đơn khác, không chuyển kho, không di chuyển thủ công. Điều phối quyết định có dùng hay không (⚠️ giả định). Xem [06 §4.5](../warehouse/06-warehouse-map-slotting/README.md), [20 §4.9](../warehouse/20-inventory-control/README.md). Khác khu `PACKING` (thùng chờ kiểm & dán nhãn) và `DISPATCH` (thùng đã dán nhãn chờ bàn giao). |
+| **Staged** | Trạng thái của task / dòng lấy hàng khi thùng đã lấy về khu chờ xuất: tồn chưa trừ, vẫn gắn đơn. Rời `Staged` khi **chuyển cả tác vụ sang khu kiểm & dán nhãn** (→ `Picked`, trừ tồn) hoặc khi đơn bị huỷ (cất lại). Xem [07 §5](../warehouse/07-picking/README.md). |
+| **Transfer whole task to check & labeling / Chuyển cả tác vụ sang khu kiểm & dán nhãn** | Thao tác Điều phối / Quản lý kho làm **một lần cho cả task** `Staged`, khi đơn đã sẵn sàng xuất (đủ hàng, hoặc Sale cho phép giao một phần) và không đang treo: mọi dòng `Staged` → `Picked`, trừ tồn tại khu chờ xuất (dòng sổ `PICK`), thùng và khoản phân bổ → `Consumed`, thùng mang sang khu `PACKING`, phần kiểm thùng mở ([07 §4.3](../warehouse/07-picking/README.md)). |
+| **Put-back / Trả hàng về vị trí** | Cất lại **nguyên thùng** đã lấy nhưng không dùng (đơn huỷ khi chưa có thùng nào dán nhãn) — kể cả thùng đang ở khu chờ xuất — vào một bin của cùng kho, qua hàng chờ cất lại; quét LPN xác nhận ([07 §4.5](../warehouse/07-picking/README.md)). Thùng hư hỏng bị loại khi kiểm thùng cũng qua hàng chờ này nhưng cất vào khu `QUARANTINE` ([08 §4.2](../warehouse/08-packing/README.md)). |
+| **Replenishment (picking) / Bổ sung vùng picking** | Đưa thùng từ bin dự trữ sang bin picking khi sắp cạn. Tự động theo min / max là phạm vi sau ([C24](../open-questions/README.md)); hiện làm bằng di chuyển thủ công nguyên thùng ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
+| **Outbound Check & Labeling / Kiểm thùng & Dán nhãn giao hàng** | Module [08](../warehouse/08-packing/README.md) (thư mục `08-packing`): quét LPN kiểm đủ thùng cho đơn (đúng SKU, đủ số thùng), loại thùng hư hỏng, **in & dán nhãn giao hàng** lên từng thùng, **gom thùng thành shipment** để bàn giao 09. **Thùng LPN là kiện giao**: không đóng lại hàng, không chọn loại kiện, không cân đo, không niêm phong; kích thước, khối lượng lấy từ quy cách thùng. |
+| **Outbound check session / Phiên kiểm thùng** | Phiên kiểm thùng & dán nhãn của một đơn: `Pending` → `In Progress` → `Completed` (đã kiểm đủ thùng & dán nhãn, đơn `Packed`); hoàn tất một phần thì giữ `In Progress`, đơn `Partially Fulfilled`; → `Cancelled` chỉ khi đơn bị huỷ lúc chưa có thùng nào dán nhãn. Chỉ người bắt đầu phiên (hoặc Quản lý kho) thao tác ([08 §5.1](../warehouse/08-packing/README.md)). |
+| **Outbound carton / Thùng giao** | Thùng LPN đã lấy cho đơn, đi qua khâu kiểm & dán nhãn: `To Check` → `Checked` (quét đúng LPN) → `Labeled` (đã dán nhãn giao) → gom vào shipment (09); → `Removed` (thùng hư hỏng bị loại, hoặc đơn huỷ khi chưa thùng nào dán nhãn — thùng vào hàng chờ cất lại) ([08 §5.2](../warehouse/08-packing/README.md)). |
+| **Shipping label / Nhãn giao hàng** | Nhãn in cho từng thùng đã `Checked`, dán cạnh nhãn LPN: mã đơn, mã LPN (mã vạch), SKU, số lượng, khối lượng, người nhận, điện thoại, địa chỉ giao, kho gửi / địa chỉ hoàn hàng, ký hiệu dễ vỡ / không xoay. Nhãn rách / mất in lại theo mã LPN, nhãn cũ vô hiệu. **Thùng đầu tiên của đơn được dán nhãn** là mốc khoá huỷ đơn, đổi cách giao, đổi địa chỉ giao ([08 BR-04](../warehouse/08-packing/README.md)). Hệ thống không lấy vận đơn / mã theo dõi của hãng. |
+| **Dimensional weight / Khối lượng quy đổi** | Khối lượng tính cước theo thể tích thùng: D × R × C (cm) / 6.000, hệ số cấu hình được ([08 BR-09](../warehouse/08-packing/README.md)). |
+| **Shipping / Giao cho đơn vị vận chuyển** | Bàn giao thùng LPN đã dán nhãn (gửi kiện qua hãng, hoặc xếp lên xe khi giao nguyên chuyến) cho hãng vận chuyển ngoài để giao đến khách. Bị chặn khi đợt `BEFORE_DELIVERY` của hợp đồng chưa thu đủ. Hệ thống không theo dõi hành trình sau bàn giao. |
+| **Carrier / 3PL / Đơn vị vận chuyển** | Bên thứ ba thực hiện vận chuyển (giao nhận), hoạt động ngoài hệ thống; không thu tiền hộ doanh nghiệp. |
+| **Manifest / Bảng kê bàn giao** | Danh sách kiện (thùng LPN) của một chuyến bàn giao, kèm người đại diện hãng, biển số, tài xế; hai bên ký. |
 | **Load / Chuyến bàn giao** | Một lần bàn giao cho một hãng trên một xe: gửi kiện thì mở chuyến là `Loading`; giao nguyên chuyến thì mỗi xe của kế hoạch là một chuyến `Planned` → `Vehicle Booked` → `Loading` → `Dispatched`. Bàn giao là tất cả hoặc không ([09](../warehouse/09-shipping/README.md) §5.2). |
-| **Load estimate / Ước tính tải** | Ước tính số thùng, thể tích, khối lượng, số xe của một đơn / lệnh chuyển kho từ quy cách đóng gói, trước khi đóng gói; chỉ để tham khảo, được đối chiếu với kế hoạch chuyến xe. |
-| **Transfer pack / Phiên đóng gói chuyển kho** | Phiên đóng gói của lệnh chuyển kho nguyên chuyến: giữ hàng tại kho nguồn, cho phép gửi nguyên thùng LPN ([10](../warehouse/10-inter-warehouse-transfer/README.md)). |
-| **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện không giao được, quay về kho gửi. |
-| **Shipment** | Nhóm 1..n kiện của một đơn, có trạng thái giao chung (`Ready to Dispatch` → `Handed Over` → `Delivered` / `Delivery Failed` → `Returned`); không có lịch sử tracking từ hãng. |
+| **Load estimate / Ước tính tải** | Ước tính số thùng, thể tích, khối lượng, số xe của một đơn / lệnh chuyển kho từ **quy cách thùng** của SKU; dòng có SKU thiếu quy cách thùng làm ước tính bị đánh dấu chưa đủ; chỉ để tham khảo, được đối chiếu với kế hoạch chuyến xe ([09](../warehouse/09-shipping/README.md)). |
+| **Transfer check session / Phiên kiểm thùng chuyển kho** | Phiên kiểm thùng của lệnh chuyển kho nguyên chuyến: giữ các thùng LPN cho lệnh tại kho nguồn, quét kiểm và dán nhãn từng thùng; thùng LPN là kiện chuyển đi ([10](../warehouse/10-inter-warehouse-transfer/README.md), dùng cùng quy tắc với [08](../warehouse/08-packing/README.md)). |
+| **RTO** (Return To Origin) — **Hoàn hàng về kho** | Kiện (thùng) không giao được, quay về kho gửi. |
+| **Shipment** | Nhóm 1..n **thùng LPN đã dán nhãn giao** của **một đơn**, sinh khi hoàn tất kiểm thùng ([08](../warehouse/08-packing/README.md)), mã `<mã đơn>-S<n>`; có trạng thái giao chung (`Ready to Dispatch` → `Handed Over` → `Delivered` / `Delivery Failed` → `Returned`); chờ bàn giao ở khu `DISPATCH`; không có lịch sử tracking từ hãng. |
 | **FTL** (Full Truckload) / **Giao nguyên chuyến** | Hình thức giao thuê nguyên xe tải / container (cho đơn sỉ khối lượng lớn được chỉ định, hoặc lệnh chuyển kho), khác với gửi từng kiện qua hãng vận chuyển. |
 | **Load Planning / Lập kế hoạch xếp hàng 3D** | Tính từ danh sách kiện: cần loại xe nào, bao nhiêu chiếc, mỗi kiện đặt ở vị trí & hướng nào trong thùng xe; hiển thị 3D để kiểm tra trước khi thuê xe. |
 | **Load Plan / Kế hoạch chuyến xe** | Kết quả của Load Planning: số xe từng loại, vị trí từng kiện, % lấp đầy, kiện không xếp được; có vòng đời `Draft` → `Planned` → `Confirmed` → `Dispatched`. |
 | **Vehicle Type / Loại xe** | Danh mục xe tải / container cấu hình được: kích thước lòng thùng, tải trọng tối đa, số chiếc sẵn có, giá thuê. Cài sẵn container 20DC, 40DC, 40HC, 45HC. |
 | **Fill rate / Tỷ lệ lấp đầy** | Phần trăm thể tích lòng thùng và phần trăm tải trọng của một xe đã được kiện sử dụng. |
-| **Rotatable / Cho phép xoay** | Cờ của SKU (mặc định cho kiện, Packer được ghi đè) cho biết kiện được xoay theo 6 hướng khi xếp lên xe hay phải giữ nguyên hướng đặt. |
+| **Rotatable / Cho phép xoay** | Cờ trên Inventory Item của SKU (mặc định cho phép) cho biết thùng được xoay theo 6 hướng khi xếp lên xe hay phải giữ nguyên hướng đặt. Lấy theo SKU / quy cách thùng, không ghi đè tại kho ([08 BR-07](../warehouse/08-packing/README.md), [09 BR-17](../warehouse/09-shipping/README.md)). |
 | **Inter-warehouse Transfer / Chuyển kho** | Di chuyển tồn giữa hai kho khác địa điểm. |
-| **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển tồn giữa các vị trí trong cùng một kho. Hiện là thao tác di chuyển thủ công, ghi ngay, chỉ phần tự do của hàng lẻ ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
+| **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển **nguyên thùng LPN** giữa các vị trí trong cùng một kho bằng tay *(Đã chốt 2026-11-04 — thuộc phạm vi hiện tại)*: quét 1..n thùng và vị trí đích, ghi ngay, mỗi thùng một dòng sổ `MOVE`; chỉ thùng tự do (không giữ cho đơn / lệnh chuyển kho); không di chuyển thủ công vào khu chờ xuất ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 | **Transfer Order (TO) / Lệnh chuyển kho** | Chứng từ yêu cầu chuyển hàng giữa/trong kho. |
 | **Transfer discrepancy / Chênh lệch chuyển kho** | Sai khác giữa số xuất ở kho nguồn và số nhận ở kho đích. Ghi khi nhận tại kho đích — phạm vi sau ([10](../warehouse/10-inter-warehouse-transfer/README.md)). |
 
 ---
 
-## 3a. Thuật ngữ sản xuất / in theo đơn (Production)
+## 3a. Thuật ngữ mẫu, thiết kế & SKU theo mẫu của khách (Design)
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **Phôi / Blank** | Ly, hộp, túi chưa in (ly trơn, túi giấy trơn…) — Inventory Item của SKU; tồn kho và ATP tính trên phôi; được cấp cho xưởng theo lệnh sản xuất. |
-| **Print method / Kỹ thuật in** | **(Phạm vi sau — [B18](../open-questions/README.md))** Công nghệ in của sản phẩm (in lụa, in offset khô, in UV, flexo…); chưa khai báo được ([01 §4.9](../warehouse/01-product-creation/README.md)); dùng chọn trạm in khi có trạm in ([B10](../open-questions/README.md)). |
-| **Print Station / Trạm in** | **(Phạm vi sau — [B10](../open-questions/README.md))** Máy/vị trí in tại xưởng nội bộ, có kỹ thuật in, công suất/ngày và trạng thái. Chưa triển khai: lệnh sản xuất không gán trạm. |
-| **Production area / Khu xưởng in** | Area loại `PRODUCTION`: nơi chứa phôi đã cấp, hàng đang in và thành phẩm chờ QC. |
-| **Production Order (MO) / Lệnh sản xuất (LSX)** | Chứng từ xưởng in cho **một dòng đơn tùy chỉnh** (`ORDER`) hoặc **một yêu cầu làm mẫu** (`SAMPLE`): SKU phôi, số lượng, design snapshot, print-ready file, hạn hoàn thành, chế độ (in nội bộ / gia công). Mã `LSX-yyyyMMdd-NNNN`, ví dụ `LSX-20261028-0001`. Xem [19](../warehouse/19-production/README.md). |
-| **Production queue / Hàng đợi sản xuất** | Danh sách lệnh `Ready` (đã qua prepress) xếp theo hạn hoàn thành rồi thời điểm tạo lệnh; là cách xem, không phải trạng thái. |
-| **Prepress / Kiểm file trước sản xuất** | Production Staff kiểm print-ready file của lệnh sản xuất trước khi cấp phôi: checksum khớp thiết kế đã khoá, vùng in, độ phân giải. Khác *Preflight* (kiểm tự động khi khách thiết kế). |
-| **In bù / Reprint (rework)** | Cấp phôi cho **phần còn thiếu** và in lại khi in hỏng hoặc QC không đạt; lệnh quay về `Ready`; phôi đã cấp chưa in được dùng trước, thiếu thì hệ thống giữ thêm. |
-| **Dừng lệnh sản xuất / Stop** | Quản lý kho kết thúc lệnh đang `Printing` hoặc `QC`: mọi hàng đã in thành phế phẩm, phôi chưa in trả về, lệnh `Cancelled`. Khác **huỷ** — chỉ áp cho lệnh chưa in. Xem [19 §4.9](../warehouse/19-production/README.md). |
-| **Scrap / Phế phẩm, xuất huỷ** | Sản phẩm in hỏng hoặc phôi hỏng; luôn ghi kèm lý do và giảm tồn bằng chứng từ điều chỉnh có lệnh sản xuất làm nguồn. |
-| **Sản xuất mẫu / Sample production** | Làm vài sản phẩm theo thiết kế mới để khách duyệt trước khi đặt số lượng lớn (LSX `SAMPLE`, luôn in nội bộ). |
-| **Yêu cầu làm mẫu / Sample request** | Chứng từ Sale tạo để xưởng làm mẫu cho khách; kết thúc khi khách duyệt hoặc yêu cầu sửa. |
-| **Mẫu đã duyệt / Approved sample** | Mẫu khách đã chấp nhận; khoá thiết kế cho cặp (thiết kế, phôi) và là chuẩn QC khi sản xuất đơn hàng. |
-| **Gia công ngoài / Subcontracting** | Thuê **nhà gia công** in một phần LSX `ORDER` khi xưởng nội bộ thiếu công suất. Hai cách: **`SUPPLIED_BLANKS`** (mình cấp phôi, trả phí gia công) và **`FULL_SERVICE`** (nhà gia công tự lo phôi, mình mua thành phẩm). Xem [19 §4.7](../warehouse/19-production/README.md). |
-| **Nhà gia công / Subcontractor** | Nhà cung cấp được đánh dấu **gia công in**; nhận PO gia công, không dùng hệ thống. |
-| **PO gia công** (`SUBCONTRACT`) | PO sinh khi tách LSX, một dòng là thành phẩm của LSX con; duyệt, nhận hàng và đối chiếu hoá đơn như PO thường. |
-| **Đối soát phôi gia công** | Phôi gửi = thành phẩm nhận + phế phẩm trả về + phôi trả về + hao hụt; hao hụt vượt mức cho phép bị trừ vào hoá đơn gia công. |
+| **Bleed / Vùng tràn lề** | Phần mở rộng ngoài mép để tránh viền trắng khi cắt. |
+| **Customer sample / Mẫu của khách** | Logo, file gốc, ảnh, mẫu vật khách (doanh nghiệp) đưa cho Sale để làm thiết kế. Lưu kèm bản thiết kế để tham khảo, **không** thuộc bộ file của snapshot ([12 §4.1](../ecommerce/12-product-design/README.md)). |
+| **Customer-exclusive SKU / SKU thành phẩm theo mẫu của khách** | SKU riêng của **một khách**, hệ thống sinh khi khách **xác nhận** một thiết kế, gắn khách sở hữu và **một design snapshot**; thuộc sản phẩm `CUSTOMIZABLE` và quy cách của thiết kế. Là **hàng có tồn duy nhất**: tồn, nhập kho, lấy hàng, xuất (nguyên thùng), báo giá, đơn, Yêu cầu sản xuất đều theo SKU này; chỉ khách sở hữu thấy và được báo giá / đặt. Quy cách thùng, logistics, chính sách tồn sao chép từ quy cách khi sinh. Mã = mã sản phẩm – mã khách – số thứ tự; `Active` ngay; chỉ có giá riêng của khách (⚠️ giả định — [open-questions B20, D27](../open-questions/README.md)). Bản sửa thiết kế sinh SKU mới. Xem [01 §4.8](../warehouse/01-product-creation/README.md), [12](../ecommerce/12-product-design/README.md). |
+| **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. Phạm vi sau ([B18](../open-questions/README.md)): hiện khách đưa mẫu, nhân viên lập bộ file thiết kế, khách xác nhận ([12](../ecommerce/12-product-design/README.md)). |
+| **Design artifact role / Vai trò file thiết kế** | Mỗi file trong bộ thiết kế mang một vai trò: `CUSTOMER_PREVIEW` (xem trước cho khách — file được duyệt và xác nhận), `TECHNICAL_SPEC` (bản vẽ kỹ thuật), `PRINT_READY` (file in), `PRODUCTION_INSTRUCTION` (hướng dẫn sản xuất). Ba vai trò sau được gửi bộ phận sản xuất qua Yêu cầu sản xuất. |
+| **Design draft / Bản thiết kế** | Bản thiết kế của một khách cho **một sản phẩm `CUSTOMIZABLE` + một quy cách**, từ lúc Sale ghi nhận mẫu của khách tới khi khách xác nhận (`Draft` → `Submitted` → `Approved`). Chỉ chủ sở hữu, người thiết kế và người duyệt thấy khi chưa xác nhận. Xem [12](../ecommerce/12-product-design/README.md). |
+| **Design snapshot / Bản thiết kế chốt** | Bộ file (theo vai trò) và đặc tả mà khách đã **xác nhận**, kèm checksum SHA-256 từng file và cả bộ. **Bất biến** từ lúc xác nhận; sinh cùng bước với SKU thành phẩm theo mẫu của khách. Được kiểm lại checksum mỗi lần dùng (gắn báo giá, đơn, Yêu cầu sản xuất, cấp link tải). Đổi nội dung = tạo bản sửa (bản thiết kế mới, SKU mới). |
+| **DPI** (Dots Per Inch) | Độ phân giải in; DPI thấp → ảnh in bị mờ/vỡ. |
+| **Live 3D Preview / Xem trước 3D trực tiếp** | Hiển thị thiết kế 2D "dán" lên mô hình 3D, cập nhật realtime khi khách chỉnh. Phạm vi giai đoạn sau ([open-questions B18](../open-questions/README.md)). |
+| **My designs / Mẫu thiết kế của tôi** | Mục trên cổng khách hàng: danh sách bản thiết kế khách là chủ sở hữu (trạng thái, file xem trước) và SKU riêng sinh ra từ đó, kèm chỉ báo còn hàng; khách xác nhận / yêu cầu sửa thiết kế và mở chat với Sale từ đây ([13 §4.5](../ecommerce/13-catalog/README.md)). |
+| **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). Bản tự động (`Pass` / `Warning` / `Fail`) thuộc phạm vi giai đoạn sau (B18); hiện tại việc này là **duyệt kỹ thuật** do Quản trị bán hàng thực hiện. |
+| **Print area / Vùng in** | Khu vực cho phép in nội dung trên sản phẩm. Khai báo trên sản phẩm là phạm vi sau ([01 §4.10](../warehouse/01-product-creation/README.md)). |
+| **Print method / Kỹ thuật in** | Công nghệ in (in lụa, in offset khô, in UV, flexo…). Hiện chỉ ghi bằng chữ trong **đặc tả kỹ thuật** của bản thiết kế ([12](../ecommerce/12-product-design/README.md)); khai báo trên sản phẩm là phạm vi sau ([01 §4.10](../warehouse/01-product-creation/README.md), [B18](../open-questions/README.md)). |
+| **Print-on-demand / In theo yêu cầu** | Hàng in theo mẫu của khách được bộ phận sản xuất làm (ngoài hệ thống) theo **Yêu cầu sản xuất** khi đơn thiếu hàng (sau khi đã kiểm tồn SKU riêng); không sản xuất trước để bổ sung tồn. |
+| **Print-ready file / File sẵn sàng in** | File in đúng chuẩn kỹ thuật (vai trò `PRINT_READY`), gửi bộ phận sản xuất kèm Yêu cầu sản xuất. |
+| **Product type / Loại sản phẩm** | Chỉ còn `CUSTOMIZABLE` — **hàng in theo mẫu của khách**, hệ thống gán, không chọn: biến thể là **quy cách**, hàng có tồn và bán được là SKU thành phẩm theo mẫu của khách *(Đã chốt 2026-11-04 — [01 BR-19](../warehouse/01-product-creation/README.md))*. Loại `STANDARD` (hàng trơn) đã bỏ (§8). |
+| **Quy cách (của sản phẩm `CUSTOMIZABLE`)** | Biến thể theo trục (ví dụ ly PP 500 ml trong) của sản phẩm in theo mẫu — **chỉ là khuôn để in**: dùng để lập thiết kế và làm khuôn dữ liệu (kể cả quy cách thùng) cho SKU theo mẫu của khách; **không có tồn, không có giá, không báo giá / đặt trực tiếp**; hiện trên sàn cho mọi khách (không giá, không chỉ báo còn hàng) để xem và **yêu cầu in theo mẫu** qua chat *(✅ đã chốt 2026-11-04 — [open-questions B19](../open-questions/README.md), [13 BR-11](../ecommerce/13-catalog/README.md))*. Không nhầm với **quy cách thùng** (§1). |
+| **RGB / CMYK** | Hệ màu màn hình (RGB) vs hệ màu in (CMYK); cần chuyển đổi khi in. |
+| **Safe area / Vùng an toàn** | Phần bên trong vùng in, tránh bị xén khi sản xuất. |
+| **Technical review / Duyệt kỹ thuật thiết kế** | **Quản trị bán hàng** được giao duyệt **Đạt / Không đạt** bộ file thiết kế, kèm nhận xét, trước khi gửi khách xác nhận. Độc lập (bốn mắt): không phải chủ sở hữu, người thiết kế hay người sửa cuối. Mọi thay đổi xoá kết quả duyệt ([12 §4.3](../ecommerce/12-product-design/README.md)). |
 
 ---
 
@@ -182,84 +173,73 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
 | **B2B / Bán sỉ** | Hệ thống chỉ bán cho khách doanh nghiệp đã liên hệ trước; không có khách vãng lai. |
-| **Customer portal / Cổng khách hàng** | Trang dành cho khách sỉ đã đăng nhập: catalog & giá riêng, báo giá, duyệt mẫu, đặt hàng, theo dõi đơn & công nợ. |
+| **Customer portal / Cổng khách hàng (sàn bán hàng)** | Trang dành cho khách sỉ đã đăng nhập: catalog & bảng giá riêng, mẫu thiết kế của tôi, xác nhận thiết kế, chấp nhận báo giá, chat với Sale, xem đơn / hợp đồng / đợt thanh toán / công nợ. **Khách không tự đặt hàng** — đơn do Sale chốt *(Đã chốt 2026-11-04)*. |
 | **In-app notification / Thông báo trong ứng dụng** | Hộp thông báo theo người, mức `INFO` / `WARN` / `CRITICAL`; đã đọc tự xoá sau 90 ngày. Xem [00 §6](../00-system-overview/README.md). |
-| **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: phôi, thông số in, bậc số lượng / MOQ, giá, hiệu lực, phương thức thanh toán. Khách chấp nhận thì Sale được báo; **Sale / Điều phối chuyển** báo giá đã chấp nhận thành đơn ([14](../ecommerce/14-cart-and-order/README.md)). |
-| **Giá riêng theo khách / Customer price list** | Giá theo (khách, SKU) gồm 1–20 bậc số lượng; bậc đầu là MOQ của khách. Ưu tiên cao nhất, rồi giá nhóm, rồi giá gốc ([13](../ecommerce/13-catalog/README.md)). |
-| **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ với đơn bán theo công nợ. |
-| **Hạn mức tín dụng / Credit limit** | Mức dư nợ tối đa của một khách; đơn công nợ vượt hạn mức bị giữ chờ duyệt. |
-| **Kỳ hạn thanh toán / Payment term** | Số ngày khách được trả chậm (ví dụ 30 ngày) với đơn công nợ. |
-| **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày trên cổng khách hàng để khách sỉ xem & đặt. |
+| **Báo giá / Quote** | Đề nghị giá Sale gửi khách sỉ: **chỉ SKU thành phẩm theo mẫu của chính khách đó** (quy cách không báo giá được — [14 BR-04](../ecommerce/14-cart-and-order/README.md)), **số thùng** từng dòng (kèm số cái / thùng), bậc giá / MOQ theo số thùng, **đơn giá theo cái**, hiệu lực, lịch thanh toán dự kiến ([14 BR-07, BR-08](../ecommerce/14-cart-and-order/README.md)). Khách chấp nhận (chọn số thùng) trên sàn hoặc bằng thẻ hành động trong chat; **Sale tạo đơn** từ báo giá `Accepted` ([14 §4.1](../ecommerce/14-cart-and-order/README.md)). |
+| **Giá riêng theo khách / Customer price list** | Giá theo (khách, SKU riêng) gồm 1–20 **bậc theo số thùng**; bậc đầu là MOQ của khách; mỗi bậc ghi **đơn giá theo cái**; hiển thị kèm số cái / thùng của SKU *(Đã chốt 2026-11-05 — [13 BR-05, BR-06](../ecommerce/13-catalog/README.md))*. Là **nguồn giá duy nhất** — không có giá gốc, không có giá nhóm, quy cách không có giá *(Đã chốt 2026-11-04 — [13 BR-04](../ecommerce/13-catalog/README.md), [open-questions D14](../open-questions/README.md))*. Chưa có giá riêng thì hiện "Liên hệ Sale" (⚠️ giả định — D27). |
+| **MOQ** (Minimum Order Quantity) | **Số thùng** đặt tối thiểu của khách cho một SKU — bậc thấp nhất của bảng giá riêng / báo giá; số thùng mỗi dòng phải ≥ MOQ *(Đã chốt 2026-11-05 — [13 BR-05](../ecommerce/13-catalog/README.md), [14 BR-07](../ecommerce/14-cart-and-order/README.md))*. |
+| **Price tier / Bậc giá** | Một mức của bảng giá riêng / báo giá: **số thùng tối thiểu** kèm **đơn giá / cái**. Bậc áp dụng = bậc cuối cùng có số thùng tối thiểu ≤ **tổng số thùng của SKU** trên báo giá / đơn; dưới MOQ thì không có giá. Thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái *(Đã chốt 2026-11-05 — [13 §4.4, BR-05](../ecommerce/13-catalog/README.md), [14 BR-07, BR-08](../ecommerce/14-cart-and-order/README.md))*. |
+| **Công nợ phải thu / Receivable** | Số tiền khách sỉ còn nợ: các **đợt `AFTER_DELIVERY`** đã đến hạn chưa trả đủ và các **khoản phí huỷ** chưa trả ([15 §4.3](../ecommerce/15-payment/README.md)). Khách xem trên cổng; Sale nhắc qua chat. |
+| **Hạn mức tín dụng / Credit limit** | Mức dư nợ tối đa của một khách (≥ 0), do kế toán duyệt. Chỉ áp cho phần trả sau giao (`AFTER_DELIVERY`): hợp đồng có đợt trả sau thì khách phải có hạn mức > 0 ([18](../ecommerce/18-customer-information/README.md)). |
+| **Kỳ hạn công nợ / Credit term** | Số ngày N mặc định (0–365) cho đợt `AFTER_DELIVERY` (hạn trả = ngày giao + N); kế toán duyệt. Hợp đồng đã ký giữ lịch thanh toán của nó dù kỳ hạn đổi sau. |
+| **Catalog / Danh mục sản phẩm** | Tập hợp sản phẩm trưng bày trên cổng khách hàng để khách sỉ xem, hỏi hàng và mở chat với Sale. |
 | **PLP** (Product Listing Page) — **Trang danh sách sản phẩm** | Trang liệt kê nhiều sản phẩm (có lọc, sắp xếp). |
 | **PDP** (Product Detail Page) — **Trang chi tiết sản phẩm** | Trang một sản phẩm: hình ảnh, mô tả, chọn biến thể, giá, tình trạng còn hàng. |
-| **Base price / Giá gốc** | Giá bán một mức của một SKU (VND), dùng khi khách không có giá riêng và không thuộc nhóm có giá. Bắt buộc cho mọi SKU `Active` trước khi xuất bản. |
-| **Segment price / Giá nhóm khách** | Một giá cho (nhóm khách, SKU), không có bậc; dùng khi khách chưa có giá riêng. |
-| **Availability indicator / Chỉ báo còn hàng** | `In stock` / `Low stock` (ATP ≤ 5, cấu hình được) / `Out of stock` cho từng SKU; không bao giờ hiện số ATP cho khách. |
-| **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. |
-| **Print-on-demand / In theo yêu cầu** | Sản phẩm chỉ được in/sản xuất sau khi có đơn của khách. |
-| **Customization / Personalization / Tùy chỉnh cá nhân hoá** | Khách tự thêm nội dung (ảnh, chữ) lên sản phẩm. Phạm vi sau ([B18](../open-questions/README.md)): hiện nhân viên lập bộ file thiết kế, khách xác nhận ([12](../ecommerce/12-product-design/README.md)). |
-| **Print area / Vùng in** | Khu vực cho phép in nội dung trên sản phẩm. |
-| **Safe area / Vùng an toàn** | Phần bên trong vùng in, tránh bị xén khi sản xuất. |
-| **Bleed / Vùng tràn lề** | Phần mở rộng ngoài mép để tránh viền trắng khi cắt. |
-| **DPI** (Dots Per Inch) | Độ phân giải in; DPI thấp → ảnh in bị mờ/vỡ. |
-| **RGB / CMYK** | Hệ màu màn hình (RGB) vs hệ màu in (CMYK); cần chuyển đổi khi in. |
-| **Live 3D Preview / Xem trước 3D trực tiếp** | Hiển thị thiết kế 2D "dán" lên mô hình 3D, cập nhật realtime khi khách chỉnh. Phạm vi giai đoạn sau ([open-questions B18](../open-questions/README.md)). |
-| **Design draft / Bản thiết kế** | Bản thiết kế của một khách cho một sản phẩm, đang làm hoặc chờ khách xác nhận (`Draft` → `Submitted` → `Approved`). Chỉ chủ sở hữu, người thiết kế và người duyệt thấy. Xem [12](../ecommerce/12-product-design/README.md). |
-| **Design artifact role / Vai trò file thiết kế** | Mỗi file trong bộ thiết kế mang một vai trò: `CUSTOMER_PREVIEW` (xem trước cho khách — file được duyệt và xác nhận), `TECHNICAL_SPEC` (bản vẽ kỹ thuật), `PRINT_READY` (file in), `PRODUCTION_INSTRUCTION` (hướng dẫn sản xuất). |
-| **Technical review / Duyệt kỹ thuật thiết kế** | Nhân viên QC được giao duyệt **Đạt / Không đạt** bộ file thiết kế, kèm nhận xét, trước khi gửi khách xác nhận. Độc lập (bốn mắt): không phải khách, không phải người sửa cuối. Mọi thay đổi xoá kết quả duyệt. |
-| **Design snapshot / artifact / Bản thiết kế chốt** | Bộ file (theo vai trò) và đặc tả mà khách đã **xác nhận**, kèm checksum SHA-256 từng file và cả bộ. **Bất biến** từ lúc xác nhận; được kiểm lại checksum mỗi lần dùng (báo giá, đặt hàng, prepress, đóng gói). Đổi nội dung = tạo bản sửa (bản thiết kế mới). |
-| **Preflight / Kiểm tra tiền in ấn** | Kiểm tra file thiết kế đạt chuẩn in (DPI, hệ màu, font, lề). Bản tự động (`Pass` / `Warning` / `Fail`) thuộc phạm vi giai đoạn sau (B18); hiện tại việc này là **duyệt kỹ thuật** do QC thực hiện. |
-| **Print-ready file / File sẵn sàng in** | File xuất bản in đúng chuẩn kỹ thuật cho xưởng. |
-| **Cart / Cart line / Checkout / Abandoned cart — Giỏ hàng** | Không áp dụng (chỉ bán sỉ, chốt 2026-10-06): đơn tạo từ báo giá hoặc đặt nhanh hàng sẵn trên cổng ([14](../ecommerce/14-cart-and-order/README.md)). |
-| **Order / Đơn hàng** | Chứng từ bán hàng chính thức sau khi khách đặt. |
+| **Availability indicator / Chỉ báo còn hàng** | `In stock` / `Low stock` (0 < ATP ≤ ngưỡng, mặc định **5 thùng**, cấu hình được — ⚠️ giả định [open-questions D28](../open-questions/README.md)) / `Out of stock` cho từng **SKU riêng**, tính từ ATP theo **số thùng**, chỉ khách sở hữu thấy; quy cách không có chỉ báo; không bao giờ hiện số ATP cho khách ([13 BR-07](../ecommerce/13-catalog/README.md)). |
+| **Publish / Xuất bản** | Đưa sản phẩm lên catalog cho khách thấy. Đòi nội dung catalog, danh mục, ít nhất một quy cách `Active` và một ảnh đã đăng; **không đòi giá** ([01 BR-05](../warehouse/01-product-creation/README.md)). |
+| **Cart / Cart line / Checkout / Abandoned cart — Giỏ hàng** | Không áp dụng (chỉ bán sỉ, chốt 2026-10-06): khách không tự đặt; đơn chỉ do Sale tạo từ báo giá đã chấp nhận ([14](../ecommerce/14-cart-and-order/README.md), chốt 2026-11-04). |
+| **Reorder / Đặt lại** | Khách bấm "Đặt lại" trên một đơn cũ → hệ thống chỉ **mở chat** với Sale gắn ngữ cảnh đơn đó; Sale lập báo giá mới theo giá hiện hành ([14 §4.1](../ecommerce/14-cart-and-order/README.md)). |
+| **Order / Đơn hàng** | Chứng từ bán hàng chính thức, **do Sale tạo từ báo giá `Accepted`**, đặt theo **số thùng** khách đã chọn. Mỗi đơn có đúng **một hợp đồng mua bán còn hiệu lực** ([14](../ecommerce/14-cart-and-order/README.md)). |
 | **Order number / Mã đơn hàng** | Mã định danh duy nhất của đơn. |
-| **Order line / Dòng đơn hàng** | Một mục hàng trong đơn với giá đã chốt. |
-| **Price lock / Chốt giá** | Cố định giá dòng hàng vào đơn tại thời điểm đặt; không đổi theo giá catalog sau đó. |
-| **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn confirmed đến khi giao hàng cho khách (pick–pack–ship). |
+| **Order line / Dòng đơn hàng** | Một mục hàng trong đơn: SKU riêng, **số thùng**, số cái / thùng và **đơn giá / cái** đã chốt; thành tiền = số thùng × số cái / thùng × đơn giá / cái ([14 BR-08](../ecommerce/14-cart-and-order/README.md)). |
+| **Price lock / Chốt giá** | Cố định đơn giá / cái — cùng **số cái / thùng** — của dòng hàng vào báo giá / đơn tại thời điểm lập; không đổi theo giá catalog hay quy cách thùng sau đó (⚠️ giả định — [open-questions A11](../open-questions/README.md)). |
+| **Sales Contract / Hợp đồng mua bán** | Chứng từ đi kèm **mỗi đơn** (đúng một hợp đồng còn hiệu lực): các bên (thông tin pháp lý của khách), dòng hàng & giá (bằng của đơn), điều khoản giao hàng, **lịch thanh toán**, file hợp đồng đã ký. Ký **ngoài hệ thống**, Sale tải bản scan lên (⚠️ giả định — [open-questions D20](../open-questions/README.md)). `Draft` → `Sent` → `Signed` → `Completed`; `Draft` / `Sent` → `Cancelled`. Xem [14 §4.3](../ecommerce/14-cart-and-order/README.md). |
+| **Payment schedule / Lịch thanh toán** | Danh sách các **đợt thanh toán** của một hợp đồng: tên đợt, số tiền hoặc %, mốc đến hạn; tổng các đợt = tổng tiền đơn. Sale nhập theo từng hợp đồng, mặc định lấy từ **lịch thanh toán mặc định** của khách ([18](../ecommerce/18-customer-information/README.md)). |
+| **Payment Installment / Đợt thanh toán** | Một khoản phải thu trong lịch thanh toán, sinh khi hợp đồng `Signed`, theo dõi ở [15 §5.1](../ecommerce/15-payment/README.md): `Not Due` → `Due` → `Partially Paid` / `Paid`; quá hạn → `Overdue`. |
+| **Installment due trigger / Mốc đến hạn của đợt** | `ON_SIGNING` — trả khi ký (+ N ngày); chưa thu đủ → đơn `Pending Payment`, chưa xác nhận. `BEFORE_DELIVERY` — trả trước khi bàn giao vận chuyển; đến hạn khi đơn `Ready to Fulfill`; chưa thu đủ → **chặn bàn giao**. `AFTER_DELIVERY` — trả sau giao + N ngày; là **công nợ phải thu** có kỳ hạn. Xem [14 §4.3](../ecommerce/14-cart-and-order/README.md), [15 §4.1](../ecommerce/15-payment/README.md). |
+| **Default payment schedule / Lịch thanh toán mặc định** | Mẫu lịch thanh toán lưu trên hồ sơ khách (các đợt, %, mốc; tổng 100%), dùng điền sẵn cho báo giá và hợp đồng. Đợt `AFTER_DELIVERY` chỉ có khi kế toán đã duyệt hạn mức > 0 ([18](../ecommerce/18-customer-information/README.md)). |
+| **Transfer instructions / Thông tin chuyển khoản theo đợt** | Tài khoản nhận của doanh nghiệp, số tiền còn phải trả của đợt, nội dung chuyển khoản = mã hợp đồng + mã đợt. Hiển thị trên cổng và gửi khách bằng thẻ trong chat ([15 §4.2](../ecommerce/15-payment/README.md)). |
+| **Customer legal information / Thông tin pháp lý của khách** | Địa chỉ đăng ký kinh doanh, người đại diện theo pháp luật, chức vụ (và tài khoản ngân hàng — chỉ để hoàn tiền); bắt buộc trước khi lập hợp đồng (⚠️ giả định — D26). Xem [18](../ecommerce/18-customer-information/README.md). |
+| **Fulfillment / Hoàn tất đơn** | Toàn bộ quá trình từ đơn `Confirmed` đến khi giao hàng cho khách: kiểm tồn thành phẩm & giữ nguyên thùng – (Yêu cầu sản xuất nếu thiếu) – lấy nguyên thùng – (khu chờ xuất) – kiểm thùng & dán nhãn giao – bàn giao vận chuyển. |
 | **Fulfillment sourcing / Chọn kho xuất** | Quyết định đơn được giao từ kho nào. |
-| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt (giao một phần — Sale cho phép theo từng đơn, *Quyết định 21/10/2026*, [17](../ecommerce/17-order-management/README.md) §4.2). Mỗi đơn xuất từ **một kho**. |
-| **Assisted order / Đặt hàng hộ** | Nhân viên Sale tạo/hoàn tất đơn thay khách. |
-| **Payment / Thanh toán** | Thu tiền cho đơn hàng và các luồng tài chính liên quan. |
+| **Awaiting Stock / Chờ hàng** | Trạng thái đơn `Confirmed` thiếu thành phẩm (có sẵn ít thùng hơn số thùng của dòng), có Yêu cầu sản xuất đang mở cho phần thiếu (tính theo thùng); phần có sẵn đã được giữ. Nhận đủ hàng → `Ready to Fulfill` ([17 §4.4](../ecommerce/17-order-management/README.md)). |
+| **Split fulfillment / shipment / Tách giao** | Một đơn giao thành nhiều đợt (giao một phần — Sale cho phép theo từng đơn, *Quyết định 21/10/2026*, [17](../ecommerce/17-order-management/README.md) §4.5): phần có sẵn được bàn giao trước trong lúc chờ phần thiếu từ Yêu cầu sản xuất. Mỗi đơn xuất từ **một kho**. |
+| **Payment / Thanh toán** | Thu tiền theo **các đợt của hợp đồng mua bán**, bằng chuyển khoản, và các luồng ngược (đảo phân bổ, hoàn tiền) — [15](../ecommerce/15-payment/README.md). |
 | **Payment gateway / Cổng thanh toán** | Dịch vụ trung gian xử lý giao dịch online (thẻ, ví, QR…). Không áp dụng: khách sỉ chỉ chuyển khoản (open-questions D1). |
 | **Authorize / Capture / Void** | Giữ tiền (authorize) → trừ tiền (capture); huỷ khoản đã giữ chưa trừ (void). Không áp dụng (D2). |
-| **COD** (Cash On Delivery) — **Thanh toán khi nhận hàng** | Khách trả tiền khi nhận hàng. Không áp dụng cho bán lẻ (hệ thống chỉ bán sỉ); với đơn đặt cọc, phần còn lại có thể thu khi giao. |
-| **Prepaid / Trả trước** | Khách thanh toán trước khi hàng được giao. |
-| **Deposit / Partial payment — Đặt cọc / Trả một phần** | Trả trước một phần (thường % giá trị đơn); đơn đặt cọc chỉ được release sang sản xuất khi tiền cọc đã về. |
 | **Refund / Hoàn tiền** | Trả lại tiền cho khách (toàn phần / một phần). Lệnh hoàn `Pending` → `Completed` / `Failed` ([15](../ecommerce/15-payment/README.md)). |
-| **Payment term / Điều khoản thanh toán** | Trả trước 100% / đặt cọc / công nợ — cấu hình cho từng khách (kế toán duyệt); đơn chỉ dùng điều khoản được phép. |
-| **Balance policy / Chính sách thu phần còn lại** | Với đơn đặt cọc: `BEFORE_DELIVERY` (chuyển khoản trước khi giao), `ON_DELIVERY` (nhà vận chuyển thu khi giao), `ON_CREDIT` (thành công nợ). Copy từ khách, chỉ được siết lại. |
 | **Customer transfer / Khoản tiền về** | Một khoản khách chuyển khoản, kế toán ghi nhận theo **mã tham chiếu sao kê** (duy nhất); số tiền không đổi, chỉ thêm dòng phân bổ / đảo. |
-| **Allocation (payment) / Phân bổ tiền** | Gán tiền của một khoản tiền về cho đơn hoặc khoản công nợ; không chỉ định → khoản đến hạn sớm nhất trước. Khác "Allocation" tồn kho. |
-| **Reversal / Đảo phân bổ** | Sửa phân bổ sai bằng một dòng đảo mới (không sửa dòng cũ); tiền quay về tiền dư; đơn đã xác nhận bị thiếu tiền thì phải treo. |
-| **Customer credit / Tiền dư của khách** | Phần tiền về chưa phân bổ; tự trả khoản công nợ mới, phân bổ sau, hoặc hoàn theo yêu cầu. |
-| **Receivable / Khoản công nợ phải thu** | Ba loại: `CREDIT_ORDER`, `DEPOSIT_BALANCE`, `CANCELLATION_FEE`. Khoản do **nhà vận chuyển thu hộ** là nợ của nhà vận chuyển, không tính vào dư nợ của khách. |
-| **Exposure / Dư nợ & Credit position / Vị thế tín dụng** | Dư nợ = đơn công nợ chưa giao + phần còn lại `ON_CREDIT` chưa giao + khoản công nợ chưa trả do khách trả; hạn mức còn lại = hạn mức − dư nợ. Khách xem được trên cổng. |
-| **Credit hold / Treo tín dụng** | Đơn công nợ vượt hạn mức hoặc khách có khoản quá hạn → `On Hold`; kế toán duyệt, hoặc từ chối (huỷ / đổi sang trả trước / đặt cọc). |
-| **Cancellation request / Yêu cầu huỷ** | Khách gửi khi đơn đã release nhưng chưa đóng gói xong; Sale / Điều phối duyệt hoặc từ chối; tự `Expired` khi đơn không còn huỷ được ([17](../ecommerce/17-order-management/README.md) §4.5). |
-| **Cancellation fee / Phí huỷ** | Chỉ tính khi đơn đã bắt đầu in; theo % tiền đã thu hoặc số tiền thoả thuận; tiền đã thu bù phí trước, phần thiếu thành khoản công nợ `CANCELLATION_FEE`. |
-| **Remainder closure / Đóng phần còn lại** | Đóng các đơn vị chưa giao của đơn giao một phần; tiền thừa trả phí trước rồi hoàn, hàng in chưa giao xuất huỷ. |
+| **Allocation (payment) / Phân bổ tiền** | Gán tiền của một khoản tiền về cho **đợt thanh toán** đã đến hạn (`Due` / `Partially Paid` / `Overdue`) hoặc khoản phí huỷ; không chỉ định → mục có hạn trả sớm nhất trước. Khác "Allocation" tồn kho. |
+| **Reversal / Đảo phân bổ** | Sửa phân bổ sai bằng một dòng đảo mới (không sửa dòng cũ); tiền quay về tiền dư; đơn đã xác nhận mà thiếu đợt `ON_SIGNING` thì phải treo (lý do thanh toán). |
+| **Customer credit / Tiền dư của khách** | Phần tiền về chưa phân bổ (kể cả tiền trả sớm cho đợt chưa đến hạn); tự trả đợt khi đợt chuyển `Due`, hoặc hoàn theo yêu cầu. |
+| **Cancellation fee receivable / Khoản phí huỷ** | Phần phí huỷ còn thiếu sau khi đã trừ vào tiền đã thu; đến hạn ngay ngày huỷ / ngày đóng phần còn lại, dùng cùng vòng đời với đợt thanh toán (bắt đầu từ `Due`) ([15 §4.6](../ecommerce/15-payment/README.md)). |
+| **Exposure / Dư nợ & Credit position / Vị thế tín dụng** | Dư nợ = phần chưa thu của mọi đợt `AFTER_DELIVERY` thuộc các hợp đồng `Signed` (kể cả `Not Due`) + khoản phí huỷ chưa trả; hạn mức còn lại = hạn mức − dư nợ, không âm ([15 BR-10](../ecommerce/15-payment/README.md)). Khách xem được trên cổng. |
+| **Credit hold / Treo tín dụng** | Kiểm khi Sale gửi hợp đồng có đợt `AFTER_DELIVERY` (chỉ cảnh báo) và khi hợp đồng `Signed`: khách quá hạn (`OVERDUE`) hoặc vượt hạn mức (`OVER_LIMIT`) → đơn `On Hold` lý do `CREDIT`; kế toán duyệt (→ `Pending Payment` / `Confirmed`) hoặc từ chối (huỷ đơn `CREDIT_REJECTED`) ([15 §4.3](../ecommerce/15-payment/README.md)). |
+| **Cancellation request / Yêu cầu huỷ** | Khách gửi (trên cổng hoặc qua chat) từ `Pending Contract` tới trước khi thùng đầu tiên của đơn được dán nhãn giao hàng ([08 BR-04](../warehouse/08-packing/README.md)); Sale / Điều phối duyệt hoặc từ chối; tự `Expired` khi đơn không còn huỷ được. Khách không tự huỷ ngay (⚠️ giả định — D25). Xem [17](../ecommerce/17-order-management/README.md) §4.8. |
+| **Cancellation fee / Phí huỷ** | Chỉ tính khi **bộ phận sản xuất đã bắt đầu** (có Yêu cầu sản xuất của đơn tới `In Production`); theo % tiền đã thu hoặc số tiền thoả thuận; tiền đã thu bù phí trước, phần thiếu thành khoản phí huỷ ([17 BR-11](../ecommerce/17-order-management/README.md)). |
+| **Remainder closure / Đóng phần còn lại** | Đóng các thùng chưa giao của đơn `Partially Fulfilled`: Yêu cầu sản xuất liên quan `Draft` / `Sent` bị huỷ, `Partially Received` bị đóng thiếu; số phải thu của các đợt được giảm tương ứng (đợt muộn nhất trước); tiền thừa trả phí trước rồi hoàn ([17 §4.8](../ecommerce/17-order-management/README.md), [15 §4.6](../ecommerce/15-payment/README.md)). |
 | **Chargeback** | Khách khiếu nại giao dịch với ngân hàng/cổng để đòi lại tiền. Không áp dụng (không có cổng thanh toán). |
-| **Reconciliation / Đối soát** | So khớp tiền ghi trong hệ thống với **sao kê ngân hàng**: khoản khách chuyển khoản, tiền nhà vận chuyển nộp ([15](../ecommerce/15-payment/README.md)). |
+| **Reconciliation / Đối soát** | So khớp tiền ghi trong hệ thống với **sao kê ngân hàng**: các khoản khách chuyển khoản ([15](../ecommerce/15-payment/README.md)). |
 | **Settlement report** | Báo cáo quyết toán tiền từ cổng thanh toán về doanh nghiệp. Không áp dụng (không có cổng thanh toán — D1). |
-| **COD remittance / Tiền nhà vận chuyển nộp** | Tiền hãng vận chuyển thu hộ chuyển trả về doanh nghiệp; kế toán ghi theo dòng sao kê vào khoản công nợ do nhà vận chuyển thu ([15](../ecommerce/15-payment/README.md) §4.6). |
 | **PCI-DSS** | Bộ tiêu chuẩn bảo mật dữ liệu thẻ thanh toán. Không áp dụng (không có cổng thanh toán — D1). |
-| **Order Management / Quản lý đơn hàng** | Lớp điều phối & theo dõi vòng đời đơn (không tự pick/pack/ship). |
+| **Order Management / Quản lý đơn hàng** | Lớp điều phối & theo dõi vòng đời đơn (không tự pick/pack/ship hay sản xuất); lập và theo dõi Yêu cầu sản xuất ([17](../ecommerce/17-order-management/README.md)). |
 | **Order timeline / Dòng thời gian đơn** | Chuỗi sự kiện của đơn theo thời gian. |
-| **Order amendment / Sửa đơn** | Thay đổi nội dung đơn sau khi tạo (theo quy tắc trạng thái). |
+| **Order amendment / Sửa đơn** | Thay đổi nội dung đơn sau khi tạo (theo quy tắc trạng thái). Từ `Pending Payment` trở đi chỉ đổi địa chỉ, hoặc đổi sang SKU theo mẫu mới khi khách sửa thiết kế (giữ số thùng, số cái / thùng và đơn giá; SKU mới phải cùng số cái / thùng — ⚠️ giả định [open-questions B5](../open-questions/README.md)); đổi dòng / số thùng / giá cần phụ lục hợp đồng — phạm vi sau ([17 §4.7](../ecommerce/17-order-management/README.md)). |
 | **RMA** (Return Merchandise Authorization) — **Phiếu cho phép trả hàng** | Chứng từ chấp thuận & hướng dẫn khách trả hàng. |
-| **Exchange / Đổi hàng** | Trả hàng cũ + nhận hàng mới (thường xử lý như trả + đơn mới). |
-| **Sales Chat / Messaging / Nhắn tin với Sale** | Kênh hội thoại trực tiếp khách ↔ nhân viên Sale. Phạm vi sau ([F7](../open-questions/README.md)). |
-| **Conversation / Thread / Hội thoại** | Một chuỗi tin nhắn giữa khách và Sale, gắn ngữ cảnh (sản phẩm/đơn/thiết kế). |
-| **Routing / Định tuyến** | Gán hội thoại đến agent phù hợp (kỹ năng, tải, lịch sử). |
+| **Exchange / Đổi hàng** | Trả hàng cũ + nhận hàng mới (thường xử lý như trả + báo giá / đơn mới). |
+| **Sales Chat / Messaging / Nhắn tin với Sale** | Kênh hội thoại trực tiếp khách ↔ nhân viên Sale trên cổng khách hàng. **Thuộc phạm vi giai đoạn này** (✅ chốt 2026-11-04 — [F7](../open-questions/README.md)); là kênh chính để khách liên hệ Sale vì khách không tự đặt hàng ([16](../ecommerce/16-sales-chat/README.md)). |
+| **Conversation / Thread / Hội thoại** | Một chuỗi tin nhắn giữa khách và Sale, gắn ngữ cảnh (sản phẩm / SKU, mẫu thiết kế, báo giá, đơn, hợp đồng). |
+| **Action card / Thẻ hành động** | Thẻ sinh từ chứng từ, gửi vào hội thoại để khách thao tác: báo giá (chấp nhận / yêu cầu sửa), yêu cầu xác nhận thiết kế, hợp đồng gửi khách, thông tin chuyển khoản theo đợt, nhắc công nợ. Thẻ gọi đúng thao tác của module sở hữu chứng từ; chat không tự thay đổi chứng từ ([16 BR-03](../ecommerce/16-sales-chat/README.md)). |
+| **Routing / Định tuyến** | Gán hội thoại đến agent: Sale phụ trách chứng từ ngữ cảnh → Sale đã chăm sóc khách gần nhất → hàng đợi chung, người giám sát chat phân công (⚠️ giả định — [16 §4.1](../ecommerce/16-sales-chat/README.md), F5). |
 | **SLA** (Service Level Agreement) | Cam kết mức dịch vụ (ví dụ thời gian phản hồi tối đa). |
 | **FRT** (First Response Time) — **Thời gian phản hồi đầu tiên** | Khoảng thời gian từ khi khách nhắn đến khi Sale trả lời lần đầu. |
 | **CSAT** (Customer Satisfaction) — **Mức hài lòng khách hàng** | Điểm khách chấm sau khi được hỗ trợ. |
 | **Escalate / Chuyển cấp** | Đưa vấn đề vượt thẩm quyền lên người giữ quyền giám sát chat / cấp quản lý. |
 | **Internal note / Ghi chú nội bộ** | Ghi chú chỉ nhân viên thấy, khách không thấy. |
-| **Customer profile / Hồ sơ khách hàng** | Bộ dữ liệu về một khách: định danh, địa chỉ, lịch sử, phân khúc, rủi ro. |
+| **Customer profile / Hồ sơ khách hàng** | Bộ dữ liệu về một khách: định danh, thông tin pháp lý, địa chỉ, điều khoản thương mại (lịch thanh toán mặc định, hạn mức, kỳ hạn, bảng giá riêng), lịch sử, phân khúc. |
 | **Guest checkout / Mua không đăng ký** | Khách đặt hàng mà không tạo tài khoản. **Không áp dụng** (hệ thống chỉ bán sỉ). |
 | **Address book / Sổ địa chỉ** | Danh sách địa chỉ giao & xuất hoá đơn của khách. |
-| **Segment / Nhóm khách / Phân khúc** | Nhóm khách theo tiêu chí (VIP, doanh nghiệp, mới, rủi ro…) để áp giá/ưu đãi. |
+| **Segment / Nhóm khách / Phân khúc** | Nhóm khách theo tiêu chí (VIP, doanh nghiệp, mới, rủi ro…), mỗi khách tối đa một nhóm. **Không còn dùng để định giá**; giữ để phân loại khách (lọc, tra cứu) — ⚠️ giả định, giữ hay bỏ hẳn còn mở ([18 §4.4](../ecommerce/18-customer-information/README.md), [open-questions D14](../open-questions/README.md)). |
 | **Consent / Đồng ý (nhận tin)** | Sự cho phép của khách để gửi marketing, có lưu thời điểm. Phạm vi sau ([D16](../open-questions/README.md)). |
 | **Right to be forgotten / Quyền được xoá** | Quyền của khách yêu cầu xoá/ẩn danh dữ liệu cá nhân. Phạm vi sau ([D16](../open-questions/README.md)). |
 | **Anonymize / Ẩn danh** | Tách bỏ thông tin cá nhân khỏi dữ liệu, giữ lại phần chứng từ bắt buộc. Phạm vi sau ([D16](../open-questions/README.md)). |
@@ -272,59 +252,57 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 
 | Trạng thái | Xuất hiện ở | Ý nghĩa ngắn |
 |------------|-------------|--------------|
-| `Draft` | PO, Receipt, Invoice, TO, Design, Load Plan, Sample request, Báo giá | Bản nháp, sửa tự do, chưa có hiệu lực |
-| `Pending Approval` | PO, TO, Điều chỉnh tồn, Sản phẩm | Chờ phê duyệt |
+| `Draft` | Phiếu nhập kho, Yêu cầu sản xuất, TO, Bản thiết kế, Báo giá, Hợp đồng, Order, Load Plan | Bản nháp, sửa tự do, chưa có hiệu lực |
+| `Pending Approval` | TO, Điều chỉnh tồn, Sản phẩm | Chờ phê duyệt |
 | `Approved` / `Published` / `Inactive` / `Discontinued` | Sản phẩm | Đã duyệt, dùng nội bộ / đang hiển thị trên catalog / tạm ngưng / ngừng kinh doanh ([01](../warehouse/01-product-creation/README.md)) |
-| `Active` / `Blocked` / `Obsolete` | Biến thể (SKU) | Dùng được / tạm khoá / ngừng dùng ([01 §5.2](../warehouse/01-product-creation/README.md)) |
-| `Confirmed` | PO, Order, Load Plan | Đã chốt nội bộ, khoá sửa nội dung chính |
+| `Active` / `Blocked` / `Obsolete` | Biến thể (SKU, quy cách) | Dùng được / tạm khoá / ngừng dùng ([01 §5.2](../warehouse/01-product-creation/README.md)) |
+| `Draft` / `Submitted` / `Approved` | Bản thiết kế | Đang thiết kế, duyệt kỹ thuật / chờ khách xác nhận / khách đã xác nhận, đã sinh snapshot và SKU riêng ([12 §5.1](../ecommerce/12-product-design/README.md)) |
+| `Sent` / `Changes Requested` / `Accepted` / `Expired` / `Converted` | Báo giá | Đã gửi khách / khách yêu cầu sửa (Sale mở bản sửa mới) / khách chấp nhận / hết hiệu lực / Sale đã tạo đơn ([14 §5.1](../ecommerce/14-cart-and-order/README.md)) |
+| `Sent` / `Signed` / `Completed` / `Cancelled` | Hợp đồng mua bán | Đã gửi khách, chờ ký / đã ký, bản scan đã tải, sinh các đợt thanh toán / đơn hoàn tất và mọi đợt đã thu / huỷ trước khi ký ([14 §5.2](../ecommerce/14-cart-and-order/README.md)) |
+| `Pending Contract` | Order | Hợp đồng đã gửi, chờ ký |
+| `Pending Payment` | Order | Hợp đồng đã ký, chờ thu đủ đợt `ON_SIGNING` |
+| `Confirmed` | Order, Load Plan | Order: hợp đồng đã ký, đủ điều kiện theo hợp đồng; hệ thống kiểm tồn thành phẩm & giữ hàng. Load Plan: đã chốt, khoá danh sách kiện & sơ đồ |
+| `Awaiting Stock` | Order | Thiếu thành phẩm; có Yêu cầu sản xuất đang mở cho phần thiếu ([17 §5.1](../ecommerce/17-order-management/README.md)) |
+| `Ready to Fulfill` | Order | Đủ hàng, đã release cho kho; đợt `BEFORE_DELIVERY` đến hạn |
+| `On Hold` | Order | Tạm giữ: `CREDIT`, `PAYMENT`, `ADDRESS`, `INVENTORY`, `CUSTOMER`, `FRAUD`, `OTHER` ([17](../ecommerce/17-order-management/README.md) §4.9); gỡ treo quay về trạng thái trước |
+| `Unpaid` / `Partially Paid` / `Paid` | Order (trạng thái thanh toán — tính ra từ các đợt, không lưu riêng) | Chưa thu / đã thu một phần tổng các đợt / mọi đợt đã `Paid` ([15 §5.2](../ecommerce/15-payment/README.md)) |
+| `Not Due` / `Due` / `Partially Paid` / `Overdue` / `Paid` / `Cancelled` | Đợt thanh toán, Khoản phí huỷ | Chưa tới mốc / đã tới mốc, chờ trả / trả một phần / quá hạn chưa trả đủ / đã trả đủ / đơn bị huỷ, không còn phải thu (⚠️ giả định). Khoản phí huỷ bắt đầu từ `Due` ([15 §5.1](../ecommerce/15-payment/README.md)) |
+| `Sent` / `In Production` | Yêu cầu sản xuất | Đã xuất phiếu, gửi bộ phận sản xuất / bộ phận sản xuất đã bắt đầu (cập nhật tay), không huỷ được ([17 §5.3](../ecommerce/17-order-management/README.md)) |
+| `Partially Received` / `Received` | Yêu cầu sản xuất, TO | Đã nhập kho một phần / đã nhập đủ (TO: nhận tại kho đích — phạm vi sau) |
+| `Closed` | Yêu cầu sản xuất | Đóng thiếu (hoặc dừng khi chưa nhận gì), bắt buộc lý do |
 | `Planned` | Load Plan, Load, Kiểm kê | Load Plan: đã có phương án xếp kiện lên xe, đang kiểm tra / chỉnh tay. Load: một xe của kế hoạch đã chốt, chưa đặt xe. Kiểm kê: đã lập phiếu, chưa đếm dòng nào |
 | `Vehicle Booked` / `Loading` | Load (chuyến bàn giao) | Đã ghi nhận đặt xe / đang quét kiện lên xe (kế hoạch bị khoá) |
 | `Dispatched` | Load Plan, Load | Load: đã ký bàn giao, xe rời kho. Load Plan: mọi xe của kế hoạch đã rời kho |
-| `Pending` / `Picking` / `Picked` | Task lấy hàng | Chờ bắt đầu / đang lấy / mọi dòng đã lấy (mở đóng gói) |
-| `Open` / `Picked` / `Short` / `Put Back` | Dòng lấy hàng | Chờ lấy / đã lấy, tồn đã trừ / vị trí thiếu, chờ phân bổ lại / đã cất lại bin ([07 §5.2](../warehouse/07-picking/README.md)) |
-| `Pending` / `In Progress` / `Done` | Nhiệm vụ cất (putaway) | Chưa cất / đã cất một phần lẻ / đã cất hết |
+| `Pending` / `Picking` / `Picked` / `Staged` | Task lấy hàng | Chờ bắt đầu / đang lấy / mọi dòng đã lấy về khu `PACKING` (mở kiểm thùng) / mọi dòng đã lấy về khu chờ xuất, giữ riêng cho đơn ([07 §5.1](../warehouse/07-picking/README.md)) |
+| `Open` / `Staged` / `Picked` / `Short` / `Cancelled` / `Put Back` | Dòng lấy hàng (một thùng LPN) | Chờ lấy thùng / thùng ở khu chờ xuất, tồn chưa trừ / đã lấy thùng, tồn đã trừ / không lấy được thùng, chờ phân bổ lại / bị thay bằng dòng phân bổ lại / thùng đã cất lại bin ([07 §5.2](../warehouse/07-picking/README.md)) |
+| `Picking` / `Packed` | Order | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu kiểm & dán nhãn) / **đã kiểm đủ thùng & dán nhãn giao hàng**, không huỷ được nữa (mốc khoá huỷ thực tế là thùng đầu tiên được dán nhãn — [08 BR-04](../warehouse/08-packing/README.md)) |
+| `Pending` / `In Progress` / `Completed` / `Cancelled` | Phiên kiểm thùng | Chờ lấy hàng xong, chờ bắt đầu / đang quét kiểm & dán nhãn (kể cả sau khi hoàn tất một phần) / đã kiểm đủ thùng & dán nhãn, đơn `Packed` / đơn huỷ khi chưa thùng nào dán nhãn ([08 §5.1](../warehouse/08-packing/README.md)) |
+| `To Check` / `Checked` / `Labeled` / `Removed` | Thùng giao | Đã lấy về khu `PACKING`, chưa quét / đã quét đúng LPN, có kích thước & khối lượng theo quy cách thùng / đã in & dán nhãn giao, chờ gom vào shipment / bị loại khỏi đơn (hư hỏng, hoặc đơn huỷ), vào hàng chờ cất lại ([08 §5.2](../warehouse/08-packing/README.md)) |
+| `Pending` / `Done` / `Cancelled` | Nhiệm vụ cất (putaway) | Thùng chưa cất / thùng đã cất vào bin / dành sẵn, chưa có thao tác huỷ ([05](../warehouse/05-putaway/README.md)) |
+| `In Putaway` | Phiếu nhập kho | Đã xác nhận, tồn `Inbound` ở khu nhận hàng, đang cất; cất xong thì `Closed` ([03](../warehouse/03-receipt/README.md)) |
 | `In Progress` / `Completed` | Kiểm kê | Đang đếm / đã nộp, chênh lệch thành điều chỉnh chờ duyệt ([20 §5.2](../warehouse/20-inventory-control/README.md)) |
-| `Not Sent` / `Pending` / `Confirmed` / `Rejected` | Phản hồi của NCC (PO) | Chưa gửi / chờ NCC trả lời / NCC xác nhận / NCC từ chối |
-| `Withdrawn` | Dòng PO | Bị bỏ khỏi bản nháp sau khi đã nằm trong một bản sửa (giữ làm lịch sử) |
-| `Packing` / `Packed` | Phiên đóng gói, Order | Đang đóng / đã đóng đủ |
-| `Open` / `Sealed` / `Voided` | Kiện (package) | Đang cho hàng vào / đã niêm phong (có kích thước, khối lượng) / đã huỷ |
-| `Partially Received` | PO, TO | Đã nhận một phần |
-| `Received` | PO, TO | Đã nhận đủ |
 | `Closed` / `Completed` | Hầu hết chứng từ | Đã hoàn tất & đối chiếu xong |
 | `Cancelled` | Hầu hết chứng từ | Bị huỷ trước khi hoàn tất |
-| `In QC` | Receipt | Còn dòng hàng cần QC chưa có kết luận |
-| `In Putaway` | Receipt | Mọi dòng cần QC đã có kết luận, đang cất hàng; cất xong thì `Closed` ([03](../warehouse/03-receipt/README.md)) |
-| `Quarantine` | Receipt (hàng) | Cách ly chờ kết luận chất lượng |
-| `Held` / `Allocated` / `Consumed` / `Released` / `Expired` | Khoản giữ hàng | Đang giữ / giữ theo SKU đã thay bằng phân bổ ở bin & lô / hàng đã lấy, tồn đã trừ / nhả giữ có lý do / hết hạn mà đơn chưa thanh toán ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
-| `Allocated` | Tồn kho (theo vị trí) | Phần tồn `Available` có khoản phân bổ ở vị trí & lô cho một đơn/lệnh cụ thể — khoản giữ, không phải trạng thái riêng của hàng ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
-| `Expired` | Tồn kho | Quá hạn dùng (quét hằng đêm); không bán, chỉ rời kho bằng điều chỉnh đã duyệt |
+| `Inbound` / `Available` / `Quarantine` / `Expired` | Tồn kho | Đã nhận, chưa cất / ở vị trí được phép xuất, nguồn của ATP / hàng lỗi hoặc hoàn về, cách ly ở khu `QUARANTINE`, không bán / quá hạn dùng (quét hằng đêm), chỉ rời kho bằng điều chỉnh đã duyệt ([20 §5.1](../warehouse/20-inventory-control/README.md)) |
+| `Held` / `Allocated` / `Consumed` / `Released` | Khoản giữ hàng | Đang giữ, không có hạn (kể cả thùng đã lấy về khu chờ xuất) / giữ theo SKU đã thay bằng phân bổ vào thùng LPN cụ thể / thùng đã lấy sang khu kiểm & dán nhãn, tồn đã trừ / nhả giữ có lý do ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
+| `Allocated` | Tồn kho (theo thùng) | Phần tồn `Available` có khoản phân bổ — mỗi thùng LPN một khoản — cho một đơn/lệnh cụ thể; khoản giữ, không phải trạng thái riêng của hàng ([20 §5.6](../warehouse/20-inventory-control/README.md)) |
 | `Posted` / `Rejected` / `Withdrawn` | Điều chỉnh tồn | Đã duyệt và ghi tồn / bị từ chối / người đề nghị rút lại |
-| `Open` / `Acknowledged` / `Resolved` | Cảnh báo tồn | Đang xảy ra / đã có người xác nhận đã xem / điều kiện đã hết |
+| `Open` / `Acknowledged` / `Resolved` | Cảnh báo hạn dùng | Đang xảy ra / đã có người xác nhận đã xem / điều kiện đã hết (`STOCK_GONE`, `EXPIRED_OUT`) ([20 §5.4](../warehouse/20-inventory-control/README.md)) |
 | `In-Transit` | Transfer, Shipment | Đang trên đường |
-| `Pending Payment` | Order | Đã tạo đơn, chờ thanh toán |
-| `Unpaid` / `Partially Paid` / `On Credit` / `Paid` | Order (trạng thái thanh toán — tính ra từ số tiền, không lưu riêng) | Chưa thu / đã thu một phần (thường là cọc) / đơn công nợ / đã thu đủ |
-| `In Production` | Order, Sample request, Tồn kho | Order / Sample request: đang sản xuất in (dòng tuỳ chỉnh / mẫu); Order rời trạng thái khi mọi lệnh sản xuất của đơn `Completed`. Tồn kho: phôi đã cấp cho xưởng hoặc gửi nhà gia công, không bán ([20 §5.1](../warehouse/20-inventory-control/README.md)) |
-| `Pending Prepress` | Lệnh sản xuất | Chờ kiểm file in |
-| `Ready` | Lệnh sản xuất, Sample request | LSX: file đạt, nằm trong hàng đợi, chờ cấp phôi / chờ in bù. Sample request: mẫu xong, QC đạt |
-| `Material Issued` / `Printing` | Lệnh sản xuất (in nội bộ) | Phôi đã ở khu `PRODUCTION` / đang in |
-| `Subcontracted` | Lệnh sản xuất (gia công) | Đã gửi nhà gia công, chờ hàng về |
-| `QC` | Lệnh sản xuất | Đang kiểm thành phẩm (in nội bộ hoặc hàng gia công đã nhận) |
-| `Submitted` | Sample request | Đã gửi xưởng, đã sinh LSX `SAMPLE` |
-| `Sent to Customer` / `Approved` / `Changes Requested` | Sample request | Đã gửi mẫu / khách duyệt / khách yêu cầu sửa |
-| `Ready to Fulfill` | Order | Đã sẵn sàng cho kho xử lý (với dòng in: đã sản xuất xong) |
-| `On Hold` | Order, Lệnh sản xuất | Tạm giữ. Order: tín dụng, thanh toán, thiết kế lệch, địa chỉ, thiếu hàng, khách, gian lận, khác ([17](../ecommerce/17-order-management/README.md) §4.6); gỡ treo quay về trạng thái trước. LSX: file lỗi, thiếu phôi, máy hỏng… |
+| `Ready to Dispatch` / `Handed Over` | Shipment | Các thùng đã kiểm & dán nhãn giao, chờ ở khu `DISPATCH` / đã quét lên xe & ký bàn giao ([09](../warehouse/09-shipping/README.md)) |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi / đã giao đến khách |
-| `Partially Fulfilled` | Order | Đã giao một phần; phần còn lại chờ giao hoặc bị đóng ([17](../ecommerce/17-order-management/README.md) §5) |
+| `Partially Fulfilled` | Order | Đã giao một phần; phần còn lại chờ giao hoặc bị đóng ([17](../ecommerce/17-order-management/README.md) §5.1) |
 | `Delivery Failed` / `Returned` | Order, Shipment | Hãng báo giao không thành / hàng đã về kho |
 | `Return Requested` | Order | Khách yêu cầu trả hàng; từ chối thì đơn quay về `Delivered` |
 | `Refunded` / `Partially Refunded` | Order | Đã hoàn tiền toàn phần / một phần (trạng thái của đơn, không phải trạng thái thanh toán) |
 | `Pending` / `Approved` / `Rejected` / `Expired` | Yêu cầu huỷ | Chờ quyết / đã duyệt (đơn bị huỷ) / từ chối / hết hiệu lực vì đơn không còn huỷ được |
 | `Pending` / `Completed` / `Failed` | Lệnh hoàn tiền | Chờ kế toán chuyển khoản / đã hoàn / hoàn lỗi |
-| `Open` / `Partially Paid` / `Overdue` / `Paid` | Khoản công nợ phải thu | Chưa trả / trả một phần / quá hạn / đã tất toán |
+| `New` / `Queued` / `Assigned` / `Active` | Hội thoại chat | Vừa tạo / chờ agent hoặc người giám sát phân công / đã gán agent, chưa trả lời / đang trao đổi ([16 §5](../ecommerce/16-sales-chat/README.md)) |
+| `Waiting on Customer` / `Waiting on Internal` / `Escalated` | Hội thoại chat | Chờ khách phản hồi / chờ bộ phận khác / đã chuyển người giám sát chat |
+| `Resolved` / `Reopened` / `Auto-Closed` / `Closed` | Hội thoại chat | Đã xử lý xong / khách nhắn lại sau khi giải quyết / đóng do khách im lặng quá hạn / đóng vĩnh viễn |
 | `Pending Activation` / `Active` / `Blocked` / `Inactive` | Hồ sơ khách | Chờ kích hoạt / bình thường / bị chặn / đã đóng ([18](../ecommerce/18-customer-information/README.md)) |
 | `Active` / `Locked` / `Disabled` | Tài khoản nhân viên | Dùng được / bị người quản trị khoá / ngừng dùng ([00 §2.5](../00-system-overview/README.md)) |
-| `Sent` / `Changes Requested` / `Accepted` / `Expired` / `Converted` | Báo giá | Đã gửi khách / khách yêu cầu sửa (Sale mở bản sửa mới) / khách chấp nhận / hết hiệu lực / đã sinh đơn ([14 §5.1](../ecommerce/14-cart-and-order/README.md)) |
-| `Receiving` / `In Stock` / `Consumed` / `Lost` / `Void` | Thùng LPN | Đã dán nhãn trên phiếu nhận chưa xác nhận / đang chứa hàng / đã lấy hết / kiểm kê không thấy / phiếu nhận bị huỷ ([20 §5.5](../warehouse/20-inventory-control/README.md)) |
+| `Receiving` / `In Stock` / `Consumed` / `Lost` / `Void` | Thùng LPN | Đã dán nhãn trên phiếu nhập chưa xác nhận / đang chứa hàng ở một vị trí (kể cả khu chờ xuất, `QUARANTINE`) / **đã rời tồn nguyên thùng** — lấy sang khu kiểm & dán nhãn (đi tiếp làm kiện giao), xuất chuyển kho hoặc ghi giảm cả thùng; cất lại thùng của đơn bị huỷ thì quay về `In Stock` / kiểm kê không thấy / phiếu nhập bị huỷ ([20 §5.5](../warehouse/20-inventory-control/README.md)) |
 
 ---
 
@@ -334,53 +312,81 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 |----------|--------|-------|
 | WMS | Warehouse Management System | Hệ thống quản lý kho |
 | SKU | Stock Keeping Unit | Đơn vị lưu kho |
-| PO | Purchase Order | Đơn đặt hàng NCC |
 | TO | Transfer Order | Lệnh chuyển kho |
-| MO | Manufacturing / Production Order | Lệnh sản xuất |
 | RMA | Return Merchandise Authorization | Phiếu cho phép trả hàng |
 | ATP | Available To Promise | Số lượng có thể hứa giao |
 | UoM | Unit of Measure | Đơn vị tính |
-| MOQ | Minimum Order Quantity | Số lượng đặt tối thiểu |
-| QC | Quality Control | Kiểm tra chất lượng |
-| RTV | Return To Vendor | Trả hàng nhà cung cấp |
+| MOQ | Minimum Order Quantity | Số thùng đặt tối thiểu (của khách) |
 | RTO | Return To Origin | Hoàn hàng về kho |
-| COD | Cash On Delivery | Thanh toán khi nhận hàng |
 | FTL | Full Truckload | Giao nguyên chuyến (thuê nguyên xe / container) |
 | DC / HC | Dry Container / High Cube | Container khô tiêu chuẩn / container cao (ví dụ 20DC, 40DC, 40HC, 45HC) |
-| AP | Accounts Payable | Công nợ phải trả |
 | AR | Accounts Receivable | Công nợ phải thu |
-| LSX | Lệnh sản xuất (Production Order) | Chứng từ xưởng in |
 | B2B | Business To Business | Bán cho doanh nghiệp (bán sỉ) |
 | FIFO / FEFO | First-In / First-Expired-First-Out | Nhập trước / hết hạn trước, xuất trước |
-| LPN | License Plate Number | Mã thùng hàng nguyên đai |
+| LPN | License Plate Number | Mã thùng thành phẩm do bộ phận sản xuất đóng sẵn; cũng là mã kiện giao |
+| D × R × C | Dài × Rộng × Cao | Kích thước thùng (cm) trong quy cách thùng |
 | PLP / PDP | Product Listing / Detail Page | Trang danh sách / chi tiết sản phẩm |
 | DPI | Dots Per Inch | Độ phân giải in |
 | SLA | Service Level Agreement | Cam kết mức dịch vụ |
 | FRT | First Response Time | Thời gian phản hồi đầu |
 | CSAT | Customer Satisfaction | Mức hài lòng khách hàng |
-| PCI-DSS | Payment Card Industry Data Security Standard | Tiêu chuẩn bảo mật dữ liệu thẻ |
+| PCI-DSS | Payment Card Industry Data Security Standard | Tiêu chuẩn bảo mật dữ liệu thẻ (không áp dụng) |
 
 ---
 
 ## 7. Vai trò (Roles)
 
-Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00 System Overview §2](../00-system-overview/README.md).
+Danh sách chuẩn & định nghĩa đầy đủ xem tại [Role Registry — 00 System Overview §2](../00-system-overview/README.md). Có **9 role hệ thống**: 8 role nhân viên dưới đây và role Khách hàng *(cập nhật 2026-11-04: bỏ Procurement Staff, Production Staff, QC Staff)*.
 
 | Thuật ngữ | Tiếng Việt / Giải thích |
 |-----------|--------------------------|
-| **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho, phân quyền, quản lý dữ liệu gốc sản phẩm; tạm ngưng / ngừng kinh doanh sản phẩm. |
-| **Procurement Staff / Nhân viên mua hàng** | Lập & theo dõi PO (kể cả PO gia công), chốt PO, xử lý tranh chấp hoá đơn. |
-| **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver, Putaway Operator, Picker, Packer, Dispatch Staff (vai thao tác, không phải role riêng). |
-| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ; điều phối xưởng in (mở lại / huỷ / dừng lệnh sản xuất, quyết định tách lệnh đưa gia công ngoài); cập nhật logistics & chính sách tồn của SKU. |
-| **Production Staff / Nhân viên sản xuất** | Tại xưởng nội bộ: kiểm file in (prepress), in theo lệnh sản xuất (mẫu và đơn hàng), báo số lượng in được / phế phẩm kèm lý do, treo lệnh, bàn giao thành phẩm cho QC. |
-| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Replenishment Proposal & chuyển thành Draft PO (phạm vi sau — C19); lập kiểm kê, theo dõi cảnh báo tồn; cập nhật logistics & chính sách tồn của SKU. |
-| **QC Staff / Nhân viên QC** | Kiểm tra chất lượng hàng nhập tại khu kiểm tra chất lượng (accept / reject / quarantine), mẫu & thành phẩm in tại xưởng hoặc gia công ngoài (đạt / không đạt); duyệt kỹ thuật bộ file thiết kế trước khi gửi khách xác nhận. |
-| **Accountant / Kế toán** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, đối soát thanh toán, công nợ phải thu của khách sỉ, hoàn tiền. |
-| **E-commerce Admin / Quản trị bán hàng** | Tạo & duyệt sản phẩm (bốn mắt), quản lý danh mục, thương hiệu, thuộc tính; quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt. Quản trị tài khoản nhân viên & phân quyền trong giới hạn quyền mình có. |
-| **Sales Staff / Nhân viên Sale** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, lập báo giá, tạo yêu cầu làm mẫu, thiết kế (tải bộ file) & gửi khách xác nhận, tạo đơn từ báo giá, CSKH qua chat, xử lý khiếu nại. |
-| **Order Coordinator / Điều phối đơn hàng** | Release đơn cho kho, xử lý đơn treo, chọn kho xuất, gộp/tách đơn; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
-| **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (PO / TO / duyệt chi) được gán cho role qua RBAC. |
+| **System Admin / Quản trị hệ thống** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm; tạm ngưng / ngừng kinh doanh sản phẩm. |
+| **Warehouse Staff / Nhân viên kho** | Thao tác vật lý trong kho; gọi theo công đoạn được phân công: Receiver (nhập kho thành phẩm theo thùng), Putaway Operator, Picker, Packer (kiểm thùng & dán nhãn giao hàng — không đóng lại hàng), Dispatch Staff (vai thao tác, không phải role riêng). |
+| **Warehouse Manager / Quản lý kho** | Giám sát KPI, duyệt điều chỉnh tồn & phiếu chuyển kho, xử lý ngoại lệ (nhận thiếu / thừa, hàng lỗi), **cách ly / gỡ cách ly** thùng lỗi; cập nhật **quy cách thùng**, logistics & chính sách tồn của SKU. |
+| **Inventory Planner / Nhân viên kế hoạch tồn kho** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; theo dõi **cảnh báo hạn dùng**; lập kiểm kê; cập nhật quy cách thùng, logistics & chính sách tồn của SKU. **Không lập Yêu cầu sản xuất** *(cập nhật 2026-11-04)*. |
+| **Accountant / Kế toán** | Ghi nhận & phân bổ tiền khách chuyển khoản cho các **đợt thanh toán của hợp đồng**, đảo phân bổ, hoàn tiền, đối soát sao kê; **duyệt / từ chối đơn treo tín dụng**; duyệt hạn mức, kỳ hạn công nợ và lịch thanh toán mặc định có đợt trả sau của khách. |
+| **E-commerce Admin / Quản trị bán hàng** | Tạo & duyệt sản phẩm (bốn mắt), quản lý danh mục, thương hiệu, thuộc tính; quản lý catalog trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách, phân công người thiết kế / người duyệt và **duyệt kỹ thuật bộ file thiết kế** (khi không phải người thiết kế). Quản trị tài khoản nhân viên & phân quyền trong giới hạn quyền mình có. |
+| **Sales Staff / Nhân viên Sale** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ (thông tin pháp lý, lịch thanh toán mặc định), **ghi nhận mẫu khách đưa**, thiết kế (tải bộ file) & gửi khách xác nhận, lập báo giá, **tạo đơn từ báo giá đã chấp nhận**, lập & gửi **hợp đồng mua bán**, tải bản đã ký, **chat với khách**, duyệt yêu cầu huỷ, cho phép giao một phần, xử lý khiếu nại. |
+| **Order Coordinator / Điều phối đơn hàng** | Kiểm tồn thành phẩm cho đơn, **lập & theo dõi Yêu cầu sản xuất** cho phần thiếu (người duy nhất lập), quyết định dùng **khu chờ xuất** và **chuyển cả tác vụ sang khu kiểm & dán nhãn**, chọn kho xuất & cách giao, release đơn cho kho, treo / gỡ treo đơn, duyệt yêu cầu huỷ; cập nhật kết quả giao (`Delivered` / `Delivery Failed`) khi hãng báo lại. |
+| **Approver / Người duyệt** | Không phải chức danh — cách gọi tắt của *người giữ quyền phê duyệt* (TO, điều chỉnh tồn, sản phẩm, tín dụng…) được gán cho role qua RBAC. |
 | **RBAC / Phân quyền theo vai trò** | Quyền = tài nguyên × hành động (`VIEW_PAGE`, `READ`, `CREATE`, `UPDATE`, `DELETE`, `APPROVE`, `EXPORT`), gom thành role. Một tài khoản nhiều role = hợp quyền. Xem [00 §2.5](../00-system-overview/README.md). |
-| **Data scope / Phạm vi dữ liệu** | Phạm vi dữ liệu của role: `WAREHOUSE` (các kho được gán cho tài khoản), `ALL` (toàn hệ thống), `OWN` (của chính mình — khách). Nhiều role lấy phạm vi rộng nhất. |
+| **Data scope / Phạm vi dữ liệu** | Phạm vi dữ liệu của role: `WAREHOUSE` (các kho được gán cho tài khoản — Warehouse Staff, Warehouse Manager), `ALL` (toàn hệ thống), `OWN` (của chính mình — khách). Nhiều role lấy phạm vi rộng nhất. |
 | **Customer (role) / Khách hàng** | Role của tài khoản người liên hệ phía khách trên cổng; ma trận quyền cố định; không gán cho nhân viên. |
 | **Chat Supervision / Quyền giám sát chat** | Quyền phân công hội thoại, giám sát SLA, nhận escalate — gán cho Quản trị bán hàng hoặc Sales Staff được chỉ định. |
+| **Bộ phận sản xuất (actor ngoài hệ thống)** | Không phải role, không có tài khoản. Nhận Yêu cầu sản xuất, giao thành phẩm về kho (§2). |
+
+---
+
+## 8. Thuật ngữ không còn áp dụng (đã bỏ 2026-11-04)
+
+Các thuật ngữ dưới đây xuất hiện ở phiên bản tài liệu trước đợt thu hẹp phạm vi 2026-11-04 (kể cả lượt bổ sung cùng ngày: không còn hàng trơn, hàng về đã đóng thùng, chỉ xuất nguyên thùng). Chúng **không còn áp dụng**; cột bên phải chỉ khái niệm thay thế (nếu có). Bổ sung 2026-11-05: các thuật ngữ bị bỏ khi chốt **khách đặt theo số thùng, mọi thùng đúng số cái chuẩn** (hai dòng cuối bảng).
+
+| Thuật ngữ cũ | Thay bằng / ghi chú |
+|--------------|---------------------|
+| Procurement / Mua hàng; Supplier / Nhà cung cấp (NCC); Supplier catalog; Supplier confirmation; PO (Purchase Order), PO line, PO revision, Approval limit (hạn mức duyệt PO); Purchase UoM / Đơn vị mua; Lead time của NCC; Open quantity của dòng PO | Không mua hàng từ NCC. Thành phẩm vào kho theo **Yêu cầu sản xuất** ([17](../ecommerce/17-order-management/README.md)) và **phiếu nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)); số còn chờ nhập là phần còn thiếu của dòng Yêu cầu sản xuất. |
+| Vendor Invoice / Hoá đơn NCC; Three-way matching / Đối chiếu ba chiều; Price / Quantity variance; Credit note / Debit note; AP (Accounts Payable) / Công nợ phải trả; RTV (Return To Vendor) | Không có hoá đơn NCC, không có công nợ phải trả. Hàng lỗi đổi trả với bộ phận sản xuất **ngoài hệ thống** (§1 Quarantine). |
+| QC (Quality Control) / Kiểm tra chất lượng; khu `QUALITY_CONTROL`; cờ "Yêu cầu QC khi nhận"; nhập kho 3 bước; kết luận QC (Accepted / Quarantine / Rejected); trạng thái phiếu nhận `In QC` | Không kiểm chất lượng tại kho (bộ phận sản xuất đã kiểm); kho chỉ đếm đủ / thiếu / thừa; nhập kho **2 bước** (§2). Duyệt kỹ thuật thiết kế do Quản trị bán hàng làm (§3a). |
+| Over-receipt tolerance theo NCC | Không có dung sai nhận vượt; vượt số yêu cầu thì chặn (§2 Over-receipt). |
+| Replenishment Proposal / Bảng Đề xuất Nhập hàng (MRP → PO nháp) | Không bổ sung tồn trước; Yêu cầu sản xuất chỉ phát sinh từ đơn (§2). |
+| Phôi / Blank; khu xưởng in (`PRODUCTION`); Production Order (MO) / Lệnh sản xuất (LSX); hàng đợi sản xuất; Prepress; In bù (rework); Dừng lệnh sản xuất; Print Station / Trạm in; Scrap / Phế phẩm theo lệnh sản xuất | Sản xuất nằm **ngoài hệ thống**; kho không chứa phôi / vật tư. Hệ thống chỉ gửi **Yêu cầu sản xuất** (§2). |
+| Sản xuất mẫu (`SAMPLE`); Yêu cầu làm mẫu; Mẫu đã duyệt (approved sample) | Không làm mẫu tại xưởng. Khách đưa **mẫu của khách**, khách xác nhận bộ file thiết kế trên cổng (§3a). |
+| Gia công ngoài (subcontracting: `SUPPLIED_BLANKS` / `FULL_SERVICE`); Nhà gia công; PO gia công (`SUBCONTRACT`); Đối soát phôi gia công; vị trí tại nhà gia công | Không còn — sản xuất ngoài hệ thống. |
+| Trạng thái tồn `Blocked`, `In Production`; loại biến động `CONSUMPTION`; lý do điều chỉnh `SCRAP` / `SAMPLE` / `SUBCONTRACT_LOSS` | Trạng thái tồn chỉ còn `Inbound` / `Available` / `Quarantine` / `Expired` ([20 §5.1](../warehouse/20-inventory-control/README.md)). |
+| Trạng thái đơn `In Production` | `Awaiting Stock` (§4, §5). |
+| `DESIGN_MISMATCH` / giữ kiện do lệch thiết kế khi đóng gói; kiểm checksum thiết kế tại bàn đóng gói | SKU theo mẫu của khách đã mang thiết kế; khâu kiểm thùng chỉ kiểm đúng SKU / đủ số thùng ([08](../warehouse/08-packing/README.md)). |
+| COD (Cash On Delivery) / Thu hộ; COD remittance / Tiền nhà vận chuyển nộp | Không có thu hộ; khách chuyển khoản theo đợt của hợp đồng ([09 BR-04](../warehouse/09-shipping/README.md)). |
+| Payment term (điều khoản theo đơn: Trả trước 100% / Đặt cọc / Công nợ); Prepaid; Deposit / % cọc; Balance policy (`BEFORE_DELIVERY` / `ON_DELIVERY` / `ON_CREDIT`); loại công nợ `CREDIT_ORDER` / `DEPOSIT_BALANCE`; trạng thái thanh toán `On Credit` | **Lịch thanh toán theo đợt** của Hợp đồng mua bán với ba mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY` (§4). Lưu ý: `BEFORE_DELIVERY` nay là **mốc của đợt thanh toán**, không còn là chính sách thu phần còn lại. |
+| Mã huỷ / lý do nhả giữ `PAYMENT_FAILED`; giữ hàng 30 phút khi đặt | Không có thanh toán thất bại (chuyển khoản); đơn chỉ giữ hàng khi `Confirmed` (§1 Reservation). |
+| Đặt nhanh / tự đặt trên cổng; Assisted order / Đặt hàng hộ (như khái niệm riêng); Backorder / Đặt hàng chờ | Mọi đơn do Sale tạo từ báo giá đã chấp nhận; đơn thiếu hàng chờ ở `Awaiting Stock` với Yêu cầu sản xuất (§4). |
+| Hàng trơn; Product type `STANDARD` (loại sản phẩm hàng trơn, biến thể có tồn và giá bán cho mọi khách) | Mọi sản phẩm là `CUSTOMIZABLE`; hàng có tồn duy nhất là **SKU thành phẩm theo mẫu của khách** (§3a). Lưu ý: nhóm thuế `STANDARD` và loại ô `Bin.type = STANDARD` là enum khác, **vẫn dùng**. |
+| Base price / Giá gốc; Segment price / Giá nhóm khách; thứ tự giá riêng → giá nhóm → giá gốc | Giá chỉ có một nguồn: **giá riêng theo (khách, SKU riêng)** (§4). Nhóm khách chỉ còn để phân loại (⚠️ — [open-questions D14](../open-questions/README.md)). |
+| Nguồn Yêu cầu sản xuất (`ORDER` / `REPLENISHMENT`); Yêu cầu sản xuất `REPLENISHMENT` do Inventory Planner lập để bổ sung tồn | Yêu cầu sản xuất **chỉ phát sinh từ đơn**, chỉ Điều phối lập; không còn trường nguồn (§2; [open-questions B22](../open-questions/README.md) lỗi thời). |
+| Reorder point / Ngưỡng đặt lại (điểm đặt lại); Safety stock / Tồn an toàn; Usable on-hand / Tồn dùng được (số so với ngưỡng); cảnh báo `REORDER` / `SAFETY`; lý do đóng cảnh báo `NOT_PURCHASABLE`; Stock alert / Cảnh báo tồn (nghĩa gồm tồn thấp) | Không có cảnh báo tồn thấp (SKU sản xuất theo đơn); chỉ còn **cảnh báo hạn dùng** `EXPIRING` / `EXPIRED` (§1; [open-questions C11](../open-questions/README.md) lỗi thời). |
+| Lấy lẻ; thùng đã mở; phân bổ "thùng nguyên cho phần chẵn, hàng lẻ / thùng đã mở cho phần lẻ"; nhiệm vụ cất phần lẻ; trạng thái nhiệm vụ cất `In Progress`; di chuyển "phần tự do của hàng lẻ" | **Chỉ xuất nguyên thùng**; mọi tồn nằm trong thùng LPN; phân bổ chọn đủ N thùng của dòng (§1 Phân bổ nguyên thùng); nhiệm vụ cất `Pending` → `Done` (§2). |
+| Packing / Đóng gói (đóng hàng thành kiện); phiên đóng gói `Pending` / `Packing` / `Packed`; Transfer to packing / Chuyển sang đóng gói; Transfer pack / Phiên đóng gói chuyển kho | **Kiểm thùng & Dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)); phiên kiểm thùng; chuyển cả tác vụ sang khu kiểm & dán nhãn; phiên kiểm thùng chuyển kho (§3). |
+| Kiện (package) mã `PKG-`, trạng thái `Open` / `Sealed` / `Voided`; chọn loại kiện; cân đo; niêm phong; Package label / Nhãn kiện (in khi niêm phong); Packing slip / Phiếu đóng gói; Cartonization / gợi ý thùng tại bàn đóng gói; Packer ghi đè cờ xoay | **Thùng LPN là kiện giao**, mã kiện = mã LPN; kích thước, khối lượng, cờ xoay lấy từ **quy cách thùng** (§1); **nhãn giao hàng** (§3); thùng giao `To Check` / `Checked` / `Labeled` / `Removed` (§5). |
+| Kit / Bộ kiện (`package_count` trên Inventory Item; huỷ một kiện là huỷ cả bộ) | Không còn; mỗi thùng LPN là một kiện. |
+| Label outdated / Nhãn lỗi thời (nhãn in trước khi kiện đổi shipment) | Không còn; nhãn giao chỉ in lại khi rách / mất, nhãn cũ vô hiệu ([08 BR-08](../warehouse/08-packing/README.md)). |
+| Consolidated shipment (gộp nhiều đơn vào một kiện / shipment) | Không hỗ trợ: mỗi thùng và mỗi shipment thuộc một đơn ([08 BR-03](../warehouse/08-packing/README.md), [open-questions D11](../open-questions/README.md)). |
+| Thùng lẻ (thùng ít hơn số chuẩn / thùng, "một thùng cuối ít hơn"); khối lượng thùng lẻ tính theo tỷ lệ; ghi số lượng thực trong từng thùng khi nhập *(bỏ 2026-11-05)* | **Mọi thùng đúng số cái chuẩn**; thùng lệch số chuẩn không được nhận ([03 BR-13](../warehouse/03-receipt/README.md)); mọi thùng của SKU cùng kích thước, khối lượng (§1 Quy cách thùng; [open-questions B24](../open-questions/README.md), E14 lỗi thời). |
+| Tập thùng có tổng khớp số lượng dòng; "không có tổ hợp thùng khớp" coi như thiếu hàng; ưu tiên ít thùng hơn; số lượng báo giá / đơn / Yêu cầu sản xuất theo đơn vị cơ sở (cái); "đơn vị bán chưa dùng trên catalog / báo giá / đơn" *(bỏ 2026-11-05)* | Số lượng là **số thùng**, giá theo cái (§1 Đơn vị bán); phân bổ = **chọn đủ N thùng** FEFO / FIFO (§1 Phân bổ nguyên thùng; [open-questions A9, C32](../open-questions/README.md)). |
