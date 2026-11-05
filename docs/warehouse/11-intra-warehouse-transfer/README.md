@@ -14,7 +14,7 @@ Di chuyển **nguyên thùng LPN** **giữa hai vị trí trong cùng một kho*
 
 Hiện tại đây là **một thao tác di chuyển thủ công**, ghi ngay khi xác nhận; không có nhiệm vụ di chuyển (move task) qua nhiều bước.
 
-> **Đã chốt 2026-11-05:** **không có chuyển kho** giữa các kho. Mỗi đơn bán có đúng một kho xuất; hàng không được đưa từ kho này sang kho khác trong hệ thống. Dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md)) — ⚠️ giả định, xem [open-questions](../../open-questions/README.md).
+> **Đã chốt 2026-11-05:** **không có chuyển kho** giữa các kho. Mỗi đơn bán có đúng một kho xuất; hàng không được đưa từ kho này sang kho khác trong hệ thống. Dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md)) — ✅ đã chốt 2026-11-05, xem [open-questions C41](../../open-questions/README.md).
 
 > ⚠️ Giả định: **tự động đưa thùng ra vùng lấy hàng** (theo ngưỡng min / max của bin), **tối ưu lại vị trí** (re-slotting theo đề xuất, có duyệt) và **nhiệm vụ di chuyển** có phân công và vòng đời thuộc phạm vi giai đoạn sau. Xem [open-questions C2, C24](../../open-questions/README.md).
 
@@ -109,7 +109,7 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 | Thùng không vừa bin đích (kể cả khi xoay ngang được) | Từ chối cả lần di chuyển (BR-10); chọn bin lớn hơn hoặc để thùng ở khu `OVERFLOW` |
 | Sửa lệch vị trí khi kiểm kê nhưng thùng thực tế đang nằm trong bin lại bị báo không vừa | Dữ liệu sai — Quản lý kho sửa kích thước bin / chiều cao lọt / quy cách thùng ([06](../06-warehouse-map-slotting/README.md), [01](../01-product-creation/README.md)) rồi ghi nhận lại (BR-10) |
 | Thùng đang giữ cho đơn | Bị từ chối; muốn dời thì nhả / phân bổ lại trước |
-| Vị trí đích thuộc kho khác | Bị từ chối (BR-01); không có chuyển kho. Dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md), ⚠️ giả định) |
+| Vị trí đích thuộc kho khác | Bị từ chối (BR-01); không có chuyển kho. Dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md), ✅ đã chốt 2026-11-05) |
 | Kho có chỗ trở lại sau khi đã cất thùng vào `OVERFLOW` | Quét thùng ở `OVERFLOW`, quét bin đích để dời lên bin; người di chuyển tự chọn bin phù hợp (⚠️ giả định §4.1) |
 | Vị trí đích đang `Blocked` / `Maintenance` / `Inactive` | Bị từ chối |
 | Thùng đang ở vị trí `Blocked` / `Maintenance` | Được di chuyển ra (dọn bin) |

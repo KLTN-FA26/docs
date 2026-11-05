@@ -5,6 +5,8 @@
 > Đã chốt 2026-11-04: khách thanh toán theo **lịch thanh toán của Hợp đồng mua bán** ([14](../14-cart-and-order/README.md)) — mỗi hợp đồng gồm một hoặc nhiều **đợt thanh toán (Payment Installment)**. Tiền vào được phân bổ cho **đợt thanh toán**, không còn điều khoản thanh toán chọn theo đơn.
 >
 > Đã chốt 2026-11-05: **phí khuôn / bản in** (cho mẫu mới — lần sản xuất đầu của SKU riêng) là **một dòng phí trên báo giá và hợp đồng** ([14](../14-cart-and-order/README.md)); nằm trong tổng giá trị hợp đồng nên **thu theo các đợt thanh toán như hàng hoá**, không có khoản thu riêng. Treo / gỡ treo đơn do **Nhân viên Sale** làm ([17](../17-order-management/README.md)); treo do tín dụng vẫn do Kế toán duyệt.
+>
+> ✅ Đã chốt 2026-11-05 (phí vận chuyển & thuế): **phí vận chuyển** cũng là **một dòng phí của hợp đồng** do Sale nhập ([14](../14-cart-and-order/README.md) BR-20) và thu theo các đợt như hàng hoá. Hợp đồng ghi **thuế VAT từng dòng** và **tổng có thuế** ([14](../14-cart-and-order/README.md) BR-21); **các đợt thanh toán chia trên tổng có thuế**. **Hoá đơn điện tử (VAT e-invoice) xuất ở phần mềm hoá đơn ngoài hệ thống**; hệ thống chỉ cung cấp số liệu (BR-18, BR-19).
 
 ## 1. Mục đích (Purpose)
 
@@ -41,7 +43,7 @@ Payment quyết định các mốc tiền của đơn:
 |--------|-------|----------|
 | **Khoản tiền về** | Khách, **mã tham chiếu sao kê** (≤ 100 ký tự, duy nhất), số tiền > 0, tiền tệ (VND), ngày nhận (không ở tương lai), ghi chú | Có |
 | Chỉ định phân bổ | Các đợt thanh toán và / hoặc khoản phí huỷ được trả, mỗi mục một số tiền. Không chỉ định → trả mục đến hạn sớm nhất. | Không |
-| **Lịch thanh toán của hợp đồng** | Các đợt (số tiền, mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY`, N ngày) — nhận từ [14](../14-cart-and-order/README.md) khi hợp đồng `Signed`. Số tiền các đợt chia từ **tổng giá trị hợp đồng** = dòng hàng + dòng phí khuôn / bản in (nếu có) | Có |
+| **Lịch thanh toán của hợp đồng** | Các đợt (số tiền, mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY`, N ngày) — nhận từ [14](../14-cart-and-order/README.md) khi hợp đồng `Signed`. Số tiền các đợt chia từ **tổng giá trị hợp đồng (tổng có thuế)** = dòng hàng + dòng phí khuôn / bản in + dòng phí vận chuyển (nếu có) + tiền thuế VAT các dòng ([14](../14-cart-and-order/README.md) BR-09) | Có |
 | Hạn mức & kỳ hạn công nợ của khách | Hạn mức (≥ 0), kỳ hạn mặc định (0–365 ngày) — [18](../18-customer-information/README.md) | Có |
 | Sự kiện đơn hàng | Đơn sẵn sàng xuất, ngày giao xong, huỷ đơn, đóng phần còn lại ([17](../17-order-management/README.md), [09](../../warehouse/09-shipping/README.md)) | Có |
 | Yêu cầu đảo phân bổ | Phân bổ cần đảo + lý do (≤ 500); có treo đơn hay không | Khi đảo |
@@ -58,6 +60,7 @@ Payment quyết định các mốc tiền của đơn:
 | Tín hiệu **đủ đợt `ON_SIGNING`** (xác nhận đơn) và **đủ đợt `BEFORE_DELIVERY`** (mở chặn bàn giao) | 14, 17, 09 |
 | **Công nợ phải thu** và **vị thế tín dụng** của khách: dư nợ, hạn mức còn lại, quá hạn | Kế toán, Sale, 14 (gửi / ký hợp đồng), khách |
 | **Lệnh hoàn tiền** (`Pending`) | Kế toán |
+| **Số liệu cho hoá đơn điện tử** — theo hợp đồng / đợt: thông tin bên mua, các dòng hàng & dòng phí, thuế suất, tiền thuế, tổng chưa thuế, tổng có thuế, số tiền đã thu từng đợt (xem / xuất ra để nhập vào phần mềm hoá đơn) | Kế toán; phần mềm hoá đơn điện tử (ngoài hệ thống) |
 
 ---
 
@@ -74,7 +77,7 @@ Payment quyết định các mốc tiền của đơn:
    | `BEFORE_DELIVERY` | Đơn `Ready to Fulfill` (hàng đã đủ, chuẩn bị xuất) | Không có ngày hạn; chặn bàn giao tới khi trả đủ |
    | `AFTER_DELIVERY` | Đơn giao thành công (`Delivered`) | Ngày giao thành công + N ngày (mặc định = kỳ hạn công nợ của khách) |
 
-   > ⚠️ Giả định: đợt `BEFORE_DELIVERY` đến hạn khi đơn `Ready to Fulfill` và không có ngày quá hạn; với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` phải trả đủ trước **lần bàn giao đầu tiên**, đợt `AFTER_DELIVERY` tính từ **lần giao cuối cùng** (hoặc ngày đóng phần còn lại). Xem [open-questions](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-05: đợt `BEFORE_DELIVERY` đến hạn khi đơn `Ready to Fulfill` và không có ngày quá hạn; với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` phải trả đủ trước **lần bàn giao đầu tiên**, đợt `AFTER_DELIVERY` tính từ **lần giao cuối cùng** (hoặc ngày đóng phần còn lại). Xem [open-questions](../../open-questions/README.md).
 3. Mỗi khi một đợt chuyển `Due`, hệ thống **tự lấy tiền dư** của khách trả đợt đó (§4.2 bước 6).
 4. **Quét quá hạn** — **mỗi đêm 00:15**, đợt `Due` / `Partially Paid` đã qua hạn trả mà chưa trả đủ → `Overdue`.
 
@@ -150,11 +153,13 @@ Payment quyết định các mốc tiền của đơn:
     - Các đợt chưa `Paid` của đơn → `Cancelled`.
     - Toàn bộ tiền đã phân bổ cho các đợt của đơn **trả phí huỷ trước** (nếu có phí).
     - Phần thừa → lệnh hoàn tiền. Phần phí còn thiếu → **khoản phí huỷ**, đến hạn ngay ngày huỷ, do khách trả (vòng đời như đợt, bắt đầu từ `Due`).
-19. **Đóng phần còn lại** của đơn giao một phần: hệ thống **giảm số còn phải thu** của các đợt chưa trả đủ theo giá trị phần bị đóng (= số thùng bị đóng × số cái / thùng × đơn giá / cái — [14](../14-cart-and-order/README.md) BR-08; đợt muộn nhất trước — `AFTER_DELIVERY` trước), để khách không bao giờ trả nhiều hơn giá trị hàng đã nhận cộng phí (nếu có).
+19. **Đóng phần còn lại** của đơn giao một phần: hệ thống **giảm số còn phải thu** của các đợt chưa trả đủ theo giá trị phần bị đóng (= số thùng bị đóng × số cái / thùng × đơn giá / cái — [14](../14-cart-and-order/README.md) BR-08 — cộng tiền thuế VAT tương ứng của dòng; đợt muộn nhất trước — `AFTER_DELIVERY` trước), để khách không bao giờ trả nhiều hơn giá trị hàng đã nhận cộng phí (nếu có).
 
-    > ⚠️ Giả định: **dòng phí khuôn / bản in** không thuộc "phần bị đóng" — đóng phần còn lại chỉ giảm theo giá trị hàng chưa giao, phí khuôn / bản in vẫn phải thu đủ (khuôn / bản in đã làm). Xem [open-questions](../../open-questions/README.md).
+    > ✅ Đã chốt 2026-11-05: **dòng phí khuôn / bản in** không thuộc "phần bị đóng" — đóng phần còn lại chỉ giảm theo giá trị hàng chưa giao, phí khuôn / bản in vẫn phải thu đủ (khuôn / bản in đã làm). Xem [open-questions](../../open-questions/README.md).
 
-    > ⚠️ Giả định: giảm số phải thu khi đóng phần còn lại được hệ thống tự điều chỉnh trên các đợt, còn phụ lục / thanh lý hợp đồng tương ứng làm ngoài hệ thống; đợt chưa trả của đơn huỷ chuyển trạng thái `Cancelled` (bổ sung ngoài danh sách trạng thái đợt đã chốt). Xem [open-questions](../../open-questions/README.md).
+    > ⚠️ Giả định: vì các đợt chia trên tổng có thuế ([14](../14-cart-and-order/README.md) BR-21), giá trị phần bị đóng được giảm **cả tiền thuế VAT** của phần hàng đó; **dòng phí vận chuyển** cũng không thuộc "phần bị đóng" (như phí khuôn / bản in). Xem [open-questions D32](../../open-questions/README.md).
+
+    > ✅ Đã chốt 2026-11-05: giảm số phải thu khi đóng phần còn lại được hệ thống tự điều chỉnh trên các đợt, còn phụ lục / thanh lý hợp đồng tương ứng làm ngoài hệ thống; đợt chưa trả của đơn huỷ chuyển trạng thái `Cancelled` (bổ sung ngoài danh sách trạng thái đợt đã chốt). Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -169,7 +174,7 @@ Payment quyết định các mốc tiền của đơn:
 | `Partially Paid` | Đã trả một phần | → `Paid`, → `Overdue`, → `Cancelled` | Hệ thống |
 | `Overdue` | Quá hạn trả, chưa trả đủ; giữ `Overdue` cho tới khi trả đủ | → `Paid`, → `Cancelled` | Hệ thống |
 | `Paid` | Đã trả đủ | *(cuối)* — đảo phân bổ tính lại trạng thái | Hệ thống |
-| `Cancelled` ⚠️ | Đơn bị huỷ; đợt không còn phải thu (tiền đã thu xử lý theo §4.6) | *(cuối)* | Hệ thống (khi huỷ đơn) |
+| `Cancelled` *(✅ đã chốt 2026-11-05)* | Đơn bị huỷ; đợt không còn phải thu (tiền đã thu xử lý theo §4.6) | *(cuối)* | Hệ thống (khi huỷ đơn) |
 
 ```mermaid
 stateDiagram-v2
@@ -241,8 +246,10 @@ stateDiagram-v2
 - **BR-13:** Đảo phân bổ làm đơn đã xác nhận thiếu đợt `ON_SIGNING` → bắt buộc **treo đơn** (lý do thanh toán); không âm thầm đưa đơn về chưa thanh toán.
 - **BR-14:** Hoàn tiền không vượt số tiền đã thu. Hoàn tiền dư không vượt tiền dư chưa phân bổ.
 - **BR-15:** Huỷ đơn: tiền đã thu **trả phí huỷ trước**, phần thừa hoàn, phần thiếu thành khoản phí huỷ; đợt chưa trả đủ → `Cancelled`.
-- **BR-16:** Đóng phần còn lại **không bao giờ khiến khách trả nhiều hơn** giá trị hàng đã nhận cộng phí (phí huỷ, phí khuôn / bản in — nếu có).
+- **BR-16:** Đóng phần còn lại **không bao giờ khiến khách trả nhiều hơn** giá trị hàng đã nhận (có thuế) cộng phí (phí huỷ, phí khuôn / bản in, phí vận chuyển — nếu có).
 - **BR-17:** **Phí khuôn / bản in** là một dòng phí của hợp đồng ([14](../14-cart-and-order/README.md)), tính vào tổng giá trị hợp đồng và **thu theo các đợt** như hàng hoá; không sinh đợt hay khoản thu riêng. Phí phát sinh khi số vòng in mẫu vượt số lần miễn phí ([17](../17-order-management/README.md)) **không** được ghi nhận trong module này (xử lý bằng phụ lục ngoài hệ thống — phạm vi sau).
+- **BR-18:** **Phí vận chuyển và thuế nằm trong tổng hợp đồng.** Dòng phí vận chuyển ([14](../14-cart-and-order/README.md) BR-20) và tiền thuế VAT của mọi dòng ([14](../14-cart-and-order/README.md) BR-21) được tính vào **tổng có thuế** của hợp đồng; các đợt thanh toán (số tiền hoặc %) **chia trên tổng có thuế**, tổng các đợt = tổng có thuế. Phí vận chuyển **thu theo các đợt** như hàng hoá; không sinh đợt hay khoản thu riêng *(✅ Đã chốt 2026-11-05)*.
+- **BR-19:** **Hoá đơn điện tử (VAT e-invoice) xuất ở phần mềm hoá đơn ngoài hệ thống.** Hệ thống không phát hành, ký hay gửi hoá đơn; chỉ **cung cấp số liệu** (dòng, thuế suất, tiền thuế, tổng có thuế, số tiền đã thu theo đợt) để kế toán lập hoá đơn ở phần mềm ngoài *(✅ Đã chốt 2026-11-05)*.
 
 ### Edge case
 
@@ -260,6 +267,8 @@ stateDiagram-v2
 | Khách huỷ đơn trước khi gửi Đơn sản xuất | Hoàn toàn bộ tiền đã thu, không phí ([17](../17-order-management/README.md) BR-11) |
 | Khách huỷ đơn khi đơn vị sản xuất đã làm hàng theo mẫu (Đơn sản xuất đã `In Production`) | Nhân viên huỷ có phí: tiền đã thu trả phí trước, phần thừa hoàn, phần thiếu thành khoản phí huỷ |
 | Hợp đồng có dòng phí khuôn / bản in | Dòng phí nằm trong tổng giá trị hợp đồng; các đợt chia theo % tổng đó, thu như hàng hoá (BR-17) |
+| Hợp đồng có dòng phí vận chuyển | Dòng phí (kèm thuế) nằm trong tổng có thuế; các đợt chia theo % tổng đó, thu như hàng hoá (BR-18) |
+| Khách yêu cầu hoá đơn VAT | Kế toán lấy số liệu hợp đồng / đợt từ hệ thống, xuất hoá đơn điện tử ở phần mềm ngoài (BR-19) |
 | Số vòng in mẫu vượt số lần miễn phí | Sale nhận cảnh báo ở [17](../17-order-management/README.md); không sinh khoản thu trong 15; phí phát sinh làm phụ lục ngoài hệ thống (BR-17) |
 | Hàng lỗi sản xuất phát hiện sau giao | Đổi hàng hoặc hoàn một phần qua luồng trả hàng ([17](../17-order-management/README.md) §4.10) |
 
@@ -269,9 +278,10 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [14 · Quote, Order & Contract](../14-cart-and-order/README.md) | Hợp đồng `Signed` sinh các đợt (chia từ tổng giá trị gồm cả dòng phí khuôn / bản in); đủ đợt `ON_SIGNING` → đơn `Confirmed`; mọi đợt `Paid` → hợp đồng `Completed`; kiểm tín dụng lúc gửi / ký |
+| [14 · Quote, Order & Contract](../14-cart-and-order/README.md) | Hợp đồng `Signed` sinh các đợt (chia từ tổng có thuế, gồm cả dòng phí khuôn / bản in và phí vận chuyển); đủ đợt `ON_SIGNING` → đơn `Confirmed`; mọi đợt `Paid` → hợp đồng `Completed`; kiểm tín dụng lúc gửi / ký |
 | [17 · Order Management](../17-order-management/README.md) | Treo / duyệt đơn tín dụng; Sale treo / gỡ treo lý do thanh toán; mốc `Ready to Fulfill` / `Delivered` làm đợt đến hạn; phí huỷ và tiền hoàn khi huỷ / đóng phần còn lại / trả hàng |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa thu đủ; ngày giao xong làm đợt `AFTER_DELIVERY` đến hạn |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Sale gửi thông tin chuyển khoản theo đợt, nhắc công nợ |
 | [18 · Customer Information](../18-customer-information/README.md) | Hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định; vị thế tín dụng hiển thị cho khách |
 | Kế toán / Ngân hàng (ngoài hệ thống) | Đối soát sao kê; chuyển khoản hoàn |
+| Phần mềm hoá đơn điện tử (ngoài hệ thống) | Kế toán xuất hoá đơn VAT điện tử từ số liệu hợp đồng / đợt do hệ thống cung cấp (BR-19) |

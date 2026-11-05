@@ -8,7 +8,7 @@ Giữ cho **số tồn trong hệ thống đúng với hàng thực tế** và c
 - **Kiểm kê (Cycle count):** kiểm lại các thùng ở một phạm vi vị trí / SKU mà không dừng kho.
 - **Điều chỉnh tồn (Inventory adjustment):** mọi thay đổi số lượng làm bằng tay đều phải qua duyệt bốn mắt (four-eyes).
 - **Thùng hàng (LPN – License Plate Number):** mọi tồn nằm trong thùng do đơn vị sản xuất đóng sẵn; thùng là đơn vị lưu trữ, di chuyển, xuất và kiểm kê.
-- **Sổ biến động tồn (Stock movement ledger) & truy xuất lô (Lot traceability):** mọi thay đổi tồn đều để lại một dòng sổ có chứng từ nguồn; từ một lô truy được về **Đơn sản xuất (Production Order)** và phiếu nhận, và tới đơn khách.
+- **Sổ biến động tồn (Stock movement ledger) & truy xuất lô (Lot traceability):** mọi thay đổi tồn đều để lại một dòng sổ có chứng từ nguồn; từ một lô — lô chính là **mã Đơn sản xuất (Production Order)** — truy được về Đơn sản xuất và phiếu nhận, và tới đơn khách (BR-22).
 - **Cách ly hàng lỗi (Quarantine):** tách thùng lỗi và **hàng hoàn** (nhập lại qua [03](../03-receipt/README.md)) chờ xử lý khỏi tồn bán được.
 
 Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất và nhận hàng hoàn ([03](../03-receipt/README.md)), cất ([05](../05-putaway/README.md)), lấy — kể cả lấy về khu chờ xuất `STAGING` ([07](../07-picking/README.md)), di chuyển trong kho ([11](../11-intra-warehouse-transfer/README.md)). Module này **kiểm soát** tồn: nó định nghĩa trạng thái và số lượng, và sửa sai lệch.
@@ -17,13 +17,15 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 
 > **Đã chốt 2026-11-05:** ly / bao bì **không có hạn dùng**. Module **không theo dõi hạn dùng** và **không còn phần cảnh báo tồn**: không cảnh báo cận hạn / hết hạn, không quét hết hạn hằng đêm, không có trạng thái tồn hết hạn. Trạng thái tồn chỉ còn **`Inbound`**, **`Available`**, **`Quarantine`**. **Lô** giữ nghĩa lô sản xuất (gắn Đơn sản xuất) để truy vết.
 
+> ✅ Đã chốt 2026-11-05: **lô bắt buộc** với mọi SKU riêng — không có tồn không ghi lô. Lô = **mã Đơn sản xuất**, hệ thống tự gán khi nhập ([03](../03-receipt/README.md) BR-03); thùng hàng hoàn giữ lô gốc. Truy xuất lô (§4.7) dựa trên quy tắc này (BR-22).
+
 > **Đã chốt 2026-11-05:** mọi thùng của một SKU đúng **số cái chuẩn / thùng** ([01](../01-product-creation/README.md) BR-11, [03](../03-receipt/README.md) BR-13); không có thùng ít hơn số chuẩn. Tồn có thể ghi nội bộ theo **đơn vị cơ sở** (cái) để truy vết, nhưng mọi màn hình nghiệp vụ, chứng từ và tồn khả dụng hiển thị theo **số thùng** kèm số cái. Giữ hàng, phân bổ, điều chỉnh tồn và kiểm kê đều tính theo **số thùng**; phân bổ một dòng = chọn **đủ N thùng** theo **FIFO** — nhập trước lấy trước ([07](../07-picking/README.md) BR-03).
 
 > **Đã chốt 2026-11-05:** hệ thống có nhiều kho vật lý nhưng **không có chuyển hàng giữa các kho**. Mỗi đơn có đúng **một kho xuất**; giữ hàng và phân bổ cho đơn chỉ dùng tồn của kho xuất (BR-17).
 
 > ✅ Đã chốt (C8): có nghiệp vụ kiểm kê, mô tả trong module này. Xem [open-questions](../../open-questions/README.md).
 
-> ⚠️ Giả định: kiểm kê **theo thùng** — người đếm quét LPN để xác nhận thùng có mặt tại vị trí, **không mở thùng để đếm**; số cái trong thùng tin là số cái chuẩn / thùng (thùng lệch không được nhận — [03](../03-receipt/README.md) BR-13). Thùng nghi lệch số cái chuẩn (rách, khách báo thiếu) được cách ly cả thùng và xử lý với đơn vị sản xuất ngoài hệ thống. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: kiểm kê **theo thùng** — người đếm quét LPN để xác nhận thùng có mặt tại vị trí, **không mở thùng để đếm**; số cái trong thùng tin là số cái chuẩn / thùng (thùng lệch không được nhận — [03](../03-receipt/README.md) BR-13). Thùng nghi lệch số cái chuẩn (rách, khách báo thiếu) được cách ly cả thùng và xử lý với đơn vị sản xuất ngoài hệ thống. Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -139,18 +141,18 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 > **Đã chốt 2026-11-05:** hàng hoàn (hãng hoàn về — RTO, hoặc khách trả theo yêu cầu trả của [17](../../ecommerce/17-order-management/README.md)) **nhập lại kho qua [03](../03-receipt/README.md) bằng phiếu nhập loại Hàng hoàn**, vào thẳng khu `QUARANTINE`.
 
 1. Phiếu Hàng hoàn tham chiếu shipment / yêu cầu trả của đơn; quét LPN từng thùng, chỉ nhận thùng thuộc shipment / đơn đó ([03](../03-receipt/README.md), [09](../09-shipping/README.md) §4.3).
-2. Khi phiếu được xác nhận, mỗi thùng **quay lại tồn ở khu `QUARANTINE`**: trạng thái tồn `Quarantine`, thùng `In Stock`, ghi một dòng sổ `RECEIPT`. Hàng hoàn **không cộng thẳng vào tồn khả dụng**, không thuộc ATP.
+2. Khi phiếu được xác nhận, mỗi thùng **quay lại tồn ở khu `QUARANTINE`**: trạng thái tồn `Quarantine`, thùng `In Stock`, **giữ lô gốc** (BR-22), ghi một dòng sổ `RECEIPT`. Hàng hoàn **không cộng thẳng vào tồn khả dụng**, không thuộc ATP.
 3. **Quản lý kho** quyết định từng thùng như §4.8 bước 3: gỡ cách ly → mở nhiệm vụ cất về bin ([05](../05-putaway/README.md)), thùng vẫn `Quarantine` tới khi cất xong mới thành `Available`; hoặc ghi giảm cả thùng bằng điều chỉnh có duyệt (§4.3).
 4. Thùng hoàn về là **SKU riêng của khách**: sau khi gỡ cách ly, nó là tồn khả dụng của kho đó và được phân bổ cho đơn sau của chính khách theo FIFO như mọi thùng khác.
 
-> ⚠️ Giả định: thùng hàng hoàn **giữ nguyên mã LPN** đã giao; thùng đang `Consumed` quay về `In Stock` khi phiếu Hàng hoàn được xác nhận (§5.5); ngày nhập dùng cho FIFO là ngày nhập lại. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: thùng hàng hoàn **giữ nguyên mã LPN** đã giao; thùng đang `Consumed` quay về `In Stock` khi phiếu Hàng hoàn được xác nhận (§5.5); ngày nhập dùng cho FIFO là ngày nhập lại. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.5. Dời / đóng kho
 
 1. Không có chuyển hàng giữa các kho: mỗi đơn lấy hàng ở đúng kho xuất của nó (BR-17).
 2. Trường hợp hiếm phải dời hàng khỏi một kho (dời / đóng kho): xử lý bằng **điều chỉnh tồn có duyệt** (§4.3) — ghi giảm các thùng ở kho cũ và ghi tăng ở kho mới, mỗi thùng một điều chỉnh, qua duyệt bốn mắt.
 
-> ⚠️ Giả định: dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt; lý do điều chỉnh dùng cho trường hợp này, việc giữ mã LPN và lô khi ghi tăng ở kho mới chưa xác định. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt. ⚠️ Còn mở: lý do điều chỉnh dùng cho trường hợp này; việc giữ mã LPN và lô khi ghi tăng ở kho mới. Xem [open-questions C41](../../open-questions/README.md).
 
 ### 4.6. Thùng hàng LPN
 
@@ -172,13 +174,13 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 1. Mọi thay đổi tồn ghi **một dòng sổ** gồm: loại biến động (BR-16), vị trí đi / đến, SKU, lô, **mã LPN**, số lượng, người, thời điểm, **chứng từ nguồn**.
    - Chứng từ nguồn là dòng phiếu nhận (theo Đơn sản xuất hoặc Hàng hoàn), task cất, dòng lấy hàng, phiếu điều chỉnh, lần cách ly…
    - Dòng sổ **không sửa, không xoá**. Sai thì sửa bằng một điều chỉnh mới.
-2. **Truy xuất một lô** gồm:
-   - **Nguồn gốc:** Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md)) và phiếu nhận thành phẩm ([03](../03-receipt/README.md)); với hàng hoàn: phiếu nhập Hàng hoàn và đơn gốc.
+2. **Truy xuất một lô** *(✅ Đã chốt 2026-11-05: lô = mã Đơn sản xuất — BR-22)* gồm:
+   - **Nguồn gốc:** Đơn sản xuất mang mã trùng mã lô ([17](../../ecommerce/17-order-management/README.md)) và các phiếu nhận thành phẩm của Đơn sản xuất đó ([03](../03-receipt/README.md)); thùng hàng hoàn giữ lô gốc nên nằm trong cùng lô, kèm phiếu nhập Hàng hoàn và đơn gốc.
    - **Thùng còn lại:** theo từng vị trí (kể cả khu chờ xuất, khu `QUARANTINE`).
    - **Khoản đang giữ:** đơn hàng đang giữ thùng của lô này.
    - **Đơn khách đã nhận hàng** từ lô này (theo mã LPN đã giao).
    - **Toàn bộ dòng sổ** của lô.
-3. Lô không có phiếu nhận trong hệ thống (ví dụ tồn đầu kỳ) được ghi nguồn gốc là **chưa truy được (`UNTRACED`)**.
+3. Lô không có phiếu nhận trong hệ thống (ví dụ tồn đầu kỳ) được ghi nguồn gốc là **chưa truy được (`UNTRACED`)** — tồn đầu kỳ mang lô `UNTRACED`, không truy được về Đơn sản xuất (⚠️ giả định — [open-questions C45](../../open-questions/README.md)).
 
 ### 4.8. Cách ly hàng lỗi (Quarantine)
 
@@ -190,7 +192,7 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
    - thùng dùng được → **gỡ cách ly** → nhiệm vụ cất về bin ([05](../05-putaway/README.md)); cất xong thành `Available`;
    - thùng lỗi → ghi giảm cả thùng bằng điều chỉnh `DAMAGED` đã duyệt (§4.3). Việc đổi trả với đơn vị sản xuất làm **ngoài hệ thống**; hàng thay thế (nếu có) nhập kho qua [03](../03-receipt/README.md) như thành phẩm mới.
 
-> ⚠️ Giả định: hàng lỗi phát hiện sau khi nhận được đổi trả với đơn vị sản xuất ngoài hệ thống; hệ thống chỉ ghi nhận bằng cách ly ở khu `QUARANTINE` và điều chỉnh tồn. Cách ly / gỡ cách ly là đổi trạng thái, không đổi số lượng nên không qua duyệt bốn mắt. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: hàng lỗi phát hiện sau khi nhận được đổi trả với đơn vị sản xuất ngoài hệ thống; hệ thống chỉ ghi nhận bằng cách ly ở khu `QUARANTINE` và điều chỉnh tồn. Cách ly / gỡ cách ly là đổi trạng thái, không đổi số lượng nên không qua duyệt bốn mắt. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.9. Tồn ở khu chờ xuất (Staging)
 
@@ -201,7 +203,7 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
    - **đơn bị huỷ** → khoản phân bổ `Released` (`ORDER_CANCELLED`); thùng vẫn ở khu chờ xuất, chưa vào ATP, tới khi được **cất lại** về bin (dòng sổ `MOVE`).
 4. Khu chờ xuất được kiểm kê như vị trí khác (§4.2); thùng không thấy là chênh lệch thiếu của phần đang giữ cho đơn, đơn phải xử lý như thiếu hàng ([07](../07-picking/README.md)).
 
-> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ⚠️ Giả định: tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Lấy về khu chờ xuất chưa trừ tồn (chỉ đổi vị trí), tồn bị trừ khi chuyển cả tác vụ sang khu xuất hàng. Xem [open-questions](../../open-questions/README.md).
+> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ✅ Đã chốt 2026-11-05: tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Lấy về khu chờ xuất chưa trừ tồn (chỉ đổi vị trí), tồn bị trừ khi chuyển cả tác vụ sang khu xuất hàng. Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -391,6 +393,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 - **BR-19 — Phạm vi kho.** Người dùng gắn với kho chỉ xem và thao tác tồn, phiếu kiểm kê, điều chỉnh và truy xuất của các kho được gán.
 - **BR-20 — Tồn ở khu chờ xuất gắn đơn.** Tồn ở khu `STAGING` chỉ vào bằng lấy hàng cho đơn ([07](../07-picking/README.md)) và luôn mang khoản phân bổ của đơn đó. Tồn này **không khả dụng**: không thuộc ATP, không phân bổ cho đơn khác, không di chuyển thủ công ([11](../11-intra-warehouse-transfer/README.md)). Đơn bị huỷ thì thùng vẫn ngoài ATP tới khi được cất lại về bin.
 - **BR-21 — Cách ly.** Chỉ Quản lý kho cách ly / gỡ cách ly và quyết định hàng hoàn; chỉ thùng tự do mới cách ly được, và cách ly nguyên thùng. Hàng `Quarantine` chỉ rời kho qua điều chỉnh đã duyệt (BR-05).
+- **BR-22 — Lô bắt buộc, lô = mã Đơn sản xuất** *(✅ Đã chốt 2026-11-05)*. Mọi tồn đều mang lô; không có tồn không ghi lô ([01](../01-product-creation/README.md) BR-17). Lô của thùng = mã Đơn sản xuất của phiếu nhập, hệ thống tự gán ([03](../03-receipt/README.md) BR-03); thùng hàng hoàn, thùng cất lại, thùng nạp lại sau điều chỉnh đều **giữ lô gốc** (BR-18). Truy xuất lô (§4.7) đi từ mã lô thẳng tới Đơn sản xuất cùng mã.
 
 ### Edge case
 
@@ -405,7 +408,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 | Thùng mất / rách nhãn LPN, không quét được | Quản lý kho xác định thùng theo SKU, lô, vị trí trên sổ rồi in lại nhãn theo mã LPN ([03](../03-receipt/README.md)); không xác định được → cách ly thùng chờ xử lý. |
 | Thùng rách hoặc nghi số cái trong thùng khác số cái chuẩn | Cách ly cả thùng sang khu `QUARANTINE` (§4.8) — thùng lệch không được phân bổ; xử lý với đơn vị sản xuất ngoài hệ thống; thùng không dùng được ghi giảm `DAMAGED` qua duyệt. |
 | Người đề nghị điều chỉnh cũng là quản lý duy nhất của kho | Không tự duyệt được; System Admin duyệt (BR-05). |
-| Tồn đầu kỳ không có phiếu nhận | Truy xuất lô ghi nguồn gốc `UNTRACED`. |
+| Tồn đầu kỳ không có phiếu nhận | Thùng mang lô `UNTRACED`; truy xuất lô ghi nguồn gốc `UNTRACED`, không truy được về Đơn sản xuất (⚠️ giả định — [open-questions C45](../../open-questions/README.md)). |
 | Phát hiện thùng lỗi trong bin sau khi đã nhập kho | Quản lý kho cách ly nguyên thùng sang khu `QUARANTINE` (§4.8); đổi trả với đơn vị sản xuất ngoài hệ thống; thùng lỗi ghi giảm `DAMAGED` qua duyệt. |
 | Thùng lỗi nằm trong phần đang giữ cho đơn | Không cách ly thẳng được (BR-21); Quản lý kho nhả / phân bổ lại cho đơn ([07](../07-picking/README.md)) rồi mới cách ly. |
 | Hàng hoàn về nguyên vẹn | Nhập qua phiếu Hàng hoàn vào `Quarantine`; Quản lý kho gỡ cách ly, cất về bin (05) → `Available`; dùng được cho đơn sau của chính khách (§4.4). |
@@ -414,7 +417,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 | Kho khác còn thùng dư của cùng SKU khi kho xuất thiếu | Không dùng cho đơn (BR-17); phần thiếu đi Đơn sản xuất với kho nhận = kho xuất. |
 | Đơn bị huỷ khi thùng đang ở khu chờ xuất | Nhả phân bổ `ORDER_CANCELLED`; thùng vẫn ngoài ATP tới khi cất lại về bin (§4.9, BR-20). |
 | Kiểm kê khu chờ xuất không thấy thùng | Điều chỉnh `COUNT_VARIANCE` cho cả thùng thuộc phần đang giữ của đơn; đơn xử lý như thiếu hàng ([07](../07-picking/README.md)). |
-| Phải dời / đóng một kho | Điều chỉnh tồn có duyệt: ghi giảm ở kho cũ, ghi tăng ở kho mới (§4.5, ⚠️ giả định). |
+| Phải dời / đóng một kho | Điều chỉnh tồn có duyệt: ghi giảm ở kho cũ, ghi tăng ở kho mới (§4.5, ✅ đã chốt 2026-11-05). |
 
 ---
 

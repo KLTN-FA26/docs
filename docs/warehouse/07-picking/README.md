@@ -25,7 +25,7 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 
 > **Đã chốt 2026-11-05:** **mỗi đơn có đúng một kho xuất** (Sale chọn khi đơn `Confirmed`, hệ thống gợi ý — [17](../../ecommerce/17-order-management/README.md)). Chỉ giữ / phân bổ / lấy hàng **tại kho xuất**; thùng dư của cùng SKU ở kho khác không dùng cho đơn đó. Không có chuyển hàng giữa các kho, không bao giờ tách giao từ hai kho; đơn vẫn có thể giao nhiều đợt từ cùng kho xuất.
 
-> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ⚠️ Giả định: tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Cách vận hành khu chờ xuất (lấy sang `STAGING` chưa trừ tồn, lấy bổ sung vào cùng task khi phần hàng còn thiếu về kho, chuyển cả tác vụ sang khu xuất hàng một lần cho cả task) là đề xuất của tài liệu. Xem [open-questions](../../open-questions/README.md).
+> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ✅ Đã chốt 2026-11-05 (C30, C31): tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Cách vận hành khu chờ xuất (lấy sang `STAGING` chưa trừ tồn, lấy bổ sung vào cùng task khi phần hàng còn thiếu về kho, chuyển cả tác vụ sang khu xuất hàng một lần cho cả task) được xác nhận như tài liệu mô tả. Xem [open-questions](../../open-questions/README.md).
 
 > ⚠️ Giả định: lấy hàng theo **đợt (wave / batch)**, **theo zone**, và **tối ưu lộ trình** trên bản đồ kho thuộc phạm vi giai đoạn sau. Hiện tại mỗi đơn một task, các dòng lấy được sắp theo mã vị trí rồi SKU. Xem [open-questions C17](../../open-questions/README.md).
 

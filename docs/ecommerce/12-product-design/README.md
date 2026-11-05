@@ -117,7 +117,7 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 
 ### 4.4. Gửi khách xác nhận
 
-9. Khi bộ hiện tại đã **Đạt**, người thiết kế gửi khách xác nhận → `Submitted`. Quy cách của bản thiết kế phải đã có **quy cách thùng** ([01](../../warehouse/01-product-creation/README.md)); chưa có thì không gửi được (⚠️ giả định — xem [open-questions](../../open-questions/README.md)). Khách thấy yêu cầu trên cổng khách hàng (mục mẫu thiết kế của tôi — [13](../13-catalog/README.md)); Sale có thể gửi kèm yêu cầu xác nhận vào [chat](../16-sales-chat/README.md).
+9. Khi bộ hiện tại đã **Đạt**, người thiết kế gửi khách xác nhận → `Submitted`. Quy cách của bản thiết kế phải đã có **quy cách thùng** ([01](../../warehouse/01-product-creation/README.md)); chưa có thì không gửi được (✅ đã chốt 2026-11-05 — xem [open-questions B25](../../open-questions/README.md)). Khách thấy yêu cầu trên cổng khách hàng (mục mẫu thiết kế của tôi — [13](../13-catalog/README.md)); Sale có thể gửi kèm yêu cầu xác nhận vào [chat](../16-sales-chat/README.md).
 10. Trong lúc chờ, không ai sửa được bản thiết kế. Muốn sửa thì người thiết kế hoặc khách **rút yêu cầu**: bản thiết kế về `Draft` và kết quả duyệt bị xoá.
 
 ### 4.5. Khách xác nhận hoặc yêu cầu sửa
@@ -129,7 +129,7 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
       - chuyển bản thiết kế → `Approved`. Bản thiết kế từ đây **không sửa được nữa** (BR-08).
     - **Yêu cầu sửa** kèm lý do (≤ 2.000 ký tự). Bản thiết kế về `Draft`, kết quả duyệt bị xoá. Người thiết kế sửa → duyệt lại → gửi lại.
 
-> ⚠️ Giả định: SKU riêng được sinh **mã tự động** (theo mã sản phẩm + mã khách + số thứ tự), ở trạng thái `Active` ngay (duyệt kỹ thuật và khách xác nhận thay cho bước kích hoạt biến thể ở [01](../../warehouse/01-product-creation/README.md)). Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: SKU riêng được sinh **mã tự động** (theo mã sản phẩm + mã khách + số thứ tự), ở trạng thái `Active` ngay (duyệt kỹ thuật và khách xác nhận thay cho bước kích hoạt biến thể ở [01](../../warehouse/01-product-creation/README.md)). Xem [open-questions](../../open-questions/README.md).
 
 SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-catalog/README.md)). Giá có trên báo giá / đơn / hợp đồng do Sale lập ([14](../14-cart-and-order/README.md)); Sale tham khảo **giá nội bộ** do Quản lý kinh doanh khai báo ([13](../13-catalog/README.md) §4.2), nếu có. Lần sản xuất đầu của một SKU riêng (mẫu mới) có **dòng phí khuôn / bản in** trên báo giá và hợp đồng ([14](../14-cart-and-order/README.md)).
 
