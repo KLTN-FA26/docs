@@ -53,7 +53,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | Bảng giá riêng (giá nội bộ) | Bậc giá theo số thùng + đơn giá / cái cho từng SKU riêng của khách; chỉ nhân viên xem, không hiện trên sàn | Quản lý kinh doanh ([13](../13-catalog/README.md)) |
 | Sổ địa chỉ | Địa chỉ **giao hàng** và **xuất hoá đơn** (nhiều địa chỉ mỗi loại), mỗi loại một địa chỉ mặc định. Địa chỉ Việt Nam hai cấp (phường / xã, tỉnh / thành); bắt buộc tên người nhận, điện thoại, địa chỉ chi tiết | Khách / Sale |
 | Nhóm khách | Mã nhóm (cố định), tên, mô tả | Quản lý kinh doanh |
-| Dữ liệu phái sinh | Lịch sử báo giá, đơn & hợp đồng, **dư nợ & quá hạn**, thiết kế đã xác nhận và SKU theo mẫu của khách, lịch sử chat | 12, 14, 15, 16, 17 |
+| Dữ liệu phái sinh | Lịch sử báo giá, đơn & hợp đồng, **dư nợ & quá hạn**, bản thiết kế khách tự làm (kể cả bản đã duyệt) và SKU theo mẫu của khách, lịch sử chat | 12, 14, 15, 16, 17 |
 
 > ✅ Đã chốt 2026-11-05: thông tin pháp lý (địa chỉ đăng ký kinh doanh, người đại diện, chức vụ) lưu trên hồ sơ khách, có thể bổ sung sau khi tạo nhưng **bắt buộc trước khi lập hợp đồng**; tài khoản ngân hàng của khách chỉ dùng để hoàn tiền. Xem [open-questions](../../open-questions/README.md).
 
@@ -214,6 +214,6 @@ stateDiagram-v2
 | [15 · Payment](../15-payment/README.md) | Kế toán duyệt hạn mức & kỳ hạn; dư nợ, quá hạn, vị thế tín dụng; hạn đợt trả sau giao |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Hồ sơ & lịch sử tương tác hiển thị cho Sale |
 | [17 · Order Management](../17-order-management/README.md) | Lịch sử đơn gắn hồ sơ |
-| [12 · Design Management](../12-product-design/README.md) | Chủ sở hữu thiết kế và SKU theo mẫu là khách này |
+| [12 · Design Management](../12-product-design/README.md) | Khách này tự tạo và là chủ sở hữu các bản thiết kế và SKU theo mẫu sinh ra từ đó |
 | [13 · Catalog](../13-catalog/README.md) | Bảng giá riêng của khách là giá nội bộ (giá gợi ý cho Sale), không hiển thị trên sàn; trạng thái hồ sơ quyết định khách xem tình trạng còn hàng |
 | [00 · System Overview](../../00-system-overview/README.md) | Persona khách hàng |
