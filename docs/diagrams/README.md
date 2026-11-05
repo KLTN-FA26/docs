@@ -645,7 +645,9 @@ flowchart TD
     CNT -->|Có| REJ
     CNT -->|Không| HELD{"Thùng đang giữ / phân bổ cho đơn<br/>kể cả ở khu chờ xuất?"}
     HELD -->|Có| REJ(["Từ chối cả lần — không thùng nào được di chuyển<br/>báo lỗi theo từng thùng"])
-    HELD -->|"Không — mọi thùng hợp lệ"| MOVE["Chuyển ngay nguyên thùng<br/>giữ SKU, lô, ngày nhận, số trong thùng, trạng thái<br/>mỗi thùng một dòng sổ MOVE — tổng tồn kho không đổi"]
+    HELD -->|Không| FIT{"Đích là bin: thùng vừa bin theo từng chiều?<br/>D × R × C ≤ rộng × dài × chiều cao lọt, xoay ngang nếu được"}
+    FIT -->|"Không vừa"| REJ
+    FIT -->|"Vừa / đích là khu — mọi thùng hợp lệ"| MOVE["Chuyển ngay nguyên thùng<br/>giữ SKU, lô, ngày nhận, số trong thùng, trạng thái<br/>mỗi thùng một dòng sổ MOVE — tổng tồn kho không đổi"]
     MOVE --> DONE(["Xong"])
 ```
 

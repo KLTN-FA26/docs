@@ -279,7 +279,7 @@ Trường có dấu `?` là tùy chọn; để trống thì hệ thống **khôn
 
 ### Business rules
 
-- **BR-01:** Ràng buộc cứng khi cất hàng (bin, cùng kho, dùng được, cho phép cất, **thùng vừa bin theo từng chiều** — D × R × C của thùng ≤ rộng × dài của bin × chiều cao lọt của tầng, được xoay ngang nếu thùng có cờ cho phép xoay — §4.4; còn thể tích và tải trọng) **không bao giờ bị vượt**, kể cả khi NV kho chọn bin ngoài gợi ý.
+- **BR-01:** Ràng buộc cứng khi cất hàng (bin, cùng kho, dùng được, cho phép cất, **thùng vừa bin theo từng chiều** — D × R × C của thùng ≤ rộng × dài của bin × chiều cao lọt của tầng, được xoay ngang nếu thùng có cờ cho phép xoay — §4.4; còn thể tích và tải trọng) **không bao giờ bị vượt**, kể cả khi NV kho chọn bin ngoài gợi ý. **Thùng vừa bin áp cho mọi thao tác đưa thùng vào bin** *(Đã chốt 2026-11-05)*: cất hàng ([05](../05-putaway/README.md)), cất lại thùng của đơn huỷ ([07](../07-picking/README.md) BR-12), di chuyển thủ công kể cả dời từ `OVERFLOW` lên bin và sửa lệch vị trí khi kiểm kê ([11](../11-intra-warehouse-transfer/README.md) BR-10).
 - **BR-02:** NV kho được cất vào bin khác gợi ý, **không cần mã lý do** (⚠️ C18).
 - **BR-03:** Gợi ý tính từ tồn **tại thời điểm xem**; lúc xác nhận hệ thống kiểm lại dưới khoá theo bin.
 - **BR-04:** Kệ, bin, khu vực, zone **không xoá**, chỉ `Inactive`. ⚠️ Giả định: không ngưng vị trí còn tồn — **hệ thống hiện chưa kiểm**, người dùng tự bảo đảm. Xem [open-questions C22](../../open-questions/README.md).

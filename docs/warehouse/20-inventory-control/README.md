@@ -94,7 +94,7 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
    - Hệ thống **đọc lại sổ sách đúng lúc đó**: không đóng băng tồn trong lúc đếm, kho vẫn vận hành.
    - Dòng đếm đầu tiên chuyển phiếu sang `In Progress`.
 5. Thấy thùng **ngoài kế hoạch** thì thêm dòng mới:
-   - thùng sổ ghi ở vị trí khác trong cùng kho → ghi nhận **lệch vị trí**; Quản lý kho di chuyển sổ nguyên thùng về vị trí thực tế ([11](../11-intra-warehouse-transfer/README.md)) — không đổi số lượng;
+   - thùng sổ ghi ở vị trí khác trong cùng kho → ghi nhận **lệch vị trí**; Quản lý kho di chuyển sổ nguyên thùng về vị trí thực tế ([11](../11-intra-warehouse-transfer/README.md)) — không đổi số lượng; vị trí thực tế là bin thì vẫn kiểm thùng vừa bin, báo không vừa nghĩa là dữ liệu kích thước sai và phải sửa trước ([11](../11-intra-warehouse-transfer/README.md) BR-10);
    - thùng đang `Lost` → chênh lệch thừa (bước 8).
 6. Thùng đã bị chuyển nguyên thùng sang bin khác trong kho sau khi lập phiếu thì dòng đếm đi theo thùng.
 

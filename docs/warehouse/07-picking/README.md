@@ -133,7 +133,7 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 
 12. Đơn bị huỷ khi task đã bắt đầu → task `Cancelled` và được đánh dấu **cần cất lại**.
 13. Các dòng đã `Picked` hoặc `Staged` của task đó vào **hàng chờ cất lại** của kho, task huỷ sớm nhất đứng trước. Với dòng `Staged`, khoản phân bổ của đơn được nhả (`ORDER_CANCELLED`); thùng vẫn nằm ở khu chờ xuất, không phân bổ được cho đơn khác tới khi cất lại.
-14. Nhân viên / quản lý kho của kho đó cất lại **nguyên thùng** vào một **bin đang hoạt động của cùng kho**, quét LPN để xác nhận → dòng `Put Back`:
+14. Nhân viên / quản lý kho của kho đó cất lại **nguyên thùng** vào một **bin đang hoạt động của cùng kho** mà **thùng vừa bin theo từng chiều** ([06](../06-warehouse-map-slotting/README.md) BR-01) (BR-12) — không bin nào vừa thì cất vào khu `OVERFLOW` ([05](../05-putaway/README.md) BR-13); quét LPN để xác nhận → dòng `Put Back`:
     - dòng `Picked` (đã trừ tồn): thùng quay về `In Stock`, tồn `Available`, ghi một dòng sổ `PUT_BACK`;
     - dòng `Staged` (chưa trừ tồn): thùng chuyển từ khu chờ xuất về bin, ghi một dòng sổ `MOVE`.
 
@@ -206,6 +206,7 @@ stateDiagram-v2
 - **BR-09:** Báo thiếu luôn **treo đơn** và **mở kiểm kê mù** cho thùng đó. Thùng đó bị chặn phân bổ tới khi chênh lệch được duyệt ([20](../20-inventory-control/README.md) BR-11). Phân bổ lại do Quản lý kho làm, không tự động.
 - **BR-10:** Dòng lấy hàng chỉ xác nhận bằng **mã LPN của chính thùng đó** (không phân biệt hoa thường); SKU, mã vạch hay LPN khác đều bị từ chối. Lý do: tồn bị trừ ở đúng thùng được giữ; quét thùng khác cùng SKU sẽ lệch sổ. Không đổi khoản giữ sang thùng khác.
 - **BR-11:** **Thùng ở khu chờ xuất gắn với đơn.** Tồn ở `STAGING` vẫn là tồn của kho nhưng mang khoản phân bổ của đơn, **không khả dụng và không phân bổ được cho đơn khác** ([20](../20-inventory-control/README.md) BR-20). Thùng chỉ rời khu chờ xuất khi **chuyển cả tác vụ sang khu xuất hàng** (tồn bị trừ lúc đó) hoặc **cất lại** khi đơn bị huỷ. Việc chuyển làm một lần cho cả task.
+- **BR-12:** **Cất lại phải vừa bin** *(Đã chốt 2026-11-05)*: thùng cất lại (put-back) vào bin phải **thùng vừa bin theo từng chiều** ([06](../06-warehouse-map-slotting/README.md) BR-01); không bin nào vừa thì cất vào khu `OVERFLOW`.
 
 ### Edge case
 

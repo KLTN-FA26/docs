@@ -67,12 +67,13 @@ Các luồng khác cũng đổi vị trí của thùng nhưng thuộc module ri�
    - vị trí đích **dùng được** (trạng thái hiệu lực `Active` — [06](../06-warehouse-map-slotting/README.md)). Vị trí nguồn **không cần**: dọn thùng khỏi bin bị khoá / đang bảo trì chính là cách làm trống nó;
    - không vị trí nào đang **bị một phiếu kiểm kê giữ** cho SKU / lô của thùng ([20](../20-inventory-control/README.md) BR-10);
    - thùng **không đang bị giữ / phân bổ** cho đơn (kể cả thùng ở khu chờ xuất);
-   - vị trí đích **không phải khu chờ xuất** (`STAGING`): chỉ thùng lấy cho đơn mới vào khu này, qua [07](../07-picking/README.md) (BR-09).
+   - vị trí đích **không phải khu chờ xuất** (`STAGING`): chỉ thùng lấy cho đơn mới vào khu này, qua [07](../07-picking/README.md) (BR-09);
+   - vị trí đích là **bin** thì **thùng vừa bin theo từng chiều** ([06](../06-warehouse-map-slotting/README.md) BR-01): D × R × C của thùng ≤ rộng × dài của bin × chiều cao lọt của tầng, được xoay ngang nếu thùng có cờ cho phép xoay (BR-10). Đích là khu chứa hàng thì không kiểm kích thước.
 
    Một thùng không hợp lệ thì **không thùng nào** trong lần đó được di chuyển; hệ thống báo lỗi theo từng thùng.
 3. Hợp lệ → các thùng chuyển **ngay**, giữ nguyên SKU, lô, ngày nhận, số trong thùng và trạng thái; mỗi thùng ghi một dòng sổ `MOVE`.
 
-> ⚠️ Giả định: thao tác này **không kiểm** thể tích, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
+> ⚠️ Giả định: ngoài việc **thùng vừa bin** (bắt buộc — BR-10), thao tác này **không kiểm** thể tích còn trống, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
 
 ### 4.2. Chênh lệch phát hiện khi di chuyển
 
@@ -99,11 +100,14 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 - **BR-07:** Mọi di chuyển để lại dòng sổ `MOVE` cho từng thùng (LPN, nguồn, đích, SKU, lô, số lượng, người, thời điểm). Gửi lại cùng mã yêu cầu không di chuyển lần hai. Một lần xác nhận thành công hoặc thất bại **trọn vẹn** cho mọi thùng.
 - **BR-08:** Người thao tác chỉ di chuyển trong kho mình được gán (với role theo kho).
 - **BR-09:** Không di chuyển thủ công **vào khu chờ xuất** (`STAGING`). Tồn ở khu này luôn gắn với một đơn ([20](../20-inventory-control/README.md) BR-20); thùng vào bằng lấy hàng và ra bằng chuyển sang khu xuất hàng (`DISPATCH`) hoặc cất lại ([07](../07-picking/README.md)).
+- **BR-10:** **Thùng phải vừa bin** *(Đã chốt 2026-11-05)*: mọi lần dời thùng vào **bin** — kể cả dời từ khu `OVERFLOW` lên bin và sửa lệch vị trí phát hiện khi kiểm kê ([20](../20-inventory-control/README.md)) — đều kiểm **thùng vừa bin theo từng chiều** ([06](../06-warehouse-map-slotting/README.md) BR-01). Một thùng không vừa thì cả lần di chuyển bị từ chối. Khi sửa lệch vị trí mà thùng **đang thực tế nằm** trong bin lại bị báo không vừa, dữ liệu sai (kích thước bin, chiều cao lọt hoặc quy cách thùng): Quản lý kho sửa dữ liệu rồi ghi nhận lại.
 
 ### Edge case
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
+| Thùng không vừa bin đích (kể cả khi xoay ngang được) | Từ chối cả lần di chuyển (BR-10); chọn bin lớn hơn hoặc để thùng ở khu `OVERFLOW` |
+| Sửa lệch vị trí khi kiểm kê nhưng thùng thực tế đang nằm trong bin lại bị báo không vừa | Dữ liệu sai — Quản lý kho sửa kích thước bin / chiều cao lọt / quy cách thùng ([06](../06-warehouse-map-slotting/README.md), [01](../01-product-creation/README.md)) rồi ghi nhận lại (BR-10) |
 | Thùng đang giữ cho đơn | Bị từ chối; muốn dời thì nhả / phân bổ lại trước |
 | Vị trí đích thuộc kho khác | Bị từ chối (BR-01); không có chuyển kho. Dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md), ⚠️ giả định) |
 | Kho có chỗ trở lại sau khi đã cất thùng vào `OVERFLOW` | Quét thùng ở `OVERFLOW`, quét bin đích để dời lên bin; người di chuyển tự chọn bin phù hợp (⚠️ giả định §4.1) |
