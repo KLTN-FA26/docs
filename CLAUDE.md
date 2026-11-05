@@ -1,6 +1,6 @@
 # Hướng dẫn cho Claude khi làm việc với repo này
 
-Repo này chứa **tài liệu sản phẩm (Business Requirement Document) cho StockFlowCommerce** — một nền tảng hợp nhất WMS + Sàn TMĐT. Toàn bộ tài liệu nằm trong [`docs/`](docs/README.md). Không có mã nguồn ứng dụng.
+Repo này chứa **tài liệu sản phẩm (Business Requirement Document) cho StockFlowCommerce** — một nền tảng hợp nhất WMS kho thành phẩm + Sàn bán hàng sỉ (B2B). Toàn bộ tài liệu nằm trong [`docs/`](docs/README.md). Không có mã nguồn ứng dụng.
 
 **Nguyên tắc bao trùm:** đây là tài liệu nghiệp vụ mà nhiều người đọc và dựa vào. Mọi thay đổi nội dung nghiệp vụ đều phải **phân tích kỹ — tìm hết chỗ liên quan — hỏi người dùng — rồi mới sửa**. Không sửa mù, không tự quyết.
 
@@ -98,7 +98,7 @@ Sau khi sửa xong, Grep lại từ khóa vừa đổi trên toàn `docs/` để
 docs/
 ├── README.md                     Mục lục tổng
 ├── 00-system-overview/README.md
-├── warehouse/NN-<slug>/README.md   NN = 01..11, 19, 20 (19-production, 20-inventory-control bổ sung sau)
+├── warehouse/NN-<slug>/README.md   NN = 01, 03, 05..09, 11, 20 (02, 04, 19 xoá 2026-11-04; 10 xoá 2026-11-05; 20-inventory-control bổ sung sau)
 ├── ecommerce/NN-<slug>/README.md   NN = 12..18
 ├── diagrams/README.md
 ├── glossary/README.md
@@ -106,7 +106,7 @@ docs/
 ```
 
 - **Mỗi module = một thư mục** có prefix số thứ tự + `README.md` bên trong (để trình duyệt Git render khi mở thư mục).
-- Prefix số `01`..`18` chạy xuyên suốt theo **thứ tự luồng nghiệp vụ**; ngoại lệ `19-production` (về luồng nằm giữa 17 và 07/08) và `20-inventory-control` (chạy song song, kiểm soát tồn) được thêm sau — không đổi số/đổi thứ tự khi chưa hỏi.
+- Prefix số `01`..`18` chạy xuyên suốt theo **thứ tự luồng nghiệp vụ**; số `02`, `04`, `19` (xoá 2026-11-04) và `10` (xoá 2026-11-05) bỏ trống; ngoại lệ `20-inventory-control` (chạy song song, kiểm soát tồn) được thêm sau — không đổi số/đổi thứ tự khi chưa hỏi.
 - Không tạo file `.md` rời ngoài cấu trúc này khi chưa được duyệt. Ảnh/tài nguyên đi kèm module đặt trong chính thư mục module đó.
 - Link giữa các file dùng **đường dẫn tương đối** (ví dụ từ `warehouse/03-receipt/` tới payment là `../../ecommerce/15-payment/README.md`).
 
