@@ -158,7 +158,7 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 2. Phiếu nhập được xác nhận (→ `In Putaway`, [03](../03-receipt/README.md)) → `In Stock`. Hàng bên trong là tồn của thùng, ở vị trí của thùng.
 3. Thùng được cất ([05](../05-putaway/README.md)), di chuyển ([11](../11-intra-warehouse-transfer/README.md)), lấy về khu chờ xuất ([07](../07-picking/README.md)), cách ly (§4.8) và kiểm kê (§4.2) **nguyên thùng**; vẫn `In Stock`.
 4. Thùng **rời tồn** → `Consumed` khi:
-   - được lấy sang khu kiểm & dán nhãn (`PACKING`) cho đơn ([07](../07-picking/README.md)) — thùng đi tiếp làm **kiện giao** với chính mã LPN ([08](../08-packing/README.md), [09](../09-shipping/README.md));
+   - được lấy sang khu xuất hàng (`DISPATCH`) cho đơn ([07](../07-picking/README.md)) — thùng đi tiếp làm **kiện giao** với chính mã LPN ([08](../08-packing/README.md), [09](../09-shipping/README.md));
    - bị ghi giảm cả thùng bằng điều chỉnh đã duyệt (hỏng, mất…).
 
    Phân bổ cho đơn chọn **đủ N thùng** (N = số thùng của dòng đơn) theo FIFO, chỉ trong kho xuất; dòng lấy hàng chỉ xác nhận bằng quét LPN ([07](../07-picking/README.md) BR-03, BR-10).
@@ -197,11 +197,11 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 1. Lấy hàng với đích `STAGING` ([07](../07-picking/README.md)) chuyển nguyên thùng từ bin sang vị trí thuộc khu chờ xuất (dòng sổ `MOVE`). **Khoản phân bổ của đơn đi theo thùng** và vẫn `Held`; tồn chưa bị trừ.
 2. Tồn ở khu chờ xuất **đã gắn đơn**: không thuộc ATP, không phân bổ cho đơn khác, không di chuyển thủ công (BR-20).
 3. Thùng rời khu chờ xuất theo hai đường:
-   - **chuyển cả tác vụ sang khu kiểm & dán nhãn** ([08](../08-packing/README.md)) → tồn bị trừ (dòng sổ `PICK`), thùng `Consumed`, khoản phân bổ → `Consumed`;
+   - **chuyển cả tác vụ sang khu xuất hàng** ([08](../08-packing/README.md)) → tồn bị trừ (dòng sổ `PICK`), thùng `Consumed`, khoản phân bổ → `Consumed`;
    - **đơn bị huỷ** → khoản phân bổ `Released` (`ORDER_CANCELLED`); thùng vẫn ở khu chờ xuất, chưa vào ATP, tới khi được **cất lại** về bin (dòng sổ `MOVE`).
 4. Khu chờ xuất được kiểm kê như vị trí khác (§4.2); thùng không thấy là chênh lệch thiếu của phần đang giữ cho đơn, đơn phải xử lý như thiếu hàng ([07](../07-picking/README.md)).
 
-> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ⚠️ Giả định: tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Lấy về khu chờ xuất chưa trừ tồn (chỉ đổi vị trí), tồn bị trừ khi chuyển cả tác vụ sang khu kiểm & dán nhãn. Xem [open-questions](../../open-questions/README.md).
+> **Đã chốt 2026-11-05:** Quản lý kho quyết định có dùng khu chờ xuất cho đơn hay không. ⚠️ Giả định: tồn ở `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Lấy về khu chờ xuất chưa trừ tồn (chỉ đổi vị trí), tồn bị trừ khi chuyển cả tác vụ sang khu xuất hàng. Xem [open-questions](../../open-questions/README.md).
 
 ---
 
@@ -291,7 +291,7 @@ Mục này từng mô tả vòng đời cảnh báo hạn dùng. Module không c
 |------------|---------|----------------------|--------------|
 | `Receiving` | Đã dán nhãn trên phiếu nhận chưa xác nhận; chưa có tồn | → `In Stock`, → `Void` | NV kho ([03](../03-receipt/README.md)) |
 | `In Stock` | Đang chứa hàng, nằm ở một vị trí (kể cả khu chờ xuất, khu `QUARANTINE`); là trạng thái duy nhất có tồn | → `Consumed`, → `Lost` | Hệ thống; Quản lý kho |
-| `Consumed` | Thùng đã rời tồn nguyên thùng: lấy sang khu kiểm & dán nhãn (đi tiếp làm kiện giao), hoặc ghi giảm cả thùng; giữ lại để còn lịch sử | → `In Stock` (cất lại thùng của đơn bị huỷ; nhập lại hàng hoàn qua phiếu Hàng hoàn) | Hệ thống |
+| `Consumed` | Thùng đã rời tồn nguyên thùng: lấy sang khu xuất hàng (đi tiếp làm kiện giao), hoặc ghi giảm cả thùng; giữ lại để còn lịch sử | → `In Stock` (cất lại thùng của đơn bị huỷ; nhập lại hàng hoàn qua phiếu Hàng hoàn) | Hệ thống |
 | `Lost` | Kiểm kê không tìm thấy | → `In Stock` (tìm lại được) | Quản lý kho (qua điều chỉnh đã duyệt) |
 | `Void` | Phiếu nhập bị huỷ trước khi xác nhận | *(cuối)* | Hệ thống |
 
@@ -301,7 +301,7 @@ stateDiagram-v2
     [*] --> Receiving: Dán nhãn trên dòng nhận
     Receiving --> InStock: Phiếu nhập xác nhận
     Receiving --> Void: Huỷ phiếu nhận
-    InStock --> Consumed: Lấy sang khu kiểm và dán nhãn / ghi giảm cả thùng
+    InStock --> Consumed: Lấy sang khu xuất hàng / ghi giảm cả thùng
     Consumed --> InStock: Cất lại (đơn bị huỷ) / nhập lại hàng hoàn
     InStock --> Lost: Kiểm kê không thấy (điều chỉnh đã duyệt)
     Lost --> InStock: Tìm lại được
@@ -322,7 +322,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 |----------------------|---------|----------------------|--------------|
 | `Held` | Đang giữ (kể cả thùng đã lấy về khu chờ xuất); không có hạn | → `Allocated` (chỉ giữ theo SKU), → `Consumed` (chỉ phân bổ), → `Released` | Hệ thống |
 | `Allocated` | Giữ theo SKU đã được thay bằng các khoản phân bổ | *(cuối)* | Quản lý kho (release) |
-| `Consumed` | Thùng đã lấy sang khu kiểm & dán nhãn, tồn đã trừ | *(cuối)* | NV kho (xác nhận pick); Quản lý kho (chuyển cả tác vụ từ khu chờ xuất sang khu kiểm & dán nhãn) |
+| `Consumed` | Thùng đã lấy sang khu xuất hàng, tồn đã trừ | *(cuối)* | NV kho (xác nhận pick); Quản lý kho (chuyển cả tác vụ từ khu chờ xuất sang khu xuất hàng) |
 | `Released` | Nhả giữ, có lý do (bảng dưới) | *(cuối)* | Hệ thống / người có quyền |
 
 **Lý do nhả giữ:**
@@ -378,7 +378,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
   | `MOVE` | Di chuyển, cất hàng; lấy thùng về khu chờ xuất và cất lại từ khu chờ xuất |
   | `ADJUSTMENT` | Điều chỉnh |
   | `STATUS_CHANGE` | Đổi trạng thái: cách ly / gỡ cách ly |
-  | `PICK` | Lấy thùng sang khu kiểm & dán nhãn (trừ tồn) |
+  | `PICK` | Lấy thùng sang khu xuất hàng (trừ tồn) |
   | `PUT_BACK` | Cất lại thùng đã trừ tồn của đơn bị huỷ |
 
   Dòng sổ không sửa, không xoá.

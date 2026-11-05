@@ -40,7 +40,7 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 |------|-------------------|---------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm; **tạm ngưng / tiếp tục / ngừng kinh doanh sản phẩm** ([01](../warehouse/01-product-creation/README.md)) | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
 | **Nhân viên kho (Warehouse Staff)** | Nhập kho thành phẩm theo thùng, kiểm đếm, cất hàng (putaway), lấy hàng nguyên thùng (picking), đưa hàng về khu chờ xuất, kiểm thùng & dán nhãn giao hàng, bàn giao vận chuyển (shipping), nhập hàng hoàn, đếm kiểm kê | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
-| **Quản lý kho (Warehouse Manager)** | Quản lý **các kho được gán** (một hoặc nhiều kho). **Thiết lập:** kho, bản đồ, vị trí (thể tích m³, tải trọng), danh mục hãng vận chuyển & loại xe, quy cách thùng; theo dõi **bảng sức chứa kho** ([06](../warehouse/06-warehouse-map-slotting/README.md)). **Nhập kho:** xử lý nhận thiếu / thừa / thùng lệch số chuẩn; quyết định hàng hoàn trong khu cách ly ([03](../warehouse/03-receipt/README.md)). **Xuất kho:** release đơn, tạo task lấy hàng & giao người, khu chờ xuất, chuyển task sang khu kiểm & dán nhãn, huỷ chuyến bàn giao, ghi nhận kết quả giao ([07](../warehouse/07-picking/README.md), [09](../warehouse/09-shipping/README.md)). **Kiểm soát tồn:** lập kiểm kê, **duyệt điều chỉnh tồn**, cách ly / gỡ cách ly ([20](../warehouse/20-inventory-control/README.md)) | Duyệt / từ chối điều chỉnh tồn (người duyệt khác người gửi; kho chỉ có một quản lý thì System Admin duyệt); ghi đè gợi ý slotting; có đủ quyền thao tác như nhân viên kho — đó là quyền, không phải việc chính |
+| **Quản lý kho (Warehouse Manager)** | Quản lý **các kho được gán** (một hoặc nhiều kho). **Thiết lập:** kho, bản đồ, vị trí (thể tích m³, tải trọng), danh mục hãng vận chuyển & loại xe, quy cách thùng; theo dõi **bảng sức chứa kho** ([06](../warehouse/06-warehouse-map-slotting/README.md)). **Nhập kho:** xử lý nhận thiếu / thừa / thùng lệch số chuẩn; quyết định hàng hoàn trong khu cách ly ([03](../warehouse/03-receipt/README.md)). **Xuất kho:** release đơn, tạo task lấy hàng & giao người, khu chờ xuất, chuyển task sang khu xuất hàng, huỷ chuyến bàn giao, ghi nhận kết quả giao ([07](../warehouse/07-picking/README.md), [09](../warehouse/09-shipping/README.md)). **Kiểm soát tồn:** lập kiểm kê, **duyệt điều chỉnh tồn**, cách ly / gỡ cách ly ([20](../warehouse/20-inventory-control/README.md)) | Duyệt / từ chối điều chỉnh tồn (người duyệt khác người gửi; kho chỉ có một quản lý thì System Admin duyệt); ghi đè gợi ý slotting; có đủ quyền thao tác như nhân viên kho — đó là quyền, không phải việc chính |
 | **Kế toán (Accountant)** | **Ghi nhận & phân bổ tiền khách chuyển khoản** cho các **đợt thanh toán của hợp đồng**, **công nợ phải thu của khách sỉ**, hoàn tiền; **duyệt / từ chối đơn bị treo do công nợ** và **duyệt hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định của khách** ([15](../ecommerce/15-payment/README.md)) | Ghi nhận, phân bổ, đảo phân bổ tiền về; duyệt tín dụng & hạn mức; chạy đối soát; **xem chi tiết & lịch sử đơn, hợp đồng (chỉ đọc)** *(Quyết định 21/10/2026)* |
 
 #### Nhóm bán hàng sỉ (sales)
@@ -58,7 +58,7 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 |--------------|-----------|--------|
 | Receiver | Nhập kho thành phẩm theo Đơn sản xuất, nhập hàng hoàn vào khu cách ly, kiểm đếm số thùng | [03](../warehouse/03-receipt/README.md) |
 | Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
-| Picker | Lấy nguyên thùng theo task được giao (mỗi đơn một task), đưa về khu chờ xuất hoặc khu kiểm thùng, báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
+| Picker | Lấy nguyên thùng theo task được giao (mỗi đơn một task), đưa về khu chờ xuất hoặc khu xuất hàng, báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
 | Packer | Quét kiểm đủ thùng cho đơn, dán nhãn giao hàng, gom thùng thành shipment (không đóng lại hàng) | [08](../warehouse/08-packing/README.md) |
 | Dispatch Staff | Mở chuyến bàn giao, quét kiện, ký bàn giao; lập kế hoạch xếp hàng lên xe (Load Planning) khi giao nguyên chuyến, ghi nhận đặt xe, xếp kiện lên xe | [09](../warehouse/09-shipping/README.md) |
 
@@ -234,7 +234,7 @@ flowchart TB
 
     OM --> PICK
     INVENTORY --> PICK
-    PICK -- khu chờ xuất / khu kiểm thùng --> PACK
+    PICK -- khu chờ xuất / khu xuất hàng --> PACK
     PACK --> SHIP
     PAY -. chặn bàn giao nếu đợt trước giao chưa thu .-> SHIP
     SHIP --> OM
@@ -271,7 +271,7 @@ flowchart LR
     H1 --> F
     F -- Đủ --> K[Lấy nguyên thùng\nPicking]
     K --> K1[Khu chờ xuất\nnếu cần giữ hàng]
-    K1 --> L[Kiểm thùng & dán nhãn\ngiao hàng]
+    K1 --> L[Kiểm thùng & dán nhãn\ntại khu xuất hàng]
     K --> L
     L --> M[Bàn giao vận chuyển\nShipping]
     M --> N[Giao thành công\nDelivered]
@@ -306,7 +306,7 @@ flowchart LR
 ## 6. Nguyên tắc dữ liệu xuyên suốt (Cross-cutting Data Principles)
 
 1. **SKU là đơn vị định danh hàng hoá nhỏ nhất** để quản lý tồn (mỗi biến thể sản phẩm = 1 SKU). Mỗi SKU có **đúng một Inventory Item** (hồ sơ hàng vật lý, quan hệ 1:1) — đối tượng được theo dõi tồn; nội dung bán hàng thuộc Product/Variant, không thuộc Inventory Item. Xem [01 · Product Creation](../warehouse/01-product-creation/README.md) và [Glossary](../glossary/README.md).
-2. **Tồn kho luôn gắn với vị trí (location-based inventory)**: một số lượng SKU luôn thuộc về một vị trí cụ thể — **bin** trên tầng kệ, hoặc **khu vực chứa hàng (Area)** như khu nhận, cách ly, chờ xuất (Staging), đóng gói, chờ giao (xem [06](../warehouse/06-warehouse-map-slotting/README.md)). Tồn **theo kho** (Inventory Level) và tồn toàn hệ thống là số **tổng hợp** từ tồn theo vị trí, không phải nguồn dữ liệu riêng.
+2. **Tồn kho luôn gắn với vị trí (location-based inventory)**: một số lượng SKU luôn thuộc về một vị trí cụ thể — **bin** trên tầng kệ, hoặc **khu vực chứa hàng (Area)** thuộc một trong 5 loại: khu nhận (`RECEIVING`), khu cách ly (`QUARANTINE`), khu tạm (`OVERFLOW`), khu chờ xuất (`STAGING`), khu xuất hàng (`DISPATCH` — nơi kiểm thùng & dán nhãn giao hàng, gom shipment, chờ xe). Khu `NON_STORAGE` chỉ vẽ trên bản đồ, không chứa hàng. Xem [06](../warehouse/06-warehouse-map-slotting/README.md). Tồn **theo kho** (Inventory Level) và tồn toàn hệ thống là số **tổng hợp** từ tồn theo vị trí, không phải nguồn dữ liệu riêng.
 3. **Mọi thay đổi tồn kho phải có chứng từ nguồn (source document)**: phiếu nhập kho thành phẩm hoặc hàng hoàn (Receipt), Pick, Adjustment… Không có nghiệp vụ nào sửa tồn "trần" mà không để lại vết.
 4. **Trạng thái chứng từ chỉ tiến, không lùi tự do**: chuyển trạng thái theo sơ đồ vòng đời của từng module; huỷ/hoàn phải là hành động có kiểm soát và ghi log.
 5. **Hàng in theo mẫu của khách là SKU thành phẩm riêng**: khi khách xác nhận thiết kế, hệ thống sinh một SKU gắn với khách và bản thiết kế đã chốt (design snapshot, bất biến). Tồn, nhập, xuất đều theo SKU này; snapshot được đính kèm Đơn sản xuất gửi đơn vị sản xuất ([12](../ecommerce/12-product-design/README.md), [17](../ecommerce/17-order-management/README.md)).

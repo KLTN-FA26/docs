@@ -115,7 +115,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 
 ### 4.1. Gửi kiện qua hãng vận chuyển (Parcel)
 
-1. **Chờ xuất** — shipment `Ready to Dispatch` ở khu chờ giao (khu `DISPATCH`). Gán **hãng** cho shipment (chỉ hãng `Active`, chỉ khi shipment chưa nằm trên chuyến nào).
+1. **Chờ xuất** — shipment `Ready to Dispatch` ở khu xuất hàng (`DISPATCH`). Gán **hãng** cho shipment (chỉ hãng `Active`, chỉ khi shipment chưa nằm trên chuyến nào).
 2. **Mở chuyến bàn giao** — Dispatch Staff mở chuyến cho **một hãng** (biển số, tài xế có thể nhập sau) → chuyến `Loading`. Thêm các shipment cùng hãng, cùng kho vào chuyến.
 3. **Quét kiện lên xe** — quét mã LPN trên nhãn giao hàng của từng thùng. Hệ thống chặn kiện:
    - không thuộc shipment nào (chưa kiểm & dán nhãn ở [08](../08-packing/README.md)), hoặc shipment không còn `Ready to Dispatch`;
@@ -234,7 +234,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Ready to Dispatch` | Sinh khi hoàn tất kiểm thùng ([08](../08-packing/README.md)); ở khu chờ giao `DISPATCH` (có thể đã nằm trong kế hoạch chuyến xe) | → `Handed Over`, → `Cancelled` | Hệ thống / Dispatch Staff |
+| `Ready to Dispatch` | Sinh khi hoàn tất kiểm thùng ([08](../08-packing/README.md)); ở khu xuất hàng `DISPATCH` (có thể đã nằm trong kế hoạch chuyến xe) | → `Handed Over`, → `Cancelled` | Hệ thống / Dispatch Staff |
 | `Handed Over` | Đã quét lên xe & ký bàn giao | → `Delivered`, → `Delivery Failed` | Dispatch Staff |
 | `Delivered` | Hãng báo giao thành công | *(cuối)* | Quản lý kho |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do) | → `Delivered` (giao lại thành công), → `Returned` | Quản lý kho |
@@ -414,7 +414,7 @@ stateDiagram-v2
 | [08 · Kiểm thùng & Dán nhãn giao hàng](../08-packing/README.md) | Nhận shipment `Ready to Dispatch` (thùng LPN, kích thước, khối lượng, cờ xoay, nhãn giao); nhãn hỏng phải in lại; đơn đã có thùng dán nhãn không huỷ được |
 | [07 · Picking](../07-picking/README.md) | Các thùng đã phân bổ dùng cho ước tính tải; shipment huỷ → thùng cất lại |
 | [01 · Product Creation](../01-product-creation/README.md) | Quy cách thùng của SKU (số cái chuẩn / thùng, kích thước, khối lượng thùng đầy, cờ cho phép xoay) cho ước tính tải, Load Planning và nhãn |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu chờ giao (`DISPATCH`); địa chỉ kho in trên nhãn kiện và biên bản |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu xuất hàng (`DISPATCH`) — nơi kiểm thùng & dán nhãn, gom shipment, chờ xe; địa chỉ kho in trên nhãn kiện và biên bản |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Kho xuất và hình thức giao do Sale chọn ở đơn; giao một phần do Sale quyết; trạng thái `Shipped` / `Partially Fulfilled` / `Delivered` / `Delivery Failed` / `Returned`; đơn không huỷ được từ khi thùng đầu tiên dán nhãn |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` của hợp đồng chưa thu; ngày giao thành công là mốc đến hạn của đợt `AFTER_DELIVERY` |
 | [14 · Quote, Order & Contract](../../ecommerce/14-cart-and-order/README.md) | Hợp đồng mua bán của đơn: điều khoản giao hàng, lịch các đợt thanh toán |
