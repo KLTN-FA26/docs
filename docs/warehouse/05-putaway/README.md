@@ -28,7 +28,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho (Warehouse Staff)** | Xem nhiệm vụ cất của kho, xem bin gợi ý, quét thùng, quét bin đích, xác nhận cất |
-| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **lớp lưu trữ**, **kích thước bin** và **chiều cao lọt của tầng** (hệ thống tự tính thể tích m³), **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
+| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **kích thước bin** và **chiều cao lọt của tầng** (hệ thống tự tính thể tích m³), **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
 | **Quản trị hệ thống (System Admin)** | Như Quản lý kho về khai báo bản đồ kho ([06](../06-warehouse-map-slotting/README.md)) |
 | **Hệ thống** | Mở nhiệm vụ cất khi thùng sẵn sàng (phiếu nhập xác nhận, hoặc thùng hàng hoàn được gỡ cách ly); gợi ý tối đa 10 bin; chặn bin vi phạm ràng buộc cứng; ghi sổ biến động; đóng phiếu nhập khi cất xong |
 | **Quản lý kho — kiểm soát tồn** | Lập kiểm kê, duyệt điều chỉnh tồn khi có sai lệch phát hiện trong / sau putaway — xem [20 · Inventory Control](../20-inventory-control/README.md) |
@@ -74,8 +74,8 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 
 3. Khi mở một nhiệm vụ, hệ thống gợi ý **tối đa 10 bin**. Bin phải thoả **ràng buộc cứng**:
    - là **bin** (không phải khu vực) của **cùng kho**, cho phép cất (`is_putaway_target`);
-   - cùng **lớp lưu trữ** với SKU;
    - bin, kệ và kho đều đang **`Active`**;
+   - **thùng vừa bin theo từng chiều**: D × R × C của thùng (quy cách thùng — [01](../01-product-creation/README.md)) ≤ rộng × dài của bin × chiều cao lọt của tầng; thùng có cờ **cho phép xoay** được xoay ngang (đổi D và R), vừa theo một trong hai hướng là đạt ([06 §4.4](../06-warehouse-map-slotting/README.md));
    - **còn chỗ theo thể tích**: thể tích trống của bin (thể tích bin **tự tính** − tổng thể tích các thùng đang nằm trong bin) ≥ thể tích thùng. Bin chưa tính được thể tích (dữ liệu cũ: tầng thiếu chiều cao lọt) coi như không giới hạn (⚠️ [06 §4.6](../06-warehouse-map-slotting/README.md));
    - **không vượt tải trọng**: tổng khối lượng thùng đang có + khối lượng thùng mới ≤ tải trọng tối đa của bin. Bin không khai báo tải trọng thì không kiểm.
 
@@ -93,7 +93,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
    - không phải bin;
    - khác kho;
    - bin không dùng được hoặc không cho phép cất;
-   - sai lớp lưu trữ;
+   - thùng không vừa bin (kể cả khi xoay ngang được);
    - vượt thể tích hoặc tải trọng.
 
    Hai người không cùng lúc cất vào một bin: hệ thống xếp hàng các lần cất vào cùng bin.
@@ -106,7 +106,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 | Luồng | Khi dùng | Cách xử lý |
 |-------|----------|------------|
 | **Cất khác bin gợi ý** | Gợi ý không đúng thực tế | Quét bin khác; được nếu bin thoả ràng buộc cứng |
-| **Không có bin hợp lệ** | Kho đầy, sai cấu hình, thùng quá khổ | Danh sách gợi ý rỗng; Quản lý kho khai báo / mở bin cho phép cất. Kho đầy: NV kho quét vị trí thuộc khu tạm **`OVERFLOW`** để hoàn tất nhiệm vụ (BR-13); khi có chỗ, thùng được dời lên bin bằng [di chuyển nguyên thùng](../11-intra-warehouse-transfer/README.md) |
+| **Không có bin hợp lệ** | Kho đầy, sai cấu hình, thùng không vừa bin nào | Danh sách gợi ý rỗng; Quản lý kho khai báo / mở bin cho phép cất. Kho đầy hoặc thùng không vừa bin nào: NV kho quét vị trí thuộc khu tạm **`OVERFLOW`** để hoàn tất nhiệm vụ (BR-13); khi có chỗ, thùng được dời lên bin bằng [di chuyển nguyên thùng](../11-intra-warehouse-transfer/README.md) |
 
 ### 4.4. Cất hàng hoàn sau khi gỡ cách ly
 
@@ -162,7 +162,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 - **BR-01:** Chỉ hai nguồn có nhiệm vụ cất: thùng của **phiếu nhập theo Đơn sản xuất đã xác nhận** (tồn `Inbound` ở khu `RECEIVING`), và thùng hàng hoàn được **Quản lý kho gỡ cách ly** (khu `QUARANTINE` — §4.4). Hàng khác ở khu cách ly chưa có quyết định thì không cất.
 - **BR-02:** Tồn kho **luôn gắn với một vị trí** — một **bin** hoặc một **khu vực chứa hàng**. Không tồn tại tồn "không vị trí".
 - **BR-03:** Không đặt hàng vượt **thể tích** của bin (`capacity_volume_m3` — **hệ thống tự tính** = rộng × dài bin × chiều cao lọt của tầng, không nhập tay — [06](../06-warehouse-map-slotting/README.md) BR-19) — tính theo tổng thể tích thùng (D × R × C theo quy cách thùng); không vượt **tải trọng tối đa** (`max_weight`) — tính theo tổng khối lượng thùng đầy *(Đã chốt 2026-11-05)*. Tải trọng không khai báo thì không kiểm; bin chưa tính được thể tích (dữ liệu cũ thiếu chiều cao lọt) thì không kiểm thể tích (⚠️ [06 §4.6](../06-warehouse-map-slotting/README.md)).
-- **BR-04:** Chỉ cất vào **bin** cho phép cất (`is_putaway_target`) của cùng kho, có **lớp lưu trữ trùng lớp lưu trữ của SKU**, với bin, kệ và kho đều `Active` — ngoại lệ duy nhất là khu `OVERFLOW` khi kho đầy (BR-13). Một bin có thể chứa nhiều thùng, nhiều SKU / lô nếu còn thể tích và tải trọng.
+- **BR-04:** Chỉ cất vào **bin** cho phép cất (`is_putaway_target`) của cùng kho mà **thùng vừa bin theo từng chiều** — D × R × C của thùng ≤ rộng × dài của bin × chiều cao lọt của tầng, được xoay ngang (đổi D và R) nếu thùng có cờ cho phép xoay ([06](../06-warehouse-map-slotting/README.md) BR-01) — với bin, kệ và kho đều `Active` — ngoại lệ duy nhất là khu `OVERFLOW` khi kho đầy hoặc thùng không vừa bin nào (BR-13). Một bin có thể chứa nhiều thùng, nhiều SKU / lô nếu còn thể tích và tải trọng.
 - **BR-05:** Gợi ý ưu tiên **gom cùng lô, cùng SKU** trước khi trải sang bin trống (BR-SLT-004). FIFO (ngày nhập) được bảo đảm ở bước **phân bổ khi lấy hàng** ([20](../20-inventory-control/README.md), [07](../07-picking/README.md)), không ở bước gợi ý bin. Không có hạn dùng, không FEFO *(Đã chốt 2026-11-05)*.
 - **BR-06:** Nhiệm vụ `Done` không sửa; điều chỉnh vị trí sau đó dùng [Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) (di chuyển nguyên thùng).
 - **BR-07:** Cất vào bin khác gợi ý được phép khi bin thoả ràng buộc cứng; không bắt buộc mã lý do (⚠️ giả định — C18).
@@ -171,7 +171,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 - **BR-10:** Mỗi lần cất ghi **dòng sổ biến động** có chứng từ nguồn là nhiệm vụ cất.
 - **BR-11:** Nếu phát hiện một thùng lệch số cái chuẩn tại khu nhận hàng hoặc tại bin đích, không tự sửa nhiệm vụ đã chốt; thùng lệch không được phân bổ, xử lý bằng khu cách ly / kiểm kê / điều chỉnh tồn có phê duyệt (⚠️ giả định — [03](../03-receipt/README.md)) — xem [20 §4.2–4.3](../20-inventory-control/README.md).
 - **BR-12:** Available-to-promise chỉ tăng khi thùng đã cất (vào bin, hoặc vào khu `OVERFLOW` theo BR-13); hàng ở khu nhận hàng, khu cách ly không được bán.
-- **BR-13:** **Kho đầy → khu tạm `OVERFLOW`** *(Đã chốt 2026-11-05)*: khi không còn bin hợp lệ, nhiệm vụ cất được hoàn tất bằng cách quét một vị trí thuộc khu `OVERFLOW` của cùng kho (không kiểm lớp lưu trữ, thể tích của khu). Thùng ở `OVERFLOW` được dời lên bin bằng [11](../11-intra-warehouse-transfer/README.md) khi có chỗ. ⚠️ Giả định: chỉ cho cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available` ở một khu chứa hàng, coi như đã cất xong (thuộc ATP, **giữ cho đơn được ngay**), lấy hàng được nếu khu khai báo cho phép lấy hàng ([06](../06-warehouse-map-slotting/README.md)). Xem [open-questions](../../open-questions/README.md).
+- **BR-13:** **Kho đầy → khu tạm `OVERFLOW`** *(Đã chốt 2026-11-05)*: khi không còn bin hợp lệ — kho đầy, hoặc thùng không vừa bin nào theo kích thước (BR-04) — nhiệm vụ cất được hoàn tất bằng cách quét một vị trí thuộc khu `OVERFLOW` của cùng kho (không kiểm thể tích của khu). Thùng ở `OVERFLOW` được dời lên bin bằng [11](../11-intra-warehouse-transfer/README.md) khi có chỗ. ⚠️ Giả định: chỉ cho cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available` ở một khu chứa hàng, coi như đã cất xong (thuộc ATP, **giữ cho đơn được ngay**), lấy hàng được nếu khu khai báo cho phép lấy hàng ([06](../06-warehouse-map-slotting/README.md)). Xem [open-questions](../../open-questions/README.md).
 - **BR-14:** Thùng hàng hoàn chỉ được cất lại sau khi **Quản lý kho gỡ cách ly** ([03](../03-receipt/README.md) BR-14, [20](../20-inventory-control/README.md)); tồn `Quarantine` → `Available` khi cất xong (⚠️ giả định §4.4).
 
 ### Đối chiếu chuẩn tham chiếu
@@ -192,7 +192,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Bin gợi ý đã đầy (do lần cất khác) | Lúc xác nhận hệ thống kiểm lại và từ chối; xem lại gợi ý (tính lại theo tồn hiện tại) và chọn bin khác |
 | Không còn chỗ cho SKU (kho đầy) | Gợi ý rỗng; Quản lý kho mở thêm bin cho phép cất, hoặc NV kho cất vào khu `OVERFLOW` (BR-13), dời lên bin khi có chỗ ([11](../11-intra-warehouse-transfer/README.md)) |
 | Thùng không vừa thể tích trống của bin nào | Gợi ý rỗng; không chia thùng. Quản lý kho mở bin lớn hơn, dọn chỗ bằng [di chuyển nguyên thùng](../11-intra-warehouse-transfer/README.md), hoặc cất vào khu `OVERFLOW` (BR-13) |
-| Thùng cồng kềnh không vừa bin tiêu chuẩn | Cất vào bin có lớp lưu trữ phù hợp (ví dụ `OVERSIZE`); nếu không có, Quản lý kho khai báo thêm ([06](../06-warehouse-map-slotting/README.md)) |
+| Thùng cồng kềnh không vừa bin tiêu chuẩn | Cất vào bin vừa thùng nếu có (xoay ngang được nếu thùng có cờ cho phép xoay); không bin nào vừa → cất vào khu `OVERFLOW` (BR-13); Quản lý kho mở bin lớn hơn nếu cần ([06](../06-warehouse-map-slotting/README.md)) rồi dời thùng lên bằng [di chuyển nguyên thùng](../11-intra-warehouse-transfer/README.md) |
 | Quét sai thùng | Từ chối (thùng không khớp nhiệm vụ) |
 | Thùng đã được chuyển tay vào bin trước khi xác nhận | Xác nhận đúng bin đó: hệ thống cất tại chỗ, không tính trùng sức chứa |
 | Nhãn LPN bị rách / không quét được | In lại nhãn theo mã LPN ([03](../03-receipt/README.md)) rồi quét |
@@ -208,8 +208,8 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Module | Quan hệ |
 |--------|---------|
 | [03 · Receipt](../03-receipt/README.md) | Xác nhận phiếu nhập theo Đơn sản xuất mở nhiệm vụ cất (mỗi thùng một nhiệm vụ); cất xong mọi thùng → phiếu nhập `Closed`. Phiếu hàng hoàn đưa thùng vào khu `QUARANTINE`, cất lại sau khi gỡ cách ly |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, lớp lưu trữ (`NORMAL` / `FRAGILE` / `OVERSIZE`), thể tích (m³, tự tính), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
-| [01 · Product Creation](../01-product-creation/README.md) | Lớp lưu trữ và quy cách thùng của SKU (thể tích thùng, khối lượng thùng đầy) |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, kích thước bin và chiều cao lọt của tầng (kiểm thùng vừa bin), thể tích (m³, tự tính), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy hoặc thùng không vừa bin nào; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
+| [01 · Product Creation](../01-product-creation/README.md) | Quy cách thùng của SKU (kích thước D × R × C, thể tích thùng, khối lượng thùng đầy) và cờ cho phép xoay |
 | [07 · Picking](../07-picking/README.md) | Vị trí cất hợp lý và gom lô giúp lấy nguyên thùng nhanh; FIFO ở bước phân bổ |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển nguyên thùng bằng tay để sửa vị trí sau khi đã cất, hoặc dời thùng từ `OVERFLOW` lên bin |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) / [14 · Order](../../ecommerce/14-cart-and-order/README.md) | Cất xong làm tăng tồn khả dụng (ATP) |
