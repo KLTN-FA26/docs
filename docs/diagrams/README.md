@@ -630,7 +630,7 @@ stateDiagram-v2
 
 Chi tiết: [11 · Intra-warehouse Transfer](../warehouse/11-intra-warehouse-transfer/README.md). **Di chuyển nguyên thùng LPN bằng tay nằm trong phạm vi hiện tại** *(Đã chốt 2026-11-04)*: quét thùng, quét vị trí đích, ghi ngay; không mở thùng, không di chuyển một phần thùng. Dùng cả để **dời thùng từ khu tạm `OVERFLOW` lên bin** khi kho có chỗ trở lại ([05](../warehouse/05-putaway/README.md) BR-13). **Không có chuyển kho** *(Đã chốt 2026-11-05)*: vị trí đích khác kho bị từ chối; dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt ([20](../warehouse/20-inventory-control/README.md) §4.5 — ⚠️ giả định). Tự động đưa thùng ra vùng lấy hàng, re-slotting và nhiệm vụ di chuyển là phạm vi giai đoạn sau ([C2, C24](../open-questions/README.md)). Lấy hàng về khu chờ xuất và cất lại thùng của đơn huỷ thuộc [07](../warehouse/07-picking/README.md), cách ly sang khu `QUARANTINE` thuộc [20](../warehouse/20-inventory-control/README.md) — không đi luồng này.
 
-> ⚠️ Giả định: một lần xác nhận gồm **một hoặc nhiều thùng** tới **một vị trí đích**, mỗi thùng một dòng sổ `MOVE`; một thùng không hợp lệ thì cả lần không thực hiện. Thao tác không kiểm lớp lưu trữ, thể tích, tải trọng của vị trí đích. Xem [open-questions C24](../open-questions/README.md).
+> ⚠️ Giả định: một lần xác nhận gồm **một hoặc nhiều thùng** tới **một vị trí đích**, mỗi thùng một dòng sổ `MOVE`; một thùng không hợp lệ thì cả lần không thực hiện. Thao tác không kiểm thể tích, tải trọng của vị trí đích. Xem [open-questions C24](../open-questions/README.md).
 
 ```mermaid
 flowchart TD
