@@ -433,7 +433,7 @@ stateDiagram-v2
 
 ### 2.5. Vòng đời kế hoạch chuyến xe (Load Plan — giao nguyên chuyến)
 
-Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Chỉ dùng cho **đơn khách giao nguyên chuyến**: kế hoạch chứa nguyên shipment `Ready to Dispatch` đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn). **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao. Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp.
+Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Chỉ dùng cho **đơn khách giao nguyên chuyến**: kế hoạch chứa nguyên shipment `Ready to Dispatch` đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn). **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao. Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp. Đã có xe bắt đầu xếp thì chỉ **huỷ có kiểm soát** (cả kế hoạch hoặc một xe) hoặc **bỏ xe `Planned` khỏi kế hoạch** khi mọi xe khác đã rời kho ([09](../warehouse/09-shipping/README.md) BR-14) *(Quyết định 02/11/2026)*.
 
 ```mermaid
 stateDiagram-v2
@@ -443,10 +443,10 @@ stateDiagram-v2
     Planned --> Draft: Đổi kiện / loại xe / chế độ
     Planned --> Confirmed: Chốt kế hoạch
     Confirmed --> Planned: Mở lại (chưa xếp lên xe)
-    Confirmed --> Dispatched: Mọi xe bàn giao và rời kho
+    Confirmed --> Dispatched: Mọi xe bàn giao và rời kho / bỏ xe còn lại
     Draft --> Cancelled
     Planned --> Cancelled
-    Confirmed --> Cancelled
+    Confirmed --> Cancelled: Huỷ / huỷ có kiểm soát (đã có xe xếp, chưa xe nào rời kho)
     Dispatched --> [*]
     Cancelled --> [*]
 ```
