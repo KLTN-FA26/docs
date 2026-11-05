@@ -84,7 +84,8 @@ Mục tiêu: định vị nhanh, mã vị trí không trùng và không đổi, 
 | **Vị trí lấy hàng được** của một kho (cho phép lấy + dùng được) | Phân bổ khi lấy hàng ([07](../07-picking/README.md), [20](../20-inventory-control/README.md)) |
 | **Khu `STAGING` / `PACKING` / `DISPATCH` của kho** | [07](../07-picking/README.md), [08](../08-packing/README.md), [09](../09-shipping/README.md), [17](../../ecommerce/17-order-management/README.md) |
 | **Địa chỉ kho** in trên nhãn giao hàng / chứng từ | [08](../08-packing/README.md), [09](../09-shipping/README.md) |
-| **Bảng sức chứa kho** theo từng kho: Sức chứa, Đang chiếm, Sắp về, Còn trống dự kiến, Sắp xuất (tham khảo) — §4.6 | Sale khi lập Đơn sản xuất / chọn kho xuất ([17](../../ecommerce/17-order-management/README.md)); Quản lý kho |
+| **Bảng sức chứa kho** theo từng kho: Sức chứa, Đang chiếm, Sắp về, Còn trống dự kiến, **Chờ duyệt**, **Còn trống nếu duyệt hết**, Sắp xuất (tham khảo) — §4.6 | Sale khi lập Đơn sản xuất / chọn kho xuất, Sales Manager khi duyệt Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md)); Quản lý kho |
+| **Thông báo sức chứa** cho Quản lý kho của kho nhận: Đơn sản xuất được gửi về kho; còn trống dự kiến của kho chuyển sang âm — §4.6 | Quản lý kho ([00 §6](../../00-system-overview/README.md)) |
 | **Cảnh báo vượt chỗ trống dự kiến** (không chặn) | [17](../../ecommerce/17-order-management/README.md) |
 
 ---
@@ -155,7 +156,9 @@ Chi tiết vận hành ở [05 §4.2](../05-putaway/README.md); tóm tắt quy t
 
 ### 4.6. Bảng sức chứa kho (Warehouse Capacity Board)
 
-> **Đã chốt 2026-11-05:** yêu cầu mới. Heatmap độ lấp đầy, honeycombing vẫn là phạm vi sau.
+> **Đã chốt 2026-11-05:** yêu cầu mới. Heatmap độ lấp đầy, honeycombing và **dự báo chỗ trống theo ngày** vẫn là phạm vi sau.
+>
+> **Đã chốt 2026-11-05 (bổ sung):** thêm cột **Chờ duyệt** (Đơn sản xuất chưa gửi đi), **kiểm lại chỗ trống khi Sales Manager duyệt** và **thông báo cho Quản lý kho** của kho nhận.
 
 1. **Nguồn số liệu** — mỗi bin và khu chứa hàng khai báo **thể tích (m³)** và **tải trọng (kg)** (§4.1). Thể tích một thùng = D × R × C theo quy cách thùng của SKU ([01](../01-product-creation/README.md)).
 2. **Các cột của bảng**, cho từng kho, tính **khi đọc** (không lưu):
@@ -166,12 +169,18 @@ Chi tiết vận hành ở [05 §4.2](../05-putaway/README.md); tóm tắt quy t
    | **Đang chiếm** | Tổng thể tích các thùng đang nằm trong kho (thùng `In Stock` ở mọi vị trí của kho, mọi trạng thái tồn) |
    | **Sắp về** | Phần **chưa nhận** (số thùng còn mở × thể tích thùng) của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có **kho nhận** là kho này ([17](../../ecommerce/17-order-management/README.md)) |
    | **Còn trống dự kiến** | = Sức chứa − Đang chiếm − Sắp về (có thể âm) |
+   | **Chờ duyệt** | Thể tích các Đơn sản xuất **chưa gửi đi** (`Draft` / `Pending Approval`) có kho nhận là kho này — tách riêng, **không** trừ vào còn trống dự kiến vì đơn chưa chắc được gửi |
+   | **Còn trống nếu duyệt hết** | = Còn trống dự kiến − Chờ duyệt (có thể âm) |
    | **Sắp xuất** *(tham khảo)* | Tổng thể tích các thùng **đã giữ cho đơn chưa giao** của kho ([20](../20-inventory-control/README.md)); **không cộng** vào chỗ trống |
 
    Bảng hiện kèm tổng tải trọng tương ứng (kg) để tham khảo.
-3. **Dùng khi Sale lập Đơn sản xuất / chọn kho xuất** ([17](../../ecommerce/17-order-management/README.md)) — hệ thống hiện **còn trống dự kiến** của các kho. Thể tích cần chứa (số thùng × thể tích thùng) **lớn hơn** còn trống dự kiến của kho được chọn → **cảnh báo**, **không chặn**.
-4. **Hàng về khi kho đầy** — kho vẫn nhận ([03](../03-receipt/README.md)); thùng không còn bin hợp lệ được cất vào khu tạm **`OVERFLOW`** — là tồn `Available` ở khu chứa hàng, coi như đã cất xong, giữ cho đơn được ngay (⚠️ giả định — [05](../05-putaway/README.md) BR-13) — rồi Quản lý kho dời lên bin khi có chỗ ([05](../05-putaway/README.md) BR-13, [11](../11-intra-warehouse-transfer/README.md)).
-5. **Quản lý kho** theo dõi bảng để mở thêm bin, dọn chỗ hoặc báo Sale trước khi hàng về.
+3. **Dùng khi Sale lập Đơn sản xuất / chọn kho xuất** ([17](../../ecommerce/17-order-management/README.md)) — hệ thống hiện **còn trống dự kiến**, **chờ duyệt** và **còn trống nếu duyệt hết** của các kho. Thể tích cần chứa (số thùng × thể tích thùng) **lớn hơn** còn trống dự kiến của kho được chọn → **cảnh báo**; lớn hơn **còn trống nếu duyệt hết** (không tính chính đơn đang lập) → cảnh báo thêm rằng các Đơn sản xuất khác đang chờ duyệt về cùng kho. Cả hai đều **không chặn**.
+4. **Kiểm lại khi Sales Manager duyệt** Đơn sản xuất — hệ thống tính lại bảng **tại thời điểm duyệt** (chỗ trống có thể đã đổi từ lúc Sale lập) và hiện cho người duyệt cùng cảnh báo như bước 3; **không chặn**, người duyệt quyết duyệt, trả lại (ví dụ để Sale đổi kho xuất) hoặc duyệt kèm ghi chú.
+5. **Hàng về khi kho đầy** — kho vẫn nhận ([03](../03-receipt/README.md)); thùng không còn bin hợp lệ được cất vào khu tạm **`OVERFLOW`** — là tồn `Available` ở khu chứa hàng, coi như đã cất xong, giữ cho đơn được ngay (⚠️ giả định — [05](../05-putaway/README.md) BR-13) — rồi Quản lý kho dời lên bin khi có chỗ ([05](../05-putaway/README.md) BR-13, [11](../11-intra-warehouse-transfer/README.md)).
+6. **Thông báo cho Quản lý kho** của kho nhận (hộp thông báo — [00 §6](../../00-system-overview/README.md)):
+   - khi một Đơn sản xuất chuyển `Sent` về kho: `INFO` — mã Đơn sản xuất, số thùng, thể tích, ngày cần hàng;
+   - khi lần gửi đó làm **còn trống dự kiến** của kho **chuyển từ ≥ 0 sang âm**: `WARN` — số m³ thiếu (⚠️ giả định: chỉ báo ở lần chuyển sang âm, không báo lặp khi kho vẫn âm; xem [open-questions](../../open-questions/README.md)).
+7. **Quản lý kho** theo dõi bảng để mở thêm bin, dọn chỗ hoặc báo Sale trước khi hàng về.
 
 > ⚠️ Giả định: bin / khu **chưa khai báo thể tích** không được cộng vào Sức chứa (bảng hiện số vị trí chưa khai báo để Quản lý kho bổ sung); thùng nằm ở mọi vị trí của kho — kể cả `RECEIVING`, `QUARANTINE`, `STAGING`, `PACKING`, `DISPATCH`, `OVERFLOW` — đều tính vào Đang chiếm. Xem [open-questions](../../open-questions/README.md).
 
@@ -274,8 +283,8 @@ Trường có dấu `?` là tùy chọn; để trống thì hệ thống **khôn
 - **BR-17:** In nhãn tối đa 2.000 nhãn mỗi lần, theo thứ tự đi, bỏ qua vị trí `Inactive`.
 - **BR-18:** Tồn ở khu chờ xuất (`STAGING`) đã gắn **một đơn**; không được phân bổ cho đơn khác (⚠️ giả định §4.5). Hàng chỉ vào `STAGING` qua lấy hàng ([07](../07-picking/README.md)), không phải đích của di chuyển thủ công ([11](../11-intra-warehouse-transfer/README.md)).
 - **BR-19:** **Sức chứa đo bằng thể tích** *(Đã chốt 2026-11-05)*: bin và khu chứa hàng khai báo thể tích (m³) và tải trọng (kg); chỗ trống tính theo tổng thể tích thùng (D × R × C của quy cách thùng) và tổng khối lượng thùng đầy. Không còn sức chứa theo đơn vị.
-- **BR-20:** **Bảng sức chứa kho** *(Đã chốt 2026-11-05)*: Còn trống dự kiến = Sức chứa − Đang chiếm − Sắp về; Sắp về chỉ tính Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó; Sắp xuất chỉ để tham khảo, không cộng vào chỗ trống. Bảng tính khi đọc, không lưu.
-- **BR-21:** Thể tích cần chứa vượt còn trống dự kiến khi Sale lập Đơn sản xuất / chọn kho xuất → **chỉ cảnh báo, không chặn**. Hàng về khi kho đầy vẫn được nhận, cất vào khu `OVERFLOW` ([05](../05-putaway/README.md) BR-13).
+- **BR-20:** **Bảng sức chứa kho** *(Đã chốt 2026-11-05)*: Còn trống dự kiến = Sức chứa − Đang chiếm − Sắp về; Sắp về chỉ tính Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó; **Chờ duyệt** tính Đơn sản xuất `Draft` / `Pending Approval`, hiện riêng và chỉ trừ ở cột **Còn trống nếu duyệt hết**; Sắp xuất chỉ để tham khảo, không cộng vào chỗ trống. Bảng tính khi đọc, không lưu.
+- **BR-21:** Thể tích cần chứa vượt còn trống dự kiến (hoặc còn trống nếu duyệt hết) khi Sale lập Đơn sản xuất / chọn kho xuất **và khi Sales Manager duyệt** (tính lại tại thời điểm duyệt) → **chỉ cảnh báo, không chặn**. Đơn sản xuất được gửi về kho thì báo Quản lý kho kho nhận; làm còn trống dự kiến chuyển sang âm thì báo `WARN`. Hàng về khi kho đầy vẫn được nhận, cất vào khu `OVERFLOW` ([05](../05-putaway/README.md) BR-13).
 
 ### Edge case
 
@@ -296,6 +305,8 @@ Trường có dấu `?` là tùy chọn; để trống thì hệ thống **khôn
 | Mã quét không tồn tại | Báo không tìm thấy vị trí |
 | Bản đồ lệch thực địa | Kiểm kê theo vị trí ([20 §4.2](../20-inventory-control/README.md)); ưu tiên số liệu kiểm kê |
 | Sale lập Đơn sản xuất có thể tích vượt còn trống dự kiến của kho nhận | Cảnh báo, không chặn (BR-21); Sale cân nhắc chọn kho xuất khác (khi còn đổi được — [17](../../ecommerce/17-order-management/README.md)) hoặc báo Quản lý kho dọn chỗ |
+| Hai Sale cùng lập Đơn sản xuất về một kho, mỗi đơn vừa chỗ nhưng cộng lại thì không | Đơn lập sau thấy đơn trước ở cột **Chờ duyệt** và nhận cảnh báo theo **còn trống nếu duyệt hết**; Sales Manager thấy lại khi duyệt (BR-21) |
+| Chỗ trống đổi giữa lúc Sale lập và lúc Sales Manager duyệt | Bảng được tính lại khi duyệt; người duyệt thấy số mới nhất và cảnh báo nếu vượt (BR-21) |
 | Còn trống dự kiến âm | Hiện số âm; kho dự kiến thiếu chỗ — Quản lý kho mở thêm bin / khu, hàng về dư dùng khu `OVERFLOW` |
 | Bin chưa khai báo thể tích | Không giới hạn khi gợi ý cất; không cộng vào Sức chứa của bảng (⚠️ §4.6); Quản lý kho bổ sung thể tích |
 | Đơn sản xuất bị huỷ / đóng thiếu | Phần chưa nhận rời khỏi Sắp về ngay (bảng tính khi đọc) |

@@ -35,13 +35,14 @@ Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/READ
 ```mermaid
 flowchart TD
     START_ORDER(["Đơn Confirmed, Sale đã chọn kho xuất<br/>kiểm tồn SKU riêng tại kho xuất: còn thiếu thùng"]) --> PO_DRAFT["Sale lập Đơn sản xuất cho phần thiếu — Draft<br/>đơn vị sản xuất chọn từ danh mục, kho nhận = kho xuất của đơn<br/>dòng: SKU riêng, số thùng thiếu, số cái / thùng, bộ file thiết kế đã chốt<br/>cờ cần duyệt mẫu in: mặc định bật khi SKU sản xuất lần đầu"]
-    PO_DRAFT --> CAP{"Thể tích Đơn sản xuất lớn hơn<br/>còn trống dự kiến của kho nhận?"}
+    PO_DRAFT --> CAP{"Thể tích Đơn sản xuất lớn hơn còn trống dự kiến<br/>hoặc còn trống nếu duyệt hết của kho nhận?"}
     CAP -->|"Có — cảnh báo Sale, không chặn"| PO_SUBMIT
     CAP -->|Không| PO_SUBMIT["Sale gửi duyệt<br/>Đơn sản xuất: Pending Approval"]
-    PO_SUBMIT --> PO_APPROVE{"Sales Manager duyệt<br/>người duyệt khác người lập"}
+    PO_SUBMIT --> PO_APPROVE{"Sales Manager duyệt — người duyệt khác người lập<br/>bảng sức chứa tính lại lúc duyệt, vượt thì cảnh báo, không chặn"}
     PO_APPROVE -->|"Trả lại, có lý do"| PO_DRAFT
     PO_APPROVE -->|Duyệt| PO_SENT["Hệ thống xuất phiếu PDF kèm bộ file<br/>gửi qua kênh kết nối của đơn vị sản xuất<br/>Đơn sản xuất: Sent — đơn bán: Awaiting Stock"]
     PO_SENT --> EXT[["Đơn vị sản xuất — ngoài hệ thống<br/>xưởng của công ty hoặc đối tác ngoài"]]
+    PO_SENT -.->|"thông báo INFO; WARN nếu còn trống dự kiến chuyển sang âm"| WHM_NOTE["Quản lý kho của kho nhận<br/>biết hàng sắp về, chuẩn bị chỗ"]
     EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Sale ghi nhận tay<br/>Đơn sản xuất: Accepted"]
     PO_ACC --> FLAG{"Cờ cần duyệt mẫu in?"}
     FLAG -->|Có| SAMPLE["Đơn vị sản xuất in mẫu thử theo bộ file đã chốt<br/>Sale tải ảnh / video của vòng mẫu, ghi ngày gửi mẫu vật nếu có<br/>Đơn sản xuất: Sample Pending"]
@@ -88,7 +89,7 @@ flowchart TD
 
 > **Duyệt mẫu in** *(Đã chốt 2026-11-05)*: cờ do Sale bật / tắt theo từng Đơn sản xuất, mặc định bật khi SKU sản xuất lần đầu, tắt khi mặc định bật thì bắt buộc lý do. Mỗi vòng mẫu ghi số vòng, ảnh / video, ngày gửi mẫu vật, kết quả, lý do in lại. Vòng in lại `PRINT_DEFECT` (lỗi in của đơn vị sản xuất) không tính vào **số lần in mẫu miễn phí** của hợp đồng ([14](../ecommerce/14-cart-and-order/README.md) BR-18); vượt số lần miễn phí chỉ cảnh báo, phí phát sinh xử lý bằng phụ lục ngoài hệ thống (phạm vi sau). ⚠️ Giả định: số lần in mẫu tính trên từng Đơn sản xuất, gồm cả vòng đầu; Sale phân loại lý do in lại. Xem [open-questions](../open-questions/README.md).
 
-> **Sức chứa** *(Đã chốt 2026-11-05)*: cảnh báo dựa trên **còn trống dự kiến** = Sức chứa − Đang chiếm − Sắp về; Sắp về là phần chưa nhận của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-20, BR-21). Kho đầy không chặn nhận. ⚠️ Giả định: chỉ cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available`, giữ cho đơn được ngay ([05](../warehouse/05-putaway/README.md) BR-13). Xem [open-questions](../open-questions/README.md).
+> **Sức chứa** *(Đã chốt 2026-11-05)*: cảnh báo dựa trên **còn trống dự kiến** = Sức chứa − Đang chiếm − Sắp về; Sắp về là phần chưa nhận của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-20, BR-21). Kho đầy không chặn nhận. ⚠️ Giả định: chỉ cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available`, giữ cho đơn được ngay ([05](../warehouse/05-putaway/README.md) BR-13). Xem [open-questions](../open-questions/README.md). **Chờ duyệt** (Đơn sản xuất `Draft` / `Pending Approval`) hiện riêng và chỉ trừ ở **còn trống nếu duyệt hết**; Sales Manager xem lại khi duyệt; Đơn sản xuất được gửi thì báo Quản lý kho kho nhận ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6).
 
 > **Đã chốt 2026-11-05:** đơn vị sản xuất đóng **mọi thùng đúng số cái chuẩn / thùng** của SKU; kho đếm **số thùng**, thùng lệch số chuẩn không nhận và phần đó vẫn mở trên Đơn sản xuất ([03](../warehouse/03-receipt/README.md) BR-13, [open-questions B24](../open-questions/README.md)). ⚠️ Giả định: thùng phát hiện lệch số chuẩn **sau khi xác nhận nhập** không được phân bổ, chuyển sang khu `QUARANTINE` rồi ghi giảm cả thùng bằng điều chỉnh có duyệt — xem [open-questions C34](../open-questions/README.md).
 
@@ -104,6 +105,7 @@ sequenceDiagram
     participant PRODEXT as Đơn vị sản xuất (ngoài hệ thống)
     actor CUST as Khách hàng sỉ
     actor WH as NV kho
+    actor WHM as Quản lý kho kho nhận
     participant RC as Phiếu nhập (03)
     participant SLOT as Gợi ý bin (05)
     participant INVSYS as Tồn kho (20)
@@ -117,9 +119,12 @@ sequenceDiagram
         SM->>PO: Trả lại kèm lý do → Draft
         SALE->>PO: Sửa và gửi duyệt lại → Pending Approval
     end
+    SM->>CAPB: Xem lại bảng sức chứa tính tại thời điểm duyệt
+    CAPB-->>SM: Cảnh báo nếu vượt còn trống (không chặn)
     SM->>PO: Duyệt (người duyệt khác người lập) → Sent
     PO->>PRODEXT: Gửi phiếu PDF kèm bộ file thiết kế qua kênh kết nối
     PO->>OM: Đơn bán → Awaiting Stock
+    PO-->>WHM: Thông báo hàng sắp về (WARN nếu còn trống dự kiến chuyển sang âm)
     PRODEXT-->>SALE: Xác nhận nhận đơn, ngày hoàn thành dự kiến
     SALE->>PO: Ghi nhận tay → Accepted
     alt Cần duyệt mẫu in

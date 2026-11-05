@@ -326,6 +326,8 @@ flowchart LR
 | Sự việc | Mức độ | Người nhận | Kèm email |
 |---------|--------|------------|-----------|
 | Khách **chấp nhận / yêu cầu sửa** báo giá ([14](../ecommerce/14-cart-and-order/README.md)) | `INFO` | Sale phụ trách báo giá; tài khoản đó ngừng hoạt động thì mọi Sale (đánh dấu bàn giao) | Có |
+| **Đơn sản xuất được gửi** về kho (số thùng, thể tích, ngày cần hàng) ([17](../ecommerce/17-order-management/README.md) §4.3) *(Đã chốt 2026-11-05)* | `INFO` | Quản lý kho của kho nhận | Không |
+| **Còn trống dự kiến** của kho chuyển sang **âm** do một Đơn sản xuất được gửi ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6) *(Đã chốt 2026-11-05)* | `WARN` | Quản lý kho của kho nhận | Không |
 
 Email ngoài hộp thông báo: **email mời** người liên hệ của khách (§2.5.2).
 
