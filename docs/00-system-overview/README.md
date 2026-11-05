@@ -73,6 +73,7 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 | Quyết định giao một phần | Bật / tắt cờ cho phép giao một phần của đơn ([17](../ecommerce/17-order-management/README.md) §4.2) *(Quyết định 21/10/2026)* | Sales Staff, System Admin |
 | Duyệt kỹ thuật thiết kế | Duyệt Đạt / Không đạt bộ file thiết kế trước khi gửi khách; người duyệt khác người thiết kế ([12](../ecommerce/12-product-design/README.md)) *(Đã chốt 2026-11-04)* | Quản lý kinh doanh |
 | Duyệt Đơn sản xuất | Duyệt / trả lại Đơn sản xuất trước khi gửi đơn vị sản xuất; người duyệt khác người lập ([17](../ecommerce/17-order-management/README.md)) *(Đã chốt 2026-11-05)* | Quản lý kinh doanh |
+| Huỷ có kiểm soát kế hoạch xe | Huỷ có kiểm soát cả kế hoạch chuyến xe hoặc một xe đã bắt đầu xếp; bỏ xe `Planned` khỏi kế hoạch khi mọi xe khác đã rời kho; bắt buộc mã lý do + ghi chú ([09](../warehouse/09-shipping/README.md) BR-14) *(Quyết định 02/11/2026)* | Quản lý kho, System Admin |
 | Duyệt điều chỉnh tồn | Duyệt / từ chối điều chỉnh tồn; người duyệt khác người gửi ([20](../warehouse/20-inventory-control/README.md)) | Quản lý kho (System Admin khi kho chỉ có một quản lý) |
 | Duyệt tín dụng & lịch thanh toán | Duyệt / từ chối đơn bị treo do công nợ (vượt hạn mức, khách quá hạn); duyệt hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định của khách | Kế toán |
 | Hoàn tiền | Tạo lệnh hoàn tiền dư cho khách; xử lý lệnh hoàn khi huỷ / đóng phần còn lại | Kế toán (System Admin có toàn quyền) |
