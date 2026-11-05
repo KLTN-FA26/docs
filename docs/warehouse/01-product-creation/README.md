@@ -68,7 +68,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 | **Quy cách thùng (carton spec)** | Inventory Item | **Đơn vị thùng** (một đơn vị quy đổi; hệ số = **số cái chuẩn / thùng**, cố định cho SKU), **kích thước thùng** (D×R×C — hệ thống tính **thể tích thùng** m³), **khối lượng thùng đầy** | **Có** với SKU riêng (kế thừa từ quy cách — §4.8, BR-03) |
 | **Đơn vị bán (sales unit)** | Variant | Với SKU riêng, đơn vị bán **luôn là đơn vị thùng** của quy cách thùng: khách đặt theo **số thùng**, giá ghi **theo cái** (BR-11) | Có với SKU riêng (hệ thống gán theo quy cách thùng) |
 | **Thông số logistics khác** | Inventory Item | **Mã vạch** (≤ 64, duy nhất), khối lượng và kích thước một đơn vị cơ sở | Không (nếu nhập: số dương) |
-| **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` / `COLD` / `HAZMAT` / `FRAGILE` / `OVERSIZE` — quyết định loại bin được phép cất ([06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |
+| **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` (thường) / `FRAGILE` (dễ vỡ) / `OVERSIZE` (quá khổ) *(Đã chốt 2026-11-05: bỏ lớp hàng lạnh, hàng nguy hiểm)* — quyết định loại bin được phép cất ([06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |
 | **Cho phép xoay (rotatable)** | Inventory Item | Thùng được xoay khi xếp xe hay không; dùng khi lập kế hoạch xếp xe ([09](../09-shipping/README.md)) | Không (mặc định cho phép) |
 | **Chính sách tồn (inventory policy)** | Inventory Item | **Kiểu theo dõi** `NONE` / `LOT` / `SERIAL` / `LOT_SERIAL`. **Lô** là **lô sản xuất** (gắn Đơn sản xuất) để truy vết. Không theo dõi hạn dùng; cách xuất **cố định FIFO** theo ngày nhập, không cấu hình (BR-17) | Không (mặc định: không lô, không serial) |
 

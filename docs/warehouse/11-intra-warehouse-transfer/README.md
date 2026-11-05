@@ -98,7 +98,7 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 - **BR-06:** Không di chuyển ra / vào một vị trí đang bị **phiếu kiểm kê** giữ cho SKU / lô của thùng — kiểm kê đếm trên sổ sách lúc đếm, di chuyển giữa chừng sẽ làm sai chênh lệch.
 - **BR-07:** Mọi di chuyển để lại dòng sổ `MOVE` cho từng thùng (LPN, nguồn, đích, SKU, lô, số lượng, người, thời điểm). Gửi lại cùng mã yêu cầu không di chuyển lần hai. Một lần xác nhận thành công hoặc thất bại **trọn vẹn** cho mọi thùng.
 - **BR-08:** Người thao tác chỉ di chuyển trong kho mình được gán (với role theo kho).
-- **BR-09:** Không di chuyển thủ công **vào khu chờ xuất** (`STAGING`). Tồn ở khu này luôn gắn với một đơn ([20](../20-inventory-control/README.md) BR-20); thùng vào bằng lấy hàng và ra bằng chuyển sang khu kiểm thùng & dán nhãn hoặc cất lại ([07](../07-picking/README.md)).
+- **BR-09:** Không di chuyển thủ công **vào khu chờ xuất** (`STAGING`). Tồn ở khu này luôn gắn với một đơn ([20](../20-inventory-control/README.md) BR-20); thùng vào bằng lấy hàng và ra bằng chuyển sang khu xuất hàng (`DISPATCH`) hoặc cất lại ([07](../07-picking/README.md)).
 
 ### Edge case
 

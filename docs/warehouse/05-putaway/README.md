@@ -19,7 +19,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 >
 > Hiện mọi nhân viên kho của kho đó đều thấy và cất được mọi nhiệm vụ.
 
-> **Đã chốt 2026-11-05:** chỗ trống của bin đo bằng **thể tích (m³)** và **tải trọng (kg)** ([06](../06-warehouse-map-slotting/README.md)), thay cho sức chứa theo đơn vị. Thể tích một thùng = D × R × C theo quy cách thùng ([01](../01-product-creation/README.md)); khối lượng một thùng = khối lượng thùng đầy.
+> **Đã chốt 2026-11-05:** chỗ trống của bin đo bằng **thể tích (m³)** và **tải trọng (kg)** ([06](../06-warehouse-map-slotting/README.md)), thay cho sức chứa theo đơn vị. **Thể tích bin do hệ thống tự tính** = rộng × dài của bin × chiều cao lọt của tầng kệ (bắt buộc), không nhập tay ([06](../06-warehouse-map-slotting/README.md) BR-19). Thể tích một thùng = D × R × C theo quy cách thùng ([01](../01-product-creation/README.md)); khối lượng một thùng = khối lượng thùng đầy.
 
 ---
 
@@ -28,7 +28,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho (Warehouse Staff)** | Xem nhiệm vụ cất của kho, xem bin gợi ý, quét thùng, quét bin đích, xác nhận cất |
-| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **lớp lưu trữ**, **thể tích (m³)**, **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
+| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **lớp lưu trữ**, **kích thước bin** và **chiều cao lọt của tầng** (hệ thống tự tính thể tích m³), **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
 | **Quản trị hệ thống (System Admin)** | Như Quản lý kho về khai báo bản đồ kho ([06](../06-warehouse-map-slotting/README.md)) |
 | **Hệ thống** | Mở nhiệm vụ cất khi thùng sẵn sàng (phiếu nhập xác nhận, hoặc thùng hàng hoàn được gỡ cách ly); gợi ý tối đa 10 bin; chặn bin vi phạm ràng buộc cứng; ghi sổ biến động; đóng phiếu nhập khi cất xong |
 | **Quản lý kho — kiểm soát tồn** | Lập kiểm kê, duyệt điều chỉnh tồn khi có sai lệch phát hiện trong / sau putaway — xem [20 · Inventory Control](../20-inventory-control/README.md) |
@@ -76,7 +76,7 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
    - là **bin** (không phải khu vực) của **cùng kho**, cho phép cất (`is_putaway_target`);
    - cùng **lớp lưu trữ** với SKU;
    - bin, kệ và kho đều đang **`Active`**;
-   - **còn chỗ theo thể tích**: thể tích trống của bin (thể tích bin − tổng thể tích các thùng đang nằm trong bin) ≥ thể tích thùng. Bin không khai báo thể tích coi như không giới hạn;
+   - **còn chỗ theo thể tích**: thể tích trống của bin (thể tích bin **tự tính** − tổng thể tích các thùng đang nằm trong bin) ≥ thể tích thùng. Bin chưa tính được thể tích (dữ liệu cũ: tầng thiếu chiều cao lọt) coi như không giới hạn (⚠️ [06 §4.6](../06-warehouse-map-slotting/README.md));
    - **không vượt tải trọng**: tổng khối lượng thùng đang có + khối lượng thùng mới ≤ tải trọng tối đa của bin. Bin không khai báo tải trọng thì không kiểm.
 
    Độ lấp đầy tính trên **mọi SKU, mọi trạng thái** đang nằm trong bin.
@@ -161,7 +161,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 
 - **BR-01:** Chỉ hai nguồn có nhiệm vụ cất: thùng của **phiếu nhập theo Đơn sản xuất đã xác nhận** (tồn `Inbound` ở khu `RECEIVING`), và thùng hàng hoàn được **Quản lý kho gỡ cách ly** (khu `QUARANTINE` — §4.4). Hàng khác ở khu cách ly chưa có quyết định thì không cất.
 - **BR-02:** Tồn kho **luôn gắn với một vị trí** — một **bin** hoặc một **khu vực chứa hàng**. Không tồn tại tồn "không vị trí".
-- **BR-03:** Không đặt hàng vượt **thể tích** khai báo của bin (`capacity_volume_m3`) — tính theo tổng thể tích thùng (D × R × C theo quy cách thùng); không vượt **tải trọng tối đa** (`max_weight`) — tính theo tổng khối lượng thùng đầy *(Đã chốt 2026-11-05)*. Trường nào không khai báo thì không kiểm tra.
+- **BR-03:** Không đặt hàng vượt **thể tích** của bin (`capacity_volume_m3` — **hệ thống tự tính** = rộng × dài bin × chiều cao lọt của tầng, không nhập tay — [06](../06-warehouse-map-slotting/README.md) BR-19) — tính theo tổng thể tích thùng (D × R × C theo quy cách thùng); không vượt **tải trọng tối đa** (`max_weight`) — tính theo tổng khối lượng thùng đầy *(Đã chốt 2026-11-05)*. Tải trọng không khai báo thì không kiểm; bin chưa tính được thể tích (dữ liệu cũ thiếu chiều cao lọt) thì không kiểm thể tích (⚠️ [06 §4.6](../06-warehouse-map-slotting/README.md)).
 - **BR-04:** Chỉ cất vào **bin** cho phép cất (`is_putaway_target`) của cùng kho, có **lớp lưu trữ trùng lớp lưu trữ của SKU**, với bin, kệ và kho đều `Active` — ngoại lệ duy nhất là khu `OVERFLOW` khi kho đầy (BR-13). Một bin có thể chứa nhiều thùng, nhiều SKU / lô nếu còn thể tích và tải trọng.
 - **BR-05:** Gợi ý ưu tiên **gom cùng lô, cùng SKU** trước khi trải sang bin trống (BR-SLT-004). FIFO (ngày nhập) được bảo đảm ở bước **phân bổ khi lấy hàng** ([20](../20-inventory-control/README.md), [07](../07-picking/README.md)), không ở bước gợi ý bin. Không có hạn dùng, không FEFO *(Đã chốt 2026-11-05)*.
 - **BR-06:** Nhiệm vụ `Done` không sửa; điều chỉnh vị trí sau đó dùng [Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) (di chuyển nguyên thùng).
@@ -180,7 +180,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 |--------|------------------------------|---------------------------|
 | Nhập kho nhiều bước | 2 bước: khu nhận hàng → bin; không có chặng kiểm tra chất lượng tại kho | Khớp mô hình nhận hàng 2 bước (Input → Stock) của Odoo; MISA cũng hỗ trợ quy trình nhập/xuất nhiều bước |
 | Gợi ý vị trí | Lọc ràng buộc cứng, rồi xếp hạng: cùng lô → cùng SKU → bin trống → còn chỗ; nhiều chỗ trống trước | Tương tự tinh thần Odoo Putaway Rules/Storage Categories; thứ tự xếp hạng là thiết kế riêng |
-| Capacity | Thể tích (m³) và tải trọng tối đa (kg) của bin, so với tổng thể tích / khối lượng thùng | Odoo có storage category/capacity |
+| Capacity | Thể tích (m³, tự tính từ kích thước bin × chiều cao lọt của tầng) và tải trọng tối đa (kg) của bin, so với tổng thể tích / khối lượng thùng | Odoo có storage category/capacity |
 | Cất khác gợi ý | Cho phép nếu không vi phạm ràng buộc cứng | Phù hợp thực tế vận hành barcode/WMS: người làm kho xác nhận theo thực địa |
 | Theo thùng | Mỗi thùng LPN là một nhiệm vụ, cất nguyên thùng; không có hàng ngoài thùng | Tương tự package / LPN putaway của các WMS phổ biến |
 | FIFO | Bảo đảm ở bước phân bổ khi lấy hàng (không có hạn dùng nên không dùng FEFO) | Khớp chiến lược xuất kho phổ biến trong Odoo/MISA |
@@ -208,7 +208,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Module | Quan hệ |
 |--------|---------|
 | [03 · Receipt](../03-receipt/README.md) | Xác nhận phiếu nhập theo Đơn sản xuất mở nhiệm vụ cất (mỗi thùng một nhiệm vụ); cất xong mọi thùng → phiếu nhập `Closed`. Phiếu hàng hoàn đưa thùng vào khu `QUARANTINE`, cất lại sau khi gỡ cách ly |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, lớp lưu trữ, thể tích (m³), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, lớp lưu trữ (`NORMAL` / `FRAGILE` / `OVERSIZE`), thể tích (m³, tự tính), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
 | [01 · Product Creation](../01-product-creation/README.md) | Lớp lưu trữ và quy cách thùng của SKU (thể tích thùng, khối lượng thùng đầy) |
 | [07 · Picking](../07-picking/README.md) | Vị trí cất hợp lý và gom lô giúp lấy nguyên thùng nhanh; FIFO ở bước phân bổ |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển nguyên thùng bằng tay để sửa vị trí sau khi đã cất, hoặc dời thùng từ `OVERFLOW` lên bin |

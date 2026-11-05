@@ -49,7 +49,7 @@ docs/
 │   ├── 03-receipt/                        Nhập kho thành phẩm (theo Đơn sản xuất)
 │   ├── 05-putaway/                        Chuyển hàng vào kho
 │   ├── 06-warehouse-map-slotting/         Kho Map 2D/3D & Gợi ý vị trí
-│   ├── 07-picking/                        Lấy hàng nguyên thùng (về khu chờ xuất / khu kiểm thùng)
+│   ├── 07-picking/                        Lấy hàng nguyên thùng (về khu chờ xuất / khu xuất hàng)
 │   ├── 08-packing/                        Kiểm thùng & Dán nhãn giao hàng
 │   ├── 09-shipping/                       Giao hàng (bàn giao đơn vị vận chuyển)
 │   ├── 11-intra-warehouse-transfer/       Chuyển hàng trong nội bộ một kho
