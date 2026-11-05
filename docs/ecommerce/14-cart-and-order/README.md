@@ -40,6 +40,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 | Dòng báo giá | **SKU thành phẩm riêng** đang bán được, thuộc chính khách này ([12](../12-product-design/README.md)) — không chọn quy cách `CUSTOMIZABLE` (chỉ là khuôn, không có tồn / giá); **số cái / thùng** của SKU (quy cách thùng — [01](../../warehouse/01-product-creation/README.md)); **bậc giá** (số thùng tối thiểu ≥ 1, **đơn giá theo cái** VND nguyên dương — Sale nhập, hệ thống gợi ý từ bảng giá riêng nội bộ) | Có |
 | **Dòng phí khuôn / bản in** | Một dòng phí cho mỗi SKU **sản xuất lần đầu** (SKU chưa có Đơn sản xuất nào tới `In Production` — [17](../17-order-management/README.md)); số tiền VND do Sale nhập. Đặt lại SKU đã từng sản xuất thì không có dòng này | Có (khi có SKU sản xuất lần đầu) |
 | Hiệu lực báo giá | Ngày hết hiệu lực, ở tương lai | Có |
+| **Ngày giao khách yêu cầu** | Ngày khách muốn nhận hàng; một ngày cho cả báo giá, Sale nhập khi báo giá còn `Draft`; không ở quá khứ. Để trống nghĩa là khách không nêu ngày. Khác **ngày giao dự kiến** Sale hẹn trong hợp đồng (BR-19) *(Quyết định PROD-DUE 02/11/2026)* | Không |
 | Lịch thanh toán dự kiến | Lấy từ lịch mặc định của khách; chỉ để khách tham khảo, lịch ràng buộc nằm trong hợp đồng | Không |
 | Số thùng khách chấp nhận | Khách chọn **số thùng** (số nguyên ≥ 1) cho từng dòng khi chấp nhận; hệ thống hiện kèm số cái = số thùng × số cái / thùng | Có (khi chấp nhận) |
 | Địa chỉ giao & người nhận | Từ sổ địa chỉ của khách | Có (khi tạo đơn) |
@@ -52,8 +53,8 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Báo giá** (mã, số bản sửa, dòng, bậc giá, dòng phí khuôn / bản in, hiệu lực) | Khách, Sale |
-| **Đơn hàng** (mã đơn; mỗi dòng: SKU, số thùng, số cái / thùng, số cái, đơn giá / cái, thành tiền — đã chốt; dòng phí khuôn / bản in; địa chỉ, tổng tiền) | [15 Payment](../15-payment/README.md), [17 Order Management](../17-order-management/README.md) |
+| **Báo giá** (mã, số bản sửa, dòng, bậc giá, dòng phí khuôn / bản in, hiệu lực, ngày giao khách yêu cầu) | Khách, Sale |
+| **Đơn hàng** (mã đơn; mỗi dòng: SKU, số thùng, số cái / thùng, số cái, đơn giá / cái, thành tiền, **ngày giao khách yêu cầu** — đã chốt; dòng phí khuôn / bản in; địa chỉ, tổng tiền) | [15 Payment](../15-payment/README.md), [17 Order Management](../17-order-management/README.md) |
 | **Hợp đồng mua bán** (mã hợp đồng, các bên, dòng hàng, dòng phí khuôn / bản in, điều khoản giao, **số lần in mẫu miễn phí**, lịch thanh toán, bản PDF để ký, bản scan đã ký) | Khách (xem trên cổng), Kế toán, Sale; [17](../17-order-management/README.md) (số lần in mẫu miễn phí khi duyệt mẫu in) |
 | **Các đợt thanh toán** sinh khi hợp đồng `Signed` | [15 Payment](../15-payment/README.md) |
 | Thông báo cho Sale (khách chấp nhận / yêu cầu sửa báo giá) | Sale |
@@ -65,7 +66,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 ### 4.1. Báo giá (Quote)
 
 1. **Tiếp nhận yêu cầu** — khách liên hệ Sale qua [chat](../16-sales-chat/README.md), điện thoại hoặc email: loại ly / bao bì, số lượng (Sale quy về **số thùng nguyên** theo số cái / thùng của SKU), logo / mẫu. Mọi hàng đều in theo mẫu của khách: yêu cầu mới phải đi qua luồng thiết kế ([12](../12-product-design/README.md)) cho tới khi khách xác nhận và hệ thống sinh **SKU thành phẩm riêng của khách**, rồi mới vào báo giá. Khách mua lại thiết kế đã xác nhận thì dùng luôn SKU riêng đã có.
-2. **Lập báo giá** — Sale chọn SKU riêng của chính khách này (quy cách `CUSTOMIZABLE` không báo giá trực tiếp), **nhập bậc giá** — số thùng tối thiểu và đơn giá / cái; hệ thống hiện **giá gợi ý** từ bảng giá riêng nội bộ của khách ([13](../13-catalog/README.md)), Sale giữ hoặc sửa theo thoả thuận (BR-10). Nhập hiệu lực, lịch thanh toán dự kiến (mặc định theo khách). Báo giá ở `Draft`, **bản sửa số 1**.
+2. **Lập báo giá** — Sale chọn SKU riêng của chính khách này (quy cách `CUSTOMIZABLE` không báo giá trực tiếp), **nhập bậc giá** — số thùng tối thiểu và đơn giá / cái; hệ thống hiện **giá gợi ý** từ bảng giá riêng nội bộ của khách ([13](../13-catalog/README.md)), Sale giữ hoặc sửa theo thoả thuận (BR-10). Nhập hiệu lực, lịch thanh toán dự kiến (mặc định theo khách) và, nếu khách nêu, **ngày giao khách yêu cầu** (một ngày cho cả báo giá, không ở quá khứ — BR-19). Báo giá ở `Draft`, **bản sửa số 1**.
    - **Phí khuôn / bản in** — SKU **sản xuất lần đầu** (mẫu mới) thì hệ thống thêm một **dòng phí khuôn / bản in** cho SKU đó; Sale nhập số tiền. Dòng phí không có số thùng, không tính vào MOQ / bậc giá, không đi vào giữ hàng hay Đơn sản xuất (BR-17).
 
      > ⚠️ Giả định: chi tiết khuôn / bản in theo từng kỹ thuật in (cách tính, số khuôn theo màu…) là phạm vi sau; hệ thống chỉ ghi một dòng phí cho mỗi SKU mẫu mới. Xem [open-questions](../../open-questions/README.md).
@@ -87,12 +88,13 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 5. **Huỷ báo giá:**
    - Báo giá `Draft` huỷ tự do.
    - Báo giá `Accepted` chỉ huỷ được khi có SKU **không còn bán được**, bắt buộc lý do (≤ 500 ký tự).
-6. **Đặt lại đơn cũ** — khách bấm **"Đặt lại"** trên một đơn cũ ở sàn → hệ thống chỉ **mở chat** với Sale, gắn ngữ cảnh đơn đó ([16](../16-sales-chat/README.md)); không tự sinh báo giá. Sale **lập báo giá mới** như bước 2, giá gợi ý theo bảng giá **hiện hành**; SKU đã từng sản xuất thì không có dòng phí khuôn / bản in.
+6. **Đặt lại đơn cũ** — khách bấm **"Đặt lại"** trên một đơn cũ ở sàn → hệ thống chỉ **mở chat** với Sale, gắn ngữ cảnh đơn đó ([16](../16-sales-chat/README.md)); không tự sinh báo giá. Sale **lập báo giá mới** như bước 2, giá gợi ý theo bảng giá **hiện hành**; SKU đã từng sản xuất thì không có dòng phí khuôn / bản in. Báo giá mới **không** mang theo ngày giao khách yêu cầu của đơn cũ: Sale nhập ngày mới nếu khách yêu cầu (BR-19).
 
 ### 4.2. Tạo đơn hàng (Order)
 
 7. **Tạo đơn từ báo giá** — Sale chọn báo giá `Accepted` → hệ thống tạo đơn `Draft`, báo giá → `Converted`.
    - Đơn lấy đúng SKU, số thùng, số cái / thùng, đơn giá / cái khách đã chấp nhận.
+   - **Mỗi dòng đơn chép ngày giao khách yêu cầu** của báo giá (trống nếu khách không nêu) và **không đổi** nữa sau khi đơn được tạo; ngày này là **ngày cần hàng mặc định** khi Sale lập Đơn sản xuất cho dòng ([17](../17-order-management/README.md) §4.3 bước 6) (BR-19).
    - Tạo lại lần nữa thì trả về chính đơn đó, không tạo đơn thứ hai.
 8. **Kiểm tra cuối** — giá còn đúng (báo giá còn hiệu lực lúc chấp nhận)? đủ MOQ? SKU còn bán được? Hệ thống hiển thị **tồn khả dụng** từng dòng theo **số thùng** (SKU riêng có thể còn hàng dư từ đơn trước hoặc hàng trả) để Sale hẹn ngày giao; thiếu hàng **không chặn** tạo đơn — phần thiếu sẽ được bổ sung bằng Đơn sản xuất sau khi đơn xác nhận ([17](../17-order-management/README.md) §4.2).
 9. **Địa chỉ giao & người nhận** — chọn từ sổ địa chỉ của khách ([18](../18-customer-information/README.md)).
@@ -245,6 +247,7 @@ stateDiagram-v2
 - **BR-16:** Đơn từ `Pending Payment` trở đi không sửa dòng hàng / số thùng / giá (cần phụ lục hợp đồng — phạm vi sau); chỉ đổi địa chỉ giao, hoặc đổi SKU theo mẫu khi khách sửa thiết kế, theo quy tắc ở [Order Management](../17-order-management/README.md) §4.7.
 - **BR-17:** **Phí khuôn / bản in** là một **dòng phí** trên báo giá, đơn và hợp đồng cho mỗi SKU **sản xuất lần đầu** (mẫu mới — SKU chưa có Đơn sản xuất nào tới `In Production`); đặt lại SKU đã từng sản xuất thì không có dòng này. Dòng phí không có số thùng, không tính MOQ / bậc giá, không giữ hàng, không vào Đơn sản xuất; được cộng vào tổng tiền đơn (BR-09) và chốt giá cùng đơn (BR-06).
 - **BR-18:** Hợp đồng có điều khoản **số lần in mẫu miễn phí**, mặc định lấy từ cấu hình chung (⚠️ giả định 2 lần), Sale sửa được khi lập hợp đồng (số nguyên ≥ 0); bất biến khi hợp đồng `Signed`. Dùng cho bước duyệt mẫu in của Đơn sản xuất ([17](../17-order-management/README.md) §4.3): vòng in lại do lỗi in của đơn vị sản xuất (`PRINT_DEFECT`) không tính; vượt số lần miễn phí → **cảnh báo** Sale, không chặn; phí phát sinh xử lý bằng phụ lục ngoài hệ thống (phạm vi sau).
+- **BR-19:** **Ngày giao khách yêu cầu** thuộc báo giá, không bắt buộc: chỉ sửa được khi báo giá `Draft` (mỗi bản sửa mới Sale có thể đổi), không ở quá khứ, được giữ trong bản báo giá đã gửi. Khi tạo đơn, **mỗi dòng đơn chép ngày này** và **không đổi** sau đó; báo giá mới để đặt lại đơn cũ không mang ngày cũ theo. Đơn sản xuất lập cho dòng lấy ngày này làm **ngày cần hàng** mặc định ([17](../17-order-management/README.md) BR-26). Ngày này khác **ngày giao dự kiến** Sale hẹn trong điều khoản giao hàng của hợp đồng *(Quyết định PROD-DUE 02/11/2026)*.
 
 ### Edge case
 
@@ -279,7 +282,7 @@ stateDiagram-v2
 | [01 · Product Creation](../../warehouse/01-product-creation/README.md) | SKU thành phẩm riêng của khách và quy cách thùng (**số cái / thùng** — cơ sở để đặt theo thùng và tính thành tiền) |
 | [12 · Design Management](../12-product-design/README.md) | Khách xác nhận thiết kế sinh SKU thành phẩm theo mẫu — điều kiện để báo giá hàng in |
 | [15 · Payment](../15-payment/README.md) | Hợp đồng `Signed` sinh các đợt thanh toán; thu đủ đợt `ON_SIGNING` → `Confirmed`; kiểm tín dụng cho đợt `AFTER_DELIVERY` |
-| [17 · Order Management](../17-order-management/README.md) | Nhận đơn `Confirmed`: Sale chọn kho xuất, kiểm tồn thành phẩm và giữ hàng theo số thùng, Đơn sản xuất (duyệt mẫu in dùng **số lần in mẫu miễn phí** của hợp đồng); huỷ đơn |
+| [17 · Order Management](../17-order-management/README.md) | Nhận đơn `Confirmed`: Sale chọn kho xuất, kiểm tồn thành phẩm và giữ hàng theo số thùng, Đơn sản xuất (duyệt mẫu in dùng **số lần in mẫu miễn phí** của hợp đồng; **ngày giao khách yêu cầu** của dòng đơn là ngày cần hàng mặc định); huỷ đơn |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Đợt `BEFORE_DELIVERY` chưa thu đủ chặn bàn giao vận chuyển |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Thẻ hành động chấp nhận / yêu cầu sửa báo giá; "Đặt lại" mở chat; khách gửi bản scan hợp đồng đã ký |
 | [18 · Customer Information](../18-customer-information/README.md) | Thông tin pháp lý lập hợp đồng; sổ địa chỉ; lịch thanh toán mặc định; hạn mức & kỳ hạn công nợ; bảng giá riêng |

@@ -38,7 +38,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho / Dispatch Staff** | Mở chuyến bàn giao, gán shipment, quét kiện lên xe, ký bàn giao. Gán hãng cho shipment. Với giao nguyên chuyến: lập kế hoạch chuyến xe, xem / chỉnh tay 3D, xác nhận để lại kiện không xếp được, chốt kế hoạch, ghi nhận đặt xe, bắt đầu xếp xe, dỡ kiện khỏi xe khi cần. |
-| **Quản lý kho (Warehouse Manager)** — của kho xuất | Tất cả việc của Dispatch Staff. Thêm: khai báo **danh mục hãng vận chuyển** và **danh mục loại xe**; **ước tính tải**; **huỷ chuyến bàn giao**; ghi nhận **giao thành công / giao thất bại** khi hãng báo lại; ghi nhận hàng hoàn về (`Returned`) và quyết định hàng hoàn trong khu cách ly ([20](../20-inventory-control/README.md) §4.8). |
+| **Quản lý kho (Warehouse Manager)** — của kho xuất | Tất cả việc của Dispatch Staff. Thêm: khai báo **danh mục hãng vận chuyển** và **danh mục loại xe**; **ước tính tải** (kể cả ước tính thử từ file Excel — §4.0 bước 6); **huỷ chuyến bàn giao**; **huỷ có kiểm soát** kế hoạch / xe đã bắt đầu xếp và **bỏ xe khỏi kế hoạch** (quyền riêng, mặc định gán Quản lý kho và System Admin — BR-14); ghi nhận **giao thành công / giao thất bại** khi hãng báo lại; ghi nhận hàng hoàn về (`Returned`) và quyết định hàng hoàn trong khu cách ly ([20](../20-inventory-control/README.md) §4.8). |
 | **Hệ thống (Load Planner)** | Tính phương án xếp kiện lên xe / container: số xe từng loại, vị trí & hướng đặt từng kiện, % lấp đầy; dựng mô hình 3D. Ước tính tải và đối chiếu kế hoạch với ước tính. |
 | **Đơn vị vận chuyển (Carrier / 3PL)** | Nhận kiện, vận chuyển, giao cho khách, hoàn hàng về kho — **hoạt động ngoài hệ thống**; không thu tiền của khách. Với giao nguyên chuyến: cung cấp xe tải / container theo kế hoạch đã chốt. |
 | **Kế toán (Accountant)** | Ghi nhận tiền khách chuyển khoản vào đợt `BEFORE_DELIVERY` của hợp đồng — điều kiện mở chặn bàn giao ([15](../../ecommerce/15-payment/README.md)) |
@@ -65,7 +65,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| **Danh sách kiện cần xếp** | Các shipment của **đơn khách giao nguyên chuyến**, `Ready to Dispatch`, **nguyên shipment** (không lấy một phần), cùng một kho. Có thể nhập danh sách kiện từ **file Excel theo mẫu**. | Có |
+| **Danh sách kiện cần xếp** | Các shipment của **đơn khách giao nguyên chuyến**, `Ready to Dispatch`, **nguyên shipment** (không lấy một phần), cùng một kho. Danh sách kiện trong **file Excel theo mẫu** chỉ dùng để **ước tính thử** ([§4.0](#40-ước-tính-tải-trước-khi-kiểm-thùng), bước 6), **không** dùng để tạo kế hoạch *(Quyết định 02/11/2026, LP2-9)*. | Có |
 | **Danh mục loại xe (Vehicle Type)** | Mã, tên, loại (container / xe tải / bán tải), kích thước lòng thùng (mm), phần gia cố góc, kích thước cửa, tải trọng tối đa, **số chiếc sẵn có**, giá thuê (chỉ tham khảo), trạng thái. Cài sẵn container **20DC, 40DC, 40HC, 45HC**. | Có (cấu hình) |
 | **Chế độ chọn xe** | Một trong các chế độ ở [§4.2](#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning) | Có (mặc định: *Một loại*) |
 | Phân nhóm kiện chính / phụ | Chỉ dùng với chế độ *Ưu tiên + hàng chèn* | Không |
@@ -109,6 +109,9 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 3. Dòng có SKU thiếu quy cách thùng được **liệt kê** và ước tính bị đánh dấu **chưa đủ**. Không dòng nào quy được thì báo lỗi.
 4. Ước tính mới **thay thế** ước tính cũ của cùng chứng từ. Tối đa 3.000 thùng mỗi lần ước tính.
 5. Ước tính **chỉ để tham khảo** (chọn xe, chọn hình thức giao); không bao giờ chốt kế hoạch.
+6. **Ước tính thử từ file Excel** *(Quyết định 02/11/2026, LP2-9)*: màn hình "Ước tính thử" đọc danh sách kiện từ **file Excel theo mẫu** (đọc ngay trên trình duyệt), chọn loại xe và chế độ chọn xe, rồi chạy thử xếp xe để xem số xe dự kiến và sơ đồ 3D (ghi rõ "Chạy thử — không lưu").
+   - **Không lưu gì**: không tạo ước tính, không gắn với đơn nào, không tạo kế hoạch chuyến xe.
+   - Dùng quyền tạo ước tính tải hiện có; cùng giới hạn tối đa 3.000 thùng.
 
 ### 4.1. Gửi kiện qua hãng vận chuyển (Parcel)
 
@@ -133,7 +136,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 
 Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần loại xe nào, bao nhiêu chiếc**, và **mỗi kiện đặt ở vị trí nào trong thùng xe**. Kết quả hiển thị 3D để kiểm tra trước khi thuê xe.
 
-1. **Tạo kế hoạch chuyến xe (`Draft`)** — Dispatch Staff chọn **nguyên shipment** giao nguyên chuyến ở khu `DISPATCH` (hoặc nhập danh sách kiện từ file Excel theo mẫu), chọn các loại xe được dùng và **chế độ chọn xe**.
+1. **Tạo kế hoạch chuyến xe (`Draft`)** — Dispatch Staff chọn **nguyên shipment** giao nguyên chuyến ở khu `DISPATCH` (kế hoạch luôn lập từ shipment trong hệ thống; file Excel không tạo được kế hoạch — chỉ dùng để ước tính thử ở §4.0 bước 6), chọn các loại xe được dùng và **chế độ chọn xe**.
    - Kế hoạch chỉ chứa shipment của **đơn khách giao nguyên chuyến** đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn).
 2. **Tính phương án xếp** — Load Planner xếp kiện theo **quy tắc xếp** (BR-10) và chế độ đã chọn → kế hoạch `Planned`. Hệ thống trả về:
    - số xe từng loại;
@@ -160,7 +163,8 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 6. **Đặt xe** — Dispatch Staff đặt xe với hãng (**ngoài hệ thống**), rồi **ghi nhận đặt xe** cho từng chuyến → `Vehicle Booked`.
    - Đặt lại trước khi xếp thì thay thông tin cũ.
    - **Huỷ đặt xe** (bắt buộc lý do) → chuyến về `Planned`, chỉ khi chưa bắt đầu xếp.
-7. **Bắt đầu xếp xe** → chuyến `Loading`. Từ đây kế hoạch **bị khoá** (BR-14).
+7. **Bắt đầu xếp xe** → chuyến `Loading`. Từ đây kế hoạch **bị khoá** (BR-14); muốn dừng xe hoặc kế hoạch chỉ có **huỷ có kiểm soát** (BR-14).
+   - **Huỷ có kiểm soát** cả kế hoạch hoặc một xe, và **bỏ xe khỏi kế hoạch** (xe còn `Planned` khi mọi xe khác đã rời kho): Quản lý kho / System Admin, bắt buộc mã lý do + ghi chú (BR-14) *(Quyết định 02/11/2026)*.
    - Đơn không cho giao một phần phải có đủ phần còn lại trong kế hoạch.
    - Đơn còn đợt `BEFORE_DELIVERY` chưa thu được **cảnh báo** khi bắt đầu xếp (không chặn); việc chặn nằm ở bước ký bàn giao (BR-04).
    - Kiện bị để lại được **tách sang shipment mới** `Ready to Dispatch` để đi chuyến sau (nhãn giao hàng không ghi mã shipment nên không phải in lại).
@@ -169,7 +173,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - Mọi xe đã bàn giao → kế hoạch `Dispatched`.
 9. **Đơn không huỷ được** khi đã có thùng dán nhãn giao hàng ([08](../08-packing/README.md) BR-04), nên kiện trong kế hoạch không bị gỡ vì huỷ đơn. Khi cần bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`):
    - chưa có xe nào bắt đầu xếp → mở lại kế hoạch về `Planned` (BR-14), gỡ kiện, các xe bị ảnh hưởng **chờ tính lại**;
-   - kiện đã nằm trên xe đang xếp → Quản lý kho huỷ chuyến của xe đó, **quét dỡ kiện**; xe không còn gì để chở thì bị huỷ.
+   - kiện đã nằm trên xe đang xếp → Quản lý kho **huỷ có kiểm soát** xe đó (BR-14), **quét dỡ kiện**; xe không còn gì để chở thì bị huỷ.
 10. **Ghi nhận kết quả giao** — không theo dõi hành trình. Quản lý kho ghi nhận kết quả theo §4.3.
 
 **Chế độ chọn xe:**
@@ -183,7 +187,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 | **Vượt sức chứa** | Xếp tối đa những kiện vừa với số xe sẵn có và báo phần phải bỏ lại |
 | **Chỉnh tay** | Kéo thả kiện trên mô hình 3D, rồi tính lại một xe |
 
-**Cách tính phương án (tóm tắt):** đặt từng kiện vào **góc trống thấp nhất và sâu nhất** mà kiện vừa và được đỡ chắc. Hệ thống thử nhiều thứ tự xếp ngẫu nhiên trong một khoảng thời gian giới hạn (mặc định 5 giây) và giữ phương án tốt nhất, đánh giá theo thứ tự:
+**Cách tính phương án (tóm tắt):** đặt kiện vào **góc trống sâu nhất** (gần vách đầu thùng xe nhất) mà còn có kiện vừa và được đỡ chắc; nếu nhiều chỗ cùng độ sâu thì chọn chỗ **thấp nhất**, rồi chỗ **bên trái nhất**. Hàng được xếp thành từng lớp từ vách đầu thùng ra phía cửa *(Quyết định 02/11/2026)*. Hệ thống thử nhiều thứ tự xếp ngẫu nhiên trong một khoảng thời gian giới hạn và giữ phương án tốt nhất. Thời gian tìm có **hai giới hạn** *(Quyết định 02/11/2026)*: ngân sách tìm kiếm mặc định **5 giây**, và một **giới hạn cứng theo thời gian thực khoảng 12 giây**; hết giới hạn cứng thì trả về **phương án tốt nhất tìm được tới lúc đó** (kiện chưa kịp xếp báo lý do hết thời gian tìm). Phương án được đánh giá theo thứ tự:
 
 1. Ít kiện bị bỏ lại nhất;
 2. Ít xe nhất;
@@ -255,26 +259,30 @@ stateDiagram-v2
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Planned` | *(Chỉ giao nguyên chuyến)* Một xe của kế hoạch đã chốt; chưa đặt xe | → `Vehicle Booked`, → `Cancelled` (theo kế hoạch) | Hệ thống (khi chốt kế hoạch) |
+| `Planned` | *(Chỉ giao nguyên chuyến)* Một xe của kế hoạch đã chốt; chưa đặt xe | → `Vehicle Booked`, → `Cancelled` (theo kế hoạch; hoặc **bỏ xe khỏi kế hoạch** khi mọi xe khác đã rời kho — BR-14) | Hệ thống (khi chốt kế hoạch, hoặc khi một xe bị huỷ có kiểm soát) |
 | `Vehicle Booked` | *(Chỉ giao nguyên chuyến)* Đã ghi nhận đặt xe | → `Loading`, → `Planned` (huỷ đặt xe, có lý do), → `Cancelled` (theo kế hoạch) | Dispatch Staff |
-| `Loading` | Đang quét kiện lên xe. Gửi kiện qua hãng: mở chuyến là vào thẳng trạng thái này. | → `Dispatched`, → `Cancelled` | Dispatch Staff |
+| `Loading` | Đang quét kiện lên xe. Gửi kiện qua hãng: mở chuyến là vào thẳng trạng thái này. | → `Dispatched`, → `Cancelled` (xe của kế hoạch: chỉ **huỷ có kiểm soát**, sinh chuyến `Planned` mới cùng sơ đồ — BR-14) | Dispatch Staff |
 | `Dispatched` | Đã ký bàn giao, xe rời kho | *(cuối)* | Dispatch Staff |
-| `Cancelled` | Huỷ, có lý do; shipment & kiện trở lại khu `DISPATCH` | *(cuối)* | Quản lý kho (gửi kiện qua hãng); theo kế hoạch (giao nguyên chuyến) |
+| `Cancelled` | Huỷ, có lý do; shipment & kiện trở lại khu `DISPATCH`. Xe đã xếp bị huỷ có kiểm soát: kiện còn trên xe bị **khoá tới khi quét dỡ** *(Quyết định 02/11/2026)* | *(cuối)* | Quản lý kho (gửi kiện qua hãng); Quản lý kho / System Admin (huỷ có kiểm soát; bỏ xe `Planned` khỏi kế hoạch); theo kế hoạch (giao nguyên chuyến) |
 
 ```mermaid
 stateDiagram-v2
+    state "Vehicle Booked" as VehicleBooked
+
     [*] --> Loading: Mở chuyến (gửi kiện qua hãng)
     [*] --> Planned: Chốt kế hoạch (mỗi xe một chuyến)
     Planned --> VehicleBooked: Ghi nhận đặt xe
     VehicleBooked --> Planned: Huỷ đặt xe
     VehicleBooked --> Loading: Bắt đầu xếp xe
     Loading --> Dispatched: Quét đủ + ký bàn giao
-    Planned --> Cancelled
-    VehicleBooked --> Cancelled
-    Loading --> Cancelled
+    Planned --> Cancelled: Theo kế hoạch / bỏ xe khỏi kế hoạch
+    VehicleBooked --> Cancelled: Theo kế hoạch
+    Loading --> Cancelled: Huỷ (gửi kiện) / huỷ có kiểm soát (xe của kế hoạch)
     Dispatched --> [*]
     Cancelled --> [*]
 ```
+
+Xe của kế hoạch đang `Loading` bị **huỷ có kiểm soát** → chuyến `Cancelled` và hệ thống sinh chuyến `Planned` mới cùng sơ đồ cho xe đó (BR-14). **Bỏ xe khỏi kế hoạch** áp dụng cho xe còn `Planned` (chưa đặt xe) khi mọi xe khác đã rời kho: chuyến `Cancelled`, kế hoạch `Dispatched`, kiện chờ kế hoạch mới (BR-14) *(Quyết định 02/11/2026)*.
 
 ### 5.3. Kế hoạch chuyến xe (Load Plan)
 
@@ -282,9 +290,9 @@ stateDiagram-v2
 |------------|---------|----------------------|--------------|
 | `Draft` | Đang chọn kiện, loại xe, chế độ chọn xe | → `Planned`, → `Cancelled` | Dispatch Staff |
 | `Planned` | Đã có phương án xếp; xem 3D, chỉnh tay & tính lại từng xe; xác nhận để lại kiện không xếp được | → `Planned` (chỉnh tay, tính lại), → `Draft` (đổi kiện / loại xe / chế độ), → `Confirmed`, → `Cancelled` | Dispatch Staff / Load Planner |
-| `Confirmed` | Đã chốt; khoá danh sách kiện & sơ đồ; mỗi xe một chuyến bàn giao | → `Dispatched`, → `Planned` (mở lại, có lý do, khi chưa xe nào bắt đầu xếp), → `Cancelled` (có lý do, khi chưa xe nào bắt đầu xếp) | Dispatch Staff |
-| `Dispatched` | Mọi xe đã ký bàn giao & rời kho | *(cuối)* | Hệ thống |
-| `Cancelled` | Huỷ; kiện trở lại khu `DISPATCH` chờ kế hoạch khác | *(cuối)* | Dispatch Staff / Quản lý kho |
+| `Confirmed` | Đã chốt; khoá danh sách kiện & sơ đồ; mỗi xe một chuyến bàn giao | → `Dispatched` (mọi xe bàn giao & rời kho, hoặc **bỏ xe** `Planned` còn lại khỏi kế hoạch), → `Planned` (mở lại, có lý do, khi chưa xe nào bắt đầu xếp), → `Cancelled` (có lý do, khi chưa xe nào bắt đầu xếp), → `Cancelled` (**huỷ có kiểm soát** khi đã có xe xếp, chưa xe nào `Dispatched`; không mở lại — BR-14) | Dispatch Staff; huỷ có kiểm soát / bỏ xe: Quản lý kho, System Admin |
+| `Dispatched` | Mọi xe đã ký bàn giao & rời kho (xe `Planned` không có xe thay thì đã bị bỏ khỏi kế hoạch) | *(cuối)* | Hệ thống |
+| `Cancelled` | Huỷ; kiện trở lại khu `DISPATCH` chờ kế hoạch khác (kiện còn trên xe đã xếp: khoá tới khi quét dỡ, BR-14) | *(cuối)* | Dispatch Staff / Quản lý kho / System Admin |
 
 **Kiện được trả khỏi kế hoạch vì:**
 
@@ -293,6 +301,7 @@ stateDiagram-v2
 | `INPUTS_CHANGED` | Đổi danh sách kiện / loại xe / chế độ |
 | `LEFT_BEHIND` | Kiện không xếp được, đã xác nhận để lại |
 | `PLAN_CANCELLED` | Kế hoạch bị huỷ |
+| `VEHICLE_DROPPED` | Xe `Planned` bị bỏ khỏi kế hoạch khi các xe khác đã rời kho *(Quyết định 02/11/2026)* |
 
 ```mermaid
 stateDiagram-v2
@@ -302,10 +311,10 @@ stateDiagram-v2
     Planned --> Draft: Đổi kiện / loại xe / chế độ
     Planned --> Confirmed: Chốt kế hoạch
     Confirmed --> Planned: Mở lại (chưa xếp lên xe)
-    Confirmed --> Dispatched: Mọi xe bàn giao và rời kho
+    Confirmed --> Dispatched: Mọi xe bàn giao và rời kho / bỏ xe còn lại
     Draft --> Cancelled
     Planned --> Cancelled
-    Confirmed --> Cancelled
+    Confirmed --> Cancelled: Huỷ / huỷ có kiểm soát (đã có xe xếp, chưa xe nào rời kho)
     Dispatched --> [*]
     Cancelled --> [*]
 ```
@@ -345,7 +354,17 @@ stateDiagram-v2
   - không xe nào đang chờ tính lại.
 
   Không được để lại phần của đơn không cho giao một phần.
-- **BR-14:** Sau `Confirmed`, danh sách kiện và sơ đồ xếp bị khoá. Muốn sửa phải mở lại về `Planned` (kèm lý do) khi **chưa xe nào bắt đầu xếp**. Mở lại huỷ các chuyến của kế hoạch, kể cả chuyến đã đặt xe. Đã bắt đầu xếp thì không mở lại / huỷ kế hoạch được.
+- **BR-14:** Sau `Confirmed`, danh sách kiện và sơ đồ xếp bị khoá. Muốn sửa phải mở lại về `Planned` (kèm lý do) khi **chưa xe nào bắt đầu xếp**. Mở lại huỷ các chuyến của kế hoạch, kể cả chuyến đã đặt xe. Đã bắt đầu xếp thì **không mở lại** và **không huỷ thường** được; chỉ có **huỷ có kiểm soát** *(Quyết định 29/10/2026 và 02/11/2026)*:
+  - Chỉ **huỷ, không bao giờ mở lại**. Huỷ **cả kế hoạch** hoặc **một xe**. Xe bị huỷ được dỡ hàng; xe đó quay về `Planned` với cùng sơ đồ xếp (chuyến mới) để thuê xe khác, các xe còn lại vẫn chạy tiếp.
+  - Có **bất kỳ xe nào đã `Dispatched`** (đã rời kho) thì **không huỷ cả kế hoạch** được; huỷ từng xe còn lại.
+  - Lý do là mã (`XE_HONG`, `SAI_XE`, `KIEN_KHONG_VUA`, `KHAC`) **kèm ghi chú bắt buộc với mọi mã**. Quyền riêng, mặc định gán **Quản lý kho** và **System Admin** (cấp theo mã quyền — [00 §2.3](../../00-system-overview/README.md)).
+  - Kế hoạch / xe bị huỷ chuyển `Cancelled` ngay, nhưng kiện còn trên xe bị **khoá tới khi quét dỡ từng kiện** (Quản lý kho có thể xác nhận không quét khi nhãn hỏng, ghi người + thời điểm + ghi chú). Kiện đã tách "để lại" giữ nguyên.
+  - Đã có **một lần huỷ có kiểm soát** thì kế hoạch **coi như đã bắt đầu xếp**: không mở lại về `Planned`, không huỷ thường.
+  - **"Bỏ xe khỏi kế hoạch"** *(Quyết định 02/11/2026)* — dùng khi các xe khác đã rời kho và không có xe thay cho xe này:
+    - Quyền riêng như huỷ có kiểm soát; bắt buộc **mã lý do và ghi chú**.
+    - Chỉ cho xe `Planned` của kế hoạch `Confirmed`, khi **mọi xe còn lại đã `Dispatched`** (ít nhất một xe). Xe đã đặt (`Vehicle Booked`) phải **huỷ đặt xe trước**.
+    - Kết quả: chuyến của xe đó `Cancelled` kèm mã + ghi chú, xe bị gỡ khỏi kế hoạch, kế hoạch chuyển `Dispatched`; kiện của xe đó được trả khỏi kế hoạch với lý do `VEHICLE_DROPPED` và chờ lập kế hoạch mới.
+    - Bị từ chối nếu một kiện khác của cùng shipment đã rời kho trên xe đã `Dispatched`; với đơn không cho giao một phần, bị từ chối nếu shipment khác của đơn đó đã rời kho.
 - **BR-15:** Mỗi xe của kế hoạch là **một chuyến bàn giao** có biên bản riêng. Kế hoạch chỉ `Dispatched` khi **mọi xe** đã ký bàn giao & rời kho.
 
 **Chuyến bàn giao:**
@@ -356,7 +375,7 @@ stateDiagram-v2
   - phải quét đủ mọi kiện của chuyến;
   - phải xác nhận đã ký, có người đại diện hãng và biển số;
   - mọi shipment phải được đơn cho phép đi: đợt `BEFORE_DELIVERY` đã thu (BR-04), không đang treo, không thiếu phần khi đơn không cho giao một phần.
-- **BR-19:** Huỷ chuyến gửi kiện qua hãng chỉ do **Quản lý kho**, kèm lý do, khi chuyến chưa rời kho. Chuyến của kế hoạch xe chỉ thay đổi qua kế hoạch.
+- **BR-19:** Huỷ chuyến gửi kiện qua hãng chỉ do **Quản lý kho**, kèm lý do, khi chuyến chưa rời kho. Chuyến của kế hoạch xe chỉ thay đổi qua kế hoạch, hoặc qua huỷ có kiểm soát / bỏ xe khỏi kế hoạch (BR-14).
 - **BR-20:** Ước tính tải **chỉ để tham khảo**; không chốt kế hoạch, không chặn kiểm thùng.
 
 ### Edge case
@@ -373,7 +392,7 @@ stateDiagram-v2
 | Hãng hoàn về thùng không thuộc shipment | Phiếu Hàng hoàn không nhận thùng đó ([03](../03-receipt/README.md)); Quản lý kho xử lý với hãng ngoài hệ thống |
 | Một shipment của chuyến chưa đủ điều kiện (đợt `BEFORE_DELIVERY` chưa thu, đơn treo) | Cả chuyến bị từ chối bàn giao; bỏ shipment đó khỏi chuyến rồi ký cho các shipment còn lại |
 | Khách mới chuyển một phần đợt `BEFORE_DELIVERY` (`Partially Paid`) | Vẫn chặn bàn giao; Sale nhắc khách qua chat ([16](../../ecommerce/16-sales-chat/README.md)); shipment chờ ở khu `DISPATCH` |
-| Xe giao nguyên chuyến đã xếp nhưng một đơn trên xe chưa thu đợt `BEFORE_DELIVERY` | Ký bàn giao xe đó bị chặn; chờ Kế toán ghi nhận tiền, hoặc dỡ kiện của đơn đó (Quản lý kho huỷ chuyến của xe, mở lại kế hoạch nếu cần) |
+| Xe giao nguyên chuyến đã xếp nhưng một đơn trên xe chưa thu đợt `BEFORE_DELIVERY` | Ký bàn giao xe đó bị chặn; chờ Kế toán ghi nhận tiền, hoặc dỡ kiện của đơn đó (Quản lý kho huỷ có kiểm soát xe đó — BR-14; kiện bị khoá tới khi quét dỡ) |
 | Nhãn giao rách, không quét được | Hệ thống không nhận kiện; in lại nhãn theo mã LPN ở [08](../08-packing/README.md) rồi quét lại |
 | Một đơn đi nhiều hãng | Mỗi shipment gán một hãng, bàn giao trên chuyến của hãng đó; đơn `Shipped` khi mọi kiện đã bàn giao |
 | Load Planning: còn kiện không xếp được | Hệ thống trả danh sách kèm lý do; Dispatch Staff thêm xe / đổi loại xe / đổi chế độ rồi tính lại, hoặc xác nhận để lại. Khi bắt đầu xếp xe, kiện để lại tách thành shipment mới cho chuyến sau. |
@@ -381,7 +400,9 @@ stateDiagram-v2
 | Chế độ *Giữ nguyên dòng*: các kiện của một dòng hàng không vừa một xe | Phần vượt được báo là không xếp được; Dispatch Staff chọn loại xe lớn hơn hoặc đổi chế độ |
 | Xe thực tế đến khác loại / kích thước so với kế hoạch | Mở lại kế hoạch về `Planned` (chưa xếp lên xe), đổi loại xe & tính lại, chốt lại trước khi xếp; kiện không lên được ở lại khu `DISPATCH` |
 | Quét nhầm kiện của xe / chuyến khác khi xếp xe | Hệ thống chặn, báo kiện thuộc xe nào |
-| Thùng thực tế không vừa vị trí trên sơ đồ khi xếp lên xe | Dừng xếp xe đó; kiểm quy cách thùng của SKU ([01](../01-product-creation/README.md)), sửa nếu sai. Kế hoạch đã khoá thì xử lý với Quản lý kho (huỷ chuyến của xe đó, mở lại kế hoạch nếu cần) |
+| Thùng thực tế không vừa vị trí trên sơ đồ khi xếp lên xe | Dừng xếp xe đó; kiểm quy cách thùng của SKU ([01](../01-product-creation/README.md)), sửa nếu sai. Kế hoạch đã khoá thì xử lý với Quản lý kho (huỷ có kiểm soát xe đó nếu cần, mã `KIEN_KHONG_VUA` — BR-14) |
+| Xe hỏng / xe đến sai sau khi đã bắt đầu xếp | Quản lý kho **huỷ có kiểm soát** xe đó (mã `XE_HONG` / `SAI_XE` + ghi chú), quét dỡ kiện; xe quay về `Planned` cùng sơ đồ để thuê xe khác, các xe còn lại chạy tiếp (BR-14) |
+| Các xe khác đã rời kho, còn một xe `Planned` không có xe thay | Quản lý kho **bỏ xe khỏi kế hoạch** (mã lý do + ghi chú; xe đã đặt thì huỷ đặt xe trước); kế hoạch `Dispatched`, kiện trả về với lý do `VEHICLE_DROPPED`, chờ kế hoạch mới (BR-14) |
 | Ước tính tải lệch nhiều so với kế hoạch (vượt > 10%) | Cờ cảnh báo trên đối chiếu; Dispatch Staff kiểm lại quy cách thùng của SKU |
 
 ---
