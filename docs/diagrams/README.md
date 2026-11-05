@@ -17,6 +17,8 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 > - **Sàn không hiển thị giá**; Sale lập báo giá theo **giá gợi ý** từ bảng giá riêng nội bộ; mẫu mới có **dòng phí khuôn / bản in**, hợp đồng ghi **số lần in mẫu miễn phí** ([13](../ecommerce/13-catalog/README.md), [14](../ecommerce/14-cart-and-order/README.md)).
 > - **Hàng hoàn** (RTO, hàng khách trả) nhập lại qua **phiếu nhập loại Hàng hoàn** vào khu `QUARANTINE` ([03](../warehouse/03-receipt/README.md)).
 > - **Không còn khu kiểm thùng riêng:** kiểm thùng & dán nhãn giao hàng làm tại **khu xuất hàng (`DISPATCH`)** — thùng lấy xong đưa thẳng về đây, kiểm, dán nhãn tại chỗ, gom shipment, chờ xe. Đích lấy hàng là `DISPATCH` (mặc định) hoặc `STAGING` ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-22, [07](../warehouse/07-picking/README.md)).
+>
+> **Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế** trên app — trên **khuôn 2D** của quy cách (cấu hình in do Quản lý kinh doanh khai báo — [01](../warehouse/01-product-creation/README.md) §4.10), có **xem trước 3D**; bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ. Gửi duyệt → hệ thống **preflight** → **Quản lý kinh doanh** duyệt kỹ thuật & kiểm duyệt nội dung → hệ thống **xuất file in PDF/X**, chốt snapshot, sinh SKU riêng. Vòng đời bản thiết kế `Draft` / `Pending Review` / `Approved` / `Archived`. Đặt hàng từ bản thiết kế = **yêu cầu báo giá** gửi Sale ([12](../ecommerce/12-product-design/README.md), §3.1).
 
 Mục lục:
 
@@ -50,7 +52,7 @@ flowchart TD
     SAMPLE --> CUST_SAMPLE{"Khách xem mẫu in chờ duyệt<br/>trên sàn — mẫu thiết kế của tôi<br/>hoặc thẻ duyệt mẫu in trong chat"}
     CUST_SAMPLE -->|"Yêu cầu in lại, kèm ghi chú"| REPRINT["Sale ghi lý do in lại: PRINT_DEFECT / CUSTOMER_CHANGE<br/>mở vòng mẫu mới — vẫn Sample Pending<br/>vượt số lần in mẫu miễn phí của hợp đồng: cảnh báo, không chặn"]
     REPRINT --> SAMPLE
-    CUST_SAMPLE -.->|"Cần sửa file thiết kế"| REDESIGN(["Về 12 sinh SKU mới, Sale đổi SKU dòng đơn<br/>huỷ Đơn sản xuất này, lập Đơn sản xuất mới"])
+    CUST_SAMPLE -.->|"Cần sửa file thiết kế"| REDESIGN(["Khách tạo bản sửa ở 12, được duyệt thì sinh SKU mới<br/>Sale đổi SKU dòng đơn<br/>huỷ Đơn sản xuất này, lập Đơn sản xuất mới"])
     CUST_SAMPLE -->|"Duyệt mẫu"| PO_INPROD["Đơn sản xuất: In Production<br/>đơn vị sản xuất in hàng loạt, đóng thùng đúng số cái chuẩn"]
     FLAG -->|"Không — đơn vị sản xuất báo bắt đầu"| PO_INPROD
     PO_INPROD --> DELIVER["Giao các thùng thành phẩm về đúng kho nhận<br/>kèm phiếu giao ghi số Đơn sản xuất, số thùng"]
@@ -461,23 +463,25 @@ stateDiagram-v2
 
 ## 3. Phụ lục
 
-### 3.1. Luồng bán sỉ theo hợp đồng (Mẫu & thiết kế → Báo giá → Đơn → Hợp đồng → Đợt thanh toán → Công nợ)
+### 3.1. Luồng bán sỉ theo hợp đồng (Khách tự thiết kế → Yêu cầu báo giá → Báo giá → Đơn → Hợp đồng → Đợt thanh toán → Công nợ)
 
-Chi tiết: [12 · Mẫu & thiết kế](../ecommerce/12-product-design/README.md), [13 · Catalog](../ecommerce/13-catalog/README.md), [14 · Báo giá, Đơn hàng & Hợp đồng](../ecommerce/14-cart-and-order/README.md), [15 · Thanh toán theo hợp đồng & Công nợ](../ecommerce/15-payment/README.md). Khách **không tự đặt hàng** trên sàn: đơn do Sale tạo từ báo giá đã chấp nhận. **Sàn không hiển thị giá** *(Đã chốt 2026-11-05)*: giá chỉ có trên báo giá / đơn / hợp đồng; **đơn giá do Sale nhập**, hệ thống gợi ý từ **bảng giá riêng nội bộ** của khách (Sales Manager khai báo, chỉ nhân viên xem — [14](../ecommerce/14-cart-and-order/README.md) BR-10). Dòng báo giá / đơn chỉ là **SKU thành phẩm riêng của khách** (không còn hàng trơn), ghi **số thùng** (kèm số cái / thùng) và **đơn giá theo cái**; MOQ và bậc giá theo số thùng; thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái ([14](../ecommerce/14-cart-and-order/README.md) BR-07, BR-08). SKU **sản xuất lần đầu** có thêm **dòng phí khuôn / bản in** trên báo giá, đơn và hợp đồng — thu theo các đợt như hàng hoá ([14](../ecommerce/14-cart-and-order/README.md) BR-17, [15](../ecommerce/15-payment/README.md)); hợp đồng ghi **số lần in mẫu miễn phí** dùng khi duyệt mẫu in ([14](../ecommerce/14-cart-and-order/README.md) BR-18).
+Chi tiết: [12 · Thiết kế của khách](../ecommerce/12-product-design/README.md), [13 · Catalog](../ecommerce/13-catalog/README.md), [16 · Sales Chat](../ecommerce/16-sales-chat/README.md), [14 · Báo giá, Đơn hàng & Hợp đồng](../ecommerce/14-cart-and-order/README.md), [15 · Thanh toán theo hợp đồng & Công nợ](../ecommerce/15-payment/README.md). Khách **không tự đặt hàng** trên sàn: đơn do Sale tạo từ báo giá đã chấp nhận. **Sàn không hiển thị giá** *(Đã chốt 2026-11-05)*: giá chỉ có trên báo giá / đơn / hợp đồng; **đơn giá do Sale nhập**, hệ thống gợi ý từ **bảng giá riêng nội bộ** của khách (Sales Manager khai báo, chỉ nhân viên xem — [14](../ecommerce/14-cart-and-order/README.md) BR-10). Dòng báo giá / đơn chỉ là **SKU thành phẩm riêng của khách** (không còn hàng trơn), ghi **số thùng** (kèm số cái / thùng) và **đơn giá theo cái**; MOQ và bậc giá theo số thùng; thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái ([14](../ecommerce/14-cart-and-order/README.md) BR-07, BR-08). SKU **sản xuất lần đầu** có thêm **dòng phí khuôn / bản in** trên báo giá, đơn và hợp đồng — thu theo các đợt như hàng hoá ([14](../ecommerce/14-cart-and-order/README.md) BR-17, [15](../ecommerce/15-payment/README.md)); hợp đồng ghi **số lần in mẫu miễn phí** dùng khi duyệt mẫu in ([14](../ecommerce/14-cart-and-order/README.md) BR-18).
 
 ```mermaid
 flowchart TD
-    ENTRY(["Khách sỉ xem sản phẩm, quy cách trên sàn — sàn không hiện giá<br/>liên hệ Sale: chat / điện thoại / email"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
-    PATH -->|Có| CUST_INPUT["Khách đưa mẫu: logo, file, ảnh, mẫu vật<br/>Sale ghi nhận yêu cầu thiết kế — Draft (12)"]
-    CUST_INPUT --> DESIGN["Người thiết kế tải bộ file<br/>Sale / Sales Manager"]
-    DESIGN --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>người duyệt khác người thiết kế"}
-    REVIEW -->|"Không đạt"| DESIGN
-    REVIEW -->|Đạt| SUBMIT["Gửi khách xác nhận trên sàn — Submitted<br/>quy cách phải đã có quy cách thùng"]
-    SUBMIT --> CUST_OK{"Khách xác nhận?"}
-    CUST_OK -->|"Yêu cầu sửa"| DESIGN
-    CUST_OK -->|"Xác nhận"| SNAP["Design snapshot bất biến<br/>+ sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
+    ENTRY(["Khách sỉ xem sản phẩm, quy cách trên sàn — sàn không hiện giá<br/>chat với Sale"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
+    PATH -->|Có| DESIGN["Khách bấm Thiết kế trên quy cách đã có khuôn in (13)<br/>tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D<br/>lưu — bản thiết kế Draft (12)"]
+    DESIGN --> SUBMIT["Khách bấm Gửi duyệt<br/>hoặc Gửi duyệt và yêu cầu báo giá"]
+    SUBMIT --> PREFLIGHT{"Hệ thống preflight<br/>độ phân giải ở kích thước in, vùng in / lề an toàn<br/>định dạng, dung lượng, quy cách đã có quy cách thùng"}
+    PREFLIGHT -->|"Không đạt: báo lỗi cụ thể, vẫn Draft"| DESIGN
+    PREFLIGHT -->|Đạt| PENDING["Bản thiết kế: Pending Review — khoá sửa"]
+    PENDING --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>và kiểm duyệt nội dung"}
+    REVIEW -->|"Trả lại, kèm lý do: về Draft"| DESIGN
+    REVIEW -->|Duyệt| SNAP["Hệ thống xuất bộ file: file in PDF/X, xem trước 2D / 3D, đặc tả<br/>chốt design snapshot bất biến, checksum<br/>sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
+    SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>mở chat với Sale kèm thẻ yêu cầu báo giá (16)"]
+    PENDING -.->|"Đã gửi kèm yêu cầu báo giá:<br/>Sale nhận ngay, chỉ lập báo giá khi Approved"| RFQ
     PATH -->|"Không — SKU riêng của khách đã có"| QUOTE
-    SNAP --> QUOTE["Sale lập báo giá (14)<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
+    RFQ --> QUOTE["Sale lập báo giá (14)<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
     QUOTE --> DISCOUNT{"Đơn giá thấp hơn giá gợi ý<br/>vượt hạn mức giảm giá của Sale?"}
     DISCOUNT -->|Có| DISC_OK["Sales Manager duyệt trước khi gửi"]
     DISC_OK --> Q_SENT
@@ -509,6 +513,23 @@ flowchart TD
 ```
 
 > ✅ Đã chốt 2026-11-05: báo giá không bắt buộc SKU đã có giá nội bộ — chưa có thì Sale nhập giá trực tiếp; số lần in mẫu miễn phí mặc định 2. ⚠️ Giả định: một dòng phí khuôn / bản in cho mỗi SKU mẫu mới, chi tiết khuôn / bản in theo kỹ thuật in là phạm vi sau (B28). Xem [open-questions](../open-questions/README.md).
+
+**Vòng đời bản thiết kế (Design)** — chi tiết [12](../ecommerce/12-product-design/README.md) §5.1. Bản `Approved` không sửa; muốn đổi thì khách **tạo bản sửa** (bản thiết kế mới ở `Draft`, duyệt xong sinh snapshot và SKU riêng mới — 12 §4.7).
+
+```mermaid
+stateDiagram-v2
+    state "Pending Review" as PendingReview
+    [*] --> Draft: Khách bấm Thiết kế / tạo bản sửa
+    Draft --> Draft: Lưu / preflight không đạt
+    Draft --> PendingReview: Gửi duyệt, preflight đạt
+    PendingReview --> Draft: Sales Manager trả lại, có lý do
+    PendingReview --> Approved: Duyệt, xuất file PDF/X, chốt snapshot, sinh SKU riêng
+    Draft --> Archived: Khách xoá bản nháp
+    Approved --> [*]
+    Archived --> [*]
+```
+
+> ⚠️ Giả định: thẻ yêu cầu báo giá gửi kèm lúc gửi duyệt vẫn mở khi bản bị trả lại, đi tiếp theo bản đó; bản `Archived` thì thẻ đóng ([open-questions B40](../open-questions/README.md)). Ràng buộc file mặc định, chuẩn PDF/X-4, thiếu model 3D: [open-questions B34–B36](../open-questions/README.md).
 
 ### 3.2. Vòng đời đơn hàng (Order)
 
