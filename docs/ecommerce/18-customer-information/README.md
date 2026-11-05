@@ -55,7 +55,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | Nhóm khách | Mã nhóm (cố định), tên, mô tả | Quản lý kinh doanh |
 | Dữ liệu phái sinh | Lịch sử báo giá, đơn & hợp đồng, **dư nợ & quá hạn**, thiết kế đã xác nhận và SKU theo mẫu của khách, lịch sử chat | 12, 14, 15, 16, 17 |
 
-> ⚠️ Giả định: thông tin pháp lý (địa chỉ đăng ký kinh doanh, người đại diện, chức vụ) lưu trên hồ sơ khách, có thể bổ sung sau khi tạo nhưng **bắt buộc trước khi lập hợp đồng**; tài khoản ngân hàng của khách chỉ dùng để hoàn tiền. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: thông tin pháp lý (địa chỉ đăng ký kinh doanh, người đại diện, chức vụ) lưu trên hồ sơ khách, có thể bổ sung sau khi tạo nhưng **bắt buộc trước khi lập hợp đồng**; tài khoản ngân hàng của khách chỉ dùng để hoàn tiền. Xem [open-questions](../../open-questions/README.md).
 
 ### Output
 
@@ -86,7 +86,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 
    Hệ thống chuẩn hoá mã số thuế và chặn trùng (BR-01). Hồ sơ ở `Pending Activation`.
 
-   > ⚠️ Giả định: số đợt và tỷ lệ mỗi đợt do Sale nhập theo từng hợp đồng, có mẫu mặc định theo khách ở đây. Xem [open-questions](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-05: số đợt và tỷ lệ mỗi đợt do Sale nhập theo từng hợp đồng, có mẫu mặc định theo khách ở đây. Xem [open-questions](../../open-questions/README.md).
 2. **Lời mời kích hoạt** — gửi tới email người liên hệ sau khi lưu hồ sơ:
    - Link có hiệu lực **72 giờ**.
    - Kết quả gửi được ghi lại (`Sent` / `Failed`).

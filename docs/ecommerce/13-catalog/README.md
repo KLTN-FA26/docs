@@ -99,7 +99,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 4. **Chỉ nhân viên xem**; giá nội bộ **không bao giờ hiện trên sàn** (BR-04). Sale dùng làm **giá gợi ý** — điền sẵn bậc giá khi lập báo giá ([14](../14-cart-and-order/README.md)); giá thật được thoả thuận với khách và chốt trên báo giá / đơn / hợp đồng.
 5. SKU riêng **chưa có giá nội bộ** (ví dụ vừa sinh) thì Sale tự nhập bậc giá trên báo giá ([14](../14-cart-and-order/README.md)); khách không thấy khác biệt vì sàn không hiện giá.
 
-   > ⚠️ Giả định: báo giá không bắt buộc SKU phải có giá nội bộ trước; giá nội bộ chỉ là gợi ý. Xem [open-questions](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-05: báo giá không bắt buộc SKU phải có giá nội bộ trước; giá nội bộ chỉ là gợi ý. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.3. Khách duyệt & tìm hàng
 
@@ -134,9 +134,10 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
    | `Out of stock` — Hết hàng | ATP ≤ 0 |
 
    - **Không bao giờ hiện số ATP** cho khách.
-   - ATP tính **toàn hệ thống**, theo **số thùng** (mọi thùng đúng số cái chuẩn của SKU). Kết quả có thể trễ tối đa 10 giây.
+   - ATP tính **toàn hệ thống** (cộng **mọi kho**), theo **số thùng** (mọi thùng đúng số cái chuẩn của SKU). Kết quả có thể trễ tối đa 10 giây.
+   - **Quan hệ với kho xuất** *(✅ Đã chốt 2026-11-05)*: chỉ báo **không** cam kết hàng có sẵn ở một kho cụ thể. Đơn chỉ giữ hàng **tại kho xuất** Sale chọn khi đơn `Confirmed` ([17](../17-order-management/README.md) BR-22); khi chọn, hệ thống **ưu tiên gợi ý kho đang có đủ hàng** của các SKU trong đơn, rồi tới kho còn chỗ. Hàng nằm ở kho khác kho xuất không dùng cho đơn đó (không chuyển kho), nên "còn hàng" trên sàn có thể khác hàng có sẵn ở kho xuất.
 
-   > ⚠️ Giả định: ngưỡng "sắp hết" (mặc định 5) tính theo **số thùng**, cùng đơn vị với ATP hiển thị. Xem [open-questions D28](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-05: ngưỡng "sắp hết" (mặc định 5) tính theo **số thùng**, cùng đơn vị với ATP hiển thị. Xem [open-questions D28](../../open-questions/README.md).
    - SKU riêng được sản xuất theo đơn, nên thường `Out of stock`; tồn có thể còn từ **hàng dư của đơn trước** hoặc **hàng trả** đã đưa lại tồn khả dụng ([17](../17-order-management/README.md)).
    - `Out of stock` không chặn khách liên hệ Sale: Sale vẫn có thể chốt đơn, phần thiếu được bổ sung qua Đơn sản xuất ([17](../17-order-management/README.md)).
 
@@ -196,19 +197,20 @@ stateDiagram-v2
 - **BR-04:** **Sàn không hiển thị giá** — không có giá, bậc giá hay MOQ ở bất cứ màn hình catalog nào (danh sách, tìm kiếm, gợi ý, trang chi tiết, mẫu thiết kế của tôi), kể cả với SKU riêng. Khách chỉ thấy giá trên **báo giá / đơn / hợp đồng** do Sale lập (trang chứng từ trên cổng hoặc thẻ trong chat — [14](../14-cart-and-order/README.md)). Giá nội bộ (bảng giá riêng của khách sở hữu cho SKU riêng) là **nguồn giá gợi ý duy nhất**; mỗi (khách, SKU riêng) có một bảng; không có giá gốc, không có giá nhóm; quy cách không có giá.
 - **BR-05:** Giá nội bộ có **1–20 bậc** theo **số thùng**; bậc đầu là **MOQ gợi ý** (số thùng). Khi điền sẵn vào báo giá, đơn giá theo bậc chọn bằng **tổng số thùng của SKU trong báo giá**; MOQ ràng buộc là MOQ trên báo giá ([14](../14-cart-and-order/README.md) BR-07).
 - **BR-06:** Mọi giá là **VND nguyên dương**, **theo cái**; thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái ([14](../14-cart-and-order/README.md) BR-08). Không có thời hạn hiệu lực, không có duyệt giá nội bộ. Giá nội bộ chỉ là **giá gợi ý**; giá được chốt trên báo giá / đơn ([14](../14-cart-and-order/README.md)).
-- **BR-07:** Tình trạng còn hàng tính từ **ATP toàn hệ thống** của SKU riêng (định nghĩa ở [Glossary](../../glossary/README.md), [20 BR-01](../../warehouse/20-inventory-control/README.md)); **không bao giờ hiện số ATP**. ⚠️ Giả định: tính ATP theo kho phục vụ khu vực giao là phạm vi sau — xem [open-questions C3](../../open-questions/README.md).
+- **BR-07:** Tình trạng còn hàng tính từ **ATP toàn hệ thống** của SKU riêng (định nghĩa ở [Glossary](../../glossary/README.md), [20 BR-01](../../warehouse/20-inventory-control/README.md)); **không bao giờ hiện số ATP**. ✅ Đã chốt 2026-11-05 ([open-questions C3](../../open-questions/README.md)): chỉ báo **giữ tính theo mọi kho**, không theo kho phục vụ khu vực giao; giữ hàng cho đơn chỉ dùng tồn **tại kho xuất** ([17](../17-order-management/README.md) BR-22, [20 BR-01](../../warehouse/20-inventory-control/README.md)), và khi Sale chọn kho xuất hệ thống **ưu tiên gợi ý kho đang có đủ hàng** — chỉ báo trên sàn không cam kết hàng ở kho xuất (§4.4).
 - **BR-08:** **Khách không đặt hàng trên catalog.** Mọi lối "đặt hàng", "yêu cầu báo giá", "đặt lại", "yêu cầu in theo mẫu" đều mở hội thoại với Sale gắn ngữ cảnh ([16](../16-sales-chat/README.md)); đơn do Sale tạo từ báo giá đã chấp nhận ([14](../14-cart-and-order/README.md)).
 - **BR-09:** Slug khoá sau lần xuất bản đầu; nội dung catalog của sản phẩm `Discontinued` không sửa được.
 - **BR-10:** Chỉ Quản lý kinh doanh / System Admin khai báo giá nội bộ và xuất bản; Sale chỉ xem giá nội bộ. Khách không bao giờ xem được giá nội bộ.
 - **BR-11:** **Quy cách chỉ để xem và yêu cầu in**: không có giá, không có chỉ báo còn hàng, không được báo giá / đặt trực tiếp. Muốn mua, khách yêu cầu in theo mẫu qua chat; chỉ SKU riêng sinh từ thiết kế khách đã xác nhận mới được báo giá ([12](../12-product-design/README.md), [14](../14-cart-and-order/README.md)).
 - **BR-12:** **Khách đặt theo số thùng, không đặt lẻ.** Mỗi SKU riêng hiển thị **số cái chuẩn / thùng** ([01](../../warehouse/01-product-creation/README.md)); mọi số lượng khách thấy trên catalog (tình trạng còn hàng) và trên báo giá (MOQ, bậc giá) tính theo thùng.
-- **BR-13:** **Duyệt mẫu in trên sàn** chỉ dành cho **khách sở hữu** SKU của Đơn sản xuất, chỉ khi Đơn sản xuất ở `Sample Pending` và vòng mẫu đang chờ khách. Khách chỉ chọn **Duyệt** hoặc **Yêu cầu in lại** (bắt buộc ghi chú); mỗi vòng nhận đúng một kết quả, kết quả đã ghi (trên sàn hoặc qua thẻ chat) thì không đổi được. Quy tắc vòng mẫu, lý do in lại, số lần in mẫu miễn phí thuộc [17](../17-order-management/README.md). ⚠️ Giả định: mỗi vòng mẫu chỉ nhận một kết quả, đã ghi thì không đổi — xem [open-questions](../../open-questions/README.md).
+- **BR-13:** **Duyệt mẫu in trên sàn** chỉ dành cho **khách sở hữu** SKU của Đơn sản xuất, chỉ khi Đơn sản xuất ở `Sample Pending` và vòng mẫu đang chờ khách. Khách chỉ chọn **Duyệt** hoặc **Yêu cầu in lại** (bắt buộc ghi chú); mỗi vòng nhận đúng một kết quả, kết quả đã ghi (trên sàn hoặc qua thẻ chat) thì không đổi được. Quy tắc vòng mẫu, lý do in lại, số lần in mẫu miễn phí thuộc [17](../17-order-management/README.md). ✅ Đã chốt 2026-11-05: mỗi vòng mẫu chỉ nhận một kết quả, đã ghi thì không đổi — xem [open-questions](../../open-questions/README.md).
 
 ### Edge case
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
 | Hết hàng ngay khi khách đang xem | Chỉ báo cập nhật sau tối đa 10 giây; Sale kiểm lại tồn khi lập đơn ([14](../14-cart-and-order/README.md)) |
+| Sàn báo `In stock` nhưng hàng nằm rải ở nhiều kho, không kho nào đủ cho đơn | Chỉ báo tính theo mọi kho (BR-07). Khi đơn `Confirmed`, Sale chọn kho xuất theo gợi ý (ưu tiên kho đủ hàng, rồi kho còn chỗ); phần thiếu tại kho xuất đi Đơn sản xuất ([17](../17-order-management/README.md) §4.2) |
 | Khách muốn mua SKU riêng `Out of stock` | Khách vẫn mở chat với Sale; Sale báo thời gian có hàng, đơn thiếu hàng được bổ sung qua Đơn sản xuất ([17](../17-order-management/README.md)) |
 | Khách muốn đặt thẳng một quy cách (chưa có thiết kế) | Không có giá, không báo giá được (BR-11); khách bấm "Yêu cầu in theo mẫu" → luồng thiết kế ([12](../12-product-design/README.md)) |
 | Khách chưa có SKU riêng nào | Catalog chỉ hiện sản phẩm và quy cách; mục mẫu thiết kế của tôi trống hoặc chỉ có bản chưa xác nhận; khách liên hệ Sale qua chat |
@@ -234,7 +236,7 @@ stateDiagram-v2
 | Module | Quan hệ |
 |--------|---------|
 | [01 · Product Creation](../../warehouse/01-product-creation/README.md) | Nguồn sản phẩm `CUSTOMIZABLE`, quy cách, ảnh đã đăng, cây danh mục; điều kiện xuất bản; trạng thái `Published`; SKU riêng của khách thuộc sản phẩm `CUSTOMIZABLE` và quy cách thùng (số cái chuẩn / thùng) |
-| [20 · Inventory Control](../../warehouse/20-inventory-control/README.md) | ATP toàn hệ thống của SKU riêng (theo số thùng) để tính chỉ báo còn hàng |
+| [20 · Inventory Control](../../warehouse/20-inventory-control/README.md) | ATP toàn hệ thống (mọi kho) của SKU riêng (theo số thùng) để tính chỉ báo còn hàng; giữ hàng cho đơn chỉ dùng tồn tại kho xuất |
 | [12 · Quản lý mẫu & thiết kế](../12-product-design/README.md) | Mẫu thiết kế của khách và SKU riêng sinh khi khách xác nhận; khách xác nhận / yêu cầu sửa thiết kế từ mục mẫu thiết kế của tôi; khách cần sửa file sau khi xem mẫu in → bản sửa |
 | [14 · Báo giá, Đơn hàng & Hợp đồng](../14-cart-and-order/README.md) | Giá nội bộ của khách làm giá gợi ý của báo giá; giá chỉ hiện với khách trên báo giá / đơn / hợp đồng; yêu cầu báo giá và đặt lại đi qua Sale |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Khách mở chat gắn ngữ cảnh sản phẩm / quy cách / SKU riêng / mẫu thiết kế / đơn cũ; Sale gửi link sản phẩm / SKU riêng; thẻ duyệt mẫu in (cùng thao tác với mục mẫu thiết kế của tôi) |

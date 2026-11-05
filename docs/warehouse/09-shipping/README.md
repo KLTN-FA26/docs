@@ -29,7 +29,7 @@ Module hỗ trợ **hai hình thức giao** (Sale chọn theo từng đơn — [
 
 Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn vị vận chuyển thuê ngoài thực hiện. Khách thanh toán theo các **đợt của hợp đồng mua bán** bằng chuyển khoản ([15](../../ecommerce/15-payment/README.md)); không có thu hộ khi giao.
 
-> ⚠️ Giả định: khách không tự chọn hình thức giao trên cổng khách hàng; phí vận chuyển (nếu thu của khách) ghi trong điều khoản giao hàng của hợp đồng mua bán, cách tính phí cho đơn giao nguyên chuyến chưa xác định. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: khách không tự chọn hình thức giao trên cổng khách hàng. **Module 09 không tính phí vận chuyển thu của khách** (kể cả đơn giao nguyên chuyến): phí này do Sale nhập thành **dòng phí vận chuyển** trên báo giá / đơn / hợp đồng mua bán, cộng vào tổng tiền và thu theo các đợt thanh toán ([14](../../ecommerce/14-cart-and-order/README.md) BR-20, [15](../../ecommerce/15-payment/README.md)). Ước tính tải và kế hoạch xếp xe ở đây không sinh ra phí cho khách.
 
 ---
 
@@ -173,7 +173,9 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - Mọi xe đã bàn giao → kế hoạch `Dispatched`.
 9. **Đơn không huỷ được** khi đã có thùng dán nhãn giao hàng ([08](../08-packing/README.md) BR-04), nên kiện trong kế hoạch không bị gỡ vì huỷ đơn. Khi cần bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`):
    - chưa có xe nào bắt đầu xếp → mở lại kế hoạch về `Planned` (BR-14), gỡ kiện, các xe bị ảnh hưởng **chờ tính lại**;
-   - kiện đã nằm trên xe đang xếp → Quản lý kho **huỷ có kiểm soát** xe đó (BR-14), **quét dỡ kiện**; xe không còn gì để chở thì bị huỷ.
+   - kiện đã nằm trên xe đang xếp → Quản lý kho **huỷ có kiểm soát** xe đó (BR-14), **quét dỡ kiện** *(✅ Đã chốt 2026-11-05)*:
+     - kiện bị gỡ **bị loại khỏi kế hoạch** (lý do `REMOVED_FROM_VEHICLE`), trả về khu `DISPATCH` chờ kế hoạch khác;
+     - chuyến `Planned` mới của xe dùng **sơ đồ tính lại cho các kiện còn lại** của xe (hệ thống tính lại riêng xe đó, xuất lại PDF sơ đồ xếp); không còn kiện nào thì xe bị huỷ, không sinh chuyến mới.
 10. **Ghi nhận kết quả giao** — không theo dõi hành trình. Quản lý kho ghi nhận kết quả theo §4.3.
 
 **Chế độ chọn xe:**
@@ -261,7 +263,7 @@ stateDiagram-v2
 |------------|---------|----------------------|--------------|
 | `Planned` | *(Chỉ giao nguyên chuyến)* Một xe của kế hoạch đã chốt; chưa đặt xe | → `Vehicle Booked`, → `Cancelled` (theo kế hoạch; hoặc **bỏ xe khỏi kế hoạch** khi mọi xe khác đã rời kho — BR-14) | Hệ thống (khi chốt kế hoạch, hoặc khi một xe bị huỷ có kiểm soát) |
 | `Vehicle Booked` | *(Chỉ giao nguyên chuyến)* Đã ghi nhận đặt xe | → `Loading`, → `Planned` (huỷ đặt xe, có lý do), → `Cancelled` (theo kế hoạch) | Dispatch Staff |
-| `Loading` | Đang quét kiện lên xe. Gửi kiện qua hãng: mở chuyến là vào thẳng trạng thái này. | → `Dispatched`, → `Cancelled` (xe của kế hoạch: chỉ **huỷ có kiểm soát**, sinh chuyến `Planned` mới cùng sơ đồ — BR-14) | Dispatch Staff |
+| `Loading` | Đang quét kiện lên xe. Gửi kiện qua hãng: mở chuyến là vào thẳng trạng thái này. | → `Dispatched`, → `Cancelled` (xe của kế hoạch: chỉ **huỷ có kiểm soát**, sinh chuyến `Planned` mới cùng sơ đồ, hoặc sơ đồ tính lại nếu có kiện bị gỡ — BR-14) | Dispatch Staff |
 | `Dispatched` | Đã ký bàn giao, xe rời kho | *(cuối)* | Dispatch Staff |
 | `Cancelled` | Huỷ, có lý do; shipment & kiện trở lại khu `DISPATCH`. Xe đã xếp bị huỷ có kiểm soát: kiện còn trên xe bị **khoá tới khi quét dỡ** *(Quyết định 02/11/2026)* | *(cuối)* | Quản lý kho (gửi kiện qua hãng); Quản lý kho / System Admin (huỷ có kiểm soát; bỏ xe `Planned` khỏi kế hoạch); theo kế hoạch (giao nguyên chuyến) |
 
@@ -282,7 +284,7 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-Xe của kế hoạch đang `Loading` bị **huỷ có kiểm soát** → chuyến `Cancelled` và hệ thống sinh chuyến `Planned` mới cùng sơ đồ cho xe đó (BR-14). **Bỏ xe khỏi kế hoạch** áp dụng cho xe còn `Planned` (chưa đặt xe) khi mọi xe khác đã rời kho: chuyến `Cancelled`, kế hoạch `Dispatched`, kiện chờ kế hoạch mới (BR-14) *(Quyết định 02/11/2026)*.
+Xe của kế hoạch đang `Loading` bị **huỷ có kiểm soát** → chuyến `Cancelled` và hệ thống sinh chuyến `Planned` mới cho xe đó: cùng sơ đồ nếu không gỡ kiện nào; nếu có kiện bị gỡ khỏi xe thì các kiện đó bị loại khỏi kế hoạch (`REMOVED_FROM_VEHICLE`) và chuyến mới dùng **sơ đồ tính lại cho các kiện còn lại** (BR-14) *(✅ Đã chốt 2026-11-05)*. **Bỏ xe khỏi kế hoạch** áp dụng cho xe còn `Planned` (chưa đặt xe) khi mọi xe khác đã rời kho: chuyến `Cancelled`, kế hoạch `Dispatched`, kiện chờ kế hoạch mới (BR-14) *(Quyết định 02/11/2026)*.
 
 ### 5.3. Kế hoạch chuyến xe (Load Plan)
 
@@ -302,6 +304,7 @@ Xe của kế hoạch đang `Loading` bị **huỷ có kiểm soát** → chuy�
 | `LEFT_BEHIND` | Kiện không xếp được, đã xác nhận để lại |
 | `PLAN_CANCELLED` | Kế hoạch bị huỷ |
 | `VEHICLE_DROPPED` | Xe `Planned` bị bỏ khỏi kế hoạch khi các xe khác đã rời kho *(Quyết định 02/11/2026)* |
+| `REMOVED_FROM_VEHICLE` | Kiện bị gỡ khỏi xe đang xếp qua huỷ có kiểm soát (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`…); trả về khu `DISPATCH` chờ kế hoạch khác *(✅ Đã chốt 2026-11-05)* |
 
 ```mermaid
 stateDiagram-v2
@@ -332,10 +335,10 @@ stateDiagram-v2
 - **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn đã `Handed Over`. Còn phần chưa giao thì đơn ở `Partially Fulfilled`; điều này chỉ xảy ra khi đơn được Sale cho phép giao một phần.
 - **BR-04:** **Chặn bàn giao theo hợp đồng.** Shipment của đơn chỉ được bàn giao khi **mọi đợt thanh toán mốc `BEFORE_DELIVERY`** trong hợp đồng mua bán của đơn đã `Paid` ([15](../../ecommerce/15-payment/README.md)); đợt `Partially Paid` vẫn bị chặn. Áp dụng cho **cả gửi kiện và giao nguyên chuyến**. Đợt `AFTER_DELIVERY` không chặn bàn giao. Hệ thống **không thu tiền khi giao** (không có thu hộ). *(Đã chốt 2026-11-04.)*
 
-  > ⚠️ Giả định: với đơn giao nhiều lần (giao một phần), **mọi** đợt `BEFORE_DELIVERY` của hợp đồng phải thu trước **lần bàn giao đầu tiên**; gắn từng đợt `BEFORE_DELIVERY` với từng lần giao là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
+  > ✅ Đã chốt 2026-11-05: với đơn giao nhiều lần (giao một phần), **mọi** đợt `BEFORE_DELIVERY` của hợp đồng phải thu trước **lần bàn giao đầu tiên**; gắn từng đợt `BEFORE_DELIVERY` với từng lần giao là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
 - **BR-05:** Trạng thái đơn phía khách hàng phản ánh trạng thái shipment. Nhiều kiện → hiển thị trạng thái tổng hợp (ví dụ "giao một phần").
 - **BR-06:** Hàng hoàn (RTO) nhập lại kho **chỉ qua [03](../03-receipt/README.md) phiếu loại Hàng hoàn** (không cộng thẳng tồn): chỉ nhận thùng thuộc shipment, nhập thẳng vào khu `QUARANTINE`; Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt ([20](../20-inventory-control/README.md)).
-- **BR-07:** Chi phí vận chuyển thu của khách (nếu có) và cước trả hãng là hai khoản độc lập; đối soát riêng.
+- **BR-07:** Phí vận chuyển thu của khách (nếu có) và cước trả hãng là hai khoản độc lập; đối soát riêng. **09 không tính phí thu của khách**: phí đó là **dòng phí vận chuyển** Sale nhập trên báo giá / đơn / hợp đồng ([14](../../ecommerce/14-cart-and-order/README.md) BR-20), thu theo các đợt thanh toán ([15](../../ecommerce/15-payment/README.md)) *(✅ Đã chốt 2026-11-05)*.
 
 **Giao nguyên chuyến & Load Planning:**
 
@@ -355,7 +358,7 @@ stateDiagram-v2
 
   Không được để lại phần của đơn không cho giao một phần.
 - **BR-14:** Sau `Confirmed`, danh sách kiện và sơ đồ xếp bị khoá. Muốn sửa phải mở lại về `Planned` (kèm lý do) khi **chưa xe nào bắt đầu xếp**. Mở lại huỷ các chuyến của kế hoạch, kể cả chuyến đã đặt xe. Đã bắt đầu xếp thì **không mở lại** và **không huỷ thường** được; chỉ có **huỷ có kiểm soát** *(Quyết định 29/10/2026 và 02/11/2026)*:
-  - Chỉ **huỷ, không bao giờ mở lại**. Huỷ **cả kế hoạch** hoặc **một xe**. Xe bị huỷ được dỡ hàng; xe đó quay về `Planned` với cùng sơ đồ xếp (chuyến mới) để thuê xe khác, các xe còn lại vẫn chạy tiếp.
+  - Chỉ **huỷ, không bao giờ mở lại**. Huỷ **cả kế hoạch** hoặc **một xe**. Xe bị huỷ được dỡ hàng; xe đó quay về `Planned` (chuyến mới) để thuê xe khác, các xe còn lại vẫn chạy tiếp. Chuyến mới dùng cùng sơ đồ xếp, **trừ khi có kiện bị gỡ khỏi xe**: kiện bị gỡ bị loại khỏi kế hoạch (lý do `REMOVED_FROM_VEHICLE`, trả về khu `DISPATCH` chờ kế hoạch khác) và chuyến mới dùng **sơ đồ tính lại cho các kiện còn lại**; xe không còn kiện nào thì bị huỷ, không sinh chuyến mới *(✅ Đã chốt 2026-11-05)*.
   - Có **bất kỳ xe nào đã `Dispatched`** (đã rời kho) thì **không huỷ cả kế hoạch** được; huỷ từng xe còn lại.
   - Lý do là mã (`XE_HONG`, `SAI_XE`, `KIEN_KHONG_VUA`, `KHAC`) **kèm ghi chú bắt buộc với mọi mã**. Quyền riêng, mặc định gán **Quản lý kho** và **System Admin** (cấp theo mã quyền — [00 §2.3](../../00-system-overview/README.md)).
   - Kế hoạch / xe bị huỷ chuyển `Cancelled` ngay, nhưng kiện còn trên xe bị **khoá tới khi quét dỡ từng kiện** (Quản lý kho có thể xác nhận không quét khi nhãn hỏng, ghi người + thời điểm + ghi chú). Kiện đã tách "để lại" giữ nguyên.
@@ -392,7 +395,7 @@ stateDiagram-v2
 | Hãng hoàn về thùng không thuộc shipment | Phiếu Hàng hoàn không nhận thùng đó ([03](../03-receipt/README.md)); Quản lý kho xử lý với hãng ngoài hệ thống |
 | Một shipment của chuyến chưa đủ điều kiện (đợt `BEFORE_DELIVERY` chưa thu, đơn treo) | Cả chuyến bị từ chối bàn giao; bỏ shipment đó khỏi chuyến rồi ký cho các shipment còn lại |
 | Khách mới chuyển một phần đợt `BEFORE_DELIVERY` (`Partially Paid`) | Vẫn chặn bàn giao; Sale nhắc khách qua chat ([16](../../ecommerce/16-sales-chat/README.md)); shipment chờ ở khu `DISPATCH` |
-| Xe giao nguyên chuyến đã xếp nhưng một đơn trên xe chưa thu đợt `BEFORE_DELIVERY` | Ký bàn giao xe đó bị chặn; chờ Kế toán ghi nhận tiền, hoặc dỡ kiện của đơn đó (Quản lý kho huỷ có kiểm soát xe đó — BR-14; kiện bị khoá tới khi quét dỡ) |
+| Xe giao nguyên chuyến đã xếp nhưng một đơn trên xe chưa thu đợt `BEFORE_DELIVERY` | Ký bàn giao xe đó bị chặn; chờ Kế toán ghi nhận tiền, hoặc dỡ kiện của đơn đó (Quản lý kho huỷ có kiểm soát xe đó — BR-14; kiện bị khoá tới khi quét dỡ). Kiện của đơn đó bị loại khỏi kế hoạch, chờ ở khu `DISPATCH`; chuyến `Planned` mới của xe dùng sơ đồ tính lại cho các kiện còn lại |
 | Nhãn giao rách, không quét được | Hệ thống không nhận kiện; in lại nhãn theo mã LPN ở [08](../08-packing/README.md) rồi quét lại |
 | Một đơn đi nhiều hãng | Mỗi shipment gán một hãng, bàn giao trên chuyến của hãng đó; đơn `Shipped` khi mọi kiện đã bàn giao |
 | Load Planning: còn kiện không xếp được | Hệ thống trả danh sách kèm lý do; Dispatch Staff thêm xe / đổi loại xe / đổi chế độ rồi tính lại, hoặc xác nhận để lại. Khi bắt đầu xếp xe, kiện để lại tách thành shipment mới cho chuyến sau. |
@@ -417,7 +420,7 @@ stateDiagram-v2
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu xuất hàng (`DISPATCH`) — nơi kiểm thùng & dán nhãn, gom shipment, chờ xe; địa chỉ kho in trên nhãn kiện và biên bản |
 | [17 · Order Management](../../ecommerce/17-order-management/README.md) | Kho xuất và hình thức giao do Sale chọn ở đơn; giao một phần do Sale quyết; trạng thái `Shipped` / `Partially Fulfilled` / `Delivered` / `Delivery Failed` / `Returned`; đơn không huỷ được từ khi thùng đầu tiên dán nhãn |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` của hợp đồng chưa thu; ngày giao thành công là mốc đến hạn của đợt `AFTER_DELIVERY` |
-| [14 · Quote, Order & Contract](../../ecommerce/14-cart-and-order/README.md) | Hợp đồng mua bán của đơn: điều khoản giao hàng, lịch các đợt thanh toán |
+| [14 · Quote, Order & Contract](../../ecommerce/14-cart-and-order/README.md) | Hợp đồng mua bán của đơn: điều khoản giao hàng, lịch các đợt thanh toán; **dòng phí vận chuyển** thu của khách do Sale nhập ở 14 (09 không tính phí) |
 | [03 · Receipt](../03-receipt/README.md) | Hàng hoàn (RTO) nhập lại kho qua phiếu nhập loại **Hàng hoàn** (quét LPN, chỉ nhận thùng thuộc shipment), vào khu `QUARANTINE` |
 | [20 · Inventory Control](../20-inventory-control/README.md) | Hàng hoàn ở `Quarantine`; Quản lý kho gỡ cách ly hoặc ghi giảm bằng điều chỉnh có duyệt |
 | [05 · Putaway](../05-putaway/README.md) | Hàng hoàn đã gỡ cách ly được cất lại về bin |

@@ -7,6 +7,8 @@
 > **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng**, không đặt lẻ; giá vẫn theo cái; mọi thùng đúng số cái chuẩn của SKU (thùng lệch không nhận).
 >
 > **Đã chốt 2026-11-05 (bổ sung):** bỏ role **Inventory Planner** và **Điều phối đơn hàng** (việc chuyển cho Sale và Quản lý kho); đổi **Quản trị bán hàng (E-commerce Admin)** thành **Quản lý kinh doanh (Sales Manager)**; "Yêu cầu sản xuất" đổi thành **Đơn sản xuất (Production Order)** — một chứng từ chung cho xưởng của công ty và đối tác, Sale lập, Sales Manager duyệt và gửi, có bước **khách duyệt mẫu in**; **bỏ module 10 · chuyển kho** — mỗi đơn xuất từ một kho, Đơn sản xuất giao thẳng về kho xuất, kho theo dõi **sức chứa (m³)** gồm hàng đang có và hàng sắp về; **bỏ hạn dùng** (ly và bao bì không có hạn dùng); sàn **ẩn giá**, bảng giá chỉ dùng nội bộ; thêm luồng **nhập hàng hoàn** vào khu cách ly.
+>
+> **✅ Đã chốt 2026-11-05 (phí vận chuyển, thuế & hoá đơn):** **phí vận chuyển** thu của khách là **một dòng phí** Sale nhập trên báo giá / đơn / hợp đồng (hệ thống không tự tính, module giao hàng không tính phí); báo giá / đơn / hợp đồng ghi **thuế VAT theo từng dòng** (theo nhóm thuế của sản phẩm) và **tổng có thuế**, lịch thanh toán chia trên tổng có thuế ([14](../ecommerce/14-cart-and-order/README.md), [15](../ecommerce/15-payment/README.md)). **Hoá đơn điện tử (VAT e-invoice) nằm ngoài phạm vi hệ thống** — xuất ở phần mềm hoá đơn bên ngoài; hệ thống chỉ cung cấp số liệu.
 
 ## 1. Mục tiêu hệ thống (Goals)
 
