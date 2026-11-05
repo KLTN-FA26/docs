@@ -7,11 +7,14 @@ Di chuyển **nguyên thùng LPN** **giữa hai vị trí trong cùng một kho*
 - **gom thùng** của cùng SKU / lô về ít vị trí hơn, giải phóng bin;
 - **sửa vị trí sai** sau khi cất hàng;
 - **dọn vị trí** sắp ngưng hoặc bảo trì;
-- đưa thùng từ bin dự trữ ra bin cho phép lấy hàng, khi người vận hành thấy cần.
+- đưa thùng từ bin dự trữ ra bin cho phép lấy hàng, khi người vận hành thấy cần;
+- **dời thùng từ khu tạm `OVERFLOW` lên bin** khi kho có chỗ trở lại ([05](../05-putaway/README.md) BR-13, [06 §4.6](../06-warehouse-map-slotting/README.md)).
 
-> **Đã chốt 2026-11-04:** mọi tồn kho nằm trong **thùng LPN** do bộ phận sản xuất đóng sẵn, chỉ xuất nguyên thùng. Vì vậy di chuyển trong kho là **di chuyển nguyên thùng LPN bằng tay** — đưa vào phạm vi hiện tại; không mở thùng, không di chuyển một phần thùng.
+> **Đã chốt 2026-11-04:** mọi tồn kho nằm trong **thùng LPN** do đơn vị sản xuất đóng sẵn, chỉ xuất nguyên thùng. Vì vậy di chuyển trong kho là **di chuyển nguyên thùng LPN bằng tay** — đưa vào phạm vi hiện tại; không mở thùng, không di chuyển một phần thùng.
 
 Hiện tại đây là **một thao tác di chuyển thủ công**, ghi ngay khi xác nhận; không có nhiệm vụ di chuyển (move task) qua nhiều bước.
+
+> **Đã chốt 2026-11-05:** **không có chuyển kho** giữa các kho. Mỗi đơn bán có đúng một kho xuất; hàng không được đưa từ kho này sang kho khác trong hệ thống. Dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md)) — ⚠️ giả định, xem [open-questions](../../open-questions/README.md).
 
 > ⚠️ Giả định: **tự động đưa thùng ra vùng lấy hàng** (theo ngưỡng min / max của bin), **tối ưu lại vị trí** (re-slotting theo đề xuất, có duyệt) và **nhiệm vụ di chuyển** có phân công và vòng đời thuộc phạm vi giai đoạn sau. Xem [open-questions C2, C24](../../open-questions/README.md).
 
@@ -26,8 +29,8 @@ Các luồng khác cũng đổi vị trí của thùng nhưng thuộc module ri�
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho (Warehouse Staff)** | Quét thùng LPN và vị trí đích, di chuyển thùng giữa hai vị trí trong kho được gán |
-| **Quản lý kho (Warehouse Manager)** | Như nhân viên kho; xử lý chênh lệch phát hiện khi di chuyển bằng kiểm kê / điều chỉnh tồn ([20](../20-inventory-control/README.md)) |
-| **Inventory Planner, System Admin** | Có quyền di chuyển theo cấu hình phân quyền mặc định |
+| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); dọn chỗ, dời thùng từ `OVERFLOW` lên bin khi theo dõi Bảng sức chứa kho ([06](../06-warehouse-map-slotting/README.md)); xử lý chênh lệch phát hiện khi di chuyển bằng kiểm kê / điều chỉnh tồn ([20](../20-inventory-control/README.md)) |
+| **Quản trị hệ thống (System Admin)** | Có quyền di chuyển theo cấu hình phân quyền mặc định |
 
 - Cả **vị trí hiện tại của thùng và vị trí đích** phải thuộc kho người thao tác được gán (với role theo kho).
 
@@ -59,17 +62,17 @@ Các luồng khác cũng đổi vị trí của thùng nhưng thuộc module ri�
 1. NV kho / Quản lý kho **quét các thùng LPN** cần dời, rồi **quét vị trí đích**.
 2. Hệ thống kiểm cho từng thùng:
    - thùng tồn tại và **đang chứa hàng** (`In Stock` — [20](../20-inventory-control/README.md));
-   - vị trí đích **khác** vị trí hiện tại của thùng và **cùng kho**; khác kho → dùng [lệnh chuyển kho](../10-inter-warehouse-transfer/README.md);
+   - vị trí đích **khác** vị trí hiện tại của thùng và **cùng kho**; khác kho → từ chối (không có chuyển kho — BR-01);
    - cả hai vị trí thuộc kho người thao tác được gán;
    - vị trí đích **dùng được** (trạng thái hiệu lực `Active` — [06](../06-warehouse-map-slotting/README.md)). Vị trí nguồn **không cần**: dọn thùng khỏi bin bị khoá / đang bảo trì chính là cách làm trống nó;
    - không vị trí nào đang **bị một phiếu kiểm kê giữ** cho SKU / lô của thùng ([20](../20-inventory-control/README.md) BR-10);
-   - thùng **không đang bị giữ / phân bổ** cho đơn (kể cả thùng ở khu chờ xuất) hoặc cho lệnh chuyển kho;
+   - thùng **không đang bị giữ / phân bổ** cho đơn (kể cả thùng ở khu chờ xuất);
    - vị trí đích **không phải khu chờ xuất** (`STAGING`): chỉ thùng lấy cho đơn mới vào khu này, qua [07](../07-picking/README.md) (BR-09).
 
    Một thùng không hợp lệ thì **không thùng nào** trong lần đó được di chuyển; hệ thống báo lỗi theo từng thùng.
-3. Hợp lệ → các thùng chuyển **ngay**, giữ nguyên SKU, lô, hạn dùng, ngày nhận, số trong thùng và trạng thái; mỗi thùng ghi một dòng sổ `MOVE`.
+3. Hợp lệ → các thùng chuyển **ngay**, giữ nguyên SKU, lô, ngày nhận, số trong thùng và trạng thái; mỗi thùng ghi một dòng sổ `MOVE`.
 
-> ⚠️ Giả định: thao tác này **không kiểm** lớp lưu trữ, sức chứa, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
+> ⚠️ Giả định: thao tác này **không kiểm** lớp lưu trữ, thể tích, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
 
 ### 4.2. Chênh lệch phát hiện khi di chuyển
 
@@ -79,7 +82,7 @@ Các luồng khác cũng đổi vị trí của thùng nhưng thuộc module ri�
 
 ## 5. Trạng thái / Vòng đời (Lifecycle)
 
-Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi các dòng sổ `MOVE` (mỗi thùng một dòng), không có trạng thái trung gian. Thùng giữ nguyên trạng thái `In Stock`; trạng thái của hàng trong thùng (`Available`, `Quarantine`, `Expired`…) đi theo thùng sang vị trí mới ([20 §5](../20-inventory-control/README.md)).
+Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi các dòng sổ `MOVE` (mỗi thùng một dòng), không có trạng thái trung gian. Thùng giữ nguyên trạng thái `In Stock`; trạng thái của hàng trong thùng (`Available`, `Quarantine`…) đi theo thùng sang vị trí mới ([20 §5](../20-inventory-control/README.md)).
 
 ---
 
@@ -87,11 +90,11 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 
 ### Business rules
 
-- **BR-01:** Vị trí đích phải **khác** vị trí hiện tại của thùng và **cùng một kho**. Khác kho → [Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md).
-- **BR-02:** Tổng tồn của kho **không đổi**; chỉ vị trí của thùng thay đổi. SKU, lô, hạn dùng, ngày nhận, số trong thùng và trạng thái giữ nguyên.
+- **BR-01:** Vị trí đích phải **khác** vị trí hiện tại của thùng và **cùng một kho**. Hệ thống **không có chuyển kho** *(Đã chốt 2026-11-05)*: khác kho → từ chối.
+- **BR-02:** Tổng tồn của kho **không đổi**; chỉ vị trí của thùng thay đổi. SKU, lô, ngày nhận, số trong thùng và trạng thái giữ nguyên.
 - **BR-03:** Vị trí đích phải **dùng được** (trạng thái hiệu lực `Active`). Vị trí nguồn thì không cần.
 - **BR-04:** **Chỉ di chuyển nguyên thùng** *(Đã chốt 2026-11-04)*: xác định thùng bằng **quét mã LPN**; không mở thùng, không tách hay di chuyển một phần thùng. Chỉ thùng đang chứa hàng (`In Stock`) được di chuyển.
-- **BR-05:** Thùng **đang bị giữ / phân bổ** cho đơn (kể cả ở khu chờ xuất) hoặc cho lệnh chuyển kho **không** di chuyển bằng thao tác này — tránh người lấy hàng tới vị trí đã trống.
+- **BR-05:** Thùng **đang bị giữ / phân bổ** cho đơn (kể cả ở khu chờ xuất) **không** di chuyển bằng thao tác này — tránh người lấy hàng tới vị trí đã trống.
 - **BR-06:** Không di chuyển ra / vào một vị trí đang bị **phiếu kiểm kê** giữ cho SKU / lô của thùng — kiểm kê đếm trên sổ sách lúc đếm, di chuyển giữa chừng sẽ làm sai chênh lệch.
 - **BR-07:** Mọi di chuyển để lại dòng sổ `MOVE` cho từng thùng (LPN, nguồn, đích, SKU, lô, số lượng, người, thời điểm). Gửi lại cùng mã yêu cầu không di chuyển lần hai. Một lần xác nhận thành công hoặc thất bại **trọn vẹn** cho mọi thùng.
 - **BR-08:** Người thao tác chỉ di chuyển trong kho mình được gán (với role theo kho).
@@ -101,7 +104,9 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Thùng đang giữ cho đơn / lệnh chuyển kho | Bị từ chối; muốn dời thì nhả / phân bổ lại trước |
+| Thùng đang giữ cho đơn | Bị từ chối; muốn dời thì nhả / phân bổ lại trước |
+| Vị trí đích thuộc kho khác | Bị từ chối (BR-01); không có chuyển kho. Dời / đóng kho xử lý bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md), ⚠️ giả định) |
+| Kho có chỗ trở lại sau khi đã cất thùng vào `OVERFLOW` | Quét thùng ở `OVERFLOW`, quét bin đích để dời lên bin; người di chuyển tự chọn bin phù hợp (⚠️ giả định §4.1) |
 | Vị trí đích đang `Blocked` / `Maintenance` / `Inactive` | Bị từ chối |
 | Thùng đang ở vị trí `Blocked` / `Maintenance` | Được di chuyển ra (dọn bin) |
 | Vị trí đang có phiếu kiểm kê mở cho SKU / lô của thùng | Bị từ chối tới khi phiếu xong và chênh lệch có quyết định |
@@ -118,9 +123,8 @@ Di chuyển thủ công **không có vòng đời**: một lần xác nhận ghi
 
 | Module | Quan hệ |
 |--------|---------|
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Vị trí, trạng thái hiệu lực; re-slotting là phạm vi sau |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Vị trí, trạng thái hiệu lực; khu `OVERFLOW` và Bảng sức chứa kho; re-slotting là phạm vi sau |
 | [07 · Picking](../07-picking/README.md) | Thùng đã phân bổ và thùng ở khu chờ xuất không bị dời; tự động đưa thùng ra vùng lấy hàng là phạm vi sau |
-| [05 · Putaway](../05-putaway/README.md) | Cất nguyên thùng có kiểm ràng buộc cứng; di chuyển nguyên thùng dùng để sửa vị trí sau khi cất |
-| [10 · Inter-warehouse Transfer](../10-inter-warehouse-transfer/README.md) | Phân biệt phạm vi: trong kho (11) vs giữa kho (10) |
+| [05 · Putaway](../05-putaway/README.md) | Cất nguyên thùng có kiểm ràng buộc cứng; di chuyển nguyên thùng dùng để sửa vị trí sau khi cất và dời thùng từ khu `OVERFLOW` lên bin |
 | [20 · Inventory Control](../20-inventory-control/README.md) | Thùng LPN và vòng đời thùng; dòng sổ `MOVE`; phiếu kiểm kê chặn di chuyển; chênh lệch xử lý bằng kiểm kê / điều chỉnh có duyệt |
-| [00 · System Overview §5](../../00-system-overview/README.md) | Luồng Transfer / điều phối tồn kho |
+| [00 · System Overview](../../00-system-overview/README.md) | Luồng di chuyển hàng trong kho |

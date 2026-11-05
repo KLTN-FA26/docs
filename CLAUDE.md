@@ -98,7 +98,7 @@ Sau khi sửa xong, Grep lại từ khóa vừa đổi trên toàn `docs/` để
 docs/
 ├── README.md                     Mục lục tổng
 ├── 00-system-overview/README.md
-├── warehouse/NN-<slug>/README.md   NN = 01, 03, 05..11, 20 (02, 04, 19 đã xoá 2026-11-04; 20-inventory-control bổ sung sau)
+├── warehouse/NN-<slug>/README.md   NN = 01, 03, 05..09, 11, 20 (02, 04, 19 xoá 2026-11-04; 10 xoá 2026-11-05; 20-inventory-control bổ sung sau)
 ├── ecommerce/NN-<slug>/README.md   NN = 12..18
 ├── diagrams/README.md
 ├── glossary/README.md
@@ -106,7 +106,7 @@ docs/
 ```
 
 - **Mỗi module = một thư mục** có prefix số thứ tự + `README.md` bên trong (để trình duyệt Git render khi mở thư mục).
-- Prefix số `01`..`18` chạy xuyên suốt theo **thứ tự luồng nghiệp vụ**; số `02`, `04`, `19` bỏ trống (module đã xoá khi thu hẹp scope 2026-11-04); ngoại lệ `20-inventory-control` (chạy song song, kiểm soát tồn) được thêm sau — không đổi số/đổi thứ tự khi chưa hỏi.
+- Prefix số `01`..`18` chạy xuyên suốt theo **thứ tự luồng nghiệp vụ**; số `02`, `04`, `19` (xoá 2026-11-04) và `10` (xoá 2026-11-05) bỏ trống; ngoại lệ `20-inventory-control` (chạy song song, kiểm soát tồn) được thêm sau — không đổi số/đổi thứ tự khi chưa hỏi.
 - Không tạo file `.md` rời ngoài cấu trúc này khi chưa được duyệt. Ảnh/tài nguyên đi kèm module đặt trong chính thư mục module đó.
 - Link giữa các file dùng **đường dẫn tương đối** (ví dụ từ `warehouse/03-receipt/` tới payment là `../../ecommerce/15-payment/README.md`).
 

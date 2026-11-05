@@ -2,112 +2,191 @@
 
 Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hết trình xem Markdown, các khối ```mermaid``` được render tự động. Nếu trình xem không hỗ trợ, dán nội dung vào <https://mermaid.live>.
 
-> **Đã chốt 2026-11-04:** kho chỉ là **kho thành phẩm**; **sản xuất nằm ngoài hệ thống** — hệ thống chỉ gửi **Yêu cầu sản xuất** ([17](../ecommerce/17-order-management/README.md)) và **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)); kho không kiểm tra chất lượng khi nhập, chỉ đếm đủ / thiếu / thừa. Mỗi đơn có một **hợp đồng mua bán**, khách thanh toán theo **các đợt của hợp đồng** ([14](../ecommerce/14-cart-and-order/README.md), [15](../ecommerce/15-payment/README.md)).
+> **Đã chốt 2026-11-04:** kho chỉ là **kho thành phẩm**; **sản xuất nằm ngoài hệ thống** — hệ thống chỉ gửi **Đơn sản xuất (Production Order)** ([17](../ecommerce/17-order-management/README.md)) và **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)); kho không kiểm tra chất lượng khi nhập, chỉ đếm đủ / thiếu / thừa. Mỗi đơn có một **hợp đồng mua bán**, khách thanh toán theo **các đợt của hợp đồng** ([14](../ecommerce/14-cart-and-order/README.md), [15](../ecommerce/15-payment/README.md)).
 >
-> **Đã chốt 2026-11-04 (bổ sung):** **không còn hàng trơn** — mọi dòng đơn là **SKU thành phẩm riêng của khách**; **Yêu cầu sản xuất chỉ phát sinh từ đơn** (Điều phối lập cho phần thiếu). Thành phẩm về kho đã được bộ phận sản xuất **đóng thùng sẵn (LPN)**: kho nhập, cất, di chuyển, lấy và xuất **nguyên thùng**, không mở thùng, không lấy lẻ. **Thùng LPN chính là kiện giao**: khâu đóng gói thay bằng **Kiểm thùng & Dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)) — không chọn loại kiện, không cân đo, không niêm phong.
+> **Đã chốt 2026-11-04 (bổ sung):** **không còn hàng trơn** — mọi dòng đơn là **SKU thành phẩm riêng của khách**; **Đơn sản xuất chỉ phát sinh từ đơn bán** (Sale lập cho phần thiếu). Thành phẩm về kho đã được **đơn vị sản xuất** **đóng thùng sẵn (LPN)**: kho nhập, cất, di chuyển, lấy và xuất **nguyên thùng**, không mở thùng, không lấy lẻ. **Thùng LPN chính là kiện giao**: khâu đóng gói thay bằng **Kiểm thùng & Dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)) — không chọn loại kiện, không cân đo, không niêm phong.
 >
-> **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng** (báo giá, đơn, hợp đồng, Yêu cầu sản xuất, lệnh chuyển kho ghi **số thùng**, kèm số cái); **giá vẫn theo cái**, MOQ và bậc giá theo số thùng ([01](../warehouse/01-product-creation/README.md) BR-11, [14](../ecommerce/14-cart-and-order/README.md) BR-08). **Mọi thùng đúng số cái chuẩn** của SKU: kho đếm số thùng, **thùng lệch số chuẩn không nhận** ([03](../warehouse/03-receipt/README.md) BR-13); không còn thùng lẻ. Giữ hàng / phân bổ một dòng = **chọn đủ N thùng** theo FEFO / FIFO; thiếu thùng thì phần thiếu (tính theo thùng) đi Yêu cầu sản xuất ([07](../warehouse/07-picking/README.md) BR-03).
+> **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng** (báo giá, đơn, hợp đồng, Đơn sản xuất ghi **số thùng**, kèm số cái); **giá vẫn theo cái**, MOQ và bậc giá theo số thùng ([01](../warehouse/01-product-creation/README.md) BR-11, [14](../ecommerce/14-cart-and-order/README.md) BR-08). **Mọi thùng đúng số cái chuẩn** của SKU: kho đếm số thùng, **thùng lệch số chuẩn không nhận** ([03](../warehouse/03-receipt/README.md) BR-13); không còn thùng lẻ. Giữ hàng / phân bổ một dòng = **chọn đủ N thùng** theo **FIFO** (ngày nhập); thiếu thùng thì phần thiếu (tính theo thùng) đi Đơn sản xuất ([07](../warehouse/07-picking/README.md) BR-03).
+>
+> **Đã chốt 2026-11-05 (bổ sung):**
+> - **Vai trò:** **Nhân viên Sale** chọn kho xuất, chọn cách giao, lập và theo dõi Đơn sản xuất (ghi nhận `Accepted`, tiến độ, mẫu in), treo / gỡ treo đơn, cho phép giao một phần. **Quản lý kinh doanh (Sales Manager)** duyệt và gửi Đơn sản xuất. **Quản lý kho** của kho xuất release đơn, tạo task và giao người, quyết định khu chờ xuất, chuyển task sang khu kiểm & dán nhãn, ghi nhận kết quả giao. Không còn role Điều phối đơn hàng hay Inventory Planner.
+> - **Đơn sản xuất** (tên cũ "Yêu cầu sản xuất") là **một chứng từ chung** cho xưởng của công ty và đối tác ngoài, gửi qua **kênh kết nối** của đơn vị sản xuất; Đơn sản xuất bật cờ **cần duyệt mẫu in** phải được khách duyệt mẫu trước khi in hàng loạt ([17](../ecommerce/17-order-management/README.md) §4.3).
+> - **Mỗi đơn bán có đúng một kho xuất**; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; không tách giao từ hai kho, **không có chuyển kho** (module chuyển kho giữa các kho đã bỏ) ([17](../ecommerce/17-order-management/README.md) BR-22, [20](../warehouse/20-inventory-control/README.md) BR-17).
+> - Ly / bao bì **không có hạn dùng**: không FEFO, không cảnh báo cận hạn; lô = lô sản xuất gắn Đơn sản xuất.
+> - **Sức chứa kho** đo bằng thể tích (m³) kèm tải trọng; **Bảng sức chứa kho** cảnh báo (không chặn) khi lập Đơn sản xuất / chọn kho xuất; kho đầy thì hàng về được cất vào khu tạm `OVERFLOW` ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6).
+> - **Sàn không hiển thị giá**; Sale lập báo giá theo **giá gợi ý** từ bảng giá riêng nội bộ; mẫu mới có **dòng phí khuôn / bản in**, hợp đồng ghi **số lần in mẫu miễn phí** ([13](../ecommerce/13-catalog/README.md), [14](../ecommerce/14-cart-and-order/README.md)).
+> - **Hàng hoàn** (RTO, hàng khách trả) nhập lại qua **phiếu nhập loại Hàng hoàn** vào khu `QUARANTINE` ([03](../warehouse/03-receipt/README.md)).
 
 Mục lục:
 
-1. [Luồng nhập kho thành phẩm: Yêu cầu sản xuất → Nhập kho theo thùng LPN → Putaway](#1-luồng-nhập-kho-thành-phẩm)
-2. [Luồng Fulfillment: Order → kiểm tồn (Yêu cầu sản xuất) → Picking nguyên thùng → (Khu chờ xuất) → Kiểm thùng & Dán nhãn giao hàng → Shipping](#2-luồng-fulfillment) — kèm vòng đời Yêu cầu sản xuất (§2.3), phiên kiểm thùng & thùng giao (§2.4) và kế hoạch chuyến xe (§2.5)
-3. [Luồng Transfer giữa các kho](#3-luồng-transfer-giữa-các-kho)
-4. [Phụ lục: Luồng bán sỉ theo hợp đồng, vòng đời đơn hàng, hợp đồng & đợt thanh toán, di chuyển nguyên thùng trong một kho](#4-phụ-lục)
-5. [Ghi chú về sơ đồ](#5-ghi-chú-về-sơ-đồ)
+1. [Luồng nhập kho thành phẩm: Đơn sản xuất (duyệt & gửi, duyệt mẫu in) → Nhập kho theo thùng LPN → Putaway](#1-luồng-nhập-kho-thành-phẩm) — kèm nhập hàng hoàn vào khu `QUARANTINE` (§1.3)
+2. [Luồng Fulfillment: Order → chọn kho xuất, kiểm tồn (Đơn sản xuất) → Picking nguyên thùng → (Khu chờ xuất) → Kiểm thùng & Dán nhãn giao hàng → Shipping](#2-luồng-fulfillment) — kèm vòng đời Đơn sản xuất (§2.3), phiên kiểm thùng & thùng giao (§2.4) và kế hoạch chuyến xe (§2.5)
+3. [Phụ lục: Luồng bán sỉ theo hợp đồng, vòng đời đơn hàng, hợp đồng & đợt thanh toán, di chuyển nguyên thùng trong một kho](#3-phụ-lục)
+4. [Ghi chú về sơ đồ](#4-ghi-chú-về-sơ-đồ)
 
 ---
 
 ## 1. Luồng nhập kho thành phẩm
 
-Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/README.md) (Yêu cầu sản xuất), [03 · Nhập kho thành phẩm](../warehouse/03-receipt/README.md), [05 · Putaway](../warehouse/05-putaway/README.md). Nhập kho đi **2 bước**: WH/Input (khu `RECEIVING`) → WH/Stock (bin). Yêu cầu sản xuất **chỉ phát sinh từ đơn**: Điều phối lập cho phần thiếu sau khi đã kiểm tồn SKU riêng; Inventory Planner không lập Yêu cầu sản xuất. Kho chỉ nhập **theo thùng LPN** do bộ phận sản xuất đóng sẵn ([03](../warehouse/03-receipt/README.md) BR-12), đếm **số thùng**; thùng có số cái khác **số cái chuẩn / thùng** không được nhận ([03](../warehouse/03-receipt/README.md) BR-13).
+Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/README.md) (Đơn sản xuất), [03 · Nhập kho thành phẩm](../warehouse/03-receipt/README.md), [05 · Putaway](../warehouse/05-putaway/README.md), [06 · Bảng sức chứa kho §4.6](../warehouse/06-warehouse-map-slotting/README.md). Nhập kho theo Đơn sản xuất đi **2 bước**: WH/Input (khu `RECEIVING`) → WH/Stock (bin). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Sale lập** cho phần thiếu sau khi đã kiểm tồn SKU riêng tại kho xuất, **Sales Manager duyệt và gửi** (người duyệt ≠ người lập — [17](../ecommerce/17-order-management/README.md) BR-23). **Kho nhận = kho xuất** của đơn bán; đơn vị sản xuất phải giao đúng kho nhận. Kho chỉ nhập **theo thùng LPN** do đơn vị sản xuất đóng sẵn ([03](../warehouse/03-receipt/README.md) BR-12), đếm **số thùng**; thùng có số cái khác **số cái chuẩn / thùng** không được nhận ([03](../warehouse/03-receipt/README.md) BR-13).
 
 ### 1.1. Flowchart tổng thể
 
 ```mermaid
 flowchart TD
-    START_ORDER(["Đơn Confirmed thiếu thành phẩm<br/>sau khi kiểm tồn SKU riêng"]) --> PR_ORDER["Điều phối lập Yêu cầu sản xuất cho phần thiếu của đơn<br/>dòng thiếu điền sẵn — Draft"]
-    PR_ORDER --> PR_LINE["Dòng: SKU riêng của khách, số thùng = phần thiếu, kèm số cái<br/>ngày cần hàng, kho nhận, đơn liên quan<br/>đính kèm design snapshot + bộ file đã chốt"]
-    PR_LINE --> PR_SEND["Xuất phiếu yêu cầu PDF, gửi bộ phận sản xuất<br/>Yêu cầu sản xuất: Sent"]
-    PR_SEND --> EXT[["Bộ phận sản xuất — ngoài hệ thống<br/>sản xuất, tự kiểm tra chất lượng, đóng thùng sẵn"]]
-    EXT -.->|"báo đã bắt đầu"| PR_INPROD["Điều phối cập nhật tay<br/>Yêu cầu sản xuất: In Production"]
-    EXT --> DELIVER["Giao các thùng thành phẩm về kho nhận<br/>kèm phiếu giao ghi số Yêu cầu sản xuất, số thùng"]
+    START_ORDER(["Đơn Confirmed, Sale đã chọn kho xuất<br/>kiểm tồn SKU riêng tại kho xuất: còn thiếu thùng"]) --> PO_DRAFT["Sale lập Đơn sản xuất cho phần thiếu — Draft<br/>đơn vị sản xuất chọn từ danh mục, kho nhận = kho xuất của đơn<br/>dòng: SKU riêng, số thùng thiếu, số cái / thùng, bộ file thiết kế đã chốt<br/>cờ cần duyệt mẫu in: mặc định bật khi SKU sản xuất lần đầu"]
+    PO_DRAFT --> CAP{"Thể tích Đơn sản xuất lớn hơn<br/>còn trống dự kiến của kho nhận?"}
+    CAP -->|"Có — cảnh báo Sale, không chặn"| PO_SUBMIT
+    CAP -->|Không| PO_SUBMIT["Sale gửi duyệt<br/>Đơn sản xuất: Pending Approval"]
+    PO_SUBMIT --> PO_APPROVE{"Sales Manager duyệt<br/>người duyệt khác người lập"}
+    PO_APPROVE -->|"Trả lại, có lý do"| PO_DRAFT
+    PO_APPROVE -->|Duyệt| PO_SENT["Hệ thống xuất phiếu PDF kèm bộ file<br/>gửi qua kênh kết nối của đơn vị sản xuất<br/>Đơn sản xuất: Sent — đơn bán: Awaiting Stock"]
+    PO_SENT --> EXT[["Đơn vị sản xuất — ngoài hệ thống<br/>xưởng của công ty hoặc đối tác ngoài"]]
+    EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Sale ghi nhận tay<br/>Đơn sản xuất: Accepted"]
+    PO_ACC --> FLAG{"Cờ cần duyệt mẫu in?"}
+    FLAG -->|Có| SAMPLE["Đơn vị sản xuất in mẫu thử theo bộ file đã chốt<br/>Sale tải ảnh / video của vòng mẫu, ghi ngày gửi mẫu vật nếu có<br/>Đơn sản xuất: Sample Pending"]
+    SAMPLE --> CUST_SAMPLE{"Khách xem mẫu in chờ duyệt<br/>trên sàn — mẫu thiết kế của tôi<br/>hoặc thẻ duyệt mẫu in trong chat"}
+    CUST_SAMPLE -->|"Yêu cầu in lại, kèm ghi chú"| REPRINT["Sale ghi lý do in lại: PRINT_DEFECT / CUSTOMER_CHANGE<br/>mở vòng mẫu mới — vẫn Sample Pending<br/>vượt số lần in mẫu miễn phí của hợp đồng: cảnh báo, không chặn"]
+    REPRINT --> SAMPLE
+    CUST_SAMPLE -.->|"Cần sửa file thiết kế"| REDESIGN(["Về 12 sinh SKU mới, Sale đổi SKU dòng đơn<br/>huỷ Đơn sản xuất này, lập Đơn sản xuất mới"])
+    CUST_SAMPLE -->|"Duyệt mẫu"| PO_INPROD["Đơn sản xuất: In Production<br/>đơn vị sản xuất in hàng loạt, đóng thùng đúng số cái chuẩn"]
+    FLAG -->|"Không — đơn vị sản xuất báo bắt đầu"| PO_INPROD
+    PO_INPROD --> DELIVER["Giao các thùng thành phẩm về đúng kho nhận<br/>kèm phiếu giao ghi số Đơn sản xuất, số thùng"]
 
-    DELIVER --> RC_CREATE["NV kho tạo phiếu nhập theo một Yêu cầu sản xuất<br/>Phiếu nhập: Draft"]
+    DELIVER --> RC_GATE{"Đơn sản xuất<br/>nhận được hàng?"}
+    RC_GATE -->|"Cờ bật, mẫu chưa duyệt: Sent / Accepted / Sample Pending"| RC_BLOCK(["Chặn tạo phiếu nhập<br/>không nhận hàng, báo Sale"])
+    RC_GATE -->|"In Production / Partially Received, hoặc Sent / Accepted khi không bật cờ"| RC_CREATE["NV kho tạo phiếu nhập theo một Đơn sản xuất, tại kho nhận<br/>Phiếu nhập: Draft"]
     RC_CREATE --> RC_STD{"Từng thùng: số cái<br/>đúng số chuẩn / thùng của SKU?"}
-    RC_STD -->|"Lệch số chuẩn"| RC_REJ["Không nhận thùng lệch<br/>trả lại bộ phận sản xuất<br/>phần đó vẫn mở trên Yêu cầu sản xuất"]
+    RC_STD -->|"Lệch số chuẩn"| RC_REJ["Không nhận thùng lệch<br/>trả lại đơn vị sản xuất<br/>phần đó vẫn mở trên Đơn sản xuất"]
     RC_REJ -.->|"tính là thiếu"| CMP
-    RC_STD -->|"Đúng số chuẩn"| RC_COUNT["Đếm số thùng, từng dòng yêu cầu + lô<br/>ghi lô / hạn dùng, mỗi thùng mang số cái chuẩn<br/>cấp và dán nhãn LPN — thùng Receiving<br/>khu nhận hàng WH/Input — RECEIVING"]
-    RC_COUNT --> CMP{"Số thùng nhận luỹ kế<br/>so với số thùng yêu cầu?"}
-    CMP -->|Thừa| OVER["Chặn: không nhận thùng làm vượt số thùng còn mở<br/>trả nguyên thùng lại bộ phận sản xuất"]
+    RC_STD -->|"Đúng số chuẩn"| RC_COUNT["Đếm số thùng theo dòng Đơn sản xuất + lô sản xuất<br/>mỗi thùng mang số cái chuẩn<br/>cấp và dán nhãn LPN — thùng Receiving<br/>khu nhận hàng WH/Input — RECEIVING"]
+    RC_COUNT --> CMP{"Số thùng nhận luỹ kế<br/>so với số thùng trên Đơn sản xuất?"}
+    CMP -->|Thừa| OVER["Chặn: không nhận thùng làm vượt số thùng còn mở<br/>trả nguyên thùng lại đơn vị sản xuất"]
     OVER --> RC_COUNT
     CMP -->|"Đủ / Thiếu"| RC_CONFIRM["Xác nhận phiếu nhập<br/>tồn Inbound trong từng thùng tại khu RECEIVING, thùng In Stock<br/>Phiếu nhập: In Putaway"]
 
-    RC_CONFIRM --> PR_CHECK{"Yêu cầu sản xuất<br/>đã nhận đủ mọi dòng?"}
-    PR_CHECK -->|Chưa| PR_PARTIAL["Yêu cầu sản xuất: Partially Received<br/>phần thiếu vẫn mở"]
-    PR_PARTIAL -->|"giao tiếp"| DELIVER
-    PR_PARTIAL -.->|"không giao nốt"| PR_CLOSE(["Điều phối đóng thiếu<br/>Yêu cầu sản xuất: Closed, có lý do"])
-    PR_CHECK -->|Đủ| PR_RECEIVED["Yêu cầu sản xuất: Received"]
+    RC_CONFIRM --> PO_CHECK{"Đơn sản xuất<br/>đã nhận đủ mọi dòng?"}
+    PO_CHECK -->|Chưa| PO_PARTIAL["Đơn sản xuất: Partially Received<br/>phần thiếu vẫn mở"]
+    PO_PARTIAL -->|"giao tiếp"| DELIVER
+    PO_PARTIAL -.->|"không giao nốt"| PO_CLOSE(["Sale đóng thiếu<br/>Đơn sản xuất: Closed, có lý do"])
+    PO_CHECK -->|Đủ| PO_RECEIVED["Đơn sản xuất: Received"]
 
     RC_CONFIRM --> PA_TASK["Mở nhiệm vụ cất<br/>mỗi thùng LPN một nhiệm vụ — Pending"]
-    PA_TASK --> PA_SUGGEST["Gợi ý tối đa 10 bin<br/>cùng lô → cùng SKU → bin trống → bin còn chỗ"]
-    PA_SUGGEST --> PA_MOVE["NV kho quét LPN + quét bin đích, cất cả thùng<br/>hệ thống kiểm lại ràng buộc cứng"]
-    PA_MOVE --> PA_DONE["Nhiệm vụ cất Done — WH/Stock<br/>tồn Inbound → Available"]
+    PA_TASK --> PA_SUGGEST{"Gợi ý tối đa 10 bin hợp lệ<br/>còn thể tích m³ và tải trọng<br/>cùng lô → cùng SKU → bin trống → bin còn chỗ"}
+    PA_SUGGEST -->|"Có bin"| PA_MOVE["NV kho quét LPN + quét bin đích, cất cả thùng<br/>hệ thống kiểm lại ràng buộc cứng"]
+    PA_SUGGEST -->|"Gợi ý rỗng — kho đầy"| PA_OVF["Quét vị trí khu tạm OVERFLOW để hoàn tất nhiệm vụ<br/>Quản lý kho dời lên bin khi có chỗ — 11"]
+    PA_MOVE --> PA_DONE["Nhiệm vụ cất Done<br/>tồn Inbound → Available"]
+    PA_OVF --> PA_DONE
     PA_DONE --> RC_CLOSE(["Cất xong mọi thùng của phiếu<br/>Phiếu nhập: Closed"])
     PA_DONE --> HOLD["Thùng cất xong được giữ cho đơn liên quan — 17"]
-    HOLD --> ORDER_CHECK{"Mọi Yêu cầu sản xuất của đơn<br/>đã Received và đã giữ đủ thùng?"}
+    HOLD --> ORDER_CHECK{"Mọi Đơn sản xuất của đơn<br/>đã Received và đã giữ đủ thùng?"}
     ORDER_CHECK -->|Chưa| WAIT(["Đơn tiếp tục Awaiting Stock"])
     ORDER_CHECK -->|Rồi| RTF(["Đơn: Ready to Fulfill → luồng §2"])
 ```
 
-> Nhập kho theo Yêu cầu sản xuất còn ở `Sent` thì hệ thống chuyển yêu cầu sang `In Production` trước rồi mới ghi nhận số đã nhận ([17](../ecommerce/17-order-management/README.md) §4.3). Hàng giao rời, chưa đóng thùng thì không nhận. Thùng lỗi thấy rõ khi kiểm đếm không được nhận, trả nguyên thùng lại bộ phận sản xuất ngay; thùng lỗi phát hiện sau khi xác nhận phiếu được cách ly nguyên thùng sang khu `QUARANTINE` / điều chỉnh tồn ([20](../warehouse/20-inventory-control/README.md)) và đổi trả với bộ phận sản xuất ngoài hệ thống — ⚠️ giả định, xem [open-questions](../open-questions/README.md).
+> Đơn sản xuất **không bật** cờ cần duyệt mẫu in mà hàng về khi còn `Sent` / `Accepted` vẫn được nhận; lúc xác nhận phiếu, hệ thống tự chuyển Đơn sản xuất qua `In Production` rồi `Partially Received` / `Received`. Đơn sản xuất **bật** cờ mà mẫu chưa được khách duyệt thì **chặn** nhập ([03](../warehouse/03-receipt/README.md) BR-15, [17](../ecommerce/17-order-management/README.md) §4.3 bước 11) — ⚠️ giả định, xem [open-questions](../open-questions/README.md). Hàng giao rời, chưa đóng thùng thì không nhận. Thùng lỗi thấy rõ khi kiểm đếm không được nhận, trả nguyên thùng lại đơn vị sản xuất ngay; thùng lỗi phát hiện sau khi xác nhận phiếu được cách ly nguyên thùng sang khu `QUARANTINE` / điều chỉnh tồn ([20](../warehouse/20-inventory-control/README.md)) và đổi trả với đơn vị sản xuất ngoài hệ thống — ⚠️ giả định, xem [open-questions](../open-questions/README.md).
 
-> **Đã chốt 2026-11-05:** bộ phận sản xuất đóng **mọi thùng đúng số cái chuẩn / thùng** của SKU; kho đếm **số thùng**, thùng lệch số chuẩn không nhận và phần đó vẫn mở trên Yêu cầu sản xuất ([03](../warehouse/03-receipt/README.md) BR-13, [open-questions B24](../open-questions/README.md)). ⚠️ Giả định: thùng phát hiện lệch số chuẩn **sau khi xác nhận nhập** không được phân bổ, chuyển sang khu `QUARANTINE` rồi ghi giảm cả thùng bằng điều chỉnh có duyệt — xem [open-questions C34](../open-questions/README.md).
+> **Duyệt mẫu in** *(Đã chốt 2026-11-05)*: cờ do Sale bật / tắt theo từng Đơn sản xuất, mặc định bật khi SKU sản xuất lần đầu, tắt khi mặc định bật thì bắt buộc lý do. Mỗi vòng mẫu ghi số vòng, ảnh / video, ngày gửi mẫu vật, kết quả, lý do in lại. Vòng in lại `PRINT_DEFECT` (lỗi in của đơn vị sản xuất) không tính vào **số lần in mẫu miễn phí** của hợp đồng ([14](../ecommerce/14-cart-and-order/README.md) BR-18); vượt số lần miễn phí chỉ cảnh báo, phí phát sinh xử lý bằng phụ lục ngoài hệ thống (phạm vi sau). ⚠️ Giả định: số lần in mẫu tính trên từng Đơn sản xuất, gồm cả vòng đầu; Sale phân loại lý do in lại. Xem [open-questions](../open-questions/README.md).
+
+> **Sức chứa** *(Đã chốt 2026-11-05)*: cảnh báo dựa trên **còn trống dự kiến** = Sức chứa − Đang chiếm − Sắp về; Sắp về là phần chưa nhận của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-20, BR-21). Kho đầy không chặn nhận. ⚠️ Giả định: chỉ cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available`, giữ cho đơn được ngay ([05](../warehouse/05-putaway/README.md) BR-13). Xem [open-questions](../open-questions/README.md).
+
+> **Đã chốt 2026-11-05:** đơn vị sản xuất đóng **mọi thùng đúng số cái chuẩn / thùng** của SKU; kho đếm **số thùng**, thùng lệch số chuẩn không nhận và phần đó vẫn mở trên Đơn sản xuất ([03](../warehouse/03-receipt/README.md) BR-13, [open-questions B24](../open-questions/README.md)). ⚠️ Giả định: thùng phát hiện lệch số chuẩn **sau khi xác nhận nhập** không được phân bổ, chuyển sang khu `QUARANTINE` rồi ghi giảm cả thùng bằng điều chỉnh có duyệt — xem [open-questions C34](../open-questions/README.md).
 
 ### 1.2. Sequence diagram (trình tự tác nhân)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor COORD as Điều phối
-    participant PR as Yêu cầu sản xuất (17)
-    participant PRODEXT as Bộ phận sản xuất (ngoài hệ thống)
+    actor SALE as Sale
+    actor SM as Sales Manager
+    participant PO as Đơn sản xuất (17)
+    participant CAPB as Bảng sức chứa kho (06)
+    participant PRODEXT as Đơn vị sản xuất (ngoài hệ thống)
+    actor CUST as Khách hàng sỉ
     actor WH as NV kho
     participant RC as Phiếu nhập (03)
     participant SLOT as Gợi ý bin (05)
     participant INVSYS as Tồn kho (20)
     participant OM as Đơn hàng (17)
 
-    COORD->>PR: Lập yêu cầu cho phần thiếu của đơn (Draft)
-    COORD->>PR: Xuất phiếu PDF kèm bộ file thiết kế → Sent
-    PR->>PRODEXT: Gửi phiếu yêu cầu (ngoài hệ thống)
-    PRODEXT-->>COORD: Báo đã bắt đầu sản xuất
-    COORD->>PR: Cập nhật tay → In Production
-    PRODEXT->>WH: Giao các thùng đã đóng sẵn (đúng số cái chuẩn) + phiếu giao ghi số yêu cầu, số thùng
-    WH->>RC: Tạo phiếu nhập theo một Yêu cầu sản xuất (Draft)
-    opt Thùng có số cái khác số chuẩn / thùng
-        WH->>PRODEXT: Không nhận, trả lại thùng lệch (phần đó vẫn mở trên yêu cầu)
+    SALE->>PO: Lập Đơn sản xuất cho phần thiếu của đơn (Draft), kho nhận = kho xuất
+    PO->>CAPB: Lấy còn trống dự kiến của kho nhận
+    CAPB-->>SALE: Cảnh báo nếu thể tích Đơn sản xuất vượt còn trống (không chặn)
+    SALE->>PO: Gửi duyệt → Pending Approval
+    opt Sales Manager trả lại
+        SM->>PO: Trả lại kèm lý do → Draft
+        SALE->>PO: Sửa và gửi duyệt lại → Pending Approval
     end
-    WH->>RC: Đếm số thùng đúng chuẩn, ghi lô, hạn dùng
+    SM->>PO: Duyệt (người duyệt khác người lập) → Sent
+    PO->>PRODEXT: Gửi phiếu PDF kèm bộ file thiết kế qua kênh kết nối
+    PO->>OM: Đơn bán → Awaiting Stock
+    PRODEXT-->>SALE: Xác nhận nhận đơn, ngày hoàn thành dự kiến
+    SALE->>PO: Ghi nhận tay → Accepted
+    alt Cần duyệt mẫu in
+        loop Mỗi vòng mẫu
+            PRODEXT-->>SALE: In mẫu thử theo bộ file đã chốt
+            SALE->>PO: Tải ảnh / video mẫu, ngày gửi mẫu vật (nếu có) → Sample Pending
+            PO-->>CUST: Mẫu in chờ duyệt (sàn 13 hoặc thẻ chat 16)
+            CUST->>PO: Duyệt, hoặc Yêu cầu in lại kèm ghi chú
+        end
+        Note over SALE,PO: Yêu cầu in lại thì Sale ghi lý do PRINT_DEFECT / CUSTOMER_CHANGE, vượt số lần miễn phí chỉ cảnh báo
+        PO->>PO: Khách duyệt mẫu → In Production
+    else Không cần duyệt mẫu in
+        SALE->>PO: Đơn vị sản xuất báo bắt đầu → In Production
+    end
+    PRODEXT->>WH: Giao các thùng đã đóng sẵn về kho nhận + phiếu giao ghi số Đơn sản xuất, số thùng
+    WH->>RC: Tạo phiếu nhập theo một Đơn sản xuất (Draft)
+    opt Cờ duyệt mẫu in bật mà mẫu chưa được khách duyệt
+        RC-->>WH: Chặn tạo phiếu, báo Sale
+    end
+    opt Thùng có số cái khác số chuẩn / thùng
+        WH->>PRODEXT: Không nhận, trả lại thùng lệch (phần đó vẫn mở trên Đơn sản xuất)
+    end
+    WH->>RC: Đếm số thùng đúng chuẩn, ghi lô sản xuất
     RC-->>WH: Cấp mã LPN từng thùng, in nhãn để dán
-    opt Nhận vượt số thùng yêu cầu
+    opt Nhận vượt số thùng trên Đơn sản xuất
         RC-->>WH: Chặn — không nhận thùng làm vượt số thùng còn mở
         WH->>PRODEXT: Trả nguyên thùng thừa
     end
     WH->>RC: Xác nhận phiếu → In Putaway
     RC->>INVSYS: Ghi tồn Inbound trong từng thùng tại khu RECEIVING (thùng In Stock)
-    RC->>PR: Cập nhật số thùng đã nhận → Partially Received / Received
+    RC->>PO: Cập nhật số thùng đã nhận → Partially Received / Received
     RC->>WH: Mở nhiệm vụ cất (mỗi thùng LPN một nhiệm vụ)
     WH->>SLOT: Xem nhiệm vụ cất
-    SLOT-->>WH: Tối đa 10 bin xếp hạng
-    WH->>INVSYS: Quét LPN + quét bin, cất cả thùng (WH/Stock) → tồn Available
+    SLOT-->>WH: Tối đa 10 bin hợp lệ (còn thể tích, tải trọng)
+    alt Có bin hợp lệ
+        WH->>INVSYS: Quét LPN + quét bin, cất cả thùng (WH/Stock) → tồn Available
+    else Kho đầy, gợi ý rỗng
+        WH->>INVSYS: Cất vào khu OVERFLOW → tồn Available, dời lên bin khi có chỗ (11)
+    end
     INVSYS->>OM: Giữ thùng cho đơn liên quan
-    OM->>OM: Mọi Yêu cầu sản xuất đã Received, giữ đủ thùng → Ready to Fulfill
+    OM->>OM: Mọi Đơn sản xuất đã Received, giữ đủ thùng → Ready to Fulfill
     RC->>RC: Cất hết mọi thùng → Closed
-    opt Bộ phận sản xuất không giao nốt
-        COORD->>PR: Đóng thiếu (Closed, có lý do)
+    opt Đơn vị sản xuất không giao nốt
+        SALE->>PO: Đóng thiếu (Closed, có lý do)
     end
 ```
+
+### 1.3. Nhập hàng hoàn (phiếu nhập loại Hàng hoàn)
+
+Chi tiết: [03 · Nhập kho §4.2](../warehouse/03-receipt/README.md), [09 · Shipping §4.3](../warehouse/09-shipping/README.md), [17 · Order Management §4.10](../ecommerce/17-order-management/README.md), [20 · Inventory Control §4.4, §4.8](../warehouse/20-inventory-control/README.md). *(Đã chốt 2026-11-05)* Hàng hãng hoàn về (RTO) và hàng khách trả theo yêu cầu trả hàng đã duyệt (RMA) **luôn** nhập lại kho qua phiếu loại **Hàng hoàn** (`RETURN`), vào thẳng khu `QUARANTINE` — không qua `RECEIVING`, không cộng thẳng vào tồn khả dụng ([03](../warehouse/03-receipt/README.md) BR-14, [20](../warehouse/20-inventory-control/README.md) BR-15).
+
+```mermaid
+flowchart TD
+    RTO(["Shipment Delivery Failed, hãng hoàn kiện về kho xuất<br/>Quản lý kho ghi nhận shipment Returned — 09"]) --> RT_CREATE
+    RMA(["Khách trả hàng, Sale duyệt yêu cầu trả<br/>phát hành RMA, khách gửi hàng về kho xuất — 17"]) --> RT_CREATE
+    RT_CREATE["NV kho tạo phiếu nhập Hàng hoàn — Draft<br/>tham chiếu một shipment hoàn về hoặc một RMA<br/>chọn khu QUARANTINE của kho"] --> RT_SCAN["Quét LPN từng thùng hoàn về<br/>giữ nguyên mã LPN, SKU, lô, số cái chuẩn / thùng<br/>ghi chú tình trạng bên ngoài nếu có"]
+    RT_SCAN --> RT_BELONG{"Thùng thuộc shipment / đơn<br/>được tham chiếu?"}
+    RT_BELONG -->|Không| RT_REJ["Từ chối thùng đó"]
+    RT_REJ --> RT_SCAN
+    RT_BELONG -->|"Có — quét xong"| RT_CONFIRM["Xác nhận phiếu hàng hoàn — Closed, không mở nhiệm vụ cất<br/>thùng Consumed → In Stock tại khu QUARANTINE<br/>tồn Quarantine, không thuộc ATP<br/>báo 17 hàng đã về — căn cứ đơn Returned và hoàn tiền 15"]
+    RT_CONFIRM --> RT_DECIDE{"Quản lý kho quyết định<br/>từng thùng"}
+    RT_DECIDE -->|"Dùng được — gỡ cách ly"| RT_PA["Mở nhiệm vụ cất — 05<br/>tồn vẫn Quarantine tới khi cất xong"]
+    RT_PA --> RT_AVAIL(["Cất lên bin → tồn Available<br/>dùng cho đơn sau của chính khách sở hữu SKU, FIFO"])
+    RT_DECIDE -->|"Không dùng được"| RT_WO(["Ghi giảm cả thùng bằng điều chỉnh tồn có duyệt — 20<br/>lỗi sản xuất đổi trả với đơn vị sản xuất ngoài hệ thống"])
+```
+
+> ⚠️ Giả định: phiếu hàng hoàn lập tại **kho xuất của đơn**, đóng ngay khi xác nhận; thùng hoàn về thiếu so với shipment / RMA thì xác nhận các thùng thực có, phần thiếu xử lý ngoài hệ thống; thùng đã bị mở vẫn nhận vào cách ly; thùng giữ mã LPN gốc, ngày nhập dùng cho FIFO là ngày nhập lại; gỡ cách ly mở nhiệm vụ cất, tồn vẫn `Quarantine` tới khi cất xong. Xem [open-questions](../open-questions/README.md).
 
 ---
 
@@ -117,44 +196,47 @@ Chi tiết: [17 · Order Management §4.2–4.6](../ecommerce/17-order-managemen
 
 ### 2.1. Flowchart tổng thể
 
-> **Đã chốt 2026-11-05:** dòng đơn ghi **số thùng N**; mọi thùng đúng số cái chuẩn nên giữ hàng / phân bổ = **chọn đủ N thùng LPN** của SKU, ưu tiên FEFO / FIFO. Chỉ có sẵn k < N thùng thì giữ k thùng, **N − k thùng còn lại là thiếu** — Điều phối gửi Yêu cầu sản xuất cho phần thiếu (tính theo thùng) hoặc Sale thoả thuận lại số thùng với khách ([07](../warehouse/07-picking/README.md) BR-03, [17](../ecommerce/17-order-management/README.md) §4.2, BR-21, [open-questions C32](../open-questions/README.md)).
+> **Đã chốt 2026-11-05:** **mỗi đơn có đúng một kho xuất** — Sale chọn khi đơn `Confirmed`, hệ thống gợi ý (kho đang có hàng dư của SKU / kho còn chỗ) và hiện còn trống dự kiến của các kho. Chỉ giữ hàng có sẵn **tại kho xuất**; hàng dư ở kho khác không dùng cho đơn đó; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; **không bao giờ tách giao từ hai kho**, đơn vẫn giao nhiều đợt (giao một phần) từ cùng kho xuất ([17](../ecommerce/17-order-management/README.md) §4.2, BR-22, [20](../warehouse/20-inventory-control/README.md) BR-17). ⚠️ Giả định: kho xuất chỉ đổi được khi đơn chưa có hàng giữ và chưa có Đơn sản xuất từ `Sent` trở đi. Xem [open-questions](../open-questions/README.md).
 
-> ⚠️ Giả định: Điều phối quyết định có dùng **khu chờ xuất (`STAGING`)** cho đơn; lấy thùng sang `STAGING` chưa trừ tồn, lấy bổ sung vào cùng task, **chuyển cả tác vụ sang khu kiểm & dán nhãn** một lần cho cả task. Xem [open-questions](../open-questions/README.md).
+> **Đã chốt 2026-11-05:** dòng đơn ghi **số thùng N**; mọi thùng đúng số cái chuẩn nên giữ hàng / phân bổ = **chọn đủ N thùng LPN** của SKU tại kho xuất, theo **FIFO** (ngày nhập). Chỉ có sẵn k < N thùng thì giữ k thùng, **N − k thùng còn lại là thiếu** — Sale lập Đơn sản xuất cho phần thiếu (tính theo thùng) hoặc thoả thuận lại số thùng với khách ([07](../warehouse/07-picking/README.md) BR-03, [17](../ecommerce/17-order-management/README.md) §4.2, BR-21, [open-questions C32](../open-questions/README.md)).
+
+> **Đã chốt 2026-11-05:** **Quản lý kho** của kho xuất quyết định có dùng **khu chờ xuất (`STAGING`)** cho đơn. ⚠️ Giả định: lấy thùng sang `STAGING` chưa trừ tồn, tồn ở đó đã gắn đơn; lấy bổ sung vào cùng task; **chuyển cả tác vụ sang khu kiểm & dán nhãn** một lần cho cả task. Xem [open-questions](../open-questions/README.md).
 
 ```mermaid
 flowchart TD
-    CONF(["Đơn: Confirmed<br/>hợp đồng Signed, đủ đợt ON_SIGNING"]) --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng từng dòng, theo số thùng<br/>hàng dư từ đơn trước, hàng trả<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn"]
-    CHECK --> SETUP["Điều phối chọn kho xuất<br/>và cách giao: gửi kiện / giao nguyên chuyến"]
-    SETUP --> ENOUGH{"Đủ hàng?<br/>mỗi dòng có đủ N thùng"}
+    CONF(["Đơn: Confirmed<br/>hợp đồng Signed, đủ đợt ON_SIGNING"]) --> WH_SELECT["Sale chọn kho xuất — một kho cho cả đơn<br/>hệ thống gợi ý kho có hàng dư của SKU / kho còn chỗ<br/>hiện tồn khả dụng và còn trống dự kiến từng kho"]
+    WH_SELECT --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng tại kho xuất, theo số thùng<br/>hàng dư từ đơn trước, hàng trả đã gỡ cách ly<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn"]
+    CHECK --> SETUP["Sale chọn cách giao: gửi kiện / giao nguyên chuyến"]
+    SETUP --> ENOUGH{"Đủ hàng tại kho xuất?<br/>mỗi dòng có đủ N thùng"}
 
-    ENOUGH -->|"Thiếu thùng"| PR_SEND["Điều phối lập và gửi Yêu cầu sản xuất<br/>cho phần thiếu, tính theo số thùng — luồng §1"]
-    PR_SEND --> AWAIT["Đơn: Awaiting Stock<br/>Sale báo khách ngày giao mới nếu trễ hợp đồng"]
+    ENOUGH -->|"Thiếu thùng"| PO_SEND["Sale lập Đơn sản xuất cho phần thiếu, tính theo số thùng<br/>kho nhận = kho xuất, cảnh báo nếu vượt còn trống dự kiến<br/>Sales Manager duyệt và gửi — luồng §1"]
+    PO_SEND --> AWAIT["Đơn: Awaiting Stock — khi Đơn sản xuất Sent<br/>Sale báo khách ngày giao mới nếu trễ hợp đồng"]
     AWAIT --> AW_CHOICE{"Phần có sẵn<br/>xử lý thế nào?"}
     AW_CHOICE -->|"Chờ đủ hàng"| AW_BIN["Thùng nằm tại bin, đã giữ cho đơn"]
-    AW_CHOICE -->|"Điều phối dùng khu chờ xuất: đích STAGING"| TASK
+    AW_CHOICE -->|"Quản lý kho dùng khu chờ xuất: đích STAGING"| TASK
     AW_CHOICE -->|"Sale cho phép giao một phần: đích PACKING"| TASK
-    AW_BIN -.->|"thành phẩm nhập kho, cất xong — §1"| RECV["Mọi Yêu cầu sản xuất của đơn đã Received, giữ đủ thùng<br/>Đơn: Ready to Fulfill<br/>đợt BEFORE_DELIVERY → Due"]
+    AW_BIN -.->|"thành phẩm nhập kho xuất, cất xong — §1"| RECV["Mọi Đơn sản xuất của đơn đã Received, giữ đủ thùng<br/>Đơn: Ready to Fulfill<br/>đợt BEFORE_DELIVERY → Due"]
 
-    ENOUGH -->|Đủ| RELEASE["Điều phối release, phân bổ đủ N thùng LPN cụ thể mỗi dòng — bin, lô<br/>FEFO / FIFO<br/>Đơn: Ready to Fulfill — đợt BEFORE_DELIVERY → Due"]
+    ENOUGH -->|Đủ| RELEASE["Đơn: Ready to Fulfill — đợt BEFORE_DELIVERY → Due<br/>Quản lý kho của kho xuất release<br/>phân bổ đủ N thùng LPN cụ thể mỗi dòng — bin, lô, FIFO"]
     RELEASE --> TASK
     RECV --> HAS_TASK{"Đơn đã có task?"}
-    HAS_TASK -->|Chưa| TASK["Điều phối / Quản lý kho tạo task, giao người<br/>chọn đích lấy hàng: PACKING / STAGING<br/>mỗi thùng đã phân bổ một dòng lấy hàng<br/>đơn Ready to Fulfill → Picking, đơn Awaiting Stock giữ nguyên"]
-    HAS_TASK -->|Có| TOPUP["Phân bổ bổ sung đủ số thùng còn thiếu, thêm dòng vào cùng task<br/>giữ đích của task — task và đơn → Picking"]
+    HAS_TASK -->|Chưa| TASK["Quản lý kho tạo task, giao người<br/>chọn đích lấy hàng: PACKING / STAGING<br/>mỗi thùng đã phân bổ một dòng lấy hàng<br/>đơn Ready to Fulfill → Picking, đơn Awaiting Stock giữ nguyên"]
+    HAS_TASK -->|Có| TOPUP["Quản lý kho phân bổ bổ sung đủ số thùng còn thiếu, FIFO<br/>thêm dòng vào cùng task, giữ đích của task — task và đơn → Picking"]
     TOPUP --> PICK
     TASK --> PICK["Picker quét vị trí + quét LPN của thùng<br/>đúng thùng của dòng, không nhập số lượng"]
 
     PICK --> SHORT{"Lấy được thùng<br/>của dòng?"}
     SHORT -->|"Không thấy / hư hỏng"| SHORT_HOLD["Báo thiếu: dòng Short, đơn On Hold INVENTORY<br/>tự mở kiểm kê mù thùng đó"]
-    SHORT_HOLD --> REALLOC{"Phân bổ lại được đủ số thùng thiếu<br/>từ thùng khác của SKU, cùng kho?"}
+    SHORT_HOLD --> REALLOC{"Quản lý kho phân bổ lại được đủ số thùng thiếu<br/>từ thùng khác của SKU tại kho xuất?"}
     REALLOC -->|"Được — tự gỡ treo"| PICK
-    REALLOC -->|"Không"| SHORT_DECIDE(["Điều phối + Sale quyết:<br/>Yêu cầu sản xuất / thoả thuận lại số thùng /<br/>giao một phần rồi đóng phần còn lại / huỷ"])
+    REALLOC -->|"Không"| SHORT_DECIDE(["Quản lý kho báo Sale, Sale quyết:<br/>Đơn sản xuất cho phần thiếu / thoả thuận lại số thùng /<br/>giao một phần rồi đóng phần còn lại / huỷ"])
     SHORT -->|"Lấy được"| DEST{"Đích lấy hàng?"}
 
     DEST -->|STAGING| STAGED["Dòng Staged: thùng chuyển nguyên sang khu STAGING, sổ MOVE<br/>chưa trừ tồn, phân bổ vẫn Held, giữ riêng cho đơn<br/>Task: Staged"]
     STAGED --> READY_OUT{"Đơn sẵn sàng xuất?<br/>đủ hàng, hoặc được giao một phần"}
     READY_OUT -->|"Chưa: chờ hàng / chờ đợt BEFORE_DELIVERY"| STAGED
-    STAGED -.->|"phần thiếu nhập kho"| RECV
-    READY_OUT -->|Rồi| TO_CHECK["Điều phối / Quản lý kho: chuyển cả tác vụ sang khu kiểm và dán nhãn<br/>một lần cho cả task, đơn không treo<br/>trừ tồn, sổ PICK, thùng và phân bổ Consumed — Task: Picked"]
+    STAGED -.->|"phần thiếu nhập kho xuất"| RECV
+    READY_OUT -->|Rồi| TO_CHECK["Quản lý kho: chuyển cả tác vụ sang khu kiểm và dán nhãn<br/>một lần cho cả task, đơn không treo<br/>trừ tồn, sổ PICK, thùng và phân bổ Consumed — Task: Picked"]
     DEST -->|PACKING| PICKED["Dòng Picked: trừ tồn ngay, sổ PICK, thùng Consumed<br/>Task: Picked"]
     TO_CHECK --> CHECK_START
     PICKED --> CHECK_START["NV kho bắt đầu phiên kiểm thùng tại khu PACKING<br/>quét LPN từng thùng: đúng đơn, đúng SKU — thùng Checked<br/>thùng hư hỏng: loại → Removed, cất lại vào QUARANTINE"]
@@ -162,8 +244,8 @@ flowchart TD
     CHECK_START --> LABEL["Kích thước, khối lượng theo quy cách thùng của SKU<br/>in và dán nhãn giao hàng lên từng thùng — Labeled<br/>thùng đầu tiên dán nhãn: khoá huỷ đơn, cách giao, địa chỉ"]
     LABEL --> COMPLETE{"Hoàn tất kiểm thùng:<br/>đủ thùng?"}
     COMPLETE -->|Đủ| PACKED["Phiên kiểm thùng: Completed<br/>Đơn: Packed — đã kiểm đủ thùng và dán nhãn<br/>Shipment: Ready to Dispatch"]
-    COMPLETE -->|"Thiếu, đơn được giao một phần"| PART["Đơn: Partially Fulfilled<br/>Shipment: Ready to Dispatch<br/>phần còn lại lấy bổ sung sau"]
-    PART -.->|"phần còn lại về kho"| RECV
+    COMPLETE -->|"Thiếu, đơn được giao một phần"| PART["Đơn: Partially Fulfilled<br/>Shipment: Ready to Dispatch<br/>phần còn lại lấy bổ sung sau, cùng kho xuất"]
+    PART -.->|"phần còn lại về kho xuất"| RECV
     PACKED --> PAY_WARN["Cảnh báo nếu đợt BEFORE_DELIVERY chưa thu<br/>không chặn kiểm thùng"]
     PART --> PAY_WARN
 
@@ -177,11 +259,11 @@ flowchart TD
     GATE -->|Rồi| HANDOVER["Ký bàn giao — tất cả hoặc không<br/>Shipment: Handed Over"]
     HANDOVER --> SHIPPED["Đơn: Shipped, hoặc Partially Fulfilled nếu còn phần chưa giao<br/>không theo dõi hành trình, không thu tiền khi giao"]
 
-    SHIPPED --> RESULT{"Hãng báo kết quả<br/>Điều phối cập nhật"}
+    SHIPPED --> RESULT{"Hãng báo kết quả<br/>Quản lý kho ghi nhận"}
     RESULT -->|"Thành công"| DELIVERED["Đơn: Delivered<br/>đợt AFTER_DELIVERY đến hạn — công nợ phải thu"]
     RESULT -->|"Thất bại, có lý do"| FAILED["Đơn: Delivery Failed"]
     FAILED -->|"Hãng giao lại thành công"| DELIVERED
-    FAILED -->|"Hàng hoàn về kho"| RTO(["Đơn: Returned — nhập lại kho, xử lý hoàn tiền"])
+    FAILED -->|"Hàng hoàn về kho xuất"| RTO(["Đơn: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE, §1.3<br/>xử lý hoàn tiền"])
     DELIVERED --> AUTO["Mỗi đêm: sau 7 ngày, mọi đợt Paid,<br/>không có yêu cầu trả hàng — Đơn: Completed"]
     AUTO --> CLOSED(["Sau 30 ngày: Closed"])
 ```
@@ -192,9 +274,9 @@ flowchart TD
 sequenceDiagram
     autonumber
     actor SALE as Sale
-    actor COORD as Điều phối
+    actor WM as Quản lý kho (kho xuất)
     participant OM as Đơn hàng (17)
-    participant PR as Yêu cầu sản xuất (17)
+    participant PO as Đơn sản xuất (17)
     participant INVSYS as Tồn kho (20)
     actor PICKER as Picker
     actor CHECKER as NV kho kiểm thùng (08)
@@ -204,38 +286,38 @@ sequenceDiagram
     participant CARRIER as Hãng vận chuyển (ngoài hệ thống)
     actor CUST as Khách hàng sỉ
 
-    OM->>INVSYS: Đơn Confirmed — kiểm tồn SKU riêng theo số thùng, giữ đủ N thùng mỗi dòng (hoặc số thùng có sẵn)
-    COORD->>OM: Chọn kho xuất, cách giao (gửi kiện / nguyên chuyến)
+    SALE->>OM: Đơn Confirmed — chọn kho xuất (hệ thống gợi ý), chọn cách giao (gửi kiện / nguyên chuyến)
+    OM->>INVSYS: Kiểm tồn SKU riêng tại kho xuất theo số thùng, giữ đủ N thùng mỗi dòng (hoặc số thùng có sẵn)
     alt Thiếu thùng
-        COORD->>PR: Lập và gửi Yêu cầu sản xuất cho phần thiếu (tính theo số thùng)
+        SALE->>PO: Lập Đơn sản xuất cho phần thiếu (kho nhận = kho xuất), Sales Manager duyệt và gửi (luồng §1)
         OM->>OM: Awaiting Stock
         SALE-->>CUST: Báo ngày giao dự kiến mới (nếu trễ hợp đồng)
-        opt Điều phối dùng khu chờ xuất
-            COORD->>PICKER: Tạo task đích STAGING cho phần có sẵn
+        opt Quản lý kho dùng khu chờ xuất
+            WM->>PICKER: Tạo task đích STAGING cho phần có sẵn
             PICKER->>INVSYS: Lấy nguyên thùng về khu STAGING (MOVE, chưa trừ tồn) → task Staged
         end
-        PR-->>OM: Thành phẩm nhập kho đủ (luồng §1) → Ready to Fulfill
+        PO-->>OM: Thành phẩm nhập kho xuất đủ (luồng §1) → Ready to Fulfill
     else Đủ hàng
-        COORD->>OM: Release → Ready to Fulfill
+        OM->>OM: Ready to Fulfill
     end
     OM->>PAY: Đợt BEFORE_DELIVERY chuyển Due
-    COORD->>INVSYS: Phân bổ đủ N thùng LPN mỗi dòng (FEFO / FIFO)
+    WM->>INVSYS: Release, phân bổ đủ N thùng LPN mỗi dòng tại kho xuất (FIFO)
     alt Đơn chưa có task
-        COORD->>PICKER: Tạo task, chọn đích PACKING / STAGING, giao người → đơn Picking
+        WM->>PICKER: Tạo task, chọn đích PACKING / STAGING, giao người → đơn Picking
     else Đơn đã có task Staged
-        COORD->>PICKER: Phân bổ bổ sung, thêm dòng vào cùng task → task và đơn Picking
+        WM->>PICKER: Phân bổ bổ sung, thêm dòng vào cùng task → task và đơn Picking
     end
     PICKER->>INVSYS: Quét vị trí + quét LPN của thùng (mỗi dòng một thùng)
     opt Không lấy được thùng
         PICKER-->>OM: Báo thiếu → đơn On Hold INVENTORY
         INVSYS->>INVSYS: Tự mở kiểm kê mù thùng đó
-        COORD->>INVSYS: Phân bổ lại đủ số thùng thiếu từ thùng khác cùng kho → tự gỡ treo
+        WM->>INVSYS: Phân bổ lại đủ số thùng thiếu từ thùng khác tại kho xuất → tự gỡ treo
     end
     alt Đích PACKING
         INVSYS->>INVSYS: Trừ tồn ngay (PICK), thùng Consumed → task Picked
     else Đích STAGING
         INVSYS->>INVSYS: Chuyển thùng sang khu STAGING (MOVE), phân bổ vẫn Held → task Staged
-        COORD->>INVSYS: Chuyển cả tác vụ sang khu kiểm và dán nhãn → trừ tồn, thùng và phân bổ Consumed → task Picked
+        WM->>INVSYS: Chuyển cả tác vụ sang khu kiểm và dán nhãn → trừ tồn, thùng và phân bổ Consumed → task Picked
     end
     CHECKER->>CHECKER: Bắt đầu phiên kiểm thùng, quét LPN từng thùng (đúng đơn, đúng SKU)
     CHECKER->>CHECKER: In và dán nhãn giao hàng từng thùng (kích thước, khối lượng theo quy cách thùng)
@@ -261,44 +343,57 @@ sequenceDiagram
     DISP-->>OM: Shipped (không theo dõi hành trình)
     CARRIER-->>CUST: Giao hàng (ngoài hệ thống, không thu tiền)
     alt Giao thành công
-        CARRIER-->>COORD: Báo đã giao
-        COORD->>OM: Delivered
+        CARRIER-->>WM: Báo đã giao
+        WM->>OM: Delivered
         OM->>PAY: Đợt AFTER_DELIVERY đến hạn (công nợ phải thu)
         CUST->>ACC: Chuyển khoản theo kỳ hạn
         ACC->>PAY: Ghi nhận theo sao kê → đợt Paid
         OM->>OM: Sau 7 ngày, mọi đợt Paid → Completed, sau 30 ngày → Closed
     else Giao thất bại
-        CARRIER-->>COORD: Báo giao thất bại
-        COORD->>OM: Delivery Failed (kèm lý do)
-        CARRIER->>DISP: Hoàn hàng về kho (RTO)
-        COORD->>OM: Returned → xử lý hoàn tiền (15)
+        CARRIER-->>WM: Báo giao thất bại
+        WM->>OM: Delivery Failed (kèm lý do)
+        CARRIER->>DISP: Hoàn hàng về kho xuất (RTO)
+        WM->>OM: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE (§1.3), xử lý hoàn tiền (15)
     end
 ```
 
-### 2.3. Vòng đời Yêu cầu sản xuất (Production Request)
+### 2.3. Vòng đời Đơn sản xuất (Production Order)
 
-Chi tiết trạng thái & điều kiện chuyển xem [17 · Order Management §5.3](../ecommerce/17-order-management/README.md). Yêu cầu sản xuất **chỉ phát sinh từ đơn**: Điều phối lập cho phần thiếu của đơn `Confirmed` sau khi đã kiểm tồn SKU riêng; không có yêu cầu bổ sung tồn. `Partially Received` / `Received` do hệ thống chuyển khi nhập kho theo thùng ([03](../warehouse/03-receipt/README.md)).
+Chi tiết trạng thái & điều kiện chuyển xem [17 · Order Management §5.3](../ecommerce/17-order-management/README.md). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Sale lập** cho phần thiếu của đơn `Confirmed` sau khi đã kiểm tồn SKU riêng tại kho xuất; không có Đơn sản xuất bổ sung tồn. **Sales Manager duyệt** (→ `Sent`, hệ thống xuất phiếu và gửi qua kênh kết nối) hoặc **trả lại** (→ `Draft`, bắt buộc lý do). `Sample Pending` chỉ có khi bật cờ **cần duyệt mẫu in**; mỗi lần khách yêu cầu in lại là một **vòng mẫu** mới. `Sent` / `Accepted` → `In Production` do hệ thống chuyển khi hàng về mà Đơn sản xuất không bật cờ duyệt mẫu in ([03](../warehouse/03-receipt/README.md) BR-15). `Partially Received` / `Received` do hệ thống chuyển khi nhập kho theo thùng ([03](../warehouse/03-receipt/README.md)).
 
 ```mermaid
 stateDiagram-v2
+    state "Pending Approval" as PendingApproval
+    state "Sample Pending" as SamplePending
     state "In Production" as InProduction
     state "Partially Received" as PartiallyReceived
-    [*] --> Draft: Điều phối lập cho phần thiếu của đơn
-    Draft --> Sent: Xuất phiếu, gửi bộ phận sản xuất
-    Sent --> InProduction: Bộ phận sản xuất bắt đầu
+
+    [*] --> Draft: Sale lập cho phần thiếu của đơn
+    Draft --> PendingApproval: Gửi duyệt
+    PendingApproval --> Draft: Sales Manager trả lại (lý do)
+    PendingApproval --> Sent: Sales Manager duyệt, hệ thống gửi phiếu
+    Sent --> Accepted: Đơn vị sản xuất xác nhận, ngày dự kiến
+    Accepted --> SamplePending: Cần duyệt mẫu in, tải mẫu vòng 1
+    SamplePending --> SamplePending: Khách yêu cầu in lại, vòng mới
+    SamplePending --> InProduction: Khách duyệt mẫu
+    Accepted --> InProduction: Không cần duyệt mẫu, bắt đầu sản xuất
+    Sent --> InProduction: Hàng về khi không cần duyệt mẫu
     InProduction --> PartiallyReceived: Nhập kho một phần
     InProduction --> Received: Nhập kho đủ
     PartiallyReceived --> Received: Nhập nốt
     PartiallyReceived --> Closed: Đóng thiếu (lý do)
     InProduction --> Closed: Dừng sản xuất, chưa nhận gì (lý do)
     Draft --> Cancelled
-    Sent --> Cancelled: Chưa nhận gì (lý do)
+    PendingApproval --> Cancelled
+    Sent --> Cancelled: Chưa in hàng loạt (lý do)
+    Accepted --> Cancelled: Chưa in hàng loạt (lý do)
+    SamplePending --> Cancelled: Chưa in hàng loạt (lý do)
     Received --> [*]
     Closed --> [*]
     Cancelled --> [*]
 ```
 
-> ⚠️ Giả định: Yêu cầu sản xuất `In Production` mà bộ phận sản xuất dừng hẳn khi chưa giao gì thì Điều phối **đóng** (`Closed`, bắt buộc lý do), không huỷ. Xem [open-questions](../open-questions/README.md).
+> **Đã chốt 2026-11-05:** Đơn sản xuất `In Production` không huỷ được; đơn vị sản xuất dừng hẳn khi chưa giao gì thì Sale **đóng** (`Closed`, bắt buộc lý do). Huỷ (`Cancelled`, bắt buộc lý do) chỉ khi chưa in hàng loạt: `Draft` / `Pending Approval` / `Sent` / `Accepted` / `Sample Pending` ([17](../ecommerce/17-order-management/README.md) BR-06). Phản hồi `Accepted`, tiến độ và mẫu in do Sale ghi nhận tay; kênh API là phạm vi sau.
 
 ### 2.4. Vòng đời phiên kiểm thùng & thùng giao (Outbound Check & Labeling)
 
@@ -338,7 +433,7 @@ stateDiagram-v2
 
 ### 2.5. Vòng đời kế hoạch chuyến xe (Load Plan — giao nguyên chuyến)
 
-Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Dùng cho đơn khách giao nguyên chuyến và lệnh chuyển kho nguyên chuyến ([10](../warehouse/10-inter-warehouse-transfer/README.md)); một kế hoạch không trộn đơn khách với lệnh chuyển kho. **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao. Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp.
+Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Chỉ dùng cho **đơn khách giao nguyên chuyến**: kế hoạch chứa nguyên shipment `Ready to Dispatch` đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn). **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao. Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp.
 
 ```mermaid
 stateDiagram-v2
@@ -358,136 +453,38 @@ stateDiagram-v2
 
 ---
 
-## 3. Luồng Transfer giữa các kho
+## 3. Phụ lục
 
-Chi tiết: [10 · Inter-warehouse Transfer](../warehouse/10-inter-warehouse-transfer/README.md). Lệnh chuyển kho **chuyển nguyên thùng**: mỗi dòng ghi **số thùng**, kho nguồn phải đủ số thùng tự do; phân bổ = chọn đủ N thùng theo FEFO / FIFO ([10](../warehouse/10-inter-warehouse-transfer/README.md) BR-13); thùng LPN là kiện chuyển đi.
+### 3.1. Luồng bán sỉ theo hợp đồng (Mẫu & thiết kế → Báo giá → Đơn → Hợp đồng → Đợt thanh toán → Công nợ)
 
-> ⚠️ Giả định: ngưỡng duyệt lệnh chuyển kho tính theo **tổng số thùng**, mặc định **100 thùng** ([10](../warehouse/10-inter-warehouse-transfer/README.md) BR-08). Xem [open-questions C35](../open-questions/README.md).
-
-### 3.1. Flowchart tổng thể
-
-> ⚠️ Từ bước **Kho đích: tạo phiếu nhận** trở đi (nhận, đối chiếu chênh lệch, cất hàng, đóng lệnh) là **phạm vi giai đoạn sau** — lệnh hiện dừng ở `In Transit` ([10](../warehouse/10-inter-warehouse-transfer/README.md) §4 bước 8–11, [open-questions C26](../open-questions/README.md)). Các bước đó vẽ **nét đứt**.
+Chi tiết: [12 · Mẫu & thiết kế](../ecommerce/12-product-design/README.md), [13 · Catalog](../ecommerce/13-catalog/README.md), [14 · Báo giá, Đơn hàng & Hợp đồng](../ecommerce/14-cart-and-order/README.md), [15 · Thanh toán theo hợp đồng & Công nợ](../ecommerce/15-payment/README.md). Khách **không tự đặt hàng** trên sàn: đơn do Sale tạo từ báo giá đã chấp nhận. **Sàn không hiển thị giá** *(Đã chốt 2026-11-05)*: giá chỉ có trên báo giá / đơn / hợp đồng; **đơn giá do Sale nhập**, hệ thống gợi ý từ **bảng giá riêng nội bộ** của khách (Sales Manager khai báo, chỉ nhân viên xem — [14](../ecommerce/14-cart-and-order/README.md) BR-10). Dòng báo giá / đơn chỉ là **SKU thành phẩm riêng của khách** (không còn hàng trơn), ghi **số thùng** (kèm số cái / thùng) và **đơn giá theo cái**; MOQ và bậc giá theo số thùng; thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái ([14](../ecommerce/14-cart-and-order/README.md) BR-07, BR-08). SKU **sản xuất lần đầu** có thêm **dòng phí khuôn / bản in** trên báo giá, đơn và hợp đồng — thu theo các đợt như hàng hoá ([14](../ecommerce/14-cart-and-order/README.md) BR-17, [15](../ecommerce/15-payment/README.md)); hợp đồng ghi **số lần in mẫu miễn phí** dùng khi duyệt mẫu in ([14](../ecommerce/14-cart-and-order/README.md) BR-18).
 
 ```mermaid
 flowchart TD
-    NEED(["Nhu cầu cân bằng tồn / đưa hàng gần vùng bán"]) --> TO_CREATE["Inventory Planner / Quản lý kho tạo lệnh chuyển kho — Draft<br/>kho nguồn → kho đích, cách giao, dòng SKU và số thùng"]
-    TO_CREATE --> TO_CHECK{"Mỗi dòng đủ số thùng Available tự do<br/>tại kho nguồn?"}
-    TO_CHECK -->|Không| ADJUST["Từ chối lưu dòng đó<br/>giảm số thùng hoặc chọn kho nguồn khác"]
-    ADJUST --> TO_CREATE
-    TO_CHECK -->|Có| TO_SUBMIT{"Gửi duyệt: tổng số thùng<br/>vượt ngưỡng, mặc định 100 thùng?"}
-    TO_SUBMIT -->|Vượt| TO_PENDING["Pending Approval<br/>Quản lý kho khác người gửi duyệt"]
-    TO_PENDING -->|Duyệt| TO_APPROVED
-    TO_PENDING -->|"Từ chối + lý do"| TO_CREATE
-    TO_SUBMIT -->|"Không — tự duyệt"| TO_APPROVED["Approved"]
-
-    TO_APPROVED --> MODE{"Cách giao?"}
-    MODE -->|"Nguyên chuyến — mặc định"| FTL_CHECK["Mở phiên kiểm thùng chuyển kho → TO Picking<br/>phân bổ và giữ đủ N thùng mỗi dòng, FEFO / FIFO<br/>quét LPN kiểm từng thùng, dán nhãn chuyển kho như 08<br/>thùng không lấy được: giao một phần kèm ghi chú"]
-    FTL_CHECK -.->|"Huỷ lấy hàng, chưa rời kho"| TO_APPROVED
-    FTL_CHECK --> FTL_LP["Kế hoạch chuyến xe 3D cho đúng lệnh này<br/>đi nguyên lô, xếp và ký bàn giao từng xe"]
-    FTL_LP --> DISPATCH["Xuất kho nguồn → TO In Transit<br/>tồn kho nguồn giảm theo nguyên thùng, sổ TRANSFER_OUT, thùng Consumed<br/>tồn In-Transit thuộc lệnh"]
-    MODE -->|"Gửi kiện"| PCL["NV kho lấy thùng<br/>xác nhận xuất bằng quét LPN từng thùng gửi đi"]
-    PCL --> DISPATCH
-
-    DISPATCH --> TRANSPORT["Vận chuyển giữa 2 kho<br/>không theo dõi hành trình"]
-    TRANSPORT --> DST_RECV["Kho đích: tạo phiếu nhận<br/>tham chiếu lệnh chuyển kho"]
-    DST_RECV --> DST_COUNT["Kiểm đếm số thùng thực nhận + tình trạng"]
-    DST_COUNT --> DISCREPANCY{"Khớp số thùng xuất?"}
-    DISCREPANCY -->|Lệch| INVESTIGATE["Ghi transfer discrepancy<br/>điều tra / claim hãng vận chuyển ngoài hệ thống<br/>điều chỉnh In-Transit"]
-    DISCREPANCY -->|Khớp| DST_PA
-    INVESTIGATE --> DST_PA["Sinh nhiệm vụ cất tại kho đích"]
-
-    DST_PA --> DST_SLOT["Gợi ý bin cất hàng tại kho đích — 05"]
-    DST_SLOT --> DST_MOVE["Cất nguyên thùng vào vị trí<br/>tồn In-Transit → Available tại kho đích"]
-    DST_MOVE --> TO_STATUS{"Đã nhận và cất hết dòng?"}
-    TO_STATUS -->|Chưa| DST_RECV
-    TO_STATUS -->|Rồi| TO_DONE(["Lệnh chuyển kho: Completed / Closed"])
-
-    classDef later stroke-dasharray: 5 5
-    class DST_RECV,DST_COUNT,DISCREPANCY,INVESTIGATE,DST_PA,DST_SLOT,DST_MOVE,TO_STATUS,TO_DONE later
-```
-
-### 3.2. Sequence diagram (trình tự tác nhân)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor PLAN as Inventory Planner / Quản lý kho
-    participant TO as Lệnh chuyển kho (TO)
-    actor MGR as Quản lý kho (người duyệt)
-    actor SRC as NV kho nguồn
-    participant INV_SRC as Tồn kho nguồn
-    participant LP as Kế hoạch chuyến xe (09)
-    participant TRANS as Vận chuyển
-    actor DST as NV kho đích
-    participant SLOT as Gợi ý bin (kho đích)
-    participant INV_DST as Tồn kho đích
-
-    PLAN->>TO: Tạo TO (Draft) — nguồn / đích, cách giao, dòng SKU và số thùng
-    TO->>INV_SRC: Kiểm mỗi dòng đủ số thùng Available tự do
-    PLAN->>TO: Gửi duyệt
-    alt Tổng số thùng không vượt ngưỡng (mặc định 100 thùng)
-        TO->>TO: Tự duyệt → Approved
-    else Vượt ngưỡng
-        TO->>MGR: Pending Approval
-        MGR->>TO: Duyệt → Approved (từ chối kèm lý do → Draft)
-    end
-    alt Nguyên chuyến (mặc định)
-        SRC->>TO: Mở phiên kiểm thùng chuyển kho → Picking
-        TO->>INV_SRC: Phân bổ và giữ đủ N thùng mỗi dòng (FEFO / FIFO)
-        SRC->>SRC: Lấy thùng, quét LPN kiểm, dán nhãn chuyển kho (không mở thùng, không đóng lại hàng)
-        SRC->>LP: Lập kế hoạch chuyến xe cho đúng lệnh này, xếp và ký từng xe
-        LP-->>TO: Xe cuối cùng ký bàn giao → In Transit
-    else Gửi kiện
-        SRC->>SRC: Lấy thùng
-        SRC->>TO: Xác nhận xuất bằng quét LPN từng thùng gửi đi → In Transit
-    end
-    INV_SRC->>INV_SRC: Giảm tồn theo nguyên thùng (TRANSFER_OUT, thùng Consumed) → In-Transit thuộc TO
-    SRC->>TRANS: Bàn giao vận chuyển (không theo dõi hành trình)
-    Note over DST,INV_DST: Phạm vi giai đoạn sau — chưa có trong hệ thống
-    TRANS->>DST: Giao hàng tới kho đích
-    DST->>TO: Tạo phiếu nhận tham chiếu TO
-    DST->>DST: Kiểm đếm số thùng và tình trạng
-    opt Lệch số thùng xuất / nhận
-        DST->>TO: Ghi transfer discrepancy
-        TO->>TRANS: Claim / điều tra
-        DST->>INV_DST: Điều chỉnh In-Transit tương ứng
-    end
-    DST->>SLOT: Yêu cầu gợi ý vị trí (kho đích)
-    SLOT-->>DST: Vị trí đích đề xuất
-    DST->>INV_DST: Cất nguyên thùng → In-Transit chuyển thành Available (kho đích)
-    TO->>TO: Completed / Closed
-```
-
----
-
-## 4. Phụ lục
-
-### 4.1. Luồng bán sỉ theo hợp đồng (Mẫu & thiết kế → Báo giá → Đơn → Hợp đồng → Đợt thanh toán → Công nợ)
-
-Chi tiết: [12 · Mẫu & thiết kế](../ecommerce/12-product-design/README.md), [14 · Báo giá, Đơn hàng & Hợp đồng](../ecommerce/14-cart-and-order/README.md), [15 · Thanh toán theo hợp đồng & Công nợ](../ecommerce/15-payment/README.md). Khách **không tự đặt hàng** trên sàn: đơn do Sale tạo từ báo giá đã chấp nhận. Dòng báo giá / đơn chỉ là **SKU thành phẩm riêng của khách** (không còn hàng trơn), ghi **số thùng** (kèm số cái / thùng) và **đơn giá theo cái**; MOQ và bậc giá theo số thùng; thành tiền dòng = số thùng × số cái / thùng × đơn giá / cái ([14](../ecommerce/14-cart-and-order/README.md) BR-07, BR-08).
-
-```mermaid
-flowchart TD
-    ENTRY(["Khách sỉ xem quy cách trên sàn, liên hệ Sale<br/>chat / điện thoại / email"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
+    ENTRY(["Khách sỉ xem sản phẩm, quy cách trên sàn — sàn không hiện giá<br/>liên hệ Sale: chat / điện thoại / email"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
     PATH -->|Có| CUST_INPUT["Khách đưa mẫu: logo, file, ảnh, mẫu vật<br/>Sale ghi nhận yêu cầu thiết kế — Draft (12)"]
-    CUST_INPUT --> DESIGN["Người thiết kế tải bộ file<br/>Sale / Quản trị bán hàng"]
-    DESIGN --> REVIEW{"Quản trị bán hàng duyệt kỹ thuật<br/>người duyệt khác người thiết kế"}
+    CUST_INPUT --> DESIGN["Người thiết kế tải bộ file<br/>Sale / Sales Manager"]
+    DESIGN --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>người duyệt khác người thiết kế"}
     REVIEW -->|"Không đạt"| DESIGN
     REVIEW -->|Đạt| SUBMIT["Gửi khách xác nhận trên sàn — Submitted<br/>quy cách phải đã có quy cách thùng"]
     SUBMIT --> CUST_OK{"Khách xác nhận?"}
     CUST_OK -->|"Yêu cầu sửa"| DESIGN
     CUST_OK -->|"Xác nhận"| SNAP["Design snapshot bất biến<br/>+ sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
     PATH -->|"Không — SKU riêng của khách đã có"| QUOTE
-    SNAP --> QUOTE["Sale lập báo giá (14)<br/>số thùng từng dòng, đơn giá / cái theo bảng giá riêng<br/>bậc giá và MOQ theo số thùng, hiệu lực — Sent"]
+    SNAP --> QUOTE["Sale lập báo giá (14)<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
+    QUOTE --> DISCOUNT{"Đơn giá thấp hơn giá gợi ý<br/>vượt hạn mức giảm giá của Sale?"}
+    DISCOUNT -->|Có| DISC_OK["Sales Manager duyệt trước khi gửi"]
+    DISC_OK --> Q_SENT
+    DISCOUNT -->|Không| Q_SENT["Gửi báo giá cho khách — Sent<br/>khách thấy giá trên báo giá / thẻ báo giá trong chat"]
 
-    QUOTE --> Q_RESP{"Khách phản hồi trên sàn<br/>hoặc thẻ hành động trong chat"}
+    Q_SENT --> Q_RESP{"Khách phản hồi trên sàn<br/>hoặc thẻ hành động trong chat"}
     Q_RESP -->|"Yêu cầu sửa"| Q_REV["Changes Requested → bản sửa mới"]
     Q_REV --> QUOTE
     Q_RESP -->|"Hết hiệu lực"| Q_EXP(["Báo giá: Expired"])
     Q_RESP -->|"Chấp nhận, chọn số thùng ≥ MOQ"| ACCEPT["Báo giá: Accepted"]
-    ACCEPT --> ORDER["Sale tạo đơn từ báo giá<br/>chốt số thùng, số cái / thùng, đơn giá / cái<br/>Đơn: Draft — báo giá Converted"]
+    ACCEPT --> ORDER["Sale tạo đơn từ báo giá<br/>chốt số thùng, số cái / thùng, đơn giá / cái, dòng phí khuôn / bản in<br/>Đơn: Draft — báo giá Converted"]
 
-    ORDER --> CONTRACT["Sale lập hợp đồng mua bán — Draft<br/>các bên, dòng hàng & giá, điều khoản giao<br/>lịch thanh toán: ON_SIGNING / BEFORE_DELIVERY / AFTER_DELIVERY"]
+    ORDER --> CONTRACT["Sale lập hợp đồng mua bán — Draft<br/>các bên, dòng hàng và giá, dòng phí khuôn / bản in, điều khoản giao<br/>số lần in mẫu miễn phí — mặc định từ cấu hình chung<br/>lịch thanh toán: ON_SIGNING / BEFORE_DELIVERY / AFTER_DELIVERY"]
     CONTRACT --> SEND["Gửi hợp đồng — Sent<br/>Đơn: Pending Contract<br/>cảnh báo nếu vượt hạn mức / quá hạn"]
     SEND --> SIGN{"Khách ký?<br/>ngoài hệ thống"}
     SIGN -->|"Từ chối / cần sửa"| C_CANCEL["Huỷ hợp đồng, có lý do<br/>đơn về Draft để lập hợp đồng thay thế, hoặc huỷ đơn"]
@@ -499,13 +496,15 @@ flowchart TD
     HOLD -->|"Từ chối"| O_CANCEL(["Đơn: Cancelled — CREDIT_REJECTED"])
     HOLD -->|Duyệt| ONSIGN
     CREDIT -->|Không| ONSIGN{"Đợt ON_SIGNING đã thu đủ<br/>hoặc không có?"}
-    ONSIGN -->|Chưa| PP["Đơn: Pending Payment<br/>khách chuyển khoản, Kế toán ghi nhận & phân bổ"]
+    ONSIGN -->|Chưa| PP["Đơn: Pending Payment<br/>khách chuyển khoản, Kế toán ghi nhận và phân bổ"]
     PP -->|"Thu đủ"| CONFIRMED
-    ONSIGN -->|Rồi| CONFIRMED(["Đơn: Confirmed → kiểm tồn & Fulfillment — §2"])
-    CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
+    ONSIGN -->|Rồi| CONFIRMED(["Đơn: Confirmed → Sale chọn kho xuất, kiểm tồn và Fulfillment — §2"])
+    CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>phí khuôn / bản in nằm trong các đợt như hàng hoá<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
 ```
 
-### 4.2. Vòng đời đơn hàng (Order)
+> ⚠️ Giả định: báo giá không bắt buộc SKU đã có giá nội bộ — chưa có thì Sale nhập giá trực tiếp; một dòng phí khuôn / bản in cho mỗi SKU mẫu mới, chi tiết khuôn / bản in theo kỹ thuật in là phạm vi sau; số lần in mẫu miễn phí mặc định 2. Xem [open-questions](../open-questions/README.md).
+
+### 3.2. Vòng đời đơn hàng (Order)
 
 Chi tiết: [17 · Order Management §5.1](../ecommerce/17-order-management/README.md). Sơ đồ vẽ theo bảng chuyển tiếp của 17 §5.1.
 
@@ -530,11 +529,11 @@ stateDiagram-v2
     OnHold --> PendingPayment: Kế toán duyệt, còn đợt ON_SIGNING
     OnHold --> Confirmed: Kế toán duyệt / gỡ treo
     PendingPayment --> Confirmed: Thu đủ đợt ON_SIGNING
-    Confirmed --> ReadyToFulfill: Đủ hàng, release
-    Confirmed --> AwaitingStock: Thiếu, gửi Yêu cầu sản xuất
+    Confirmed --> ReadyToFulfill: Chọn kho xuất, đủ hàng
+    Confirmed --> AwaitingStock: Thiếu, Đơn sản xuất đã gửi
     AwaitingStock --> ReadyToFulfill: Nhận đủ hàng
     AwaitingStock --> PartiallyFulfilled: Giao trước phần có sẵn
-    ReadyToFulfill --> Picking: Tạo task lấy hàng
+    ReadyToFulfill --> Picking: Quản lý kho release, tạo task
     Picking --> Packed: Kiểm đủ thùng và dán nhãn
     Picking --> PartiallyFulfilled
     Packed --> PartiallyFulfilled
@@ -548,7 +547,7 @@ stateDiagram-v2
     PartiallyFulfilled --> DeliveryFailed
     DeliveryFailed --> Delivered: Giao lại thành công
     DeliveryFailed --> PartiallyFulfilled
-    DeliveryFailed --> Returned
+    DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
     Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
     Delivered --> ReturnRequested
@@ -571,11 +570,11 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-> Treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9). Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi cách giao, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`.
+> **Sale** treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9); treo do tín dụng do Kế toán duyệt. Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi cách giao, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`. `Returned` = hàng đã về kho qua phiếu nhập Hàng hoàn, nằm ở khu `QUARANTINE` (§1.3).
 
-### 4.3. Vòng đời hợp đồng mua bán & đợt thanh toán
+### 3.3. Vòng đời hợp đồng mua bán & đợt thanh toán
 
-Chi tiết: [14 · §5.2 Hợp đồng mua bán](../ecommerce/14-cart-and-order/README.md), [15 · §5.1 Đợt thanh toán](../ecommerce/15-payment/README.md).
+Chi tiết: [14 · §5.2 Hợp đồng mua bán](../ecommerce/14-cart-and-order/README.md), [15 · §5.1 Đợt thanh toán](../ecommerce/15-payment/README.md). Số tiền các đợt chia từ **tổng giá trị hợp đồng** = dòng hàng + dòng phí khuôn / bản in (nếu có).
 
 | Mốc đến hạn của đợt | Chuyển `Due` khi | Ảnh hưởng tới đơn |
 |---------------------|------------------|-------------------|
@@ -619,27 +618,28 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-> ⚠️ Giả định: trạng thái `Cancelled` của đợt (khi huỷ đơn) bổ sung ngoài danh sách trạng thái đã chốt; đơn huỷ sau khi hợp đồng `Signed` thì hợp đồng giữ `Signed` và chuyển `Completed` khi phí huỷ / hoàn tiền xử lý xong. **Khoản phí huỷ** dùng cùng vòng đời đợt, bắt đầu từ `Due`. Xem [open-questions](../open-questions/README.md).
+> ⚠️ Giả định: trạng thái `Cancelled` của đợt (khi huỷ đơn) bổ sung ngoài danh sách trạng thái đã chốt; đơn huỷ sau khi hợp đồng `Signed` thì hợp đồng giữ `Signed` và chuyển `Completed` khi phí huỷ / hoàn tiền xử lý xong. **Khoản phí huỷ** dùng cùng vòng đời đợt, bắt đầu từ `Due`. Huỷ đơn trước khi có Đơn sản xuất tới `In Production` thì hoàn toàn bộ, kể cả dòng phí khuôn / bản in. Xem [open-questions](../open-questions/README.md).
 
-### 4.4. Luồng di chuyển nguyên thùng trong một kho (Intra-warehouse)
+### 3.4. Luồng di chuyển nguyên thùng trong một kho (Intra-warehouse)
 
-Chi tiết: [11 · Intra-warehouse Transfer](../warehouse/11-intra-warehouse-transfer/README.md). **Di chuyển nguyên thùng LPN bằng tay nằm trong phạm vi hiện tại** *(Đã chốt 2026-11-04)*: quét thùng, quét vị trí đích, ghi ngay; không mở thùng, không di chuyển một phần thùng. Tự động đưa thùng ra vùng lấy hàng, re-slotting và nhiệm vụ di chuyển là phạm vi giai đoạn sau ([C2, C24](../open-questions/README.md)). Lấy hàng về khu chờ xuất và cất lại thùng của đơn huỷ thuộc [07](../warehouse/07-picking/README.md), cách ly sang khu `QUARANTINE` thuộc [20](../warehouse/20-inventory-control/README.md) — không đi luồng này.
+Chi tiết: [11 · Intra-warehouse Transfer](../warehouse/11-intra-warehouse-transfer/README.md). **Di chuyển nguyên thùng LPN bằng tay nằm trong phạm vi hiện tại** *(Đã chốt 2026-11-04)*: quét thùng, quét vị trí đích, ghi ngay; không mở thùng, không di chuyển một phần thùng. Dùng cả để **dời thùng từ khu tạm `OVERFLOW` lên bin** khi kho có chỗ trở lại ([05](../warehouse/05-putaway/README.md) BR-13). **Không có chuyển kho** *(Đã chốt 2026-11-05)*: vị trí đích khác kho bị từ chối; dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt ([20](../warehouse/20-inventory-control/README.md) §4.5 — ⚠️ giả định). Tự động đưa thùng ra vùng lấy hàng, re-slotting và nhiệm vụ di chuyển là phạm vi giai đoạn sau ([C2, C24](../open-questions/README.md)). Lấy hàng về khu chờ xuất và cất lại thùng của đơn huỷ thuộc [07](../warehouse/07-picking/README.md), cách ly sang khu `QUARANTINE` thuộc [20](../warehouse/20-inventory-control/README.md) — không đi luồng này.
 
-> ⚠️ Giả định: một lần xác nhận gồm **một hoặc nhiều thùng** tới **một vị trí đích**, mỗi thùng một dòng sổ `MOVE`; một thùng không hợp lệ thì cả lần không thực hiện. Thao tác không kiểm lớp lưu trữ, sức chứa, tải trọng của vị trí đích. Xem [open-questions C24](../open-questions/README.md).
+> ⚠️ Giả định: một lần xác nhận gồm **một hoặc nhiều thùng** tới **một vị trí đích**, mỗi thùng một dòng sổ `MOVE`; một thùng không hợp lệ thì cả lần không thực hiện. Thao tác không kiểm lớp lưu trữ, thể tích, tải trọng của vị trí đích. Xem [open-questions C24](../open-questions/README.md).
 
 ```mermaid
 flowchart TD
     START(["NV kho / Quản lý kho quét 1..n thùng LPN<br/>rồi quét vị trí đích — kiểm cho từng thùng"]) --> INSTOCK{"Thùng tồn tại<br/>và đang chứa hàng — In Stock?"}
     INSTOCK -->|Không| REJ
     INSTOCK -->|Có| SAME{"Đích khác vị trí hiện tại của thùng, cùng kho,<br/>cả hai vị trí thuộc kho được gán?"}
-    SAME -->|"Khác kho"| REJ_TO(["Từ chối — khác kho thì dùng lệnh chuyển kho (10)"])
+    SAME -->|"Khác kho"| REJ_WH(["Từ chối — không có chuyển kho"])
+    SAME -->|"Trùng vị trí / ngoài kho được gán"| REJ
     SAME -->|Có| DEST{"Vị trí đích Active<br/>và không phải khu STAGING?"}
     DEST -->|Không| REJ
     DEST -->|Có| CNT{"Vị trí nguồn / đích đang bị phiếu kiểm kê giữ<br/>cho SKU / lô của thùng?"}
     CNT -->|Có| REJ
-    CNT -->|Không| HELD{"Thùng đang giữ / phân bổ cho đơn<br/>kể cả ở khu chờ xuất, hoặc cho lệnh chuyển kho?"}
+    CNT -->|Không| HELD{"Thùng đang giữ / phân bổ cho đơn<br/>kể cả ở khu chờ xuất?"}
     HELD -->|Có| REJ(["Từ chối cả lần — không thùng nào được di chuyển<br/>báo lỗi theo từng thùng"])
-    HELD -->|"Không — mọi thùng hợp lệ"| MOVE["Chuyển ngay nguyên thùng<br/>giữ SKU, lô, hạn dùng, ngày nhận, số trong thùng, trạng thái<br/>mỗi thùng một dòng sổ MOVE — tổng tồn kho không đổi"]
+    HELD -->|"Không — mọi thùng hợp lệ"| MOVE["Chuyển ngay nguyên thùng<br/>giữ SKU, lô, ngày nhận, số trong thùng, trạng thái<br/>mỗi thùng một dòng sổ MOVE — tổng tồn kho không đổi"]
     MOVE --> DONE(["Xong"])
 ```
 
@@ -647,12 +647,14 @@ flowchart TD
 
 ---
 
-## 5. Ghi chú về sơ đồ
+## 4. Ghi chú về sơ đồ
 
-- Các trạng thái viết hoa kiểu `Confirmed`, `In Transit`… là trạng thái chứng từ / nhiệm vụ, khớp với bảng vòng đời trong từng module; khi lệch, **bảng vòng đời trong module là chuẩn**. Trong `stateDiagram-v2`, trạng thái nhiều từ được khai báo bằng mã không dấu cách kèm nhãn hiển thị (ví dụ `state "Pending Contract" as PendingContract`).
+- Các trạng thái viết hoa kiểu `Confirmed`, `Sample Pending`… là trạng thái chứng từ / nhiệm vụ, khớp với bảng vòng đời trong từng module; khi lệch, **bảng vòng đời trong module là chuẩn**. Trong `stateDiagram-v2`, trạng thái nhiều từ được khai báo bằng mã không dấu cách kèm nhãn hiển thị (ví dụ `state "Pending Contract" as PendingContract`).
 - Sơ đồ mô tả **happy path + các nhánh ngoại lệ chính**; edge case chi tiết xem phần "Ràng buộc nghiệp vụ & Edge case" của module tương ứng.
-- **Sản xuất nằm ngoài hệ thống** *(Đã chốt 2026-11-04)*: bước của bộ phận sản xuất vẽ dạng khối "ngoài hệ thống"; hệ thống chỉ quản lý **Yêu cầu sản xuất** ([17](../ecommerce/17-order-management/README.md) §4.3, §5.3) và **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)). Kho không kiểm tra chất lượng khi nhập.
-- **Thùng LPN** *(Đã chốt 2026-11-04)*: mọi tồn nằm trong thùng do bộ phận sản xuất đóng sẵn; nhập, cất, di chuyển, lấy, chuyển kho và kiểm kê đều **nguyên thùng**, xác nhận bằng quét LPN. Thùng LPN là **kiện giao** — "kiện" trong các sơ đồ giao hàng là thùng LPN, kích thước / khối lượng theo quy cách thùng của SKU ([01](../warehouse/01-product-creation/README.md), [08](../warehouse/08-packing/README.md) BR-02, BR-07).
-- **Số thùng** *(Đã chốt 2026-11-05)*: "số lượng" của dòng báo giá, đơn, Yêu cầu sản xuất, phiếu nhập, lệnh chuyển kho trong các sơ đồ là **số thùng**; mọi thùng đúng số cái chuẩn của SKU (không có thùng lẻ), giá vẫn theo cái; phân bổ = chọn đủ N thùng FEFO / FIFO ([01](../warehouse/01-product-creation/README.md) BR-11, [07](../warehouse/07-picking/README.md) BR-03).
-- **Đơn vị vận chuyển** cũng nằm ngoài hệ thống: không tích hợp API, không theo dõi hành trình, không thu tiền khi giao; kết quả giao do Điều phối cập nhật ([09](../warehouse/09-shipping/README.md)).
-- Bước vẽ **nét đứt** (`classDef later`) là **phạm vi giai đoạn sau**; mũi tên nét đứt là nhánh phụ / sự kiện chờ.
+- **Sản xuất nằm ngoài hệ thống** *(Đã chốt 2026-11-04)*: bước của **đơn vị sản xuất** (xưởng của công ty hoặc đối tác ngoài) vẽ dạng khối "ngoài hệ thống"; hệ thống chỉ quản lý **Đơn sản xuất** ([17](../ecommerce/17-order-management/README.md) §4.3, §5.3) và **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)). Kho không kiểm tra chất lượng khi nhập.
+- **Vai trò** *(Đã chốt 2026-11-05)*: việc phía khách / sản xuất là của **Sale** (Đơn sản xuất do **Sales Manager** duyệt và gửi); việc trong kho xuất (release, task, khu chờ xuất, kết quả giao) là của **Quản lý kho**.
+- **Thùng LPN** *(Đã chốt 2026-11-04)*: mọi tồn nằm trong thùng do đơn vị sản xuất đóng sẵn; nhập, cất, di chuyển, lấy và kiểm kê đều **nguyên thùng**, xác nhận bằng quét LPN. Thùng LPN là **kiện giao** — "kiện" trong các sơ đồ giao hàng là thùng LPN, kích thước / khối lượng theo quy cách thùng của SKU ([01](../warehouse/01-product-creation/README.md), [08](../warehouse/08-packing/README.md) BR-02, BR-07).
+- **Số thùng** *(Đã chốt 2026-11-05)*: "số lượng" của dòng báo giá, đơn, Đơn sản xuất, phiếu nhập trong các sơ đồ là **số thùng**; mọi thùng đúng số cái chuẩn của SKU (không có thùng lẻ), giá vẫn theo cái; phân bổ = chọn đủ N thùng theo **FIFO** (ngày nhập) ([01](../warehouse/01-product-creation/README.md) BR-11, [07](../warehouse/07-picking/README.md) BR-03).
+- **Một kho xuất** *(Đã chốt 2026-11-05)*: mọi bước giữ hàng, lấy hàng, kiểm thùng, giao hàng của một đơn diễn ra tại kho xuất của đơn; Đơn sản xuất giao về kho đó. Không có chuyển kho.
+- **Đơn vị vận chuyển** cũng nằm ngoài hệ thống: không tích hợp API, không theo dõi hành trình, không thu tiền khi giao; kết quả giao do **Quản lý kho** ghi nhận ([09](../warehouse/09-shipping/README.md)).
+- Mũi tên **nét đứt** là nhánh phụ / sự kiện chờ (ví dụ đơn vị sản xuất phản hồi, hàng nhập kho về sau).

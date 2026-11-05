@@ -11,7 +11,7 @@
 
 **StockFlowCommerce** là nền tảng hợp nhất (unified platform) giữa **Quản lý kho thành phẩm (Warehouse Management System – WMS)** và **Bán hàng sỉ qua sàn bán hàng (B2B Customer Portal)**, phục vụ doanh nghiệp chuyên cung cấp **ly và bao bì dùng một lần cho ngành đồ uống**, **in logo theo mẫu của khách sỉ** (custom-printed cups & packaging) — không bán hàng trơn. Khách hàng chủ yếu là quán / chuỗi đồ uống. Doanh nghiệp **chỉ bán sỉ (B2B)** cho khách đã liên hệ từ trước — không bán lẻ cho khách vãng lai.
 
-> **Đã chốt 2026-11-04 (review nghiệp vụ — thu hẹp phạm vi):** kho chỉ là **kho thành phẩm**. **Sản xuất nằm ngoài hệ thống**: ứng với đơn hàng thiếu tồn, hệ thống gửi **Yêu cầu sản xuất** cho bộ phận sản xuất, rồi lập phiếu nhập kho khi sản xuất xong (không kiểm tra chất lượng tại kho). Sàn bán hàng chỉ để khách **xem hàng, xem mẫu thiết kế, chat và chốt đơn với Sale**. Mỗi đơn có một **hợp đồng mua bán**; khách **thanh toán theo đợt của hợp đồng** (chuyển khoản), không có thanh toán kiểu thương mại điện tử (QR / cổng thanh toán). Đã xoá các module 02 · Purchase Order, 04 · Invoice, 19 · Production. **Không còn hàng trơn**: kho chỉ chứa thành phẩm theo mẫu của khách, được bộ phận sản xuất đóng thùng sẵn; kho chỉ xuất nguyên thùng, không đóng lại hàng.
+> **Đã chốt 2026-11-04 (review nghiệp vụ — thu hẹp phạm vi):** kho chỉ là **kho thành phẩm**. **Sản xuất nằm ngoài hệ thống**: ứng với đơn hàng thiếu tồn, hệ thống gửi **Đơn sản xuất** cho đơn vị sản xuất, rồi lập phiếu nhập kho khi sản xuất xong (không kiểm tra chất lượng tại kho). Sàn bán hàng chỉ để khách **xem hàng, xem mẫu thiết kế, chat và chốt đơn với Sale**. Mỗi đơn có một **hợp đồng mua bán**; khách **thanh toán theo đợt của hợp đồng** (chuyển khoản), không có thanh toán kiểu thương mại điện tử (QR / cổng thanh toán). Đã xoá các module 02 · Purchase Order, 04 · Invoice, 19 · Production. **Không còn hàng trơn**: kho chỉ chứa thành phẩm theo mẫu của khách, được đơn vị sản xuất đóng thùng sẵn; kho chỉ xuất nguyên thùng, không đóng lại hàng.
 
 Dải mặt hàng gồm hai nhóm:
 
@@ -24,10 +24,10 @@ Hệ thống gồm hai mảng lớn, chia thành năm nhóm chức năng: **qu�
 
 | Mảng | Tên gọi | Vai trò chính |
 |------|---------|---------------|
-| **A. Kho thành phẩm** | Warehouse / Back-office | Dữ liệu sản phẩm, nhập kho thành phẩm theo Yêu cầu sản xuất, lưu kho, vận hành kho, khu chờ xuất, xuất kho, giao hàng, chuyển kho, kiểm soát tồn |
-| **B. Bán hàng sỉ** | Sales / Sàn bán hàng | Quản lý mẫu & thiết kế của khách, sàn bán hàng (xem hàng, bảng giá riêng), chat với Sale, báo giá, đơn hàng & hợp đồng mua bán, thanh toán theo đợt & công nợ, Yêu cầu sản xuất, chăm sóc khách hàng |
+| **A. Kho thành phẩm** | Warehouse / Back-office | Dữ liệu sản phẩm, nhập kho thành phẩm theo Đơn sản xuất và nhập hàng hoàn, lưu kho, sức chứa kho, vận hành kho, khu chờ xuất, xuất kho, giao hàng, kiểm soát tồn |
+| **B. Bán hàng sỉ** | Sales / Sàn bán hàng | Quản lý mẫu & thiết kế của khách, sàn bán hàng (xem hàng, không hiện giá), chat với Sale, báo giá (giá gợi ý từ bảng giá nội bộ), đơn hàng & hợp đồng mua bán, thanh toán theo đợt & công nợ, Đơn sản xuất (kèm khách duyệt mẫu in), chăm sóc khách hàng |
 
-Hai mảng gặp nhau tại **Tồn kho thành phẩm (Inventory)**: bán hàng sỉ phát sinh nhu cầu; kho kiểm tồn, nếu thiếu thì Yêu cầu sản xuất được gửi ra ngoài và thành phẩm quay về kho qua phiếu nhập kho.
+Hai mảng gặp nhau tại **Tồn kho thành phẩm (Inventory)**: bán hàng sỉ phát sinh nhu cầu; kho kiểm tồn, nếu thiếu thì Đơn sản xuất được gửi ra ngoài và thành phẩm quay về kho qua phiếu nhập kho.
 
 ---
 
@@ -35,7 +35,7 @@ Hai mảng gặp nhau tại **Tồn kho thành phẩm (Inventory)**: bán hàng 
 
 Tài liệu được tổ chức theo **thứ tự luồng nghiệp vụ** (business flow order). Đọc tuần tự từ `00` → `18` sẽ đi hết vòng đời một đơn hàng: từ lúc khai báo sản phẩm → nhập kho thành phẩm → khách đặt → xuất kho → giao hàng → thu tiền.
 
-> Số thứ tự `02` (Purchase Order), `04` (Invoice) và `19` (Production) **bỏ trống** vì các module này đã bị xoá khỏi phạm vi (2026-11-04); các module còn lại giữ nguyên số.
+> Số thứ tự `02` (Purchase Order), `04` (Invoice), `19` (Production) — xoá 2026-11-04 — và `10` (Inter-warehouse Transfer) — xoá 2026-11-05 — **bỏ trống**; các module còn lại giữ nguyên số.
 >
 > Module `20-inventory-control` được bổ sung sau: **Kiểm soát tồn kho** (kiểm kê, điều chỉnh tồn, cảnh báo, truy xuất lô) không phải một bước trong luồng mà chạy song song, kiểm soát tồn mà các module 03, 05–11 ghi vào.
 
@@ -46,23 +46,22 @@ docs/
 │
 ├── warehouse/                             MẢNG A — KHO THÀNH PHẨM
 │   ├── 01-product-creation/               Tạo sản phẩm (master data; SKU thành phẩm theo mẫu của khách)
-│   ├── 03-receipt/                        Nhập kho thành phẩm (theo Yêu cầu sản xuất)
+│   ├── 03-receipt/                        Nhập kho thành phẩm (theo Đơn sản xuất)
 │   ├── 05-putaway/                        Chuyển hàng vào kho
 │   ├── 06-warehouse-map-slotting/         Kho Map 2D/3D & Gợi ý vị trí
 │   ├── 07-picking/                        Lấy hàng nguyên thùng (về khu chờ xuất / khu kiểm thùng)
 │   ├── 08-packing/                        Kiểm thùng & Dán nhãn giao hàng
 │   ├── 09-shipping/                       Giao hàng (bàn giao đơn vị vận chuyển)
-│   ├── 10-inter-warehouse-transfer/       Chuyển hàng giữa các kho
 │   ├── 11-intra-warehouse-transfer/       Chuyển hàng trong nội bộ một kho
 │   └── 20-inventory-control/              Kiểm soát tồn kho (kiểm kê, điều chỉnh, cảnh báo, truy xuất lô)
 │
 ├── ecommerce/                             MẢNG B — BÁN HÀNG SỈ (B2B)
 │   ├── 12-product-design/                 Quản lý mẫu & thiết kế của khách
-│   ├── 13-catalog/                        Sàn bán hàng: xem hàng, mẫu thiết kế, bảng giá riêng
+│   ├── 13-catalog/                        Sàn bán hàng: xem hàng, mẫu thiết kế, duyệt mẫu in (không hiện giá)
 │   ├── 14-cart-and-order/                 Báo giá, Đơn hàng & Hợp đồng mua bán
 │   ├── 15-payment/                        Thanh toán theo hợp đồng & Công nợ
 │   ├── 16-sales-chat/                     Chat với Sale (gắn đơn / mẫu thiết kế / báo giá)
-│   ├── 17-order-management/               Quản lý đơn hàng & Yêu cầu sản xuất
+│   ├── 17-order-management/               Quản lý đơn hàng & Đơn sản xuất
 │   └── 18-customer-information/           Quản lý thông tin khách sỉ
 │
 ├── diagrams/                              Sơ đồ luồng dữ liệu / trạng thái (Mermaid)
@@ -99,14 +98,12 @@ Danh sách vai trò chuẩn (Role Registry) xem tại [00-system-overview §2](0
 | Persona | Mô tả | Module thường dùng |
 |---------|-------|--------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình hệ thống, phân quyền, khai báo kho, quản lý dữ liệu gốc sản phẩm, tạm ngưng / ngừng kinh doanh sản phẩm | 01, 06 |
-| **Nhân viên kho (Warehouse Staff)** | Nhập kho thành phẩm theo thùng, cất hàng, lấy hàng nguyên thùng, đưa hàng về khu chờ xuất, kiểm thùng & dán nhãn giao hàng, giao hàng, chuyển kho, đếm kiểm kê | 03, 05, 07, 08, 09, 10, 11, 20 |
-| **Quản lý kho (Warehouse Manager)** | Giám sát vận hành, duyệt điều chỉnh tồn, duyệt chuyển kho, xử lý nhận thiếu / thừa và hàng lỗi | 03, 05, 06, 10, 11, 20 |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Cân bằng tồn giữa các kho, tạo lệnh chuyển kho, lập kiểm kê, theo dõi cảnh báo hạn dùng | 10, 20 |
+| **Nhân viên kho (Warehouse Staff)** | Nhập kho thành phẩm theo thùng, nhập hàng hoàn, cất hàng, lấy hàng nguyên thùng, đưa hàng về khu chờ xuất, kiểm thùng & dán nhãn giao hàng, giao hàng, đếm kiểm kê | 03, 05, 07, 08, 09, 11, 20 |
+| **Quản lý kho (Warehouse Manager)** | Quản lý các kho được gán: thiết lập kho & sức chứa; xử lý nhận thiếu / thừa / thùng lệch và hàng hoàn; release đơn, giao task lấy hàng, khu chờ xuất, ghi nhận kết quả giao; lập kiểm kê, duyệt điều chỉnh tồn, cách ly | 03, 05, 06, 07, 08, 09, 11, 20 |
 | **Kế toán (Accountant)** | Ghi nhận & phân bổ tiền về cho đợt thanh toán của hợp đồng, công nợ phải thu của khách sỉ, duyệt tín dụng & lịch thanh toán | 14, 15, 17, 18 |
-| **Quản trị bán hàng (E-commerce Admin)** | Tạo & duyệt sản phẩm, danh mục, thuộc tính; quản lý sàn bán hàng, bảng giá theo khách, nội dung; lập bản thiết kế, phân công & duyệt kỹ thuật thiết kế; trạng thái & nhóm khách; quản trị tài khoản & phân quyền | 00, 01, 12, 13, 14, 18 |
-| **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, ghi nhận mẫu khách đưa, thiết kế & gửi khách xác nhận, báo giá, tạo đơn & hợp đồng, chat với khách | 01, 12, 14, 16, 17, 18 |
-| **Điều phối đơn hàng (Order Coordinator)** | Kiểm tồn cho đơn, tạo & theo dõi Yêu cầu sản xuất, giữ hàng ở khu chờ xuất, release đơn cho kho, xử lý đơn treo, chọn kho xuất | 07, 17 |
-| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước: đưa mẫu, xác nhận / yêu cầu sửa thiết kế, xem hàng & giá riêng, chat với Sale, chấp nhận báo giá, theo dõi đơn, hợp đồng, đợt thanh toán & công nợ | 12, 13, 14, 15, 16 |
+| **Quản lý kinh doanh (Sales Manager)** | Tạo & duyệt sản phẩm, danh mục, thuộc tính; nội dung sàn bán hàng, bảng giá nội bộ theo khách; lập bản thiết kế, phân công & duyệt kỹ thuật thiết kế; **duyệt & gửi Đơn sản xuất**; trạng thái & nhóm khách; quản trị tài khoản & phân quyền | 00, 01, 12, 13, 14, 17, 18 |
+| **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm, tạo khách sỉ, ghi nhận mẫu khách đưa, thiết kế & gửi khách xác nhận, báo giá, tạo đơn & hợp đồng, chọn kho xuất, lập & theo dõi Đơn sản xuất (kèm mẫu in), treo đơn, chọn cách giao, chat với khách | 01, 12, 14, 16, 17, 18 |
+| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước: đưa mẫu, xác nhận / yêu cầu sửa thiết kế, duyệt mẫu in, xem hàng (không hiện giá), chat với Sale, chấp nhận báo giá, theo dõi đơn, hợp đồng, đợt thanh toán & công nợ | 12, 13, 14, 15, 16 |
 
 ---
 

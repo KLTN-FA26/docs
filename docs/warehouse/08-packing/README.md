@@ -6,7 +6,7 @@ Kiểm lần cuối các **thùng thành phẩm (LPN)** đã [lấy](../07-picki
 
 Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – mỗi thùng có kích thước, khối lượng và nhãn giao hợp lệ**. Đây là **chốt kiểm soát cuối** trước khi hàng rời kho.
 
-> Đã chốt 2026-11-04: thành phẩm về kho đã được bộ phận sản xuất **đóng thùng sẵn** và chỉ xuất **nguyên thùng** ([07](../07-picking/README.md)). **Thùng LPN chính là kiện giao**: kho **không đóng lại hàng** — không chọn loại kiện, không cân đo, không niêm phong, không mở bộ kiện. Kích thước và khối lượng của thùng lấy từ **quy cách thùng** khai báo cho SKU ([01](../01-product-creation/README.md)). SKU in theo mẫu của khách đã mang thiết kế ([12](../../ecommerce/12-product-design/README.md)), nên chỉ kiểm **đúng SKU / đủ số thùng**. Thư mục giữ tên `08-packing`; khu `PACKING` giữ mã kỹ thuật, nghĩa là khu kiểm & dán nhãn.
+> Đã chốt 2026-11-04: thành phẩm về kho đã được đơn vị sản xuất **đóng thùng sẵn** và chỉ xuất **nguyên thùng** ([07](../07-picking/README.md)). **Thùng LPN chính là kiện giao**: kho **không đóng lại hàng** — không chọn loại kiện, không cân đo, không niêm phong, không mở bộ kiện. Kích thước và khối lượng của thùng lấy từ **quy cách thùng** khai báo cho SKU ([01](../01-product-creation/README.md)). SKU in theo mẫu của khách đã mang thiết kế ([12](../../ecommerce/12-product-design/README.md)), nên chỉ kiểm **đúng SKU / đủ số thùng**. Thư mục giữ tên `08-packing`; khu `PACKING` giữ mã kỹ thuật, nghĩa là khu kiểm & dán nhãn.
 
 > **Đã chốt 2026-11-05:** mọi thùng của một SKU đúng **số cái chuẩn / thùng** ([03](../03-receipt/README.md) BR-13), nên mọi thùng có **cùng kích thước và cùng khối lượng thùng đầy** theo quy cách thùng; không có thùng nhỏ hơn chuẩn, không tính khối lượng riêng cho từng thùng. Xem [open-questions B24, E14](../../open-questions/README.md).
 
@@ -17,8 +17,8 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 | Actor | Vai trò |
 |-------|---------|
 | **Nhân viên kho (kiểm thùng)** | Bắt đầu phiên kiểm thùng, quét LPN từng thùng, loại thùng hư hỏng, in & dán nhãn giao hàng, in lại nhãn hỏng, hoàn tất phiên. **Chỉ người bắt đầu phiên** được thao tác tiếp. |
-| **Quản lý kho (Warehouse Manager)** | Thao tác thay nhân viên trên mọi phiên; cách ly thùng hư hỏng ([20](../20-inventory-control/README.md) §4.8). |
-| **Điều phối đơn hàng (Order Coordinator)** | Cho chuyển cả tác vụ của đơn từ khu chờ xuất sang khu kiểm & dán nhãn ([07](../07-picking/README.md) §4.3); quyết định khi thiếu thùng; nhận cảnh báo đợt thanh toán `BEFORE_DELIVERY` chưa thu. |
+| **Quản lý kho (Warehouse Manager)** — của kho xuất | **Cho chuyển cả tác vụ** của đơn từ khu chờ xuất sang khu kiểm & dán nhãn ([07](../07-picking/README.md) §4.3); xử lý khi thiếu thùng (phân bổ lại — [07](../07-picking/README.md) §4.4); thao tác thay nhân viên trên mọi phiên; cách ly thùng hư hỏng ([20](../20-inventory-control/README.md) §4.8); nhận cảnh báo đợt thanh toán `BEFORE_DELIVERY` chưa thu. |
+| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi thiếu thùng mà không phân bổ lại được; treo đơn lý do `ADDRESS` khi địa chỉ giao không hợp lệ; nhắc khách thanh toán đợt `BEFORE_DELIVERY` ([17](../../ecommerce/17-order-management/README.md)). |
 | **Hệ thống** | Chỉ mở phiên khi đã lấy hàng xong. Lấy kích thước, khối lượng, cờ cho phép xoay của thùng từ quy cách thùng của SKU. Tính khối lượng quy đổi. Gom thùng thành shipment. **Khoá huỷ đơn, đổi cách giao, đổi địa chỉ giao** khi thùng đầu tiên của đơn được dán nhãn ([17](../../ecommerce/17-order-management/README.md)). Cảnh báo đợt `BEFORE_DELIVERY` chưa thu. |
 
 ---
@@ -41,7 +41,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 | **Thùng giao (outbound carton)** — định danh bằng mã LPN; SKU, lô, số lượng, kích thước, khối lượng thực & quy đổi, cờ cho phép xoay | 09 Shipping (kể cả kế hoạch chuyến xe) |
 | **Nhãn giao hàng** — in cho từng thùng đã kiểm, dán lên thùng cạnh nhãn LPN | Quét khi xếp xe, bàn giao |
 | **Shipment** `Ready to Dispatch` — các thùng đã dán nhãn của lần hoàn tất, mã `<mã đơn>-S<n>` | 09 Shipping |
-| **Cảnh báo đợt `BEFORE_DELIVERY` chưa thu** khi hoàn tất | Nhân viên kho, Điều phối |
+| **Cảnh báo đợt `BEFORE_DELIVERY` chưa thu** khi hoàn tất | Nhân viên kho, Quản lý kho, Sale |
 | Cập nhật đơn: `Packed` (đã kiểm đủ thùng & dán nhãn) / `Partially Fulfilled` | 17 Order Management |
 
 ---
@@ -52,7 +52,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 
 1. **Hàng chờ kiểm** — đơn có phần lấy hàng `Picked`, thùng đã ở khu `PACKING`:
    - đơn lấy thẳng về `PACKING`; hoặc
-   - đơn có thùng giữ ở khu chờ xuất, đã được Điều phối cho chuyển cả tác vụ sang khu kiểm & dán nhãn ([07](../07-picking/README.md) §4.3).
+   - đơn có thùng giữ ở khu chờ xuất, đã được Quản lý kho cho chuyển cả tác vụ sang khu kiểm & dán nhãn ([07](../07-picking/README.md) §4.3).
 
    Đơn còn `Awaiting Stock` chỉ hiện khi Sale đã **cho phép giao một phần** (giao trước phần đã có).
 2. **Bắt đầu** — nhân viên kho bấm bắt đầu → phiên `In Progress`, ghi người bắt đầu. Từ đây **chỉ người đó** (hoặc Quản lý kho) thao tác.
@@ -161,10 +161,10 @@ stateDiagram-v2
 | Nhãn LPN rách, không quét được | Quản lý kho in lại nhãn LPN theo mã ([03](../03-receipt/README.md)), rồi quét kiểm |
 | Nhân viên khác muốn làm tiếp phiên của người đã bắt đầu | Bị chặn; Quản lý kho làm thay hoặc phân công lại |
 | Khách muốn huỷ đơn, đổi địa chỉ hoặc đổi cách giao sau khi thùng đầu tiên đã dán nhãn | Bị chặn (BR-04); Sale xử lý với khách theo [17](../../ecommerce/17-order-management/README.md) |
-| SKU chưa khai báo quy cách thùng | Không in được nhãn; Quản trị bổ sung quy cách thùng ở [01](../01-product-creation/README.md) rồi in |
-| Kích thước thực của thùng khác quy cách khai báo | Báo Quản trị sửa quy cách thùng ở [01](../01-product-creation/README.md); thùng đã kiểm dùng quy cách mới khi in lại nhãn / lập kế hoạch xe |
-| Đơn còn chờ hàng từ Yêu cầu sản xuất (`Awaiting Stock`) | Chỉ kiểm & giao trước phần đã có khi Sale cho phép giao một phần; nếu không, thùng giữ ở khu chờ xuất hoặc chờ đủ hàng ([07](../07-picking/README.md)) |
-| Địa chỉ giao không hợp lệ | Phát hiện trước khi dán nhãn: Điều phối treo đơn lý do `ADDRESS` ([17](../../ecommerce/17-order-management/README.md)), liên hệ khách sửa rồi gỡ treo. Đã dán nhãn: không đổi được; xử lý theo kết quả giao ([09](../09-shipping/README.md)) |
+| SKU chưa khai báo quy cách thùng | Không in được nhãn; Quản lý kho bổ sung quy cách thùng ở [01](../01-product-creation/README.md) rồi in |
+| Kích thước thực của thùng khác quy cách khai báo | Quản lý kho sửa quy cách thùng ở [01](../01-product-creation/README.md); thùng đã kiểm dùng quy cách mới khi in lại nhãn / lập kế hoạch xe |
+| Đơn còn chờ hàng từ Đơn sản xuất (`Awaiting Stock`) | Chỉ kiểm & giao trước phần đã có khi Sale cho phép giao một phần; nếu không, Quản lý kho giữ thùng ở khu chờ xuất hoặc chờ đủ hàng ([07](../07-picking/README.md)) |
+| Địa chỉ giao không hợp lệ | Phát hiện trước khi dán nhãn: Sale treo đơn lý do `ADDRESS` ([17](../../ecommerce/17-order-management/README.md)), liên hệ khách sửa rồi gỡ treo. Đã dán nhãn: không đổi được; xử lý theo kết quả giao ([09](../09-shipping/README.md)) |
 | Hợp đồng còn đợt `BEFORE_DELIVERY` chưa thu | Hoàn tất vẫn được, kèm cảnh báo; bàn giao bị chặn tới khi đợt đó đã thu |
 
 ---
