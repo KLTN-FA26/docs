@@ -72,7 +72,7 @@ Các luồng khác cũng đổi vị trí của thùng nhưng thuộc module ri�
    Một thùng không hợp lệ thì **không thùng nào** trong lần đó được di chuyển; hệ thống báo lỗi theo từng thùng.
 3. Hợp lệ → các thùng chuyển **ngay**, giữ nguyên SKU, lô, ngày nhận, số trong thùng và trạng thái; mỗi thùng ghi một dòng sổ `MOVE`.
 
-> ⚠️ Giả định: thao tác này **không kiểm** lớp lưu trữ, thể tích, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
+> ⚠️ Giả định: thao tác này **không kiểm** thể tích, tải trọng và cờ cho phép cất của vị trí đích (chỉ cất hàng ở [05](../05-putaway/README.md) kiểm). Người di chuyển tự chịu trách nhiệm chọn vị trí phù hợp. Xem [open-questions C24](../../open-questions/README.md).
 
 ### 4.2. Chênh lệch phát hiện khi di chuyển
 

@@ -31,7 +31,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 | Lớp dữ liệu | Nội dung | Ai cập nhật | Phục vụ chủ yếu |
 |-------------|----------|-------------|-----------------|
 | **Sản phẩm & Biến thể (Product / Variant)** | Định danh, danh mục, thương hiệu, nhóm thuế, thuộc tính, mã SKU, hình ảnh, đơn vị bán; với SKU riêng: khách sở hữu, design snapshot, quy cách gốc | Quản lý kinh doanh, Sale, System Admin; Hệ thống (sinh SKU riêng) | 12 Product Design, 13 Catalog, 14 Quote/Order, 17 Order Management |
-| **Hàng tồn kho (Inventory Item)** | Đơn vị cơ sở, đơn vị quy đổi, **quy cách thùng**, mã vạch, thông số logistics, lớp lưu trữ, chính sách tồn (lô / serial) | Quản lý kho (quy cách thùng, logistics & chính sách tồn); người sửa sản phẩm (quy đổi) | 03 → 11, 20 (mảng kho vận) |
+| **Hàng tồn kho (Inventory Item)** | Đơn vị cơ sở, đơn vị quy đổi, **quy cách thùng**, mã vạch, thông số logistics, cờ cho phép xoay, chính sách tồn (lô / serial) | Quản lý kho (quy cách thùng, logistics & chính sách tồn); người sửa sản phẩm (quy đổi) | 03 → 11, 20 (mảng kho vận) |
 
 ---
 
@@ -68,8 +68,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 | **Quy cách thùng (carton spec)** | Inventory Item | **Đơn vị thùng** (một đơn vị quy đổi; hệ số = **số cái chuẩn / thùng**, cố định cho SKU), **kích thước thùng** (D×R×C — hệ thống tính **thể tích thùng** m³), **khối lượng thùng đầy** | **Có** với SKU riêng (kế thừa từ quy cách — §4.8, BR-03) |
 | **Đơn vị bán (sales unit)** | Variant | Với SKU riêng, đơn vị bán **luôn là đơn vị thùng** của quy cách thùng: khách đặt theo **số thùng**, giá ghi **theo cái** (BR-11) | Có với SKU riêng (hệ thống gán theo quy cách thùng) |
 | **Thông số logistics khác** | Inventory Item | **Mã vạch** (≤ 64, duy nhất), khối lượng và kích thước một đơn vị cơ sở | Không (nếu nhập: số dương) |
-| **Lớp lưu trữ (storage class)** | Inventory Item | `NORMAL` (thường) / `FRAGILE` (dễ vỡ) / `OVERSIZE` (quá khổ) *(Đã chốt 2026-11-05: bỏ lớp hàng lạnh, hàng nguy hiểm)* — quyết định loại bin được phép cất ([06](../06-warehouse-map-slotting/README.md)) | Có (mặc định `NORMAL`) |
-| **Cho phép xoay (rotatable)** | Inventory Item | Thùng được xoay khi xếp xe hay không; dùng khi lập kế hoạch xếp xe ([09](../09-shipping/README.md)) | Không (mặc định cho phép) |
+| **Cho phép xoay (rotatable)** | Inventory Item | Thùng được xoay hay không; dùng khi lập kế hoạch xếp xe ([09](../09-shipping/README.md)) và khi kiểm **thùng vừa bin** lúc cất hàng — thùng cho phép xoay được xoay ngang (đổi D và R) ([06](../06-warehouse-map-slotting/README.md) §4.4) | Không (mặc định cho phép) |
 | **Chính sách tồn (inventory policy)** | Inventory Item | **Kiểu theo dõi** `NONE` / `LOT` / `SERIAL` / `LOT_SERIAL`. **Lô** là **lô sản xuất** (gắn Đơn sản xuất) để truy vết. Không theo dõi hạn dùng; cách xuất **cố định FIFO** theo ngày nhập, không cấu hình (BR-17) | Không (mặc định: không lô, không serial) |
 
 ### Output
@@ -164,7 +163,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
    - **kích thước thùng** (D×R×C) và **khối lượng thùng đầy**. Hệ thống tính **thể tích thùng** = D × R × C (m³) *(Đã chốt 2026-11-05)*.
 
    Quy cách thùng là căn cứ để kiểm đếm theo thùng khi nhập ([03](../03-receipt/README.md)), cất ([05](../05-putaway/README.md)), in nhãn giao ([08](../08-packing/README.md)) và lập kế hoạch xếp xe 3D ([09](../09-shipping/README.md)). **Thể tích và khối lượng thùng** là căn cứ kiểm **còn chỗ** khi cất (theo thể tích + tải trọng của bin — [05](../05-putaway/README.md)) và tính **Bảng sức chứa kho** (Đang chiếm, Sắp về — [06](../06-warehouse-map-slotting/README.md)). *(Đã chốt 2026-11-05)* **Mọi thùng đúng số cái chuẩn**: đơn vị sản xuất đóng thùng đúng số chuẩn; thùng có số lượng khác số chuẩn **không được nhận** ([03](../03-receipt/README.md)). Không có thùng ít hơn số chuẩn; mọi thùng của một SKU cùng kích thước và khối lượng.
-2. **Logistics khác** — mã vạch, khối lượng và kích thước một đơn vị, lớp lưu trữ, cờ xoay. **Đơn vị cơ sở không đổi được khi SKU còn tồn.**
+2. **Logistics khác** — mã vạch, khối lượng và kích thước một đơn vị, cờ xoay. **Đơn vị cơ sở không đổi được khi SKU còn tồn.**
 3. **Chính sách tồn** — kiểu theo dõi (lô / serial).
    - **Lô** là **lô sản xuất**, ghi khi nhập kho theo Đơn sản xuất ([03](../03-receipt/README.md)), dùng để truy vết ([20](../20-inventory-control/README.md)).
    - *(Đã chốt 2026-11-05)* Ly / bao bì **không có hạn dùng**: không theo dõi hạn dùng, không có cách xuất để chọn — phân bổ thùng luôn theo **FIFO** (ngày nhập).
@@ -179,7 +178,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
    - **design snapshot** — tham chiếu bất biến tới bản thiết kế chốt;
    - **quy cách** — giá trị trục biến thể sao chép từ quy cách của thiết kế;
    - **mã SKU** tự sinh = **mã sản phẩm – mã khách – số thứ tự** (ví dụ `LYPPIN-KH0012-01`), duy nhất toàn hệ thống, ≤ 64 ký tự.
-3. **Inventory Item** được tạo tự động (1:1). Đơn vị cơ sở, đơn vị quy đổi, **quy cách thùng**, thông số logistics, lớp lưu trữ và chính sách tồn **sao chép từ Inventory Item của quy cách**; sau đó sửa riêng được (§4.7).
+3. **Inventory Item** được tạo tự động (1:1). Đơn vị cơ sở, đơn vị quy đổi, **quy cách thùng**, thông số logistics, cờ cho phép xoay và chính sách tồn **sao chép từ Inventory Item của quy cách**; sau đó sửa riêng được (§4.7).
 4. SKU sinh ra ở **`Active`** ngay (thiết kế đã qua duyệt kỹ thuật và khách xác nhận ở 12), không qua duyệt sản phẩm lần nữa.
 5. **Giá** — SKU riêng **chưa có giá** khi sinh; giá có trên **báo giá / đơn / hợp đồng** do Sale lập sau khi thương lượng với khách ([14](../../ecommerce/14-cart-and-order/README.md)). Quản lý kinh doanh có thể khai báo **bảng giá riêng nội bộ** ([13](../../ecommerce/13-catalog/README.md)) — chỉ nhân viên xem, làm giá gợi ý cho Sale. Module này không lưu giá.
 6. **Phạm vi sử dụng** — chỉ khách sở hữu thấy SKU trên cổng khách hàng; chỉ báo giá / đơn / Đơn sản xuất **của khách sở hữu** được dùng SKU này. Tồn, nhập kho, lấy hàng, xuất kho đều theo SKU này, **nguyên thùng**.
@@ -325,7 +324,7 @@ stateDiagram-v2
 | Module | Quan hệ |
 |--------|---------|
 | [03 · Receipt](../03-receipt/README.md) | Nhập kho SKU riêng theo **số thùng**; quy cách thùng (số cái chuẩn / thùng) là căn cứ kiểm đếm — thùng lệch số chuẩn không nhận; chính sách lô / serial quyết định thông tin phải ghi (lô = lô sản xuất) |
-| [05 · Putaway](../05-putaway/README.md) & [06 · Slotting](../06-warehouse-map-slotting/README.md) | Lớp lưu trữ, **thể tích / khối lượng thùng** để kiểm còn chỗ (thể tích + tải trọng) khi chọn bin; thể tích thùng tính Bảng sức chứa kho |
+| [05 · Putaway](../05-putaway/README.md) & [06 · Slotting](../06-warehouse-map-slotting/README.md) | **Kích thước thùng** (D × R × C) và cờ cho phép xoay để kiểm thùng vừa bin; **thể tích / khối lượng thùng** để kiểm còn chỗ (thể tích + tải trọng) khi chọn bin; thể tích thùng tính Bảng sức chứa kho |
 | [07 · Picking](../07-picking/README.md) | Lấy nguyên thùng theo LPN của SKU riêng; phân bổ đủ số thùng của dòng đơn |
 | [08 · Outbound Check & Labeling](../08-packing/README.md) | Kích thước / khối lượng thùng từ quy cách thùng in trên nhãn giao hàng |
 | [09 · Shipping](../09-shipping/README.md) | Kế hoạch xếp xe 3D dùng kích thước / khối lượng thùng và cờ xoay |
