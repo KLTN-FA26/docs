@@ -8,7 +8,7 @@
 >
 > Đã chốt 2026-11-05 (bổ sung): **sàn không hiển thị giá** ([13](../13-catalog/README.md)) — giá chỉ có trên báo giá / đơn / hợp đồng sau khi Sale thoả thuận với khách. **Giá trên báo giá do Sale nhập**; hệ thống gợi ý từ **bảng giá riêng nội bộ** của khách do Quản lý kinh doanh (Sales Manager) khai báo, chỉ nhân viên xem. Báo giá và hợp đồng có **dòng phí khuôn / bản in** cho mẫu mới (lần sản xuất đầu của SKU); hợp đồng có điều khoản **số lần in mẫu miễn phí** dùng cho bước duyệt mẫu in của Đơn sản xuất ([17](../17-order-management/README.md) §4.3). Role điều phối đơn hàng đã bỏ: việc tiếp nhận đơn đã xác nhận (chọn kho xuất, Đơn sản xuất) chuyển cho Sale.
 >
-> ✅ Đã chốt 2026-11-05 (phí vận chuyển & thuế): **phí vận chuyển** thu của khách là **một dòng phí** do Sale nhập trên báo giá / đơn / hợp đồng (như dòng phí khuôn / bản in); hệ thống không tự tính; cộng vào tổng tiền và chia vào lịch thanh toán như hàng hoá (BR-20). Mỗi dòng (hàng và phí) ghi **thuế suất VAT** theo **nhóm thuế** của sản phẩm ([01](../../warehouse/01-product-creation/README.md)), **tiền thuế**; chứng từ ghi **tổng có thuế** (BR-21). **Hoá đơn điện tử xuất ở phần mềm hoá đơn ngoài hệ thống**; hệ thống chỉ cung cấp số liệu ([15](../15-payment/README.md)).
+> ✅ Đã chốt 2026-11-05 (phí vận chuyển & thuế): **phí vận chuyển** thu của khách là **một dòng phí** do Sale nhập trên báo giá / đơn / hợp đồng (như dòng phí khuôn / bản in); hệ thống không tự tính; cộng vào tổng tiền và chia vào lịch thanh toán như hàng hoá (BR-20). Mỗi dòng (hàng và phí) ghi **thuế suất VAT** theo **nhóm thuế** của sản phẩm ([01](../../warehouse/01-product-creation/README.md)), **tiền thuế**; chứng từ ghi **tổng có thuế** (BR-21). *(Cập nhật 2026-11-06)* **Hoá đơn điện tử** do hệ thống phát hành qua nhà cung cấp hoá đơn điện tử theo **từng lần giao thành công**, dùng thuế suất đã chốt của dòng ([21](../21-e-invoice/README.md)).
 >
 > ✅ Đã chốt 2026-11-05 (khách tự thiết kế): **khách tự thiết kế trên app** ([12](../12-product-design/README.md)); bản thiết kế được Quản lý kinh doanh duyệt thì sinh SKU riêng. **Đặt hàng từ bản thiết kế = yêu cầu báo giá** gửi Sale ([13](../13-catalog/README.md), [16](../16-sales-chat/README.md)): khách nêu **số thùng mong muốn** (chỉ là gợi ý) và **ngày giao mong muốn** (nếu có — thành **ngày giao khách yêu cầu** của báo giá). Sale lập báo giá / đơn / hợp đồng như cũ; khách vẫn không tự đặt hàng, sàn vẫn ẩn giá.
 
@@ -26,8 +26,8 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ (B2B Customer)** | **Yêu cầu báo giá** từ bản thiết kế đã duyệt trên sàn — nêu số thùng mong muốn, ngày giao mong muốn ([13](../13-catalog/README.md)). Xem báo giá; **chấp nhận** (chọn số thùng) hoặc **yêu cầu sửa** — trên sàn hoặc bằng thẻ hành động trong [chat](../16-sales-chat/README.md). Xem đơn và hợp đồng trên cổng; ký hợp đồng (ngoài hệ thống) và có thể gửi lại bản scan đã ký qua chat. Bấm "Đặt lại" một đơn cũ để mở chat với Sale. |
-| **Nhân viên Sale (Sales Staff)** | Nhận **yêu cầu báo giá từ bản thiết kế** ([16](../16-sales-chat/README.md)). Lập, sửa, gửi, huỷ báo giá (không chấp nhận / yêu cầu sửa thay khách); **nhập đơn giá** (tham khảo giá gợi ý), **số tiền phí khuôn / bản in** và **số tiền phí vận chuyển** (nếu thu). **Tạo đơn từ báo giá đã chấp nhận.** Lập hợp đồng, lịch thanh toán và điều khoản **số lần in mẫu miễn phí**, gửi khách, tải bản scan hợp đồng đã ký lên. Tiếp nhận đơn đã xác nhận để chọn kho xuất và lập Đơn sản xuất ([17](../17-order-management/README.md)). |
+| **Khách hàng sỉ (B2B Customer)** | **Yêu cầu báo giá** từ bản thiết kế đã duyệt trên sàn — nêu số thùng mong muốn, ngày giao mong muốn ([13](../13-catalog/README.md)). Xem báo giá; **chấp nhận** (chọn số thùng) hoặc **yêu cầu sửa** — trên sàn hoặc bằng thẻ hành động trong [chat](../16-sales-chat/README.md). Xem đơn và hợp đồng trên cổng; ký hợp đồng (ngoài hệ thống) và có thể gửi lại file hợp đồng đã ký qua chat. Bấm "Đặt lại" một đơn cũ để mở chat với Sale. |
+| **Nhân viên Sale (Sales Staff)** | Nhận **yêu cầu báo giá từ bản thiết kế** ([16](../16-sales-chat/README.md)). Lập, sửa, gửi, huỷ báo giá (không chấp nhận / yêu cầu sửa thay khách); **nhập đơn giá** (tham khảo giá gợi ý), **số tiền phí khuôn / bản in** và **số tiền phí vận chuyển** (nếu thu). **Tạo đơn từ báo giá đã chấp nhận.** Lập hợp đồng, lịch thanh toán và điều khoản **số lần in mẫu miễn phí**, gửi khách, tải file hợp đồng đã ký lên. Tiếp nhận đơn đã xác nhận để chọn kho xuất và lập Đơn sản xuất ([17](../17-order-management/README.md)). |
 | **Kế toán (Accountant)** | Duyệt / từ chối đơn bị treo vì **tín dụng** khi hợp đồng có đợt trả sau giao ([15](../15-payment/README.md) §4.3) |
 | **Quản lý kinh doanh (Sales Manager)** | Khai báo **bảng giá riêng nội bộ** của khách cho SKU riêng (đơn giá / cái, bậc & MOQ theo số thùng — giá gợi ý cho Sale, không hiện trên sàn — [13](../13-catalog/README.md)); duyệt đơn giá thấp hơn giá gợi ý vượt hạn mức của Sale |
 | **Hệ thống** | Gợi ý giá theo bảng giá riêng nội bộ của khách; thêm dòng phí khuôn / bản in cho SKU sản xuất lần đầu; tính thành tiền; lấy **thuế suất VAT** từng dòng theo nhóm thuế, tính tiền thuế và tổng có thuế; kiểm SKU còn bán được và thuộc đúng khách; tự đánh dấu báo giá hết hiệu lực; quy lịch thanh toán ra số tiền; chuyển trạng thái đơn theo hợp đồng và đợt thanh toán |
@@ -54,7 +54,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 | Ngày giao dự kiến | Ngày Sale hẹn khách, ghi vào điều khoản giao hàng của hợp đồng | Có (khi lập hợp đồng) |
 | **Lịch thanh toán của hợp đồng** | Danh sách đợt: tên đợt, **số tiền hoặc %**, **mốc đến hạn** (`ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY` + N ngày); tổng các đợt = **tổng tiền đơn (có thuế)** | Có (khi lập hợp đồng) |
 | **Số lần in mẫu miễn phí** | Điều khoản hợp đồng: số lần in mẫu thử khách được miễn phí khi Đơn sản xuất cần duyệt mẫu in; mặc định lấy từ cấu hình chung (ví dụ 2), Sale sửa được khi lập hợp đồng | Có (khi lập hợp đồng) |
-| Bản scan hợp đồng đã ký | File hợp đồng có chữ ký hai bên, ngày ký | Có (khi ghi nhận đã ký) |
+| **File hợp đồng đã ký** | Bản scan hợp đồng giấy có chữ ký, dấu của hai bên, **hoặc** file PDF có **chữ ký số** của hai bên; ngày ký | Có (khi ghi nhận đã ký) |
 
 ### Output
 
@@ -62,7 +62,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 |---------|----------|
 | **Báo giá** (mã, số bản sửa, dòng, bậc giá, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế suất & tiền thuế từng dòng, tổng có thuế, hiệu lực, ngày giao khách yêu cầu) | Khách, Sale |
 | **Đơn hàng** (mã đơn; mỗi dòng: SKU, số thùng, số cái / thùng, số cái, đơn giá / cái, thành tiền, **thuế suất VAT, tiền thuế**, **ngày giao khách yêu cầu** — đã chốt; dòng phí khuôn / bản in, dòng phí vận chuyển — mỗi dòng phí có thuế suất & tiền thuế; địa chỉ; tổng chưa thuế, tổng tiền thuế, **tổng có thuế**) | [15 Payment](../15-payment/README.md), [17 Order Management](../17-order-management/README.md) |
-| **Hợp đồng mua bán** (mã hợp đồng, các bên, dòng hàng, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế VAT từng dòng, tổng có thuế, điều khoản giao, **số lần in mẫu miễn phí**, lịch thanh toán, bản PDF để ký, bản scan đã ký) | Khách (xem trên cổng), Kế toán, Sale; [17](../17-order-management/README.md) (số lần in mẫu miễn phí khi duyệt mẫu in) |
+| **Hợp đồng mua bán** (mã hợp đồng, các bên, dòng hàng, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế VAT từng dòng, tổng có thuế, điều khoản giao, **số lần in mẫu miễn phí**, lịch thanh toán, bản PDF để ký, file hợp đồng đã ký) | Khách (xem trên cổng), Kế toán, Sale; [17](../17-order-management/README.md) (số lần in mẫu miễn phí khi duyệt mẫu in) |
 | **Các đợt thanh toán** sinh khi hợp đồng `Signed` | [15 Payment](../15-payment/README.md) |
 | Thông báo cho Sale (khách chấp nhận / yêu cầu sửa báo giá) | Sale |
 
@@ -136,9 +136,9 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 
     > ✅ Đã chốt 2026-11-05: số đợt và tỷ lệ mỗi đợt do Sale nhập theo từng hợp đồng, có mẫu mặc định theo khách ở [18](../18-customer-information/README.md). Xem [open-questions](../../open-questions/README.md).
 13. **Gửi hợp đồng** — Sale xuất bản hợp đồng (PDF) và gửi khách → hợp đồng `Sent`, đơn → `Pending Contract`. Khách xem hợp đồng trên cổng. Lúc gửi, hệ thống kiểm **vị thế tín dụng** trên phần `AFTER_DELIVERY` ([15](../15-payment/README.md) §4.3); vượt hạn mức hoặc khách có khoản quá hạn thì **cảnh báo** Sale (sửa lịch thanh toán, hoặc vẫn gửi và chấp nhận đơn sẽ bị treo chờ kế toán khi ký).
-14. **Ký hợp đồng** — hai bên ký **ngoài hệ thống** (giấy hoặc chữ ký số bên ngoài); khách có thể gửi lại bản scan đã ký qua chat. Sale tải **bản scan đã ký** lên hợp đồng, nhập ngày ký → hợp đồng `Signed`; nội dung hợp đồng từ đây **bất biến**.
+14. **Ký hợp đồng** — hai bên ký **ngoài hệ thống** (giấy hoặc chữ ký số bên ngoài); khách có thể gửi lại file hợp đồng đã ký qua chat. Sale tải **file hợp đồng đã ký** (bản scan hợp đồng giấy hoặc PDF có chữ ký số) lên hợp đồng, nhập ngày ký → hợp đồng `Signed`; nội dung hợp đồng từ đây **bất biến**.
 
-    > ✅ Đã chốt 2026-11-05: hợp đồng ký ngoài hệ thống, Sale tải bản scan lên; phụ lục / sửa hợp đồng sau khi ký là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
+    > ✅ Đã chốt 2026-11-05: hợp đồng ký ngoài hệ thống, Sale tải file hợp đồng đã ký lên; phụ lục / sửa hợp đồng sau khi ký là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
 15. **Kết quả khi ký** — hệ thống sinh các **đợt thanh toán** ([15](../15-payment/README.md) §5.1), rồi chuyển đơn:
     - khách quá hạn hoặc vượt hạn mức (kiểm lại lúc ký) → `On Hold` lý do tín dụng, chờ **kế toán** duyệt;
     - còn đợt `ON_SIGNING` chưa thu đủ → `Pending Payment`;
@@ -188,7 +188,7 @@ stateDiagram-v2
 |------------|---------|----------------------|--------------|
 | `Draft` | Sale đang soạn hợp đồng và lịch thanh toán cho đơn `Draft` | → `Sent`, → `Cancelled` | Sale |
 | `Sent` | Đã gửi khách, chờ ký; nội dung khoá | → `Signed`, → `Cancelled` | Sale |
-| `Signed` | Đã ký, bản scan đã tải lên; đã sinh các đợt thanh toán; bất biến | → `Completed` | Sale (tải bản scan) |
+| `Signed` | Đã ký, file hợp đồng đã ký đã tải lên; đã sinh các đợt thanh toán; bất biến | → `Completed` | Sale (tải file đã ký) |
 | `Completed` | Đơn đã hoàn tất và mọi đợt đã thu đủ | *(cuối)* | Hệ thống |
 | `Cancelled` | Huỷ trước khi ký (khách từ chối, cần sửa nội dung, hoặc huỷ đơn) — bắt buộc lý do | *(cuối)* | Sale |
 
@@ -196,7 +196,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> Draft: Sale lập cho đơn Draft
     Draft --> Sent: Gửi khách (đơn → Pending Contract)
-    Sent --> Signed: Tải bản scan đã ký
+    Sent --> Signed: Tải file hợp đồng đã ký
     Signed --> Completed: Đơn hoàn tất, mọi đợt đã thu
     Draft --> Cancelled
     Sent --> Cancelled: Khách từ chối / cần sửa / huỷ đơn
@@ -211,8 +211,8 @@ stateDiagram-v2
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
 | `Draft` | Sale vừa tạo đơn từ báo giá; đang lập hợp đồng | → `Pending Contract`, → `Cancelled` | Sale |
-| `Pending Contract` | Hợp đồng đã gửi, chờ ký | → `Pending Payment`, → `Confirmed`, → `On Hold` (tín dụng), → `Draft` (huỷ hợp đồng để lập lại), → `Cancelled` | Sale (tải bản ký) / Hệ thống |
-| `Pending Payment` | Hợp đồng đã ký, chờ đợt `ON_SIGNING` | → `Confirmed`, → `Cancelled` | Hệ thống (phân bổ tiền — [15](../15-payment/README.md)) / Sale (huỷ) |
+| `Pending Contract` | Hợp đồng đã gửi, chờ ký | → `Pending Payment`, → `Confirmed`, → `On Hold` (tín dụng), → `Draft` (huỷ hợp đồng để lập lại), → `Cancelled` | Sale (tải file đã ký) / Hệ thống |
+| `Pending Payment` | Hợp đồng đã ký, chờ đợt `ON_SIGNING` | → `Confirmed`, → `Cancelled` | Hệ thống (phiếu thu — [15](../15-payment/README.md)) / Sale (huỷ) |
 | `On Hold` | Tạm giữ; ở giai đoạn này là treo vì tín dụng chờ kế toán | → `Pending Payment`, → `Confirmed` (kế toán duyệt), → `Cancelled` (từ chối) | Kế toán |
 | `Confirmed` | Hợp đồng đã ký, đủ điều kiện theo hợp đồng; chuyển sang chọn kho xuất, kiểm tồn & giữ hàng | → `Ready to Fulfill`, → `Awaiting Stock`, … (xem [17](../17-order-management/README.md)) | Hệ thống / Sale |
 
@@ -254,14 +254,16 @@ stateDiagram-v2
 - **BR-11:** Mọi thao tác trên báo giá và hợp đồng gửi kèm **số phiên bản** người dùng đang xem. Ai đó đã đổi trước thì thao tác bị từ chối. Mỗi lần mở lại báo giá sau yêu cầu sửa là một **bản sửa** mới.
 - **BR-12:** **Mỗi đơn có đúng một hợp đồng còn hiệu lực** (không `Cancelled`). Dòng hàng, giá, dòng phí và tổng tiền trên hợp đồng luôn bằng của đơn.
 - **BR-13:** **Lịch thanh toán**: ít nhất một đợt; mỗi đợt có số tiền > 0 và đúng một mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY`; **tổng các đợt = tổng tiền đơn (tổng có thuế)**. Đợt `AFTER_DELIVERY` chỉ dùng được khi khách có hạn mức công nợ > 0 do kế toán duyệt ([18](../18-customer-information/README.md)).
-- **BR-14:** Hợp đồng chỉ `Signed` khi đã có **bản scan đã ký** và ngày ký. Hợp đồng `Sent` / `Signed` không sửa nội dung; hợp đồng `Signed` không huỷ được trong hệ thống.
+- **BR-14:** Hợp đồng chỉ `Signed` khi đã có **file hợp đồng đã ký** (bản scan hợp đồng giấy hoặc PDF có chữ ký số) và ngày ký. Hợp đồng `Sent` / `Signed` không sửa nội dung; hợp đồng `Signed` không huỷ được trong hệ thống.
 - **BR-15:** Đơn chỉ `Confirmed` khi hợp đồng `Signed` **và** đợt `ON_SIGNING` (nếu có) đã thu đủ **và** không bị treo tín dụng. Đơn chưa `Confirmed` thì chưa chọn kho xuất, chưa giữ hàng, chưa chuyển cho kho.
 - **BR-16:** Đơn từ `Pending Payment` trở đi không sửa dòng hàng / số thùng / giá (cần phụ lục hợp đồng — phạm vi sau); chỉ đổi địa chỉ giao, hoặc đổi SKU theo mẫu khi khách sửa thiết kế, theo quy tắc ở [Order Management](../17-order-management/README.md) §4.7.
 - **BR-17:** **Phí khuôn / bản in** là một **dòng phí** trên báo giá, đơn và hợp đồng cho mỗi SKU **sản xuất lần đầu** (mẫu mới — SKU chưa có Đơn sản xuất nào tới `In Production`); đặt lại SKU đã từng sản xuất thì không có dòng này. Dòng phí không có số thùng, không tính MOQ / bậc giá, không giữ hàng, không vào Đơn sản xuất; được cộng vào tổng tiền đơn (BR-09) và chốt giá cùng đơn (BR-06).
 - **BR-18:** Hợp đồng có điều khoản **số lần in mẫu miễn phí**, mặc định lấy từ cấu hình chung (✅ đã chốt 2026-11-05: 2 lần), Sale sửa được khi lập hợp đồng (số nguyên ≥ 0); bất biến khi hợp đồng `Signed`. Dùng cho bước duyệt mẫu in của Đơn sản xuất ([17](../17-order-management/README.md) §4.3): vòng in lại do lỗi in của đơn vị sản xuất (`PRINT_DEFECT`) không tính; vượt số lần miễn phí → **cảnh báo** Sale, không chặn; phí phát sinh xử lý bằng phụ lục ngoài hệ thống (phạm vi sau).
 - **BR-19:** **Ngày giao khách yêu cầu** thuộc báo giá, không bắt buộc: chỉ sửa được khi báo giá `Draft` (mỗi bản sửa mới Sale có thể đổi), không ở quá khứ, được giữ trong bản báo giá đã gửi. Khi tạo đơn, **mỗi dòng đơn chép ngày này** và **không đổi** sau đó; báo giá mới để đặt lại đơn cũ không mang ngày cũ theo. Đơn sản xuất lập cho dòng lấy ngày này làm **ngày cần hàng** mặc định ([17](../17-order-management/README.md) BR-26). Ngày này khác **ngày giao dự kiến** Sale hẹn trong điều khoản giao hàng của hợp đồng *(Quyết định PROD-DUE 02/11/2026)*.
-- **BR-20:** **Phí vận chuyển** thu của khách là **một dòng phí** (tối đa một dòng) trên báo giá, đơn và hợp đồng, số tiền **do Sale nhập** theo thoả thuận; hệ thống **không tự tính** (không theo cân nặng / vùng, không lấy từ hãng, không lấy từ ước tính tải hay kế hoạch xếp xe ở [09](../../warehouse/09-shipping/README.md)), áp dụng như nhau cho gửi kiện và giao nguyên chuyến. Dòng phí không có số thùng, không tính MOQ / bậc giá, không giữ hàng, không vào Đơn sản xuất; được cộng vào tổng tiền đơn (BR-09), chốt giá cùng đơn (BR-06) và **chia vào lịch thanh toán như hàng hoá** ([15](../15-payment/README.md)). Không thu phí vận chuyển thì không có dòng này *(✅ Đã chốt 2026-11-05)*.
-- **BR-21:** **Thuế VAT theo từng dòng.** Mỗi dòng hàng và dòng phí (khuôn / bản in, vận chuyển) trên báo giá, đơn, hợp đồng ghi **thuế suất VAT** — hệ thống lấy theo **nhóm thuế** của sản phẩm ([01](../../warehouse/01-product-creation/README.md)), Sale không sửa — và **tiền thuế** = thành tiền dòng × thuế suất (làm tròn tới đồng). Chứng từ ghi tổng chưa thuế, tổng tiền thuế và **tổng có thuế**; lịch thanh toán chia trên tổng có thuế (BR-13). Thuế suất được chốt vào đơn cùng giá (BR-06). **Hoá đơn điện tử (VAT e-invoice) xuất ở phần mềm hoá đơn ngoài hệ thống**; hệ thống chỉ cung cấp số liệu ([15](../15-payment/README.md)) *(✅ Đã chốt 2026-11-05)*. ⚠️ Giả định: dòng phí vận chuyển (không gắn sản phẩm) dùng thuế suất của nhóm `STANDARD`. Xem [open-questions D31](../../open-questions/README.md).
+- **BR-20:** **Phí vận chuyển** thu của khách là **một dòng phí** (tối đa một dòng) trên báo giá, đơn và hợp đồng, số tiền **do Sale nhập** theo thoả thuận; hệ thống **không tự tính** (không theo cân nặng / vùng, không lấy từ hãng, không lấy từ ước tính tải hay kế hoạch xếp xe ở [09](../../warehouse/09-shipping/README.md); mọi đơn giao nguyên chuyến — [17](../17-order-management/README.md) BR-16). Dòng phí không có số thùng, không tính MOQ / bậc giá, không giữ hàng, không vào Đơn sản xuất; được cộng vào tổng tiền đơn (BR-09), chốt giá cùng đơn (BR-06) và **chia vào lịch thanh toán như hàng hoá** ([15](../15-payment/README.md)). Không thu phí vận chuyển thì không có dòng này *(✅ Đã chốt 2026-11-05)*.
+- **BR-21:** **Thuế VAT theo từng dòng.** Mỗi dòng hàng và dòng phí (khuôn / bản in, vận chuyển) trên báo giá, đơn, hợp đồng ghi **thuế suất VAT** — hệ thống lấy theo **nhóm thuế** của sản phẩm ([01](../../warehouse/01-product-creation/README.md)), Sale không sửa — và **tiền thuế** = thành tiền dòng × thuế suất (làm tròn tới đồng). Chứng từ ghi tổng chưa thuế, tổng tiền thuế và **tổng có thuế**; lịch thanh toán chia trên tổng có thuế (BR-13). Thuế suất được chốt vào đơn cùng giá (BR-06) *(✅ Đã chốt 2026-11-05)*. **Hoá đơn điện tử (VAT e-invoice)** phát hành ở [21](../21-e-invoice/README.md) theo từng lần giao thành công, dùng thuế suất đã chốt của dòng *(✅ Đã chốt 2026-11-06)*. ⚠️ Giả định: dòng phí vận chuyển (không gắn sản phẩm) dùng thuế suất của nhóm `STANDARD`. Xem [open-questions D31](../../open-questions/README.md).
+
+  > ⚠️ Giả định: thuế suất **chốt lúc lập báo giá / đơn** được dùng cả trên hoá đơn. Theo luật, thuế suất áp theo **ngày lập hoá đơn** (ngày giao); nếu luật đổi thuế suất giữa hai ngày (ví dụ hết thời hạn giảm thuế 10% → 8%) thì hợp đồng, các đợt thanh toán và hoá đơn có thể lệch nhau. Cách xử lý chưa chốt. Xem [open-questions D34](../../open-questions/README.md).
 - **BR-22:** **Báo giá từ yêu cầu báo giá của khách** *(✅ Đã chốt 2026-11-05)*. Yêu cầu báo giá khách gửi từ bản thiết kế trên sàn ([13](../13-catalog/README.md)) chỉ là **đề nghị**, không phải báo giá hay đơn: Sale chỉ **lập báo giá** khi bản thiết kế đã **`Approved`** và SKU riêng đã sinh ([12](../12-product-design/README.md)) — kể cả khi khách "Gửi duyệt và yêu cầu báo giá" cùng lúc. **Số thùng** khách nêu là **gợi ý**, không ràng buộc bậc giá, MOQ hay số thùng khách chọn khi chấp nhận. **Ngày giao mong muốn** được điền sẵn làm **ngày giao khách yêu cầu** của báo giá và tuân BR-19 (Sale sửa được khi `Draft`, không ở quá khứ).
 
 ### Edge case
@@ -282,16 +284,15 @@ stateDiagram-v2
 | SKU ngừng bán sau khi khách đã chấp nhận | Không tạo đơn được; Sale huỷ báo giá (ghi lý do) và báo giá lại SKU thay thế |
 | Khách đặt dưới MOQ | Chặn dòng; hiển thị MOQ (số thùng) |
 | Khách muốn đặt lại đơn cũ | Bấm "Đặt lại" trên sàn → mở chat với Sale; Sale lập báo giá mới, giá gợi ý theo bảng giá hiện hành |
-| Khách gửi bản scan hợp đồng đã ký qua chat | Sale tải file đó lên hợp đồng, nhập ngày ký → `Signed` |
+| Khách gửi file hợp đồng đã ký qua chat (bản scan hoặc PDF có chữ ký số) | Sale tải file đó lên hợp đồng, nhập ngày ký → `Signed` |
 | Khách xin sửa hợp đồng đã gửi | Sale huỷ hợp đồng (lý do), đơn về `Draft`, lập hợp đồng thay thế và gửi lại |
 | Khách từ chối ký hợp đồng | Sale huỷ hợp đồng và huỷ đơn (`CUSTOMER_REQUEST`) |
 | Lịch thanh toán có đợt `AFTER_DELIVERY` vượt hạn mức | Cảnh báo lúc gửi; Sale tăng phần thu trước giao, hoặc gửi và đơn bị treo chờ kế toán khi ký |
 | Khách đã ký nhưng chậm thanh toán đợt `ON_SIGNING` | Đơn ở `Pending Payment`, chưa giữ hàng; Sale nhắc qua chat; quá lâu thì Sale huỷ đơn (`PAYMENT_NOT_RECEIVED`) |
 | Tổng các đợt lệch tổng tiền đơn (do làm tròn %) | Phần lẻ dồn vào đợt cuối; vẫn lệch thì chặn gửi hợp đồng |
 | Khách đề nghị miễn phí vận chuyển / tự đến lấy hàng | Sale không thêm dòng phí vận chuyển (BR-20) |
-| Đơn đổi cách giao (gửi kiện ↔ nguyên chuyến) sau khi đã tạo | Dòng phí vận chuyển đã chốt không đổi (BR-06, BR-16); chênh lệch phí xử lý bằng phụ lục ngoài hệ thống (phạm vi sau) |
 | Sản phẩm của SKU chưa có nhóm thuế | Không gửi được báo giá (bước 3); nhóm thuế bắt buộc khi gửi duyệt sản phẩm ở [01](../../warehouse/01-product-creation/README.md) nên hiếm gặp |
-| Khách cần hoá đơn VAT | Kế toán xuất hoá đơn điện tử ở phần mềm hoá đơn ngoài hệ thống, dùng số liệu dòng, thuế suất, tiền thuế, tổng có thuế của hợp đồng / đợt ([15](../15-payment/README.md)) |
+| Khách cần hoá đơn VAT | Hoá đơn lập theo **từng lần giao thành công** (không theo hợp đồng hay đợt thanh toán), Kế toán phát hành qua nhà cung cấp hoá đơn điện tử ([21](../21-e-invoice/README.md)); khách tải XML / PDF trên trang đơn |
 | Trùng đơn | Huỷ một đơn với lý do `DUPLICATE_ORDER` ([17](../17-order-management/README.md)) |
 
 ---
@@ -303,8 +304,9 @@ stateDiagram-v2
 | [13 · Catalog](../13-catalog/README.md) | Sản phẩm; **bảng giá riêng nội bộ** theo khách (đơn giá / cái, bậc & MOQ theo số thùng) làm giá gợi ý cho Sale — sàn không hiện giá; tình trạng còn hàng trên cổng khách hàng; khách gửi **yêu cầu báo giá** từ bản thiết kế (số thùng gợi ý, ngày giao mong muốn) |
 | [01 · Product Creation](../../warehouse/01-product-creation/README.md) | SKU thành phẩm riêng của khách và quy cách thùng (**số cái / thùng** — cơ sở để đặt theo thùng và tính thành tiền); **nhóm thuế** của sản phẩm — nguồn thuế suất VAT từng dòng |
 | [12 · Design Management](../12-product-design/README.md) | Bản thiết kế khách tự làm được duyệt (`Approved`) sinh SKU thành phẩm riêng — điều kiện để báo giá hàng in (BR-22) |
-| [15 · Payment](../15-payment/README.md) | Hợp đồng `Signed` sinh các đợt thanh toán (chia trên tổng có thuế, gồm các dòng phí); thu đủ đợt `ON_SIGNING` → `Confirmed`; kiểm tín dụng cho đợt `AFTER_DELIVERY`; cung cấp số liệu cho hoá đơn điện tử xuất ngoài hệ thống |
+| [15 · Payment](../15-payment/README.md) | Hợp đồng `Signed` sinh các đợt thanh toán (chia trên tổng có thuế, gồm các dòng phí); thu đủ đợt `ON_SIGNING` → `Confirmed`; kiểm tín dụng cho đợt `AFTER_DELIVERY` |
+| [21 · E-invoice](../21-e-invoice/README.md) | Hoá đơn của mỗi lần giao lấy dòng đơn, dòng phí và **thuế suất đã chốt** (BR-21) |
 | [17 · Order Management](../17-order-management/README.md) | Nhận đơn `Confirmed`: Sale chọn kho xuất, kiểm tồn thành phẩm và giữ hàng theo số thùng, Đơn sản xuất (duyệt mẫu in dùng **số lần in mẫu miễn phí** của hợp đồng; **ngày giao khách yêu cầu** của dòng đơn là ngày cần hàng mặc định); huỷ đơn |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Đợt `BEFORE_DELIVERY` chưa thu đủ chặn bàn giao vận chuyển; 09 không tính phí vận chuyển thu khách — phí là dòng phí Sale nhập ở đây (BR-20) |
-| [16 · Sales Chat](../16-sales-chat/README.md) | **Thẻ yêu cầu báo giá** từ bản thiết kế (Sale nhận yêu cầu); thẻ hành động chấp nhận / yêu cầu sửa báo giá; "Đặt lại" mở chat; khách gửi bản scan hợp đồng đã ký |
+| [16 · Sales Chat](../16-sales-chat/README.md) | **Thẻ yêu cầu báo giá** từ bản thiết kế (Sale nhận yêu cầu); thẻ hành động chấp nhận / yêu cầu sửa báo giá; "Đặt lại" mở chat; khách gửi file hợp đồng đã ký |
 | [18 · Customer Information](../18-customer-information/README.md) | Thông tin pháp lý lập hợp đồng; sổ địa chỉ; lịch thanh toán mặc định; hạn mức & kỳ hạn công nợ; bảng giá riêng |
