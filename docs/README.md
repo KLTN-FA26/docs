@@ -15,6 +15,8 @@
 >
 > **Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế trên app** — trên **khuôn 2D** của quy cách, có **xem trước 3D**; bỏ luồng khách đưa mẫu cho Sale / nhân viên thiết kế hộ. Hệ thống **tự kiểm (preflight)** khi gửi duyệt; **Quản lý kinh doanh** duyệt kỹ thuật và kiểm duyệt nội dung; duyệt xong hệ thống **tự xuất file in PDF/X**, chốt design snapshot và sinh SKU riêng của khách. Đặt hàng từ bản thiết kế = **yêu cầu báo giá** gửi Sale; khách vẫn không tự đặt, sàn vẫn ẩn giá ([12](ecommerce/12-product-design/README.md)).
 >
+> **✅ Đã chốt 2026-11-06 (dự án thiết kế — góp ý hội đồng):** khách gom nhiều bản thiết kế của một bộ nhận diện vào **dự án thiết kế**: **thư viện logo / ảnh dùng chung**, **gửi duyệt cả bộ** (Quản lý kinh doanh xem cả bộ, quyết định từng bản), **yêu cầu báo giá cả dự án** → một báo giá nhiều dòng. Dự án không bắt buộc, không thêm trạng thái cho bản thiết kế ([12](ecommerce/12-product-design/README.md) §4.9–§4.11).
+>
 > **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** — mỗi lần giao thành công một hoá đơn, Kế toán bấm phát hành; khách tải XML / PDF trên trang đơn ([21](ecommerce/21-e-invoice/README.md)).
 
 Dải mặt hàng gồm hai nhóm:
@@ -62,7 +64,7 @@ docs/
 │   └── 20-inventory-control/              Kiểm soát tồn kho (kiểm kê, điều chỉnh, cảnh báo, truy xuất lô)
 │
 ├── ecommerce/                             MẢNG B — BÁN HÀNG SỈ (B2B)
-│   ├── 12-product-design/                 Thiết kế của khách: khuôn 2D, xem 3D, duyệt, file in PDF/X
+│   ├── 12-product-design/                 Thiết kế của khách: khuôn 2D, xem 3D, duyệt, file in PDF/X, dự án thiết kế
 │   ├── 13-catalog/                        Sàn bán hàng: xem hàng, mẫu thiết kế của tôi, yêu cầu báo giá, duyệt mẫu in (không hiện giá)
 │   ├── 14-cart-and-order/                 Báo giá, Đơn hàng & Hợp đồng mua bán
 │   ├── 15-payment/                        Thanh toán theo hợp đồng & Công nợ

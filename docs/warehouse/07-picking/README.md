@@ -53,7 +53,7 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 
 | Trường | Mô tả | Bắt buộc |
 |--------|-------|----------|
-| Đơn cần lấy | Đơn `Ready to Fulfill`; hoặc đơn `Awaiting Stock` có phần hàng đã có tồn — chỉ khi Quản lý kho chọn giữ hàng ở khu chờ xuất, hoặc Sale cho phép giao một phần ([17](../../ecommerce/17-order-management/README.md)) | Có |
+| Đơn cần lấy | Đơn `Ready to Fulfill`, hoặc đơn `Partially Fulfilled` có **đợt giao kế tiếp** đã đủ hàng — release **theo đợt giao** của lịch giao ([17](../../ecommerce/17-order-management/README.md) §4.5, BR-29); hoặc đơn `Awaiting Stock` có phần hàng đã có tồn — chỉ khi Quản lý kho chọn giữ hàng ở khu chờ xuất, hoặc Sale cho phép giao một phần ([17](../../ecommerce/17-order-management/README.md)) | Có |
 | Phân bổ tồn (allocation) | Các **thùng LPN** được phân bổ cho đơn khi release: **đủ N thùng** của SKU (N = số thùng của dòng đơn), theo FIFO, chỉ từ bin cho phép lấy (`is_pickable`) **của kho xuất** — BR-03, [20](../20-inventory-control/README.md) §5.6 | Có |
 | **Đích lấy hàng** | `DISPATCH` (mặc định) hoặc `STAGING` (khu chờ xuất của kho xuất — [06](../06-warehouse-map-slotting/README.md)); Quản lý kho chọn khi tạo task, đổi được khi task còn `Pending` | Có |
 | Người được giao | Nhân viên kho / quản lý kho của kho xuất | Có |
@@ -82,9 +82,9 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 
    Đơn release sớm nhất đứng trước.
 2. **Tạo task** — chọn đơn, **đích lấy hàng** và người được giao. Đơn `Awaiting Stock` chỉ tạo được task khi đích là `STAGING`, hoặc khi Sale đã cho phép giao một phần (đích `DISPATCH`). Hệ thống:
-   - tạo **một task** cho đơn: phần lấy hàng `Pending` và phần kiểm thùng `Pending`. Tạo lại thì trả về task cũ, không sinh task thứ hai;
-   - lập **dòng lấy hàng**: **mỗi thùng đã phân bổ một dòng** (bin, lô, mã LPN), sắp theo mã vị trí rồi SKU;
-   - chuyển đơn `Ready to Fulfill` → `Picking`. Đơn `Awaiting Stock` giữ nguyên trạng thái.
+   - tạo **một task** cho đơn — đơn có **lịch giao nhiều đợt** thì **một task cho mỗi đợt giao** ([17](../../ecommerce/17-order-management/README.md) BR-29): phần lấy hàng `Pending` và phần kiểm thùng `Pending`. Tạo lại thì trả về task cũ (của cùng đợt), không sinh task thứ hai;
+   - lập **dòng lấy hàng**: **mỗi thùng đã phân bổ một dòng** (bin, lô, mã LPN) — chỉ các thùng của đợt giao đó, sắp theo mã vị trí rồi SKU;
+   - chuyển đơn `Ready to Fulfill` → `Picking`. Đơn `Awaiting Stock` và đơn `Partially Fulfilled` (đợt sau) giữ nguyên trạng thái.
    - Mọi thùng của task đều thuộc **kho xuất** của đơn, vì giữ hàng và phân bổ chỉ lấy tồn của kho xuất (BR-07).
 3. **Đổi người / đổi đích** — chỉ khi task còn `Pending`.
 
@@ -233,7 +233,7 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn đã release (`Ready to Fulfill`, `Awaiting Stock`); kho xuất do Sale chọn; Đơn sản xuất cho phần thiếu (theo số thùng, kho nhận = kho xuất); treo / gỡ treo `INVENTORY`; giao một phần do Sale quyết; huỷ đơn → cất lại |
+| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn đã release (`Ready to Fulfill`, `Awaiting Stock`, `Partially Fulfilled` — release **theo đợt giao**, mỗi đợt một task); kho xuất do Sale chọn; Đơn sản xuất cho phần thiếu (theo số thùng, kho nhận = kho xuất); treo / gỡ treo `INVENTORY`; giao một phần do Sale quyết; huỷ đơn → cất lại |
 | [20 · Inventory Control](../20-inventory-control/README.md) | Phân bổ nguyên thùng LPN theo FIFO tại kho xuất; trừ tồn khi quét (thùng `Consumed`); tồn ở khu chờ xuất gắn đơn; kiểm kê mù khi thiếu; cách ly thùng hư hỏng; cất lại thùng |
 | [08 · Kiểm thùng & Dán nhãn giao hàng](../08-packing/README.md) | Task `Picked` mở phần kiểm thùng; thùng đã lấy chính là kiện giao |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) / [05 · Putaway](../05-putaway/README.md) | Khu xuất hàng `DISPATCH`, khu chờ xuất `STAGING`, khu `QUARANTINE`; vị trí thùng do putaway / slotting quyết định |

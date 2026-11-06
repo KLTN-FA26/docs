@@ -43,7 +43,7 @@ Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/READ
 
 ```mermaid
 flowchart TD
-    START_ORDER(["Đơn Confirmed, Sale đã chọn kho xuất<br/>kiểm tồn SKU riêng tại kho xuất: còn thiếu thùng"]) --> PO_DRAFT["Sale lập Đơn sản xuất cho phần thiếu — Draft<br/>đơn vị sản xuất chọn từ danh mục, kho nhận = kho xuất của đơn<br/>dòng: SKU riêng, số thùng thiếu, số cái / thùng, bộ file thiết kế đã chốt<br/>cờ cần duyệt mẫu in: mặc định bật khi SKU sản xuất lần đầu"]
+    START_ORDER(["Đơn Confirmed, Sale đã chọn kho xuất<br/>kiểm tồn SKU riêng tại kho xuất, tính cho đợt giao sớm nhất trước<br/>một đợt giao còn thiếu thùng — cảnh báo PO_NEEDED nếu sắp tới hạn"]) --> PO_DRAFT["Sale lập Đơn sản xuất cho phần thiếu của một đợt giao — Draft<br/>ngày cần hàng = ngày bắt đầu cửa sổ giao của đợt<br/>đơn vị sản xuất chọn từ danh mục, kho nhận = kho xuất của đơn<br/>dòng: SKU riêng, số thùng thiếu, số cái / thùng, bộ file thiết kế đã chốt<br/>cờ cần duyệt mẫu in: mặc định bật khi SKU sản xuất lần đầu"]
     PO_DRAFT --> CAP{"Thể tích Đơn sản xuất lớn hơn còn trống dự kiến<br/>hoặc còn trống nếu duyệt hết của kho nhận?"}
     CAP -->|"Có — cảnh báo Sale, không chặn"| PO_SUBMIT
     CAP -->|Không| PO_SUBMIT["Sale gửi duyệt<br/>Đơn sản xuất: Pending Approval"]
@@ -52,7 +52,7 @@ flowchart TD
     PO_APPROVE -->|Duyệt| PO_SENT["Hệ thống xuất phiếu PDF kèm bộ file<br/>gửi qua kênh kết nối của đơn vị sản xuất<br/>Đơn sản xuất: Sent — đơn bán: Awaiting Stock"]
     PO_SENT --> EXT[["Đơn vị sản xuất — ngoài hệ thống<br/>xưởng của công ty hoặc đối tác ngoài"]]
     PO_SENT -.->|"thông báo INFO; WARN nếu còn trống dự kiến chuyển sang âm"| WHM_NOTE["Quản lý kho của kho nhận<br/>biết hàng sắp về, chuẩn bị chỗ"]
-    EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Sale ghi nhận tay<br/>Đơn sản xuất: Accepted"]
+    EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Sale ghi nhận tay<br/>Đơn sản xuất: Accepted<br/>ngày dự kiến muộn hơn ngày cần hàng: cảnh báo AT_RISK<br/>quá ngày cần hàng chưa nhận đủ: PRODUCTION_LATE"]
     PO_ACC --> FLAG{"Cờ cần duyệt mẫu in?"}
     FLAG -->|Có| SAMPLE["Đơn vị sản xuất in mẫu thử theo bộ file đã chốt<br/>Sale tải ảnh / video của vòng mẫu, ghi ngày gửi mẫu vật nếu có<br/>Đơn sản xuất: Sample Pending"]
     SAMPLE --> CUST_SAMPLE{"Khách xem mẫu in chờ duyệt<br/>trên sàn — mẫu thiết kế của tôi<br/>hoặc thẻ duyệt mẫu in trong chat"}
@@ -210,7 +210,7 @@ Chi tiết: [17 · Order Management §4.2–4.6](../ecommerce/17-order-managemen
 
 ### 2.1. Flowchart tổng thể
 
-> **Đã chốt 2026-11-05:** **mỗi đơn có đúng một kho xuất** — Sale chọn khi đơn `Confirmed`, hệ thống gợi ý (ưu tiên kho đang có đủ hàng của các SKU trong đơn, rồi tới kho còn chỗ — ✅ C3) và hiện còn trống dự kiến của các kho. Chỉ giữ hàng có sẵn **tại kho xuất**; hàng dư ở kho khác không dùng cho đơn đó; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; **không bao giờ tách giao từ hai kho**, đơn vẫn giao nhiều đợt (giao một phần) từ cùng kho xuất ([17](../ecommerce/17-order-management/README.md) §4.2, BR-22, [20](../warehouse/20-inventory-control/README.md) BR-17). ✅ Đã chốt 2026-11-05: kho xuất chỉ đổi được khi đơn chưa có hàng giữ và chưa có Đơn sản xuất từ `Sent` trở đi. Xem [open-questions](../open-questions/README.md).
+> **Đã chốt 2026-11-05:** **mỗi đơn có đúng một kho xuất** — Sale chọn khi đơn `Confirmed`, hệ thống gợi ý (ưu tiên kho đang có đủ hàng của các SKU trong đơn, rồi tới kho còn chỗ — ✅ C3) và hiện còn trống dự kiến của các kho. Chỉ giữ hàng có sẵn **tại kho xuất**; hàng dư ở kho khác không dùng cho đơn đó; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; **không bao giờ tách giao từ hai kho**, đơn vẫn giao nhiều đợt (theo **lịch giao** của hợp đồng, hoặc giao một phần) từ cùng kho xuất ([17](../ecommerce/17-order-management/README.md) §4.2, §4.5, BR-22, BR-29, [20](../warehouse/20-inventory-control/README.md) BR-17). ✅ Đã chốt 2026-11-05: kho xuất chỉ đổi được khi đơn chưa có hàng giữ và chưa có Đơn sản xuất từ `Sent` trở đi. Xem [open-questions](../open-questions/README.md).
 
 > **Đã chốt 2026-11-05:** dòng đơn ghi **số thùng N**; mọi thùng đúng số cái chuẩn nên giữ hàng / phân bổ = **chọn đủ N thùng LPN** của SKU tại kho xuất, theo **FIFO** (ngày nhập). Chỉ có sẵn k < N thùng thì giữ k thùng, **N − k thùng còn lại là thiếu** — Sale lập Đơn sản xuất cho phần thiếu (tính theo thùng) hoặc thoả thuận lại số thùng với khách ([07](../warehouse/07-picking/README.md) BR-03, [17](../ecommerce/17-order-management/README.md) §4.2, BR-21, [open-questions C32](../open-questions/README.md)).
 
@@ -219,11 +219,11 @@ Chi tiết: [17 · Order Management §4.2–4.6](../ecommerce/17-order-managemen
 ```mermaid
 flowchart TD
     CONF(["Đơn: Confirmed<br/>hợp đồng Signed, đủ đợt ON_SIGNING"]) --> WH_SELECT["Sale chọn kho xuất — một kho cho cả đơn<br/>hệ thống gợi ý: ưu tiên kho đủ hàng, rồi kho còn chỗ<br/>hiện tồn khả dụng và còn trống dự kiến từng kho"]
-    WH_SELECT --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng tại kho xuất, theo số thùng<br/>hàng dư từ đơn trước, hàng trả đã gỡ cách ly<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn"]
-    CHECK --> ENOUGH{"Đủ hàng tại kho xuất?<br/>mỗi dòng có đủ N thùng"}
+    WH_SELECT --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng tại kho xuất, theo số thùng<br/>hàng dư từ đơn trước, hàng trả đã gỡ cách ly<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn<br/>thùng đã giữ tính cho đợt giao sớm nhất trước"]
+    CHECK --> ENOUGH{"Đủ hàng tại kho xuất<br/>cho đợt giao kế tiếp?"}
 
     ENOUGH -->|"Thiếu thùng"| PO_SEND["Sale lập Đơn sản xuất cho phần thiếu, tính theo số thùng<br/>kho nhận = kho xuất, cảnh báo nếu vượt còn trống dự kiến<br/>Sales Manager duyệt và gửi — luồng §1"]
-    PO_SEND --> AWAIT["Đơn: Awaiting Stock — khi Đơn sản xuất Sent<br/>Sale báo khách ngày giao mới nếu trễ hợp đồng"]
+    PO_SEND --> AWAIT["Đơn: Awaiting Stock — khi Đơn sản xuất Sent<br/>trễ so với lịch giao: Sale báo khách, dời cửa sổ giao nếu khách đồng ý"]
     AWAIT --> AW_CHOICE{"Phần có sẵn<br/>xử lý thế nào?"}
     AW_CHOICE -->|"Chờ đủ hàng"| AW_BIN["Thùng nằm tại bin, đã giữ cho đơn"]
     AW_CHOICE -->|"Quản lý kho dùng khu chờ xuất: đích STAGING"| TASK
@@ -268,11 +268,11 @@ flowchart TD
     LOADING --> WAYBILL{"Chuyến đã có mã vận đơn?"}
     WAYBILL -->|"Chưa — chặn ký bàn giao"| WB_IN["Điền mã vận đơn, biển số, tài xế:<br/>webhook của hãng / nhập hàng loạt từ file / nhập tay<br/>hãng tích hợp API: mã đơn có từ lúc hệ thống tạo đơn khi đặt xe"]
     WB_IN --> WAYBILL
-    WAYBILL -->|Có| GATE{"Mọi đợt BEFORE_DELIVERY đã Paid?<br/>đơn không treo"}
-    GATE -->|Chưa| BLOCK["Từ chối ký bàn giao cả chuyến<br/>bỏ shipment đó ra, chờ ở khu xuất hàng DISPATCH<br/>tới khi Kế toán ghi nhận đủ tiền"]
+    WAYBILL -->|Có| GATE{"Đợt BEFORE_DELIVERY áp cho shipment đã Paid?<br/>đã tới ngày bắt đầu cửa sổ giao của đợt giao?<br/>đơn không treo"}
+    GATE -->|Chưa| BLOCK["Từ chối ký bàn giao cả chuyến<br/>bỏ shipment đó ra, chờ ở khu xuất hàng DISPATCH<br/>tới khi Kế toán ghi nhận đủ tiền / tới cửa sổ giao"]
     BLOCK -.-> GATE
     GATE -->|Rồi| HANDOVER["Ký bàn giao — tất cả hoặc không<br/>Shipment: Handed Over, chuyến Dispatched"]
-    HANDOVER --> SHIPPED["Đơn: Shipped, hoặc Partially Fulfilled nếu còn phần chưa giao<br/>khách nhận thông báo đã bàn giao: hãng, mã vận đơn, biển số<br/>không thu tiền khi giao"]
+    HANDOVER --> SHIPPED["Đơn: Shipped, hoặc Partially Fulfilled nếu còn phần / đợt giao chưa giao<br/>khách nhận thông báo đã bàn giao: hãng, mã vận đơn, biển số<br/>không thu tiền khi giao"]
 
     SHIPPED --> SRC{"Hãng có webhook?"}
     SRC -->|Có| WH_EVT["Hệ thống nhận sự kiện: xác thực chữ ký, ghép chuyến theo mã chuyến<br/>đã lấy hàng / đang giao: ghi mốc hành trình, không đổi trạng thái<br/>chữ ký sai / không ghép được: danh sách lỗi cho Quản lý kho"]
@@ -310,9 +310,9 @@ sequenceDiagram
     SALE->>OM: Đơn Confirmed — chọn kho xuất (hệ thống gợi ý)
     OM->>INVSYS: Kiểm tồn SKU riêng tại kho xuất theo số thùng, giữ đủ N thùng mỗi dòng (hoặc số thùng có sẵn)
     alt Thiếu thùng
-        SALE->>PO: Lập Đơn sản xuất cho phần thiếu (kho nhận = kho xuất), Sales Manager duyệt và gửi (luồng §1)
+        SALE->>PO: Lập Đơn sản xuất cho phần thiếu của một đợt giao (kho nhận = kho xuất), Sales Manager duyệt và gửi (luồng §1)
         OM->>OM: Awaiting Stock
-        SALE-->>CUST: Báo ngày giao dự kiến mới (nếu trễ hợp đồng)
+        SALE-->>CUST: Nếu trễ so với lịch giao: báo khách, dời cửa sổ giao khi khách đồng ý
         opt Quản lý kho dùng khu chờ xuất
             WM->>PICKER: Tạo task đích STAGING cho phần có sẵn
             PICKER->>INVSYS: Lấy nguyên thùng về khu STAGING (MOVE, chưa trừ tồn) → task Staged
@@ -507,18 +507,18 @@ Chi tiết: [12 · Thiết kế của khách](../ecommerce/12-product-design/REA
 ```mermaid
 flowchart TD
     ENTRY(["Khách sỉ xem sản phẩm, quy cách trên sàn — sàn không hiện giá<br/>chat với Sale"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
-    PATH -->|Có| DESIGN["Khách bấm Thiết kế trên quy cách đã có khuôn in (13)<br/>tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D<br/>lưu — bản thiết kế Draft (12)"]
-    DESIGN --> SUBMIT["Khách bấm Gửi duyệt<br/>hoặc Gửi duyệt và yêu cầu báo giá"]
-    SUBMIT --> PREFLIGHT{"Hệ thống preflight<br/>độ phân giải ở kích thước in, vùng in / lề an toàn<br/>định dạng, dung lượng, quy cách đã có quy cách thùng"}
+    PATH -->|Có| DESIGN["Khách bấm Thiết kế trên quy cách đã có khuôn in (13)<br/>tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D<br/>lưu — bản thiết kế Draft (12)<br/>có thể gom vào dự án thiết kế, dùng logo từ thư viện dự án"]
+    DESIGN --> SUBMIT["Khách bấm Gửi duyệt, Gửi duyệt và yêu cầu báo giá<br/>hoặc Gửi duyệt cả bộ từ dự án — từ 2 bản, tất cả hoặc không"]
+    SUBMIT --> PREFLIGHT{"Hệ thống preflight từng bản<br/>độ phân giải ở kích thước in, vùng in / lề an toàn<br/>định dạng, dung lượng, quy cách đã có quy cách thùng"}
     PREFLIGHT -->|"Không đạt: báo lỗi cụ thể, vẫn Draft"| DESIGN
     PREFLIGHT -->|Đạt| PENDING["Bản thiết kế: Pending Review — khoá sửa"]
-    PENDING --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>và kiểm duyệt nội dung"}
+    PENDING --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>và kiểm duyệt nội dung<br/>lượt duyệt dự án: xem cả bộ, quyết định từng bản"}
     REVIEW -->|"Trả lại, kèm lý do: về Draft"| DESIGN
     REVIEW -->|Duyệt| SNAP["Hệ thống xuất bộ file: file in PDF/X, xem trước 2D / 3D, đặc tả<br/>chốt design snapshot bất biến, checksum<br/>sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
-    SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>mở chat với Sale kèm thẻ yêu cầu báo giá (16)"]
+    SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>hoặc Yêu cầu báo giá cả dự án: các bản Approved, số thùng từng bản, một ngày giao chung<br/>mở chat với Sale kèm thẻ yêu cầu báo giá — nhiều dòng khi cả dự án (16)"]
     PENDING -.->|"Đã gửi kèm yêu cầu báo giá:<br/>Sale nhận ngay, chỉ lập báo giá khi Approved"| RFQ
     PATH -->|"Không — SKU riêng của khách đã có"| QUOTE
-    RFQ --> QUOTE["Sale lập báo giá (14)<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
+    RFQ --> QUOTE["Sale lập báo giá (14) — một báo giá nhiều dòng khi yêu cầu cả dự án<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
     QUOTE --> DISCOUNT{"Đơn giá thấp hơn giá gợi ý<br/>vượt hạn mức giảm giá của Sale?"}
     DISCOUNT -->|Có| DISC_OK["Sales Manager duyệt trước khi gửi"]
     DISC_OK --> Q_SENT
@@ -531,7 +531,7 @@ flowchart TD
     Q_RESP -->|"Chấp nhận, chọn số thùng ≥ MOQ"| ACCEPT["Báo giá: Accepted"]
     ACCEPT --> ORDER["Sale tạo đơn từ báo giá<br/>chốt số thùng, số cái / thùng, đơn giá / cái, dòng phí khuôn / bản in<br/>Đơn: Draft — báo giá Converted"]
 
-    ORDER --> CONTRACT["Sale lập hợp đồng mua bán — Draft<br/>các bên, dòng hàng và giá, dòng phí khuôn / bản in, điều khoản giao<br/>số lần in mẫu miễn phí — mặc định từ cấu hình chung<br/>lịch thanh toán: ON_SIGNING / BEFORE_DELIVERY / AFTER_DELIVERY"]
+    ORDER --> CONTRACT["Sale lập hợp đồng mua bán — Draft<br/>các bên, dòng hàng và giá, dòng phí khuôn / bản in<br/>điều khoản giao: một địa chỉ, lịch giao — các đợt giao, cửa sổ giao, số thùng từng SKU<br/>số lần in mẫu miễn phí — mặc định từ cấu hình chung<br/>lịch thanh toán: ON_SIGNING / BEFORE_DELIVERY / AFTER_DELIVERY<br/>đợt trước / sau giao gắn được một đợt giao"]
     CONTRACT --> SEND["Gửi hợp đồng — Sent<br/>Đơn: Pending Contract<br/>cảnh báo nếu vượt hạn mức / quá hạn"]
     SEND --> SIGN{"Khách ký?<br/>ngoài hệ thống"}
     SIGN -->|"Từ chối / cần sửa"| C_CANCEL["Huỷ hợp đồng, có lý do<br/>đơn về Draft để lập hợp đồng thay thế, hoặc huỷ đơn"]
@@ -546,7 +546,8 @@ flowchart TD
     ONSIGN -->|Chưa| PP["Đơn: Pending Payment<br/>khách chuyển khoản, Kế toán lập phiếu thu cho đợt"]
     PP -->|"Thu đủ"| CONFIRMED
     ONSIGN -->|Rồi| CONFIRMED(["Đơn: Confirmed → Sale chọn kho xuất, kiểm tồn và Fulfillment — §2"])
-    CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>phí khuôn / bản in nằm trong các đợt như hàng hoá<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
+    CONFIRMED -.-> SCHED["Giao theo lịch giao — §2, 17 §4.5<br/>xuất kho theo đợt, không bàn giao trước ngày bắt đầu cửa sổ giao<br/>dời cửa sổ giao: mã lý do và bằng chứng khách đồng ý"]
+    CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid — gắn đợt giao thì chỉ chặn đợt đó<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>phí khuôn / bản in nằm trong các đợt như hàng hoá<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
     CONFIRMED -.-> EINV["Song song: mỗi lần giao thành công — shipment Delivered<br/>hoá đơn nháp → Kế toán phát hành qua nhà cung cấp hoá đơn điện tử (21)<br/>hoá đơn theo lần giao, không theo đợt thanh toán — §3.5"]
 ```
 
@@ -559,7 +560,7 @@ stateDiagram-v2
     state "Pending Review" as PendingReview
     [*] --> Draft: Khách bấm Thiết kế / tạo bản sửa
     Draft --> Draft: Lưu / preflight không đạt
-    Draft --> PendingReview: Gửi duyệt, preflight đạt
+    Draft --> PendingReview: Gửi duyệt lẻ hoặc cả bộ, preflight đạt
     PendingReview --> Draft: Sales Manager trả lại, có lý do
     PendingReview --> Approved: Duyệt, xuất file PDF/X, chốt snapshot, sinh SKU riêng
     Draft --> Archived: Khách xoá bản nháp
@@ -568,6 +569,16 @@ stateDiagram-v2
 ```
 
 > ⚠️ Giả định: thẻ yêu cầu báo giá gửi kèm lúc gửi duyệt vẫn mở khi bản bị trả lại, đi tiếp theo bản đó; bản `Archived` thì thẻ đóng ([open-questions B40](../open-questions/README.md)). Ràng buộc file mặc định, chuẩn PDF/X-4, thiếu model 3D: [open-questions B34–B36](../open-questions/README.md).
+
+**Dự án thiết kế (Design Project)** *(✅ Đã chốt 2026-11-06 — [open-questions B41](../open-questions/README.md))* — gom nhiều bản thiết kế của một bộ nhận diện; không thêm trạng thái cho bản thiết kế. Vòng đời dự án: `Active` → `Archived` (khách đóng khi không còn bản `Pending Review`; không mở lại — ⚠️ giả định B42). Chi tiết [12](../ecommerce/12-product-design/README.md) §4.9–§4.11, §5.4.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: Khách tạo dự án
+    Active --> Active: Thêm / gỡ bản, thư viện, gửi duyệt cả bộ, yêu cầu báo giá cả dự án
+    Active --> Archived: Khách đóng dự án, không còn bản Pending Review
+    Archived --> [*]
+```
 
 ### 3.2. Vòng đời đơn hàng (Order)
 
