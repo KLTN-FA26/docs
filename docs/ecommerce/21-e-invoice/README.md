@@ -221,7 +221,7 @@ stateDiagram-v2
 | Nhà cung cấp báo "chưa xác nhận được kết quả phát hành" | `Unknown`, chặn gửi lại (BR-05); Kế toán liên hệ nhà cung cấp rồi bấm Tra lại |
 | Hết lượt phát hành | Chặn phát hành, báo Kế toán (BR-09); nháp giữ nguyên, phát hành sau khi mua thêm lượt |
 | Một xe chở nhiều đơn | Mỗi shipment thuộc một đơn ([08](../../warehouse/08-packing/README.md) BR-03), mỗi shipment `Delivered` một hoá đơn |
-| Đơn giao nhiều lần (giao một phần) | Mỗi lần giao thành công một hoá đơn; dòng phí nằm ở hoá đơn đầu tiên (⚠️ §4.1) |
+| Đơn giao nhiều lần (theo **lịch giao nhiều đợt** — [14](../14-cart-and-order/README.md) BR-23 — hoặc giao một phần) | Mỗi lần giao thành công (mỗi shipment) một hoá đơn; một đợt giao đi nhiều xe thì có nhiều hoá đơn; dòng phí nằm ở hoá đơn đầu tiên (⚠️ §4.1) |
 | Đóng phần còn lại ([17](../17-order-management/README.md) §4.8) | Phần không giao chưa có hoá đơn, không phải điều chỉnh |
 | Kết quả giao sửa từ thành công sang thất bại, hoá đơn còn `Draft` | Hệ thống tự huỷ nháp (§4.5) |
 | Kết quả giao sửa từ thành công sang thất bại, hoá đơn đã `Issued` | Hệ thống tạo nháp **điều chỉnh giảm toàn bộ**, báo Kế toán (⚠️ §4.4) |
