@@ -59,7 +59,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 |------|-------------|----------------|----------|
 | **Định danh** | Product | **Mã sản phẩm** (chữ in hoa, số, `_`, `-`; tối đa 50 ký tự; không đổi được), **tên tiếng Việt** (≤ 255), **tên tiếng Anh** (≤ 300). Loại luôn là `CUSTOMIZABLE` (hệ thống gán, không chọn) | Có |
 | **Phân loại** | Product | **Danh mục chính** (một), **thương hiệu** — phải đang hoạt động khi chọn mới | Có trước khi gửi duyệt |
-| **Nhóm thuế (tax class)** | Product | `STANDARD` / `REDUCED` / `EXEMPT` (mức thuế suất, không liên quan loại sản phẩm) | Có |
+| **Nhóm thuế (tax class)** | Product | `STANDARD` / `REDUCED` / `EXEMPT` (mức thuế suất, không liên quan loại sản phẩm). ⚠️ Nghĩa của `EXEMPT` (không chịu thuế — KCT — hay thuế suất 0%) và cách áp 0% cho khách khu chế xuất chưa chốt — [open-questions D35](../../open-questions/README.md) | Có |
 | **Thuộc tính biến thể (variant axes)** | Product / Variant | Chọn từ từ điển thuộc tính loại `SELECT` hoặc `COLOR` (ví dụ Dung tích × Chất liệu) → tổ hợp sinh ra các **quy cách** | Không (không có trục → một quy cách mặc định) |
 | **Thuộc tính mô tả (descriptive)** | Product | Giá trị các thuộc tính khác (đường kính miệng, độ dày…) theo kiểu dữ liệu của thuộc tính | Không |
 | **Hình ảnh** | Variant | Ảnh JPEG / PNG / WebP ≤ 10 MB, ≤ 25 megapixel; tối đa 20 ảnh mỗi biến thể; một **ảnh bìa** | Có ít nhất một ảnh đã đăng trước khi xuất bản |

@@ -48,6 +48,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 |------|---------|-------|
 | Định danh doanh nghiệp | Tên công ty; **mã số thuế (không bắt buộc)**: 10 số, 10-3 (đơn vị phụ thuộc) hoặc 12 số (CCCD của đại diện hộ kinh doanh) | Sale |
 | **Thông tin pháp lý** | **Địa chỉ đăng ký kinh doanh** (trụ sở), **người đại diện theo pháp luật** và **chức vụ**; tài khoản ngân hàng của khách (không bắt buộc) | Sale |
+| **Email nhận hoá đơn** *(✅ Đã chốt 2026-11-06)* | Email nhận hoá đơn điện tử, mặc định = email người liên hệ, nhân viên sửa được; bắt buộc trước khi phát hành hoá đơn ([21](../21-e-invoice/README.md) BR-06) | Sale |
 | Tài khoản đăng nhập | Email người liên hệ (khoá đăng nhập; không đổi được), số điện thoại; mật khẩu do khách đặt khi kích hoạt | Sale / Khách |
 | Điều khoản thương mại | **Lịch thanh toán mặc định** (các đợt: tên, %, mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY`, N ngày; tổng 100%), **hạn mức công nợ** (≥ 0), **kỳ hạn công nợ** (0–365 ngày) | Sale (ban đầu) + Kế toán duyệt |
 | Bảng giá riêng (giá nội bộ) | Bậc giá theo số thùng + đơn giá / cái cho từng SKU riêng của khách; chỉ nhân viên xem, không hiện trên sàn | Quản lý kinh doanh ([13](../13-catalog/README.md)) |
@@ -64,6 +65,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | **Customer profile** | 14, 15, 16, 17, báo cáo |
 | **Thông tin pháp lý** (bên mua) điền sẵn vào hợp đồng | [14](../14-cart-and-order/README.md) |
 | **Địa chỉ & người nhận** cho đơn | [14](../14-cart-and-order/README.md) |
+| **Thông tin bên mua cho hoá đơn** — tên công ty, mã số thuế, địa chỉ xuất hoá đơn mặc định (không có thì địa chỉ đăng ký kinh doanh), email nhận hoá đơn | [21](../21-e-invoice/README.md) |
 | **Lịch thanh toán mặc định** cho báo giá và hợp đồng | [14](../14-cart-and-order/README.md) |
 | **Hạn mức & kỳ hạn công nợ** | [14](../14-cart-and-order/README.md) (cảnh báo khi gửi hợp đồng), [15](../15-payment/README.md) (kiểm tín dụng, hạn đợt trả sau) |
 | **Bảng giá riêng (giá nội bộ)** — giá gợi ý cho báo giá, chỉ nhân viên xem | [13](../13-catalog/README.md), [14](../14-cart-and-order/README.md) |
@@ -176,7 +178,7 @@ stateDiagram-v2
   - **duy nhất trên mọi hồ sơ**, kể cả hồ sơ đã đóng;
   - đã có thì không xoá được.
 
-  Email là khoá đăng nhập; mỗi khách **một tài khoản đăng nhập**.
+  Email là khoá đăng nhập; mỗi khách **một tài khoản đăng nhập**. Mã số thuế không bắt buộc khi tạo hồ sơ, nhưng **bắt buộc trước khi phát hành hoá đơn** (BR-12).
 - **BR-02:** Chỉ **Sale / Quản lý kinh doanh** tạo hồ sơ khách; không có đăng ký tự do và guest checkout. Chỉ hồ sơ `Active` mới xem tình trạng còn hàng, nhận báo giá và hợp đồng (sàn không hiển thị giá — [13](../13-catalog/README.md)).
 - **BR-03:** **Hạn mức và kỳ hạn công nợ** chỉ do **kế toán** duyệt; mọi thay đổi ghi người và thời điểm duyệt. Lịch thanh toán mặc định chỉ có đợt `AFTER_DELIVERY` khi khách có hạn mức > 0. Lúc tạo khách, Sale chỉ đặt được đợt `ON_SIGNING` / `BEFORE_DELIVERY`.
 - **BR-04:** Lịch thanh toán mặc định: mỗi đợt có % > 0 và đúng một mốc; **tổng 100%**. Đây chỉ là mẫu — lịch ràng buộc nằm trong từng hợp đồng ([14](../14-cart-and-order/README.md)).
@@ -187,6 +189,9 @@ stateDiagram-v2
 - **BR-09:** Hồ sơ `Blocked` / `Inactive` không đăng nhập và không nhận báo giá / đơn mới; đơn và hợp đồng đang chạy vẫn xử lý tới khi kết thúc.
 - **BR-10:** Thay đổi **tên công ty**, **mã số thuế** và **thông tin pháp lý** luôn được ghi lịch sử (cũ / mới / ai / khi nào).
 - **BR-11:** Mã nhóm khách cố định sau khi tạo; mỗi khách tối đa một nhóm.
+- **BR-12:** **Thông tin xuất hoá đơn** *(✅ Đã chốt 2026-11-06)*: trước khi Kế toán phát hành hoá đơn cho khách ([21](../21-e-invoice/README.md) BR-06), hồ sơ phải có **mã số thuế** (10 số, 10-3, hoặc 12 số với hộ kinh doanh) và **email nhận hoá đơn**; thiếu thì hoá đơn bị chặn phát hành và Sale bổ sung. Địa chỉ trên hoá đơn lấy **địa chỉ xuất hoá đơn mặc định**, không có thì lấy **địa chỉ đăng ký kinh doanh**. Hoá đơn đã phát hành giữ thông tin tại lúc lập, không đổi theo hồ sơ.
+
+  > ⚠️ Giả định: mọi khách đều nhận hoá đơn có mã số thuế; cách chọn địa chỉ trên hoá đơn như trên. Xem [open-questions G14](../../open-questions/README.md).
 
 ### Edge case
 
@@ -199,7 +204,8 @@ stateDiagram-v2
 | Email lời mời gửi lỗi | Lời mời ghi `Failed`; Sale gửi lại |
 | Khách không kích hoạt trong 72 giờ | Link hết hạn; Sale gửi lại (không cần chờ 1 phút) |
 | Tạo khách trùng mã số thuế với hồ sơ đã đóng | Chặn; mở lại hồ sơ cũ (kèm lý do) thay vì tạo mới |
-| Hộ kinh doanh không có mã số thuế doanh nghiệp | Để trống, hoặc nhập 12 số CCCD của người đại diện |
+| Hộ kinh doanh không có mã số thuế doanh nghiệp | Để trống, hoặc nhập 12 số CCCD của người đại diện; trước khi phát hành hoá đơn phải nhập (BR-12) |
+| Kế toán phát hành hoá đơn nhưng khách thiếu mã số thuế / email nhận hoá đơn | Hoá đơn bị chặn phát hành ([21](../21-e-invoice/README.md)); Sale bổ sung qua chat với khách rồi cập nhật hồ sơ |
 | Nghi tài khoản bị chiếm (login lạ) | Thu hồi phiên; Quản lý kinh doanh tạm chặn (`Blocked`) nếu cần |
 | Khách quá hạn công nợ kéo dài | Kế toán hạ hạn mức (có thể về 0 — hợp đồng mới không có đợt trả sau); hợp đồng mới có đợt trả sau bị treo tín dụng khi ký ([15](../15-payment/README.md)) |
 | Kế toán hạ hạn mức khi khách đang có hợp đồng đã ký | Hợp đồng đã ký giữ nguyên lịch thanh toán; hạn mức mới chỉ áp cho hợp đồng sau |
@@ -214,6 +220,7 @@ stateDiagram-v2
 | [15 · Payment](../15-payment/README.md) | Kế toán duyệt hạn mức & kỳ hạn; dư nợ, quá hạn, vị thế tín dụng; hạn đợt trả sau giao |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Hồ sơ & lịch sử tương tác hiển thị cho Sale |
 | [17 · Order Management](../17-order-management/README.md) | Lịch sử đơn gắn hồ sơ |
+| [21 · E-invoice](../21-e-invoice/README.md) | Thông tin bên mua trên hoá đơn: tên công ty, mã số thuế, địa chỉ xuất hoá đơn / đăng ký kinh doanh, email nhận hoá đơn (BR-12) |
 | [12 · Design Management](../12-product-design/README.md) | Khách này tự tạo và là chủ sở hữu các bản thiết kế và SKU theo mẫu sinh ra từ đó |
 | [13 · Catalog](../13-catalog/README.md) | Bảng giá riêng của khách là giá nội bộ (giá gợi ý cho Sale), không hiển thị trên sàn; trạng thái hồ sơ quyết định khách xem tình trạng còn hàng |
 | [00 · System Overview](../../00-system-overview/README.md) | Persona khách hàng |

@@ -8,7 +8,7 @@ Toàn bộ tài liệu nghiệp vụ (Business Requirement Document) nằm trong
 
 - [Tổng quan hệ thống](docs/00-system-overview/README.md) — mục tiêu, đối tượng người dùng, sơ đồ luồng tổng thể
 - [Mảng Kho thành phẩm](docs/warehouse/) — Product Creation → Nhập kho thành phẩm → Putaway → Slotting → Picking → Kiểm thùng & Dán nhãn → Shipping, và [Kiểm soát tồn kho](docs/warehouse/20-inventory-control/README.md) (kiểm kê, điều chỉnh tồn, cảnh báo, truy xuất lô)
-- [Mảng Bán hàng sỉ](docs/ecommerce/) — Mẫu & Thiết kế → Sàn bán hàng (Catalog) → Báo giá, Đơn hàng & Hợp đồng → Thanh toán theo hợp đồng → Sales Chat → Order Management (kèm Đơn sản xuất) → Customer Information
+- [Mảng Bán hàng sỉ](docs/ecommerce/) — Mẫu & Thiết kế → Sàn bán hàng (Catalog) → Báo giá, Đơn hàng & Hợp đồng → Thanh toán theo hợp đồng → Sales Chat → Order Management (kèm Đơn sản xuất) → Customer Information → Hoá đơn điện tử
 - [Sơ đồ luồng & trạng thái (Mermaid)](docs/diagrams/README.md)
 - [Bảng thuật ngữ](docs/glossary/README.md)
 - [Câu hỏi mở cần xác nhận](docs/open-questions/README.md)

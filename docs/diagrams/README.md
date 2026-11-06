@@ -9,7 +9,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 > **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng** (báo giá, đơn, hợp đồng, Đơn sản xuất ghi **số thùng**, kèm số cái); **giá vẫn theo cái**, MOQ và bậc giá theo số thùng ([01](../warehouse/01-product-creation/README.md) BR-11, [14](../ecommerce/14-cart-and-order/README.md) BR-08). **Mọi thùng đúng số cái chuẩn** của SKU: kho đếm số thùng, **thùng lệch số chuẩn không nhận** ([03](../warehouse/03-receipt/README.md) BR-13); không còn thùng lẻ. Giữ hàng / phân bổ một dòng = **chọn đủ N thùng** theo **FIFO** (ngày nhập); thiếu thùng thì phần thiếu (tính theo thùng) đi Đơn sản xuất ([07](../warehouse/07-picking/README.md) BR-03).
 >
 > **Đã chốt 2026-11-05 (bổ sung):**
-> - **Vai trò:** **Nhân viên Sale** chọn kho xuất, chọn cách giao, lập và theo dõi Đơn sản xuất (ghi nhận `Accepted`, tiến độ, mẫu in), treo / gỡ treo đơn, cho phép giao một phần. **Quản lý kinh doanh (Sales Manager)** duyệt và gửi Đơn sản xuất. **Quản lý kho** của kho xuất release đơn, tạo task và giao người, quyết định khu chờ xuất, chuyển task sang khu xuất hàng (`DISPATCH`), ghi nhận kết quả giao. Không còn role Điều phối đơn hàng hay Inventory Planner.
+> - **Vai trò:** **Nhân viên Sale** chọn kho xuất, lập và theo dõi Đơn sản xuất (ghi nhận `Accepted`, tiến độ, mẫu in), treo / gỡ treo đơn, cho phép giao một phần. **Quản lý kinh doanh (Sales Manager)** duyệt và gửi Đơn sản xuất. **Quản lý kho** của kho xuất release đơn, tạo task và giao người, quyết định khu chờ xuất, chuyển task sang khu xuất hàng (`DISPATCH`), ghi nhận kết quả giao. Không còn role Điều phối đơn hàng hay Inventory Planner.
 > - **Đơn sản xuất** (tên cũ "Yêu cầu sản xuất") là **một chứng từ chung** cho xưởng của công ty và đối tác ngoài, gửi qua **kênh kết nối** của đơn vị sản xuất; Đơn sản xuất bật cờ **cần duyệt mẫu in** phải được khách duyệt mẫu trước khi in hàng loạt ([17](../ecommerce/17-order-management/README.md) §4.3).
 > - **Mỗi đơn bán có đúng một kho xuất**; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; không tách giao từ hai kho, **không có chuyển kho** (module chuyển kho giữa các kho đã bỏ) ([17](../ecommerce/17-order-management/README.md) BR-22, [20](../warehouse/20-inventory-control/README.md) BR-17).
 > - Ly / bao bì **không có hạn dùng**: không FEFO, không cảnh báo cận hạn; **lô bắt buộc** — hệ thống tự gán lô = mã Đơn sản xuất khi nhập kho, hàng hoàn giữ lô gốc.
@@ -19,12 +19,18 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 > - **Không còn khu kiểm thùng riêng:** kiểm thùng & dán nhãn giao hàng làm tại **khu xuất hàng (`DISPATCH`)** — thùng lấy xong đưa thẳng về đây, kiểm, dán nhãn tại chỗ, gom shipment, chờ xe. Đích lấy hàng là `DISPATCH` (mặc định) hoặc `STAGING` ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-22, [07](../warehouse/07-picking/README.md)).
 >
 > **Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế** trên app — trên **khuôn 2D** của quy cách (cấu hình in do Quản lý kinh doanh khai báo — [01](../warehouse/01-product-creation/README.md) §4.10), có **xem trước 3D**; bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ. Gửi duyệt → hệ thống **preflight** → **Quản lý kinh doanh** duyệt kỹ thuật & kiểm duyệt nội dung → hệ thống **xuất file in PDF/X**, chốt snapshot, sinh SKU riêng. Vòng đời bản thiết kế `Draft` / `Pending Review` / `Approved` / `Archived`. Đặt hàng từ bản thiết kế = **yêu cầu báo giá** gửi Sale ([12](../ecommerce/12-product-design/README.md), §3.1).
+>
+> **✅ Đã chốt 2026-11-05 (giao hàng):** **bỏ gửi kiện qua hãng** — **mọi đơn giao nguyên chuyến**, đi qua kế hoạch xếp hàng 3D; bỏ bước Sale chọn cách giao. Mỗi xe / chuyến có **mã chuyến nội bộ** (gửi hãng khi đặt xe) và **mã vận đơn** của hãng — từ **webhook** của hãng, **nhập hàng loạt từ file** hoặc **nhập tay**; **bắt buộc có mã vận đơn trước khi ký bàn giao**. Hãng có webhook thì **mốc hành trình** và kết quả giao tự cập nhật; không có webhook / sự kiện chưa về thì **Quản lý kho ghi tay**; hãng báo sai thì Quản lý kho sửa tay kèm lý do ([09](../warehouse/09-shipping/README.md) §4.1, §4.4, §4.5). Hệ thống không chủ động gọi API hãng (phạm vi sau).
+>
+> **✅ Đã chốt 2026-11-06 (đặt xe qua API hãng):** thêm kiểu kết nối **tích hợp API đặt xe** cho đơn vị vận chuyển xe tải / van nội thành. Ghi nhận đặt xe → **hệ thống tạo đơn ở hãng**: mỗi chuyến một đơn, điểm 0 là kho xuất, **mỗi shipment một điểm giao**; mã đơn ở hãng là mã vận đơn của chuyến; kết quả giao về **theo từng điểm giao** qua webhook (xác thực bằng header). Hãng khác giữ cách cũ ([09](../warehouse/09-shipping/README.md) §4.1, §4.2 bước 6, §4.5, BR-29; §2.2).
+>
+> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** ([21](../ecommerce/21-e-invoice/README.md)): mỗi **shipment `Delivered`** sinh một hoá đơn nháp, **Kế toán bấm phát hành**, hệ thống **hỏi lại kết quả** (nhà cung cấp không có webhook); hoá đơn đã phát hành chỉ thay đổi bằng **điều chỉnh / thay thế**. Hoá đơn **không theo đợt thanh toán** (§3.1, §3.5).
 
 Mục lục:
 
 1. [Luồng nhập kho thành phẩm: Đơn sản xuất (duyệt & gửi, duyệt mẫu in) → Nhập kho theo thùng LPN → Putaway](#1-luồng-nhập-kho-thành-phẩm) — kèm nhập hàng hoàn vào khu `QUARANTINE` (§1.3)
 2. [Luồng Fulfillment: Order → chọn kho xuất, kiểm tồn (Đơn sản xuất) → Picking nguyên thùng → (Khu chờ xuất) → Kiểm thùng & Dán nhãn giao hàng → Shipping](#2-luồng-fulfillment) — kèm vòng đời Đơn sản xuất (§2.3), phiên kiểm thùng & thùng giao (§2.4) và kế hoạch chuyến xe (§2.5)
-3. [Phụ lục: Luồng bán sỉ theo hợp đồng, vòng đời đơn hàng, hợp đồng & đợt thanh toán, di chuyển nguyên thùng trong một kho](#3-phụ-lục)
+3. [Phụ lục: Luồng bán sỉ theo hợp đồng, vòng đời đơn hàng, hợp đồng & đợt thanh toán, di chuyển nguyên thùng trong một kho, hoá đơn điện tử (§3.5)](#3-phụ-lục)
 4. [Ghi chú về sơ đồ](#4-ghi-chú-về-sơ-đồ)
 
 ---
@@ -181,7 +187,7 @@ Chi tiết: [03 · Nhập kho §4.2](../warehouse/03-receipt/README.md), [09 · 
 
 ```mermaid
 flowchart TD
-    RTO(["Shipment Delivery Failed, hãng hoàn kiện về kho xuất<br/>Quản lý kho ghi nhận shipment Returned — 09"]) --> RT_CREATE
+    RTO(["Shipment Delivery Failed, hãng hoàn kiện về kho xuất<br/>shipment Returned: webhook của hãng hoặc Quản lý kho ghi tay — 09"]) --> RT_CREATE
     RMA(["Khách trả hàng, Sale duyệt yêu cầu trả<br/>phát hành RMA, khách gửi hàng về kho xuất — 17"]) --> RT_CREATE
     RT_CREATE["NV kho tạo phiếu nhập Hàng hoàn — Draft<br/>tham chiếu một shipment hoàn về hoặc một RMA<br/>chọn khu QUARANTINE của kho"] --> RT_SCAN["Quét LPN từng thùng hoàn về<br/>giữ nguyên mã LPN, SKU, lô, số cái chuẩn / thùng<br/>ghi chú tình trạng bên ngoài nếu có"]
     RT_SCAN --> RT_BELONG{"Thùng thuộc shipment / đơn<br/>được tham chiếu?"}
@@ -214,8 +220,7 @@ Chi tiết: [17 · Order Management §4.2–4.6](../ecommerce/17-order-managemen
 flowchart TD
     CONF(["Đơn: Confirmed<br/>hợp đồng Signed, đủ đợt ON_SIGNING"]) --> WH_SELECT["Sale chọn kho xuất — một kho cho cả đơn<br/>hệ thống gợi ý: ưu tiên kho đủ hàng, rồi kho còn chỗ<br/>hiện tồn khả dụng và còn trống dự kiến từng kho"]
     WH_SELECT --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng tại kho xuất, theo số thùng<br/>hàng dư từ đơn trước, hàng trả đã gỡ cách ly<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn"]
-    CHECK --> SETUP["Sale chọn cách giao: gửi kiện / giao nguyên chuyến"]
-    SETUP --> ENOUGH{"Đủ hàng tại kho xuất?<br/>mỗi dòng có đủ N thùng"}
+    CHECK --> ENOUGH{"Đủ hàng tại kho xuất?<br/>mỗi dòng có đủ N thùng"}
 
     ENOUGH -->|"Thiếu thùng"| PO_SEND["Sale lập Đơn sản xuất cho phần thiếu, tính theo số thùng<br/>kho nhận = kho xuất, cảnh báo nếu vượt còn trống dự kiến<br/>Sales Manager duyệt và gửi — luồng §1"]
     PO_SEND --> AWAIT["Đơn: Awaiting Stock — khi Đơn sản xuất Sent<br/>Sale báo khách ngày giao mới nếu trễ hợp đồng"]
@@ -249,7 +254,7 @@ flowchart TD
     TO_CHECK --> CHECK_START
     PICKED --> CHECK_START["NV kho bắt đầu phiên kiểm thùng tại khu xuất hàng DISPATCH<br/>quét LPN từng thùng: đúng đơn, đúng SKU — thùng Checked<br/>thùng hư hỏng: loại → Removed, cất lại vào QUARANTINE"]
 
-    CHECK_START --> LABEL["Kích thước, khối lượng theo quy cách thùng của SKU<br/>in và dán nhãn giao hàng lên từng thùng — Labeled<br/>thùng đầu tiên dán nhãn: khoá huỷ đơn, cách giao, địa chỉ"]
+    CHECK_START --> LABEL["Kích thước, khối lượng theo quy cách thùng của SKU<br/>in và dán nhãn giao hàng lên từng thùng — Labeled<br/>thùng đầu tiên dán nhãn: khoá huỷ đơn, địa chỉ giao"]
     LABEL --> COMPLETE{"Hoàn tất kiểm thùng:<br/>đủ thùng?"}
     COMPLETE -->|Đủ| PACKED["Phiên kiểm thùng: Completed<br/>Đơn: Packed — đã kiểm đủ thùng và dán nhãn<br/>Shipment: Ready to Dispatch"]
     COMPLETE -->|"Thiếu, đơn được giao một phần"| PART["Đơn: Partially Fulfilled<br/>Shipment: Ready to Dispatch<br/>phần còn lại lấy bổ sung sau, cùng kho xuất"]
@@ -257,20 +262,27 @@ flowchart TD
     PACKED --> PAY_WARN["Cảnh báo nếu đợt BEFORE_DELIVERY chưa thu<br/>không chặn kiểm thùng"]
     PART --> PAY_WARN
 
-    PAY_WARN --> MODE{"Cách giao?"}
-    MODE -->|"Gửi kiện qua hãng"| PARCEL["Gán hãng, mở chuyến bàn giao cho một hãng<br/>quét LPN đủ kiện lên xe — mỗi thùng một kiện"]
-    MODE -->|"Giao nguyên chuyến"| FTL["Load Planning 3D theo quy cách thùng — kế hoạch Confirmed, mỗi xe một chuyến<br/>đặt xe ngoài hệ thống, ghi nhận đặt xe<br/>bắt đầu xếp, quét LPN theo sơ đồ từng xe"]
-    PARCEL --> GATE
-    FTL --> GATE{"Mọi đợt BEFORE_DELIVERY đã Paid?<br/>đơn không treo"}
+    PAY_WARN --> FTL["Giao nguyên chuyến — mọi đơn<br/>Load Planning 3D theo quy cách thùng — kế hoạch Confirmed<br/>mỗi xe một chuyến, sinh mã chuyến nội bộ"]
+    FTL --> BOOK["Đặt xe với hãng ngoài hệ thống, gửi hãng mã chuyến nội bộ<br/>ghi nhận đặt xe — chuyến Vehicle Booked"]
+    BOOK --> LOADING["Bắt đầu xếp — chuyến Loading<br/>quét LPN theo sơ đồ từng xe"]
+    LOADING --> WAYBILL{"Chuyến đã có mã vận đơn?"}
+    WAYBILL -->|"Chưa — chặn ký bàn giao"| WB_IN["Điền mã vận đơn, biển số, tài xế:<br/>webhook của hãng / nhập hàng loạt từ file / nhập tay<br/>hãng tích hợp API: mã đơn có từ lúc hệ thống tạo đơn khi đặt xe"]
+    WB_IN --> WAYBILL
+    WAYBILL -->|Có| GATE{"Mọi đợt BEFORE_DELIVERY đã Paid?<br/>đơn không treo"}
     GATE -->|Chưa| BLOCK["Từ chối ký bàn giao cả chuyến<br/>bỏ shipment đó ra, chờ ở khu xuất hàng DISPATCH<br/>tới khi Kế toán ghi nhận đủ tiền"]
     BLOCK -.-> GATE
-    GATE -->|Rồi| HANDOVER["Ký bàn giao — tất cả hoặc không<br/>Shipment: Handed Over"]
-    HANDOVER --> SHIPPED["Đơn: Shipped, hoặc Partially Fulfilled nếu còn phần chưa giao<br/>không theo dõi hành trình, không thu tiền khi giao"]
+    GATE -->|Rồi| HANDOVER["Ký bàn giao — tất cả hoặc không<br/>Shipment: Handed Over, chuyến Dispatched"]
+    HANDOVER --> SHIPPED["Đơn: Shipped, hoặc Partially Fulfilled nếu còn phần chưa giao<br/>khách nhận thông báo đã bàn giao: hãng, mã vận đơn, biển số<br/>không thu tiền khi giao"]
 
-    SHIPPED --> RESULT{"Hãng báo kết quả<br/>Quản lý kho ghi nhận"}
-    RESULT -->|"Thành công"| DELIVERED["Đơn: Delivered<br/>đợt AFTER_DELIVERY đến hạn — công nợ phải thu"]
+    SHIPPED --> SRC{"Hãng có webhook?"}
+    SRC -->|Có| WH_EVT["Hệ thống nhận sự kiện: xác thực chữ ký, ghép chuyến theo mã chuyến<br/>đã lấy hàng / đang giao: ghi mốc hành trình, không đổi trạng thái<br/>chữ ký sai / không ghép được: danh sách lỗi cho Quản lý kho"]
+    SRC -->|"Không / sự kiện chưa về"| MANUAL["Quản lý kho ghi tay khi hãng báo lại"]
+    WH_EVT --> RESULT{"Kết quả giao"}
+    MANUAL --> RESULT
+    RESULT -->|"Thành công, POD nếu có"| DELIVERED["Đơn: Delivered<br/>đợt AFTER_DELIVERY đến hạn — công nợ phải thu"]
     RESULT -->|"Thất bại, có lý do"| FAILED["Đơn: Delivery Failed"]
     FAILED -->|"Hãng giao lại thành công"| DELIVERED
+    DELIVERED -.->|"Hãng báo sai: Quản lý kho sửa tay, có lý do"| FAILED
     FAILED -->|"Hàng hoàn về kho xuất"| RTO(["Đơn: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE, §1.3<br/>xử lý hoàn tiền"])
     DELIVERED --> AUTO["Mỗi đêm: sau 7 ngày, mọi đợt Paid,<br/>không có yêu cầu trả hàng — Đơn: Completed"]
     AUTO --> CLOSED(["Sau 30 ngày: Closed"])
@@ -289,12 +301,13 @@ sequenceDiagram
     actor PICKER as Picker
     actor CHECKER as NV kho kiểm thùng tại khu xuất hàng (08)
     actor DISP as Dispatch Staff
+    participant SHIP as Giao hàng (09)
     participant PAY as Thanh toán (15)
     actor ACC as Kế toán
     participant CARRIER as Hãng vận chuyển (ngoài hệ thống)
     actor CUST as Khách hàng sỉ
 
-    SALE->>OM: Đơn Confirmed — chọn kho xuất (hệ thống gợi ý), chọn cách giao (gửi kiện / nguyên chuyến)
+    SALE->>OM: Đơn Confirmed — chọn kho xuất (hệ thống gợi ý)
     OM->>INVSYS: Kiểm tồn SKU riêng tại kho xuất theo số thùng, giữ đủ N thùng mỗi dòng (hoặc số thùng có sẵn)
     alt Thiếu thùng
         SALE->>PO: Lập Đơn sản xuất cho phần thiếu (kho nhận = kho xuất), Sales Manager duyệt và gửi (luồng §1)
@@ -329,39 +342,63 @@ sequenceDiagram
     end
     CHECKER->>CHECKER: Bắt đầu phiên kiểm thùng tại khu xuất hàng, quét LPN từng thùng (đúng đơn, đúng SKU)
     CHECKER->>CHECKER: In và dán nhãn giao hàng từng thùng (kích thước, khối lượng theo quy cách thùng)
-    CHECKER-->>OM: Thùng đầu tiên dán nhãn → khoá huỷ đơn, đổi cách giao, đổi địa chỉ
+    CHECKER-->>OM: Thùng đầu tiên dán nhãn → khoá huỷ đơn, đổi địa chỉ
     CHECKER->>OM: Hoàn tất → Packed (hoặc Partially Fulfilled), shipment Ready to Dispatch
     opt Đợt BEFORE_DELIVERY chưa thu
         PAY-->>CHECKER: Cảnh báo số tiền (không chặn kiểm thùng)
     end
-    alt Gửi kiện qua hãng
-        DISP->>DISP: Mở chuyến cho một hãng, quét LPN đủ kiện
-    else Giao nguyên chuyến
-        DISP->>DISP: Load Planning 3D → kế hoạch Confirmed, mỗi xe một chuyến
-        DISP->>CARRIER: Đặt xe (ngoài hệ thống), ghi nhận đặt xe
-        DISP->>DISP: Bắt đầu xếp, quét LPN theo sơ đồ từng xe
+    DISP->>SHIP: Load Planning 3D → kế hoạch Confirmed, mỗi xe một chuyến (mã chuyến nội bộ)
+    alt Hãng tích hợp API đặt xe
+        DISP->>SHIP: Ghi nhận đặt xe: giờ hẹn lấy, thứ tự điểm giao
+        SHIP->>CARRIER: Tạo đơn ở hãng — điểm 0 kho xuất, mỗi shipment một điểm giao
+        CARRIER-->>SHIP: Mã đơn ở hãng = mã vận đơn → chuyến Vehicle Booked
+        CARRIER-->>SHIP: Webhook tài xế nhận đơn: biển số, tài xế
+    else Hãng khác
+        DISP->>CARRIER: Đặt xe (ngoài hệ thống), gửi hãng mã chuyến nội bộ
+        DISP->>SHIP: Ghi nhận đặt xe → chuyến Vehicle Booked
+        alt Hãng có webhook
+            CARRIER-->>SHIP: Webhook kèm mã chuyến: mã vận đơn, biển số, tài xế
+        else Hãng không có webhook / chưa về
+            DISP->>SHIP: Nhập mã vận đơn (hàng loạt từ file hoặc nhập tay)
+        end
     end
+    DISP->>SHIP: Bắt đầu xếp, quét LPN theo sơ đồ từng xe
+    SHIP->>SHIP: Kiểm chuyến đã có mã vận đơn (chưa có → chặn ký bàn giao)
     DISP->>PAY: Kiểm mọi đợt BEFORE_DELIVERY đã Paid
     opt Còn đợt BEFORE_DELIVERY chưa Paid
         PAY-->>DISP: Từ chối bàn giao (danh sách đơn, số tiền còn thiếu)
         CUST->>ACC: Chuyển khoản đợt BEFORE_DELIVERY
-        ACC->>PAY: Ghi nhận theo sao kê, phân bổ → đợt Paid, mở chặn
+        ACC->>PAY: Đối chiếu sao kê, lập phiếu thu cho đợt → đợt Paid, mở chặn
     end
-    DISP->>CARRIER: Ký bàn giao → shipment Handed Over
-    DISP-->>OM: Shipped (không theo dõi hành trình)
+    DISP->>CARRIER: Ký bàn giao → shipment Handed Over, chuyến Dispatched
+    SHIP-->>OM: Shipped
+    OM-->>CUST: Thông báo đã bàn giao vận chuyển (hãng, mã vận đơn, biển số theo từng xe)
     CARRIER-->>CUST: Giao hàng (ngoài hệ thống, không thu tiền)
+    opt Hãng có webhook
+        CARRIER-->>SHIP: Mốc hành trình (đã lấy hàng, đang giao) → ghi mốc, không đổi trạng thái đơn
+    end
     alt Giao thành công
-        CARRIER-->>WM: Báo đã giao
-        WM->>OM: Delivered
+        alt Hãng có webhook
+            CARRIER-->>SHIP: Sự kiện giao thành công (kèm POD nếu có) — hãng tích hợp API: điểm giao hoàn tất của shipment, kèm thời điểm hoàn tất
+        else Ghi tay
+            CARRIER-->>WM: Báo đã giao (ngoài hệ thống)
+            WM->>SHIP: Ghi tay giao thành công
+        end
+        SHIP->>OM: Delivered
         OM->>PAY: Đợt AFTER_DELIVERY đến hạn (công nợ phải thu)
         CUST->>ACC: Chuyển khoản theo kỳ hạn
         ACC->>PAY: Ghi nhận theo sao kê → đợt Paid
         OM->>OM: Sau 7 ngày, mọi đợt Paid → Completed, sau 30 ngày → Closed
     else Giao thất bại
-        CARRIER-->>WM: Báo giao thất bại
-        WM->>OM: Delivery Failed (kèm lý do)
+        alt Hãng có webhook
+            CARRIER-->>SHIP: Sự kiện giao thất bại (lý do ánh xạ sang mã nội bộ) — hãng tích hợp API: điểm giao thất bại
+        else Ghi tay
+            CARRIER-->>WM: Báo giao thất bại (ngoài hệ thống)
+            WM->>SHIP: Ghi tay giao thất bại kèm lý do
+        end
+        SHIP->>OM: Delivery Failed (kèm lý do)
         CARRIER->>DISP: Hoàn hàng về kho xuất (RTO)
-        WM->>OM: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE (§1.3), xử lý hoàn tiền (15)
+        SHIP->>OM: Returned (sự kiện hoàn hàng của hãng hoặc Quản lý kho ghi) — nhập lại qua phiếu Hàng hoàn vào QUARANTINE (§1.3), xử lý hoàn tiền (15)
     end
 ```
 
@@ -405,7 +442,7 @@ stateDiagram-v2
 
 ### 2.4. Vòng đời phiên kiểm thùng & thùng giao (Outbound Check & Labeling)
 
-Chi tiết: [08 · Kiểm thùng & Dán nhãn giao hàng §5](../warehouse/08-packing/README.md). Thùng LPN là kiện giao: kho chỉ quét kiểm đủ thùng, dán nhãn giao hàng và gom thùng thành shipment — làm ngay tại **khu xuất hàng (`DISPATCH`)**, không có khu kiểm thùng riêng ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-22); không chọn loại kiện, không cân đo, không niêm phong. Khi **thùng đầu tiên** của đơn được dán nhãn, đơn không huỷ được, không đổi cách giao, không đổi địa chỉ giao ([08](../warehouse/08-packing/README.md) BR-04).
+Chi tiết: [08 · Kiểm thùng & Dán nhãn giao hàng §5](../warehouse/08-packing/README.md). Thùng LPN là kiện giao: kho chỉ quét kiểm đủ thùng, dán nhãn giao hàng và gom thùng thành shipment — làm ngay tại **khu xuất hàng (`DISPATCH`)**, không có khu kiểm thùng riêng ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-22); không chọn loại kiện, không cân đo, không niêm phong. Khi **thùng đầu tiên** của đơn được dán nhãn, đơn không huỷ được, không đổi địa chỉ giao ([08](../warehouse/08-packing/README.md) BR-04).
 
 **Phiên kiểm thùng (theo đơn):**
 
@@ -441,7 +478,7 @@ stateDiagram-v2
 
 ### 2.5. Vòng đời kế hoạch chuyến xe (Load Plan — giao nguyên chuyến)
 
-Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Chỉ dùng cho **đơn khách giao nguyên chuyến**: kế hoạch chứa nguyên shipment `Ready to Dispatch` đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn). **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao. Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp. Đã có xe bắt đầu xếp thì chỉ **huỷ có kiểm soát** (cả kế hoạch hoặc một xe) hoặc **bỏ xe `Planned` khỏi kế hoạch** khi mọi xe khác đã rời kho ([09](../warehouse/09-shipping/README.md) BR-14) *(Quyết định 02/11/2026)*. Huỷ có kiểm soát một xe đang xếp: chuyến `Planned` mới của xe dùng cùng sơ đồ, **trừ khi có kiện bị gỡ khỏi xe** — kiện đó bị loại khỏi kế hoạch (lý do `REMOVED_FROM_VEHICLE`, trả về khu `DISPATCH` chờ kế hoạch khác) và chuyến mới dùng **sơ đồ tính lại cho các kiện còn lại**; xe không còn kiện nào thì bị huỷ, không sinh chuyến mới *(✅ Đã chốt 2026-11-05)*.
+Chi tiết: [09 · Shipping §4.2, §5.3](../warehouse/09-shipping/README.md#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning). Dùng cho **mọi đơn** — mọi đơn giao nguyên chuyến, không còn gửi kiện qua hãng *(✅ Đã chốt 2026-11-05)*: kế hoạch chứa nguyên shipment `Ready to Dispatch` đã kiểm thùng, thuộc **một kho** (kho xuất của các đơn); một kế hoạch / một xe chở được nhiều đơn. **Kiện là thùng LPN**, kích thước / khối lượng theo quy cách thùng của SKU ([09](../warehouse/09-shipping/README.md) BR-17). Khi chốt, mỗi xe là một chuyến bàn giao có **mã chuyến nội bộ** (`Planned` → `Vehicle Booked` → `Loading` → `Dispatched` — [09](../warehouse/09-shipping/README.md) §5.2); chuyến phải có **mã vận đơn** (webhook / file / nhập tay) trước khi ký bàn giao ([09](../warehouse/09-shipping/README.md) BR-23). Kế hoạch không có nhánh gỡ kiện vì huỷ đơn — đơn đã có thùng dán nhãn thì không huỷ được; bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`) thì mở lại về `Planned` khi chưa xe nào bắt đầu xếp. Đã có xe bắt đầu xếp thì chỉ **huỷ có kiểm soát** (cả kế hoạch hoặc một xe) hoặc **bỏ xe `Planned` khỏi kế hoạch** khi mọi xe khác đã rời kho ([09](../warehouse/09-shipping/README.md) BR-14) *(Quyết định 02/11/2026)*. Huỷ có kiểm soát một xe đang xếp: chuyến `Planned` mới của xe dùng cùng sơ đồ, **trừ khi có kiện bị gỡ khỏi xe** — kiện đó bị loại khỏi kế hoạch (lý do `REMOVED_FROM_VEHICLE`, trả về khu `DISPATCH` chờ kế hoạch khác) và chuyến mới dùng **sơ đồ tính lại cho các kiện còn lại**; xe không còn kiện nào thì bị huỷ, không sinh chuyến mới *(✅ Đã chốt 2026-11-05)*.
 
 ```mermaid
 stateDiagram-v2
@@ -499,17 +536,18 @@ flowchart TD
     SEND --> SIGN{"Khách ký?<br/>ngoài hệ thống"}
     SIGN -->|"Từ chối / cần sửa"| C_CANCEL["Huỷ hợp đồng, có lý do<br/>đơn về Draft để lập hợp đồng thay thế, hoặc huỷ đơn"]
     C_CANCEL -.-> CONTRACT
-    SIGN -->|"Đã ký"| SIGNED["Sale tải bản scan → hợp đồng Signed<br/>sinh các đợt thanh toán — Not Due"]
+    SIGN -->|"Đã ký"| SIGNED["Sale tải file hợp đồng đã ký → hợp đồng Signed<br/>sinh các đợt thanh toán — Not Due"]
 
     SIGNED --> CREDIT{"Có đợt AFTER_DELIVERY và khách<br/>quá hạn / vượt hạn mức?"}
     CREDIT -->|Có| HOLD["Đơn: On Hold — tín dụng<br/>Kế toán duyệt / từ chối"]
     HOLD -->|"Từ chối"| O_CANCEL(["Đơn: Cancelled — CREDIT_REJECTED"])
     HOLD -->|Duyệt| ONSIGN
     CREDIT -->|Không| ONSIGN{"Đợt ON_SIGNING đã thu đủ<br/>hoặc không có?"}
-    ONSIGN -->|Chưa| PP["Đơn: Pending Payment<br/>khách chuyển khoản, Kế toán ghi nhận và phân bổ"]
+    ONSIGN -->|Chưa| PP["Đơn: Pending Payment<br/>khách chuyển khoản, Kế toán lập phiếu thu cho đợt"]
     PP -->|"Thu đủ"| CONFIRMED
     ONSIGN -->|Rồi| CONFIRMED(["Đơn: Confirmed → Sale chọn kho xuất, kiểm tồn và Fulfillment — §2"])
     CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>phí khuôn / bản in nằm trong các đợt như hàng hoá<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
+    CONFIRMED -.-> EINV["Song song: mỗi lần giao thành công — shipment Delivered<br/>hoá đơn nháp → Kế toán phát hành qua nhà cung cấp hoá đơn điện tử (21)<br/>hoá đơn theo lần giao, không theo đợt thanh toán — §3.5"]
 ```
 
 > ✅ Đã chốt 2026-11-05: báo giá không bắt buộc SKU đã có giá nội bộ — chưa có thì Sale nhập giá trực tiếp; số lần in mẫu miễn phí mặc định 2. ⚠️ Giả định: một dòng phí khuôn / bản in cho mỗi SKU mẫu mới, chi tiết khuôn / bản in theo kỹ thuật in là phạm vi sau (B28). Xem [open-questions](../open-questions/README.md).
@@ -572,7 +610,8 @@ stateDiagram-v2
     Shipped --> DeliveryFailed
     PartiallyFulfilled --> Delivered
     PartiallyFulfilled --> DeliveryFailed
-    DeliveryFailed --> Delivered: Giao lại thành công
+    DeliveryFailed --> Delivered: Giao lại thành công / sửa tay
+    Delivered --> DeliveryFailed: Quản lý kho sửa tay (hãng báo sai, có lý do)
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
@@ -597,7 +636,9 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-> **Sale** treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9); treo do tín dụng do Kế toán duyệt. Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi cách giao, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`. `Returned` = hàng đã về kho qua phiếu nhập Hàng hoàn, nằm ở khu `QUARANTINE` (§1.3).
+> **Sale** treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9); treo do tín dụng do Kế toán duyệt. Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`. `Returned` = hàng đã về kho qua phiếu nhập Hàng hoàn, nằm ở khu `QUARANTINE` (§1.3). `Shipped` / `Delivered` / `Delivery Failed` / `Returned` cập nhật từ **webhook của hãng** hoặc do **Quản lý kho ghi tay** ([09](../warehouse/09-shipping/README.md) §4.3, §4.5). `Delivered` → `Delivery Failed` chỉ khi Quản lý kho **sửa tay** kèm lý do vì hãng báo sai, đơn chưa hoàn tất.
+
+> ⚠️ Giả định: sửa tay `Delivered` ↔ `Delivery Failed` khi đơn chưa hoàn tất; đợt `AFTER_DELIVERY` tính lại theo kết quả mới ([17](../ecommerce/17-order-management/README.md) §5.1). Xem [open-questions E17](../open-questions/README.md).
 
 ### 3.3. Vòng đời hợp đồng mua bán & đợt thanh toán
 
@@ -615,7 +656,7 @@ Chi tiết: [14 · §5.2 Hợp đồng mua bán](../ecommerce/14-cart-and-order/
 stateDiagram-v2
     [*] --> Draft: Sale lập cho đơn Draft
     Draft --> Sent: Gửi khách (đơn → Pending Contract)
-    Sent --> Signed: Tải bản scan đã ký
+    Sent --> Signed: Tải file hợp đồng đã ký
     Signed --> Completed: Đơn hoàn tất, mọi đợt đã thu
     Draft --> Cancelled
     Sent --> Cancelled: Khách từ chối / cần sửa / huỷ đơn
@@ -674,6 +715,70 @@ flowchart TD
 
 > Thùng không nằm ở vị trí sổ sách: không dùng thao tác này để sửa — lập phiếu kiểm kê, chênh lệch đi qua điều chỉnh tồn có duyệt ([20](../warehouse/20-inventory-control/README.md) §4.2–4.3). Thùng nghi lệch số cái chuẩn: cách ly sang khu `QUARANTINE`, không phân bổ, ghi giảm cả thùng bằng điều chỉnh có duyệt (✅ đã chốt 2026-11-05 — [open-questions C34](../open-questions/README.md)).
 
+### 3.5. Hoá đơn điện tử (E-invoice — tích hợp nhà cung cấp hoá đơn điện tử)
+
+Chi tiết: [21 · Hoá đơn điện tử](../ecommerce/21-e-invoice/README.md). *(✅ Đã chốt 2026-11-06)* Mỗi **shipment `Delivered`** ([09](../warehouse/09-shipping/README.md)) có đúng **một hoá đơn gốc**; hoá đơn gom theo **lần giao**, không theo đợt thanh toán, và **không ảnh hưởng** đợt thanh toán / công nợ ([15](../ecommerce/15-payment/README.md)). **Kế toán bấm phát hành**; nhà cung cấp xử lý **bất đồng bộ** và không có webhook, nên hệ thống hỏi lại kết quả theo mã theo dõi.
+
+**Trình tự phát hành:**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SHIP as 09 · Shipping
+    participant SYS as Hệ thống (21)
+    actor ACC as Kế toán
+    participant EINVP as Nhà cung cấp hoá đơn điện tử (ngoài hệ thống)
+    actor CUS as Khách sỉ
+
+    SHIP->>SYS: Shipment Delivered (thời điểm hãng báo giao thành công = ngày lập)
+    SYS->>SYS: Tạo hoá đơn nháp — dòng hàng theo thùng đã giao,<br/>thuế suất đã chốt, bên mua từ hồ sơ khách (18)
+    SYS-->>ACC: Thông báo hoá đơn nháp chờ phát hành
+    ACC->>SYS: Phát hành
+    SYS->>SYS: Kiểm mã số thuế, email nhận hoá đơn, lượt phát hành
+    SYS->>EINVP: Tạo và phát hành (mã tham chiếu = mã hoá đơn nội bộ)
+    EINVP-->>SYS: mã theo dõi — hoá đơn Submitting
+    EINVP->>EINVP: Ký số, nộp cơ quan thuế
+    loop Hỏi lại tới khi có kết quả
+        SYS->>EINVP: Kiểm tra theo mã theo dõi
+        EINVP-->>SYS: Đang xử lý / Thành công / Thất bại
+    end
+    alt Success
+        SYS->>EINVP: Tải XML, PDF
+        SYS->>SYS: Lưu số hoá đơn, ký hiệu — Issued
+        SYS-->>CUS: Thông báo hoá đơn đã phát hành, tải XML / PDF trên trang đơn
+        EINVP-->>CUS: Email hoá đơn (⚠️ giả định — G11)
+    else Failed
+        SYS-->>ACC: Báo lỗi kèm lý do — sửa rồi phát hành lại cùng mã
+    else Chưa xác nhận được kết quả
+        SYS-->>ACC: Unknown — không gửi lại, liên hệ nhà cung cấp rồi tra lại
+    end
+```
+
+**Vòng đời hoá đơn** (áp dụng cho hoá đơn gốc, điều chỉnh, thay thế):
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: Shipment Delivered / lập điều chỉnh, thay thế
+    Draft --> Submitting: Kế toán phát hành
+    Draft --> Cancelled: Giao bị sửa thành thất bại / huỷ nháp
+    Submitting --> Issued: Phát hành thành công
+    Submitting --> Failed: Phát hành thất bại
+    Submitting --> Unknown: Nhà cung cấp chưa xác nhận
+    Failed --> Submitting: Sửa lỗi, phát hành lại
+    Failed --> Cancelled: Huỷ
+    Unknown --> Issued: Tra lại
+    Unknown --> Failed: Tra lại
+    Issued --> Adjusted: Có hoá đơn điều chỉnh
+    Adjusted --> Adjusted: Điều chỉnh tiếp
+    Issued --> Replaced: Có hoá đơn thay thế
+    Issued --> [*]
+    Adjusted --> [*]
+    Replaced --> [*]
+    Cancelled --> [*]
+```
+
+> Trả hàng được duyệt hoàn tiền ([17](../ecommerce/17-order-management/README.md) §4.10) → nháp **điều chỉnh giảm**; Quản lý kho sửa `Delivered` → `Delivery Failed` sau khi đã phát hành → nháp **điều chỉnh giảm toàn bộ** (⚠️ giả định — [open-questions G12, G13](../open-questions/README.md)). **Ngày lập hoá đơn = thời điểm hãng báo giao thành công** (✅ đã chốt 2026-11-06 — [G8](../open-questions/README.md)). Dòng phí nằm ở hoá đơn đầu tiên của đơn: ⚠️ giả định ([G9](../open-questions/README.md)).
+
 ---
 
 ## 4. Ghi chú về sơ đồ
@@ -685,5 +790,6 @@ flowchart TD
 - **Thùng LPN** *(Đã chốt 2026-11-04)*: mọi tồn nằm trong thùng do đơn vị sản xuất đóng sẵn; nhập, cất, di chuyển, lấy và kiểm kê đều **nguyên thùng**, xác nhận bằng quét LPN. Thùng LPN là **kiện giao** — "kiện" trong các sơ đồ giao hàng là thùng LPN, kích thước / khối lượng theo quy cách thùng của SKU ([01](../warehouse/01-product-creation/README.md), [08](../warehouse/08-packing/README.md) BR-02, BR-07).
 - **Số thùng** *(Đã chốt 2026-11-05)*: "số lượng" của dòng báo giá, đơn, Đơn sản xuất, phiếu nhập trong các sơ đồ là **số thùng**; mọi thùng đúng số cái chuẩn của SKU (không có thùng lẻ), giá vẫn theo cái; phân bổ = chọn đủ N thùng theo **FIFO** (ngày nhập) ([01](../warehouse/01-product-creation/README.md) BR-11, [07](../warehouse/07-picking/README.md) BR-03).
 - **Một kho xuất** *(Đã chốt 2026-11-05)*: mọi bước giữ hàng, lấy hàng, kiểm thùng, giao hàng của một đơn diễn ra tại kho xuất của đơn; Đơn sản xuất giao về kho đó. Không có chuyển kho.
-- **Đơn vị vận chuyển** cũng nằm ngoài hệ thống: không tích hợp API, không theo dõi hành trình, không thu tiền khi giao; kết quả giao do **Quản lý kho** ghi nhận ([09](../warehouse/09-shipping/README.md)).
+- **Đơn vị vận chuyển** cũng nằm ngoài hệ thống, không thu tiền khi giao *(✅ cập nhật 2026-11-05)*: mọi đơn **giao nguyên chuyến**; hãng có **webhook** đẩy về **mã vận đơn**, biển số, tài xế, **mốc hành trình** và kết quả giao (ghép chuyến theo **mã chuyến nội bộ**); hãng không có webhook thì kho nhập mã vận đơn (file / tay) và **Quản lý kho** ghi tay kết quả giao. Hệ thống **không chủ động gọi API** hãng (phạm vi sau) ([09](../warehouse/09-shipping/README.md)), **trừ** hãng tích hợp API đặt xe: hệ thống tạo / huỷ đơn đặt xe, mỗi shipment một điểm giao, kết quả giao theo từng điểm *(✅ 2026-11-06)*.
+- **Nhà cung cấp hoá đơn điện tử** nằm ngoài hệ thống *(✅ Đã chốt 2026-11-06)*: ký số, nộp cơ quan thuế, cấp số hoá đơn; hệ thống gọi API của nhà cung cấp và tự hỏi lại kết quả ([21](../ecommerce/21-e-invoice/README.md), §3.5).
 - Mũi tên **nét đứt** là nhánh phụ / sự kiện chờ (ví dụ đơn vị sản xuất phản hồi, hàng nhập kho về sau).

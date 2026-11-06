@@ -45,7 +45,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | Ngữ cảnh đính kèm | Một trong: sản phẩm / quy cách / SKU riêng của khách ([13](../13-catalog/README.md)), bản thiết kế ([12](../12-product-design/README.md)), báo giá, đơn hàng, hợp đồng ([14](../14-cart-and-order/README.md)), Đơn sản xuất kèm vòng mẫu in ([17](../17-order-management/README.md)) — chỉ chứng từ thuộc đúng khách | Không |
 | Vòng mẫu in | Của Đơn sản xuất `Sample Pending`: số vòng, **ảnh / video mẫu** Sale tải lên, ngày gửi mẫu vật (nếu có) — dữ liệu cho thẻ duyệt mẫu in ([17](../17-order-management/README.md)) | Khi gửi thẻ duyệt mẫu in |
 | **Yêu cầu báo giá** | Khi khách yêu cầu báo giá từ bản thiết kế ([13](../13-catalog/README.md)): bản thiết kế, SKU riêng (nếu đã sinh), **trạng thái bản thiết kế** (`Pending Review` / `Approved` — [12](../12-product-design/README.md)), **số thùng mong muốn** (gợi ý), **ngày giao mong muốn** (nếu có) — dữ liệu cho thẻ yêu cầu báo giá | Khi khách yêu cầu báo giá |
-| Nội dung tin nhắn | Chữ, ảnh, file (ảnh tham khảo, ảnh sản phẩm lỗi, bản scan hợp đồng), link | Có |
+| Nội dung tin nhắn | Chữ, ảnh, file (ảnh tham khảo, ảnh sản phẩm lỗi, file hợp đồng đã ký), link | Có |
 | Thông tin khách | Hồ sơ từ [18 Customer Information](../18-customer-information/README.md) | Có (khách đã đăng nhập) |
 
 ### Output
@@ -53,7 +53,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | Kết quả | Dùng bởi |
 |---------|----------|
 | **Hội thoại (conversation / thread)** — lịch sử tin nhắn, người tham gia, ngữ cảnh, trạng thái | Sale, khách, người giám sát chat |
-| **Thẻ hành động** trong hội thoại: **yêu cầu báo giá** (bản thiết kế, trạng thái, số thùng mong muốn, ngày giao mong muốn; Sale **Lập báo giá** khi bản `Approved`), báo giá (khách chấp nhận — chọn số thùng từng dòng — / yêu cầu sửa), hợp đồng gửi khách, thông tin chuyển khoản theo đợt, nhắc công nợ, **duyệt mẫu in** (ảnh / video mẫu; Duyệt / Yêu cầu in lại kèm ghi chú) | Khách, Sale; chứng từ ở 14, 15, 17 |
+| **Thẻ hành động** trong hội thoại: **yêu cầu báo giá** (bản thiết kế, trạng thái, số thùng mong muốn, ngày giao mong muốn; Sale **Lập báo giá** khi bản `Approved`), báo giá (khách chấp nhận — chọn số thùng từng dòng — / yêu cầu sửa), hợp đồng gửi khách, thông tin chuyển khoản theo đợt, nhắc công nợ, **duyệt mẫu in** (ảnh / video mẫu; Duyệt / Yêu cầu in lại kèm ghi chú), **hoá đơn** (chỉ xem / tải hoá đơn đã phát hành) | Khách, Sale; chứng từ ở 14, 15, 17, 21 |
 | **Hành động phát sinh**: báo giá lập từ thẻ yêu cầu báo giá, báo giá, kết quả duyệt mẫu in, yêu cầu đổi / huỷ / trả | 14, 17 |
 | **Ghi chú nội bộ (internal note)** — chỉ nhân viên thấy | Sale, người giám sát chat |
 | **Chỉ số:** thời gian phản hồi đầu (FRT), thời gian xử lý, mức hài lòng (CSAT) | Người giám sát chat, báo cáo |
@@ -87,14 +87,14 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 ### 4.3. Báo giá, đơn & hợp đồng
 
 7. Agent lập **báo giá** ([14](../14-cart-and-order/README.md)) và gửi **thẻ báo giá** vào hội thoại. Khách bấm **Chấp nhận** hoặc **Yêu cầu sửa** ngay trên thẻ — cùng thao tác như trên trang báo giá ở cổng.
-8. Từ báo giá đã chấp nhận, agent tạo **đơn hàng** và **hợp đồng mua bán** ([14](../14-cart-and-order/README.md)), gửi **thẻ hợp đồng** (file hợp đồng, lịch các đợt thanh toán) cho khách. Khách có thể gửi lại bản scan đã ký qua chat; agent tải bản scan lên hợp đồng ở [14](../14-cart-and-order/README.md).
+8. Từ báo giá đã chấp nhận, agent tạo **đơn hàng** và **hợp đồng mua bán** ([14](../14-cart-and-order/README.md)), gửi **thẻ hợp đồng** (file hợp đồng, lịch các đợt thanh toán) cho khách. Khách có thể gửi lại file hợp đồng đã ký (bản scan hoặc PDF có chữ ký số) qua chat; agent tải file đó lên hợp đồng ở [14](../14-cart-and-order/README.md).
 
 > ✅ Đã chốt 2026-11-05: "khách chấp nhận báo giá qua chat" nghĩa là khách bấm **Chấp nhận** trên thẻ báo giá trong hội thoại. Agent **không** tự đánh dấu chấp nhận thay khách dựa trên tin nhắn chữ. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.4. Thanh toán theo đợt & công nợ
 
 9. Khi một **đợt thanh toán** của hợp đồng đến hạn (`Due`), agent gửi **thẻ thông tin chuyển khoản** cho đợt đó: tài khoản nhận của doanh nghiệp, số tiền đợt, nội dung chuyển khoản (mã hợp đồng + mã đợt), hạn thanh toán ([15](../15-payment/README.md)).
-10. Đợt `Overdue` hoặc công nợ phải thu sắp / đã quá hạn: agent gửi **nhắc công nợ** kèm thẻ thông tin chuyển khoản. Việc ghi nhận tiền về và phân bổ cho đợt do Kế toán làm ở [15](../15-payment/README.md); chat không ghi nhận thanh toán.
+10. Đợt `Overdue` hoặc công nợ phải thu sắp / đã quá hạn: agent gửi **nhắc công nợ** kèm thẻ thông tin chuyển khoản. Việc ghi nhận tiền về (phiếu thu theo đợt) do Kế toán làm ở [15](../15-payment/README.md); chat không ghi nhận thanh toán.
 
 ### 4.5. Duyệt mẫu in & tiến độ sản xuất
 
@@ -109,7 +109,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 
 ### 4.6. Sau bán, escalate & kết thúc
 
-15. **Hỗ trợ sau bán** — khách nhắn về đơn đang giao / bị lỗi: agent tra [Order Management](../17-order-management/README.md), báo trạng thái đơn, tạo **yêu cầu đổi / huỷ / trả**. Khách muốn đổi thiết kế của đơn đã chốt: đi theo quy trình thay đổi đơn ở [17](../17-order-management/README.md) (chỉ khi Đơn sản xuất liên quan chưa `In Production`).
+15. **Hỗ trợ sau bán** — khách nhắn về đơn đang giao / bị lỗi: agent tra [Order Management](../17-order-management/README.md), báo trạng thái đơn, tạo **yêu cầu đổi / huỷ / trả**. Khách hỏi hoá đơn: agent gửi **thẻ hoá đơn** của hoá đơn đã phát hành (số, ký hiệu, ngày lập, tổng có thuế, link tải XML / PDF) — hoá đơn lập theo từng lần giao thành công ([21](../21-e-invoice/README.md)); chat không phát hành hay sửa hoá đơn. Khách muốn đổi thiết kế của đơn đã chốt: đi theo quy trình thay đổi đơn ở [17](../17-order-management/README.md) (chỉ khi Đơn sản xuất liên quan chưa `In Production`).
 16. **Chờ nội bộ** — câu hỏi cần Kế toán / Quản lý kho / Quản lý kinh doanh trả lời: agent chuyển nội bộ, hội thoại sang `Waiting on Internal`.
 17. **Escalate** — vấn đề vượt thẩm quyền (giảm giá vượt hạn mức, bồi thường): chuyển người giám sát chat; hội thoại ghi nhận lý do & người xử lý tiếp.
 18. **Kết thúc & đánh giá** — agent đánh dấu đã giải quyết; gửi khảo sát CSAT. Hội thoại **mở lại (reopen)** được nếu khách nhắn tiếp trong thời hạn.
@@ -210,8 +210,9 @@ stateDiagram-v2
 |--------|---------|
 | [12 · Quản lý mẫu & thiết kế](../12-product-design/README.md) | Bản thiết kế khách tự làm là ngữ cảnh hội thoại; trạng thái bản thiết kế (chờ duyệt / đã duyệt / bị trả lại) hiện trên thẻ yêu cầu báo giá; chat không thiết kế, không gửi duyệt, không duyệt |
 | [13 · Catalog](../13-catalog/README.md) | Khách mở chat từ sản phẩm / quy cách / SKU riêng / mẫu thiết kế / đơn cũ (hỏi hàng, đặt lại); **"Yêu cầu báo giá"** / **"Gửi duyệt và yêu cầu báo giá"** trên bản thiết kế sinh thẻ yêu cầu báo giá; agent gửi link sản phẩm / SKU riêng; duyệt mẫu in làm được ở cả mục mẫu thiết kế của tôi và thẻ chat |
-| [14 · Báo giá, Đơn hàng & Hợp đồng](../14-cart-and-order/README.md) | Lập báo giá từ thẻ yêu cầu báo giá (khi bản `Approved`; số thùng gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu); thẻ báo giá (khách chấp nhận / yêu cầu sửa); gửi hợp đồng, nhận bản scan đã ký; giảm giá trong hạn mức |
+| [14 · Báo giá, Đơn hàng & Hợp đồng](../14-cart-and-order/README.md) | Lập báo giá từ thẻ yêu cầu báo giá (khi bản `Approved`; số thùng gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu); thẻ báo giá (khách chấp nhận / yêu cầu sửa); gửi hợp đồng, nhận file hợp đồng đã ký; giảm giá trong hạn mức |
 | [15 · Thanh toán theo hợp đồng & Công nợ](../15-payment/README.md) | Thẻ thông tin chuyển khoản theo đợt; nhắc đợt đến hạn / quá hạn và công nợ phải thu |
+| [21 · E-invoice](../21-e-invoice/README.md) | Thẻ hoá đơn (hoá đơn đã phát hành của từng lần giao, tải XML / PDF); chat không phát hành hay sửa hoá đơn |
 | [17 · Order Management](../17-order-management/README.md) | Tra cứu đơn và trạng thái giao; tiến độ Đơn sản xuất; **thẻ duyệt mẫu in** (vòng mẫu, kết quả Duyệt / Yêu cầu in lại); tạo yêu cầu đổi / huỷ / trả; đổi thiết kế của đơn theo quy trình thay đổi đơn |
 | [18 · Customer Information](../18-customer-information/README.md) | Hồ sơ khách, lịch sử tương tác & mua hàng; lưu vết hội thoại |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Xử lý khiếu nại giao hàng, đơn trễ |
