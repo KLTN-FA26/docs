@@ -1,24 +1,44 @@
 # 00 — Tổng quan hệ thống (System Overview)
 
+> **Đã chốt 2026-11-04 (review nghiệp vụ — thu hẹp phạm vi):** kho chỉ là **kho thành phẩm**; **sản xuất nằm ngoài hệ thống** (hệ thống chỉ gửi **Đơn sản xuất** và nhập kho thành phẩm khi sản xuất xong); kho **không kiểm tra chất lượng (QC)** — chỉ đếm nhận đủ / thiếu / thừa; không còn mua hàng từ nhà cung cấp (bỏ PO, hoá đơn NCC); **sàn bán hàng** chỉ để khách xem hàng, xem mẫu thiết kế, chat và chốt đơn với Sale; mỗi đơn có một **hợp đồng mua bán**, khách **thanh toán theo đợt của hợp đồng** (chuyển khoản, không có QR / cổng thanh toán online). Đã xoá các module 02 · Purchase Order, 04 · Invoice, 19 · Production.
+>
+> **Đã chốt 2026-11-04 (bổ sung):** **không còn hàng trơn** — kho chỉ chứa thành phẩm in theo mẫu của khách, do đơn vị sản xuất **đóng thùng sẵn** rồi nhập vào; Đơn sản xuất chỉ phát sinh từ đơn hàng; kho **chỉ xuất nguyên thùng** và không đóng lại hàng (08 thu gọn thành kiểm thùng & dán nhãn giao hàng).
+>
+> **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng**, không đặt lẻ; giá vẫn theo cái; mọi thùng đúng số cái chuẩn của SKU (thùng lệch không nhận).
+>
+> **Đã chốt 2026-11-05 (bổ sung):** bỏ role **Inventory Planner** và **Điều phối đơn hàng** (việc chuyển cho Sale và Quản lý kho); đổi **Quản trị bán hàng (E-commerce Admin)** thành **Quản lý kinh doanh (Sales Manager)**; "Yêu cầu sản xuất" đổi thành **Đơn sản xuất (Production Order)** — một chứng từ chung cho xưởng của công ty và đối tác, Sale lập, Sales Manager duyệt và gửi, có bước **khách duyệt mẫu in**; **bỏ module 10 · chuyển kho** — mỗi đơn xuất từ một kho, Đơn sản xuất giao thẳng về kho xuất, kho theo dõi **sức chứa (m³)** gồm hàng đang có và hàng sắp về; **bỏ hạn dùng** (ly và bao bì không có hạn dùng); sàn **ẩn giá**, bảng giá chỉ dùng nội bộ; thêm luồng **nhập hàng hoàn** vào khu cách ly.
+>
+> **✅ Đã chốt 2026-11-05 (phí vận chuyển, thuế & hoá đơn):** **phí vận chuyển** thu của khách là **một dòng phí** Sale nhập trên báo giá / đơn / hợp đồng (hệ thống không tự tính, module giao hàng không tính phí); báo giá / đơn / hợp đồng ghi **thuế VAT theo từng dòng** (theo nhóm thuế của sản phẩm) và **tổng có thuế**, lịch thanh toán chia trên tổng có thuế ([14](../ecommerce/14-cart-and-order/README.md), [15](../ecommerce/15-payment/README.md)). ~~Hoá đơn điện tử nằm ngoài phạm vi hệ thống~~ — thay bằng quyết định 2026-11-06 dưới đây.
+>
+> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** (module mới [21 · E-invoice](../ecommerce/21-e-invoice/README.md)): mỗi **lần giao thành công** (shipment `Delivered`) sinh một **hoá đơn nháp**, **Kế toán bấm phát hành**; hoá đơn đã phát hành không sửa / xoá, thay đổi bằng **hoá đơn điều chỉnh / thay thế**; khách xem và tải **XML / PDF** trên trang đơn. Hoá đơn **không theo đợt thanh toán** và không ảnh hưởng thanh toán, công nợ ([15](../ecommerce/15-payment/README.md)).
+>
+> **✅ Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế trên app** — bỏ luồng khách đưa mẫu cho Sale / nhân viên thiết kế hộ. Quản lý kinh doanh khai báo **cấu hình in** (khuôn 2D, vùng in, model 3D, ràng buộc file) cho từng quy cách ([01](../warehouse/01-product-creation/README.md)); khách bấm **"Thiết kế"** trên quy cách, tải ảnh / logo lên khuôn, xem trước 3D, **gửi duyệt**; hệ thống **tự kiểm (preflight)** rồi **Quản lý kinh doanh duyệt** kỹ thuật và nội dung; duyệt xong hệ thống **tự xuất file in PDF/X**, chốt design snapshot và sinh SKU riêng ([12](../ecommerce/12-product-design/README.md)). **Đặt hàng từ bản thiết kế = yêu cầu báo giá** gửi Sale ([13](../ecommerce/13-catalog/README.md), [16](../ecommerce/16-sales-chat/README.md)); khách vẫn không tự đặt hàng, sàn vẫn ẩn giá.
+>
+> **✅ Đã chốt 2026-11-05 (giao hàng):** **bỏ hình thức gửi kiện qua hãng** — **mọi đơn giao nguyên chuyến** (thuê nguyên xe tải / container của hãng vận chuyển), đi qua **kế hoạch xếp hàng 3D**; bỏ bước Sale chọn cách giao. Mỗi xe / chuyến có **mã vận đơn** của hãng — hãng đẩy qua **webhook**, hoặc kho **nhập tay / nhập hàng loạt từ file**; bắt buộc có mã vận đơn trước khi ký bàn giao. Hãng có webhook thì **mốc hành trình** và kết quả giao (`Delivered` / `Delivery Failed` / `Returned`) tự cập nhật; Quản lý kho vẫn ghi / sửa tay kèm lý do. Khách xem **tên hãng, mã vận đơn, biển số, các mốc hành trình** trên trang đơn ([09](../warehouse/09-shipping/README.md), [17](../ecommerce/17-order-management/README.md)). Hệ thống **chủ động gọi API** hãng (đặt xe, hỏi trạng thái) vẫn là phạm vi sau. *(✅ Cập nhật 2026-11-06:)* ngoại lệ là đơn vị vận chuyển **tích hợp API đặt xe** (xe tải / van nội thành) — hệ thống **tạo / huỷ đơn đặt xe qua API**, mỗi chuyến một đơn, mỗi shipment một điểm giao, kết quả giao về theo từng điểm ([09](../warehouse/09-shipping/README.md) BR-29).
+
 ## 1. Mục tiêu hệ thống (Goals)
 
-StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa vận hành kho và bán hàng online** cho doanh nghiệp chuyên cung cấp **ly và bao bì dùng một lần cho ngành đồ uống** (ly nhựa, ly giấy, bao bì mang đi), bán hàng trơn hoặc **in logo theo thiết kế của khách**, có **xưởng in nội bộ** (thuê **gia công ngoài** khi thiếu công suất) và **chỉ bán sỉ (B2B)** cho khách đã liên hệ từ trước — chủ yếu là quán / chuỗi đồ uống:
+StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa vận hành kho thành phẩm và bán hàng sỉ** cho doanh nghiệp chuyên cung cấp **ly và bao bì dùng một lần cho ngành đồ uống** (ly nhựa, ly giấy, bao bì mang đi), **in logo theo mẫu của khách** (không bán hàng trơn), và **chỉ bán sỉ (B2B)** cho khách đã liên hệ từ trước — chủ yếu là quán / chuỗi đồ uống:
 
 | # | Mục tiêu | Diễn giải |
 |---|----------|-----------|
-| G1 | **Một nguồn dữ liệu sản phẩm duy nhất (single source of truth)** | Sản phẩm khai báo một lần ở back-office, dùng chung cho cả kho vận và catalog TMĐT. |
-| G2 | **Tồn kho thời gian thực (real-time inventory)** | Mọi nghiệp vụ nhập – xuất – chuyển kho cập nhật tồn kho ngay, tránh bán quá số lượng (oversell). |
-| G3 | **Truy vết đầu-cuối (end-to-end traceability)** | Từ PO của nhà cung cấp → lô hàng nhận → vị trí lưu kho → đơn hàng khách → kiện hàng giao đi, tất cả liên kết bằng chứng từ. |
-| G4 | **Tối ưu thao tác kho** | Kho Map 2D/3D + gợi ý vị trí (slotting) + lộ trình picking giúp giảm quãng đường di chuyển và sai sót. |
-| G5 | **Từ thiết kế tới sản xuất** | Thiết kế logo 2D lên ly / bao bì, xem trước 3D, báo giá, **làm mẫu và khách duyệt mẫu** trước khi sản xuất số lượng lớn; thiết kế đã khoá đi theo đơn tới xưởng in và khâu đóng gói. |
-| G6 | **Kết nối Sale – Khách hàng** | Kênh chat trực tiếp để tư vấn, chốt thiết kế, xử lý phát sinh trong đơn (phạm vi giai đoạn sau — [16](../ecommerce/16-sales-chat/README.md)). |
-| G7 | **Bán sỉ có kiểm soát tín dụng** | Mỗi khách có giá riêng và phương thức thanh toán riêng (đặt cọc, trả trước, công nợ có hạn mức); đơn vượt hạn mức bị giữ lại chờ duyệt. |
+| G1 | **Một nguồn dữ liệu sản phẩm duy nhất (single source of truth)** | Sản phẩm khai báo một lần ở back-office, dùng chung cho kho thành phẩm và sàn bán hàng. Mỗi mẫu đã chốt của khách là một **SKU thành phẩm riêng** của khách đó — loại hàng duy nhất có tồn trong kho. |
+| G2 | **Tồn kho thành phẩm thời gian thực (real-time inventory)** | Mọi nghiệp vụ nhập – xuất – điều chỉnh cập nhật tồn ngay; khi nhận đơn, hệ thống cho biết đủ hàng hay phải gửi Đơn sản xuất, và kho nhận còn đủ chỗ (m³) hay không. |
+| G3 | **Truy vết đầu-cuối (end-to-end traceability)** | Từ Đơn sản xuất → lô hàng nhập kho → vị trí lưu kho → đơn hàng & hợp đồng → kiện hàng giao đi → đợt thanh toán, tất cả liên kết bằng chứng từ. |
+| G4 | **Tối ưu thao tác kho** | Kho Map 2D/3D + gợi ý vị trí (slotting) + khu chờ xuất (Staging) giúp giảm quãng đường di chuyển và sai sót. |
+| G5 | **Khách tự thiết kế trên app** | Khách tự thiết kế trên khuôn in của quy cách (xem trước 3D) → hệ thống tự kiểm → Quản lý kinh doanh duyệt → hệ thống xuất file in PDF/X; mẫu đã chốt sinh SKU thành phẩm, khách yêu cầu báo giá từ đó, và file in đi kèm Đơn sản xuất gửi đơn vị sản xuất. |
+| G6 | **Kết nối Sale – Khách hàng** | Kênh chat trên sàn, gắn ngữ cảnh đơn hàng / mẫu thiết kế / báo giá, để tư vấn và chốt đơn ([16](../ecommerce/16-sales-chat/README.md)). |
+| G7 | **Bán sỉ theo hợp đồng, kiểm soát công nợ** | Giá do Sale thoả thuận trên báo giá (sàn không hiện giá; bảng giá riêng chỉ dùng nội bộ làm giá gợi ý); mỗi đơn có hợp đồng mua bán với lịch thanh toán theo đợt; theo dõi công nợ phải thu có hạn mức & kỳ hạn. |
 
 ---
 
 ## 2. Vai trò & đối tượng người dùng (Role Registry)
 
 Đây là **sổ đăng ký vai trò chuẩn** — nguồn tham chiếu duy nhất về tên vai trò trong toàn bộ tài liệu. Mọi module chỉ dùng tên trong danh sách này.
+
+> ✅ Đã chốt 2026-11-04: bỏ ba role **Nhân viên mua hàng (Procurement Staff)**, **Nhân viên sản xuất (Production Staff)** và **Nhân viên QC (QC Staff)**. Việc duyệt kỹ thuật bộ file thiết kế chuyển cho **Quản lý kinh doanh** ([12](../ecommerce/12-product-design/README.md)).
+>
+> ✅ Đã chốt 2026-11-05: bỏ thêm hai role **Nhân viên kế hoạch tồn kho (Inventory Planner)** và **Điều phối đơn hàng (Order Coordinator)**. Việc phía khách và sản xuất (kho xuất, Đơn sản xuất, treo đơn, yêu cầu huỷ) chuyển cho **Sale**; việc trong kho (release, task lấy hàng, khu chờ xuất, kết quả giao, kiểm kê) chuyển cho **Quản lý kho**. Role "Quản trị bán hàng (E-commerce Admin)" đổi tên thành **Quản lý kinh doanh (Sales Manager)**.
 
 ### 2.1. Vai trò nội bộ (role đăng nhập)
 
@@ -27,23 +47,16 @@ StockFlowCommerce hướng đến việc **loại bỏ khoảng cách giữa v�
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
 | **Quản trị hệ thống (System Admin)** | Cấu hình toàn hệ thống, khai báo kho & khu vực, phân quyền, quản lý dữ liệu gốc sản phẩm; **tạm ngưng / tiếp tục / ngừng kinh doanh sản phẩm** ([01](../warehouse/01-product-creation/README.md)) | Toàn quyền; cấu hình quy tắc slotting, quy tắc gợi ý |
-| **Nhân viên mua hàng (Procurement Staff)** | Quản lý **hồ sơ & danh mục hàng của NCC**, tạo & theo dõi PO, **chốt & gửi PO cho NCC**, ghi **phản hồi của NCC**, đối chiếu hoá đơn (invoice matching) ([02](../warehouse/02-purchase-order/README.md)) | Tạo/sửa PO ở trạng thái Draft; gửi duyệt; chốt PO; huỷ / đóng PO; tạo Invoice |
-| **Nhân viên kho (Warehouse Staff)** | Nhận hàng, kiểm đếm, cất hàng (putaway), lấy hàng (picking), đóng gói (packing), bàn giao vận chuyển (shipping), chuyển kho | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
-| **Quản lý kho (Warehouse Manager)** | Giám sát KPI vận hành, duyệt điều chỉnh tồn (inventory adjustment), duyệt phiếu chuyển kho, xử lý ngoại lệ; **điều phối xưởng in**: mở lại lệnh treo, huỷ / dừng lệnh sản xuất, quyết định tách lệnh đưa gia công ngoài khi thiếu công suất, duyệt xuất huỷ phế phẩm (trạm in và gán lệnh cho trạm: phạm vi sau — [open-questions B10](../open-questions/README.md)) | Duyệt/từ chối; ghi đè gợi ý slotting; đóng phiếu; mở lại / huỷ / dừng lệnh sản xuất; kiểm lại thiết kế khi kiện bị giữ do lệch thiết kế *(Quyết định 22/10/2026 — không gán cho QC Staff)* |
-| **Nhân viên sản xuất (Production Staff)** | Tại xưởng nội bộ: kiểm file in (prepress), nhận lệnh sản xuất mẫu và đơn hàng, in theo file đã duyệt, báo số lượng in được / phế phẩm kèm lý do, bàn giao thành phẩm cho QC | Thao tác trên lệnh sản xuất của kho được gán; treo lệnh kèm lý do ([19](../warehouse/19-production/README.md)) |
-| **Nhân viên kế hoạch tồn kho (Inventory Planner)** | Theo dõi mức tồn giữa các kho, đề xuất & tạo lệnh chuyển kho (TO) để cân bằng tồn; đánh giá Bảng Đề xuất Nhập hàng (Replenishment Proposal) do hệ thống sinh, phân tích sức mua / sức chứa kho, chuyển thành Draft PO (phạm vi giai đoạn sau — [open-questions C19](../open-questions/README.md)); lập phiếu kiểm kê, theo dõi cảnh báo tồn thấp / hạn dùng ([20](../warehouse/20-inventory-control/README.md)) | Tạo/sửa TO ở trạng thái Draft; huỷ TO chưa xuất kho nguồn; đánh giá & convert Replenishment Proposal thành Draft PO |
-| **Nhân viên QC (QC Staff)** | Kiểm tra chất lượng **hàng nhập** tại khu kiểm tra chất lượng (accept / reject / quarantine), **mẫu** và **thành phẩm in** (in nội bộ hoặc gia công ngoài) trước khi chuyển sang đóng gói ([19](../warehouse/19-production/README.md)); **duyệt kỹ thuật bộ file thiết kế** trước khi gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)) | Ghi kết quả QC cho từng phần hàng của phiếu nhận; quyết định hàng đi Putaway hay vào khu cách ly; kết luận đạt / không đạt cho lệnh sản xuất; duyệt Đạt / Không đạt bản thiết kế được giao |
-| **Kế toán (Accountant)** | Đối chiếu ba chiều PO–Receipt–Invoice, công nợ NCC, **ghi nhận & phân bổ tiền khách chuyển khoản**, **công nợ phải thu của khách sỉ**, hoàn tiền; **duyệt / từ chối đơn công nợ bị treo** và **duyệt điều khoản thanh toán của khách** ([15](../ecommerce/15-payment/README.md)) | Tạo & xử lý Invoice; ghi nhận, phân bổ, đảo phân bổ tiền về; duyệt tín dụng & hạn mức; chạy đối soát; **xem chi tiết & lịch sử đơn (chỉ đọc)** *(Quyết định 21/10/2026)* |
-
-> ✅ Đã chốt 2026-10-06 (B1): có module **Sản xuất in** riêng — [19 · Production](../warehouse/19-production/README.md), xưởng in nội bộ (tách một phần lệnh đơn hàng đưa gia công ngoài khi thiếu công suất), hai loại sản xuất (mẫu và đơn hàng).
+| **Nhân viên kho (Warehouse Staff)** | Nhập kho thành phẩm theo thùng, kiểm đếm, cất hàng (putaway), lấy hàng nguyên thùng (picking), đưa hàng về khu chờ xuất, kiểm thùng & dán nhãn giao hàng, bàn giao vận chuyển (shipping), nhập hàng hoàn, đếm kiểm kê | Thao tác trên phiếu được phân công; ghi nhận số lượng thực tế |
+| **Quản lý kho (Warehouse Manager)** | Quản lý **các kho được gán** (một hoặc nhiều kho). **Thiết lập:** kho, bản đồ, vị trí (thể tích m³, tải trọng), danh mục hãng vận chuyển (kèm cấu hình kết nối webhook) & loại xe, quy cách thùng; theo dõi **bảng sức chứa kho** ([06](../warehouse/06-warehouse-map-slotting/README.md)). **Nhập kho:** xử lý nhận thiếu / thừa / thùng lệch số chuẩn; quyết định hàng hoàn trong khu cách ly ([03](../warehouse/03-receipt/README.md)). **Xuất kho:** release đơn, tạo task lấy hàng & giao người, khu chờ xuất, chuyển task sang khu xuất hàng, huỷ chuyến bàn giao, sửa mã vận đơn sau khi xe rời kho (kèm lý do), ghi nhận / sửa kết quả giao (kèm lý do), xử lý danh sách sự kiện webhook lỗi ([07](../warehouse/07-picking/README.md), [09](../warehouse/09-shipping/README.md)). **Kiểm soát tồn:** lập kiểm kê, **duyệt điều chỉnh tồn**, cách ly / gỡ cách ly ([20](../warehouse/20-inventory-control/README.md)) | Duyệt / từ chối điều chỉnh tồn (người duyệt khác người gửi; kho chỉ có một quản lý thì System Admin duyệt); ghi đè gợi ý slotting; có đủ quyền thao tác như nhân viên kho — đó là quyền, không phải việc chính |
+| **Kế toán (Accountant)** | **Lập phiếu thu** (đối chiếu sao kê) cho các **đợt thanh toán của hợp đồng**, huỷ phiếu thu ghi sai, **công nợ phải thu của khách sỉ**, ghi nhận đã hoàn tiền; **duyệt / từ chối đơn bị treo do công nợ** và **duyệt hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định của khách** ([15](../ecommerce/15-payment/README.md)); **phát hành hoá đơn điện tử** theo từng lần giao qua nhà cung cấp hoá đơn điện tử, lập hoá đơn điều chỉnh / thay thế ([21](../ecommerce/21-e-invoice/README.md)) | Lập / huỷ phiếu thu, ghi nhận đã hoàn; duyệt tín dụng & hạn mức; chạy đối soát; **xem chi tiết & lịch sử đơn, hợp đồng (chỉ đọc)** *(Quyết định 21/10/2026)* |
 
 #### Nhóm bán hàng sỉ (sales)
 
 | Role | Trách nhiệm chính | Quyền hạn tiêu biểu |
 |------|-------------------|---------------------|
-| **Quản trị bán hàng (E-commerce Admin)** | Quản lý **dữ liệu sản phẩm** — tạo, **duyệt (bốn mắt)**, đăng ảnh, danh mục, thương hiệu, thuộc tính ([01](../warehouse/01-product-creation/README.md)); quản lý catalog hiển thị trên cổng khách hàng, bảng giá theo khách, nội dung, chính sách; lập bản thiết kế cho khách và phân công người thiết kế / người duyệt ([12](../ecommerce/12-product-design/README.md)); **đổi trạng thái khách** và quản lý **nhóm khách** ([18](../ecommerce/18-customer-information/README.md)); **quản trị tài khoản nhân viên & phân quyền** trong giới hạn quyền mình có (§2.5) | Duyệt / từ chối sản phẩm; xuất bản / ẩn sản phẩm; lập & đổi phân công bản thiết kế; chặn / gỡ chặn / đóng / mở lại khách |
-| **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm ([01](../warehouse/01-product-creation/README.md)), tạo hồ sơ khách sỉ, lập **báo giá**, tạo **yêu cầu làm mẫu**, thiết kế (tải bộ file) & gửi khách xác nhận ([12](../ecommerce/12-product-design/README.md)), chuyển báo giá đã chấp nhận thành đơn, CSKH qua chat, **duyệt / từ chối yêu cầu huỷ**, **quyết định cho phép giao một phần** ([17](../ecommerce/17-order-management/README.md)), xử lý khiếu nại | Tạo / sửa sản phẩm nháp; xem & thao tác khách và đơn được phân công; tạo báo giá, yêu cầu mẫu, đơn hộ; huỷ đơn / đóng phần còn lại; giảm giá trong hạn mức; **bật / tắt cờ cho phép giao một phần** của đơn *(Quyết định 21/10/2026)* |
-| **Điều phối đơn hàng (Order Coordinator)** | Duyệt & release đơn cho kho, **treo / gỡ treo đơn**, phân bổ kho xuất, **chọn cách giao** (gửi kiện / nguyên chuyến), gộp/tách đơn, chuyển báo giá thành đơn, duyệt yêu cầu huỷ ([17](../ecommerce/17-order-management/README.md)) | Thao tác trên mọi đơn; ghi đè kho xuất |
+| **Quản lý kinh doanh (Sales Manager)** | Quản lý **dữ liệu sản phẩm** — tạo, **duyệt (bốn mắt)**, đăng ảnh, danh mục, thương hiệu, thuộc tính ([01](../warehouse/01-product-creation/README.md)); quản lý nội dung trên sàn bán hàng, **bảng giá nội bộ** theo khách (giá gợi ý cho Sale, không hiện trên sàn); khai báo **cấu hình in** cho quy cách — khuôn 2D, model 3D, vùng in, ràng buộc file ([01](../warehouse/01-product-creation/README.md)); **duyệt kỹ thuật và kiểm duyệt nội dung** bản thiết kế khách tự làm ([12](../ecommerce/12-product-design/README.md)); **đổi trạng thái khách** và quản lý **nhóm khách** ([18](../ecommerce/18-customer-information/README.md)); **duyệt và gửi Đơn sản xuất** ([17](../ecommerce/17-order-management/README.md)); **quản trị tài khoản nhân viên & phân quyền** trong giới hạn quyền mình có (§2.5) | Duyệt / từ chối sản phẩm; duyệt / trả lại Đơn sản xuất (không phải người lập); xuất bản / ẩn sản phẩm; khai báo cấu hình in của quy cách; duyệt / trả lại bản thiết kế của khách; chặn / gỡ chặn / đóng / mở lại khách |
+| **Nhân viên Sale (Sales Staff)** | Tạo & gửi duyệt sản phẩm ([01](../warehouse/01-product-creation/README.md)), tạo hồ sơ khách sỉ, nhận **yêu cầu báo giá từ bản thiết kế** của khách ([16](../ecommerce/16-sales-chat/README.md)), lập **báo giá**, tạo **đơn hàng** từ báo giá đã chấp nhận, lập & gửi **hợp đồng mua bán**, tải bản hợp đồng đã ký ([14](../ecommerce/14-cart-and-order/README.md)), **chat với khách** ([16](../ecommerce/16-sales-chat/README.md)); với đơn đã `Confirmed`: **chọn kho xuất**, **lập & theo dõi Đơn sản xuất** cho phần thiếu (ghi nhận bên sản xuất nhận đơn, tiến độ, **mẫu in** cho khách duyệt), **treo / gỡ treo đơn**, **duyệt / từ chối yêu cầu huỷ**, **quyết định cho phép giao một phần** ([17](../ecommerce/17-order-management/README.md)), xử lý khiếu nại | Tạo / sửa sản phẩm nháp; xem & thao tác khách và đơn được phân công; tạo báo giá, đơn, hợp đồng, Đơn sản xuất; huỷ đơn / đóng phần còn lại; giảm giá trong hạn mức; **bật / tắt cờ cho phép giao một phần** của đơn *(Quyết định 21/10/2026)* |
 
 ### 2.2. Vai thao tác (operational hat — không phải role riêng)
 
@@ -51,12 +64,11 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 
 | Vai thao tác | Công đoạn | Module |
 |--------------|-----------|--------|
-| Receiver | Nhận hàng, kiểm đếm | [03](../warehouse/03-receipt/README.md) |
+| Receiver | Nhập kho thành phẩm theo Đơn sản xuất, nhập hàng hoàn vào khu cách ly, kiểm đếm số thùng | [03](../warehouse/03-receipt/README.md) |
 | Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
-| Picker | Lấy hàng theo task được giao (mỗi đơn một task), báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
-| Packer | Đóng & niêm phong kiện (cân đo), mở bộ kiện, in nhãn, hoàn tất đóng gói | [08](../warehouse/08-packing/README.md) |
-| Dispatch Staff | Mở chuyến bàn giao, quét kiện, ký bàn giao; lập kế hoạch xếp hàng lên xe (Load Planning) khi giao nguyên chuyến, ghi nhận đặt xe, xếp kiện lên xe | [09](../warehouse/09-shipping/README.md) |
-| NV kho nguồn / kho đích | Xuất & nhận hàng chuyển kho | [10](../warehouse/10-inter-warehouse-transfer/README.md) |
+| Picker | Lấy nguyên thùng theo task được giao (mỗi đơn một task), đưa về khu chờ xuất hoặc khu xuất hàng, báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
+| Packer | Quét kiểm đủ thùng cho đơn, dán nhãn giao hàng, gom thùng thành shipment (không đóng lại hàng) | [08](../warehouse/08-packing/README.md) |
+| Dispatch Staff | Lập kế hoạch xếp hàng lên xe (Load Planning) cho mọi đơn (giao nguyên chuyến), ghi nhận đặt xe (với hãng tích hợp API đặt xe: hệ thống tạo đơn ở hãng, mã vận đơn có ngay); **nhập mã vận đơn** cho từng xe — tay từng chuyến hoặc **hàng loạt từ file** (khi hãng không đẩy qua webhook); xếp kiện lên xe, quét kiện, ký bàn giao | [09](../warehouse/09-shipping/README.md) |
 
 ### 2.3. Quyền theo ngữ cảnh (permission — không phải role)
 
@@ -66,14 +78,16 @@ Một số chức năng là **quyền** gán cho role qua cấu hình RBAC, khô
 
 | Quyền | Nội dung | Gán mặc định cho |
 |-------|----------|------------------|
-| Duyệt PO vượt hạn mức | Phê duyệt / từ chối PO | Quản lý kho hoặc System Admin |
-| Cấu hình hạn mức duyệt PO | Đặt / sửa hạn mức duyệt PO theo vai trò *(Quyết định 21/10/2026)* | System Admin (Procurement Staff, Warehouse Manager, Accountant chỉ xem) |
 | Quyết định giao một phần | Bật / tắt cờ cho phép giao một phần của đơn ([17](../ecommerce/17-order-management/README.md) §4.2) *(Quyết định 21/10/2026)* | Sales Staff, System Admin |
-| Kiểm lại thiết kế | Đưa kiện bị giữ do lệch thiết kế về đóng gói lại ([08](../warehouse/08-packing/README.md)) *(Quyết định 22/10/2026)* | Warehouse Manager, System Admin (không gán mặc định cho QC Staff) |
-| Duyệt TO vượt ngưỡng | Phê duyệt / từ chối lệnh chuyển kho | Quản lý kho |
-| Duyệt tín dụng & điều khoản thanh toán | Duyệt / từ chối đơn công nợ bị treo (vượt hạn mức, khách quá hạn); duyệt hạn mức, kỳ hạn, % cọc, điều khoản được phép của khách | Kế toán |
-| Hoàn tiền | Tạo lệnh hoàn tiền dư cho khách; xử lý lệnh hoàn khi huỷ / đóng phần còn lại | Kế toán (System Admin có toàn quyền) |
-| Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản trị bán hàng hoặc Sales Staff được chỉ định |
+| Duyệt kỹ thuật thiết kế | Duyệt kỹ thuật và kiểm duyệt nội dung (bản quyền, nội dung không phù hợp) bản thiết kế khách gửi duyệt đã qua tự kiểm: **duyệt** → hệ thống xuất file in PDF/X, sinh SKU riêng; **trả lại** kèm lý do. Người tạo là khách, người duyệt luôn là Quản lý kinh doanh ([12](../ecommerce/12-product-design/README.md)) *(Đã chốt 2026-11-04; cập nhật 2026-11-05)* | Quản lý kinh doanh |
+| Duyệt Đơn sản xuất | Duyệt / trả lại Đơn sản xuất trước khi gửi đơn vị sản xuất; người duyệt khác người lập ([17](../ecommerce/17-order-management/README.md)) *(Đã chốt 2026-11-05)* | Quản lý kinh doanh |
+| Huỷ có kiểm soát kế hoạch xe | Huỷ có kiểm soát cả kế hoạch chuyến xe hoặc một xe đã bắt đầu xếp; bỏ xe `Planned` khỏi kế hoạch khi mọi xe khác đã rời kho; bắt buộc mã lý do + ghi chú ([09](../warehouse/09-shipping/README.md)) *(Quyết định 02/11/2026)* | Quản lý kho, System Admin |
+| Duyệt điều chỉnh tồn | Duyệt / từ chối điều chỉnh tồn; người duyệt khác người gửi ([20](../warehouse/20-inventory-control/README.md)) | Quản lý kho (System Admin khi kho chỉ có một quản lý) |
+| Duyệt tín dụng & lịch thanh toán | Duyệt / từ chối đơn bị treo do công nợ (vượt hạn mức, khách quá hạn); duyệt hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định của khách | Kế toán |
+| Hoàn tiền | Ghi nhận đã hoàn (số tiền, ngày, mã sao kê) cho số tiền phải hoàn do hệ thống tính khi huỷ / đóng phần còn lại / trả hàng ([15](../ecommerce/15-payment/README.md) §4.5) *(✅ 2026-11-06)* | Kế toán (System Admin có toàn quyền) |
+| Phát hành hoá đơn điện tử | Phát hành / phát hành lại / tra lại hoá đơn qua nhà cung cấp hoá đơn điện tử; lập hoá đơn điều chỉnh / thay thế; huỷ nháp ([21](../ecommerce/21-e-invoice/README.md)) *(✅ Đã chốt 2026-11-06)* | Kế toán |
+| Cấu hình kết nối hoá đơn điện tử | Môi trường của nhà cung cấp hoá đơn điện tử, thông tin xác thực, mẫu số, ký hiệu hoá đơn, ngưỡng cảnh báo lượt phát hành ([21](../ecommerce/21-e-invoice/README.md)) | System Admin |
+| Giám sát chat (Chat Supervision) | Phân công hội thoại, giám sát SLA, nhận escalate | Quản lý kinh doanh hoặc Sales Staff được chỉ định |
 
 Phân bổ trên là cấu hình mặc định khi cài đặt; người có quyền duyệt phân quyền sửa được ma trận quyền của từng role (§2.5.3).
 
@@ -81,11 +95,12 @@ Phân bổ trên là cấu hình mặc định khi cài đặt; người có quy
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên cổng khách hàng: xem catalog & giá riêng, **xác nhận / yêu cầu sửa thiết kế**, chấp nhận báo giá, **duyệt mẫu**, đặt hàng / đặt lại, theo dõi đơn & công nợ; chat với Sale là phạm vi sau. **Không có khách vãng lai (guest).** |
-| **Nhà cung cấp (Supplier / NCC)** | Giao hàng, phát hành hoá đơn (thường tương tác ngoài hệ thống: email/portal) |
-| **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: nhận kiện khi bàn giao, vận chuyển, giao cho khách, thu hộ phần còn lại (nếu có), hoàn hàng về kho (RTO); cung cấp xe tải / container cho giao nguyên chuyến. Hệ thống không tích hợp API và không theo dõi hành trình; nhân viên cập nhật kết quả giao khi hãng báo lại |
+| **Khách hàng sỉ (B2B Customer)** | Doanh nghiệp đã liên hệ trước, được Sale tạo tài khoản. Trên sàn bán hàng: xem hàng (**sàn không hiện giá**), **tự thiết kế** trên khuôn in của quy cách (tải ảnh / logo, xem trước 3D), **gửi duyệt**, xem lại, **tạo bản sửa**, **yêu cầu báo giá** từ bản thiết kế đã duyệt ([12](../ecommerce/12-product-design/README.md), [13](../ecommerce/13-catalog/README.md)), **duyệt / yêu cầu in lại mẫu in**, **chat với Sale**, chấp nhận báo giá, xem đơn, hợp đồng, đợt thanh toán & công nợ. **Không tự đặt hàng** trên sàn — đơn do Sale chốt. **Không có khách vãng lai (guest).** |
+| **Đơn vị sản xuất (ngoài hệ thống)** | Xưởng của công ty **hoặc** đối tác bên ngoài — hệ thống xử lý như nhau, chỉ khác **kênh kết nối** khai báo trong danh mục Đơn vị sản xuất. Nhận **Đơn sản xuất** (kèm file in PDF/X đã chốt), xác nhận nhận đơn, in **mẫu thử** khi đơn yêu cầu duyệt mẫu in, sản xuất và tự kiểm tra chất lượng, đóng thùng đúng số chuẩn, giao về **đúng kho nhận**. Hệ thống không quản lý quá trình sản xuất; Sale ghi nhận phản hồi và tiến độ ([17](../ecommerce/17-order-management/README.md)) |
+| **Đơn vị vận chuyển (Carrier / 3PL)** | Bên thứ ba **ngoài hệ thống**: cung cấp xe tải / container (mọi đơn giao nguyên chuyến), nhận hàng khi bàn giao, vận chuyển, giao cho khách, hoàn hàng về kho (RTO). Hãng có **webhook** thì đẩy vào hệ thống **mã vận đơn**, biển số, tài xế, **mốc hành trình** và kết quả giao (kèm mã chuyến nội bộ để ghép đúng chuyến); hãng không có webhook thì kho nhập mã vận đơn (tay / từ file) và Quản lý kho ghi kết quả giao khi hãng báo lại. Hệ thống **không chủ động gọi API** hãng để hỏi trạng thái (phạm vi sau). Đơn vị vận chuyển xe tải / van nội thành *(✅ 2026-11-06)* có kiểu kết nối **tích hợp API đặt xe**: hệ thống **tạo / huỷ đơn** khi đặt / huỷ đặt xe (mỗi chuyến một đơn, mỗi shipment một điểm giao), hãng đẩy trạng thái từng điểm giao qua webhook ([09](../warehouse/09-shipping/README.md) BR-29) |
+| **Nhà cung cấp hoá đơn điện tử (E-invoice provider)** | Bên thứ ba **ngoài hệ thống**: nhận dữ liệu hoá đơn qua API, **ký số**, nộp cơ quan thuế, cấp số hoá đơn, trả file XML / PDF; gửi email hoá đơn cho bên mua (⚠️ giả định). Không đẩy kết quả về — hệ thống tự hỏi lại kết quả ([21](../ecommerce/21-e-invoice/README.md)) *(✅ Đã chốt 2026-11-06)* |
 
-Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (gợi ý bin khi cất hàng, Wave/Route Planner và Cartonization (phạm vi giai đoạn sau — [open-questions C17](../open-questions/README.md)), Load Planner, Design Engine + 3D Renderer (phạm vi giai đoạn sau — [open-questions B18](../open-questions/README.md)), Production Scheduler, Payment Service, Notification (hộp thông báo — §6)…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
+Ngoài ra, nhiều module liệt kê **actor hệ thống** — các engine tự động (gợi ý bin khi cất hàng, Wave/Route Planner và Cartonization (phạm vi giai đoạn sau — [open-questions C17](../open-questions/README.md)), Load Planner, Payment Service, Notification (hộp thông báo — §6)…). Đây không phải người dùng; chúng thực thi quy tắc do các role trên cấu hình.
 
 Một tài khoản có thể mang nhiều role (ví dụ Warehouse Staff kiêm Warehouse Manager ở kho nhỏ): quyền là hợp các role, phạm vi dữ liệu là phạm vi rộng nhất. Chi tiết tài khoản và phân quyền ở §2.5.
 
@@ -146,25 +161,35 @@ stateDiagram-v2
 
 #### 2.5.3. Role, quyền và phạm vi dữ liệu
 
-1. **Quyền** = **tài nguyên × hành động**, ví dụ `production-orders:APPROVE`. Hành động gồm: xem trang (`VIEW_PAGE`), đọc (`READ`), tạo (`CREATE`), sửa (`UPDATE`), xoá (`DELETE`), duyệt (`APPROVE`), xuất dữ liệu (`EXPORT`). Ba hành động cuối là **nhạy cảm**.
+1. **Quyền** = **tài nguyên × hành động**, ví dụ `sales-contracts:APPROVE`. Hành động gồm: xem trang (`VIEW_PAGE`), đọc (`READ`), tạo (`CREATE`), sửa (`UPDATE`), xoá (`DELETE`), duyệt (`APPROVE`), xuất dữ liệu (`EXPORT`). Ba hành động cuối là **nhạy cảm**.
 2. **Role** là tập quyền kèm **phạm vi dữ liệu**:
 
    | Phạm vi | Ý nghĩa | Role mặc định |
    |---------|---------|---------------|
-   | `WAREHOUSE` | Chỉ dữ liệu của **các kho được gán** cho tài khoản; không được gán kho thì không thấy gì | Warehouse Staff, Warehouse Manager, QC Staff, Production Staff |
+   | `WAREHOUSE` | Chỉ dữ liệu của **các kho được gán** cho tài khoản; không được gán kho thì không thấy gì | Warehouse Staff, Warehouse Manager |
    | `ALL` | Toàn hệ thống | Mọi role nhân viên khác |
    | `OWN` | Chỉ dữ liệu của chính mình | Dùng cho các chức năng của khách trên cổng (đơn, công nợ, báo giá của chính khách) |
 
    Phạm vi theo nhóm (`TEAM`) chưa dùng.
-3. **12 role hệ thống**: 11 role nhân viên ở §2.1 và role **Khách hàng** (`CUSTOMER`). Role hệ thống không xoá, không đổi tên.
+3. **7 role hệ thống**: 6 role nhân viên ở §2.1 và role **Khách hàng** (`CUSTOMER`). Role hệ thống không xoá, không đổi tên.
 4. **Role tự tạo** — người có quyền tạo role tạo được role mới (tuỳ chọn sao chép từ role khác), đổi tên, đổi phạm vi; xoá được khi không còn ai mang role đó.
 5. **Sửa ma trận quyền** của role (thay cả ma trận, hoặc cấp / thu từng quyền) cần quyền **duyệt phân quyền**. Ma trận của `CUSTOMER` và `SYSTEM_ADMIN` cố định. Thay đổi có hiệu lực từ thao tác kế tiếp của người mang role, không cần đăng nhập lại.
 6. **Nhiều role** — một tài khoản mang nhiều role thì quyền là **hợp** các role, phạm vi là phạm vi **rộng nhất**.
-7. **Ai quản trị tài khoản & phân quyền** — System Admin (toàn quyền) và **Quản trị bán hàng** (tạo / sửa tài khoản, role, ma trận quyền — trong giới hạn quyền mình có). Chỉ System Admin xoá được role.
+7. **Ai quản trị tài khoản & phân quyền** — System Admin (toàn quyền) và **Quản lý kinh doanh** (tạo / sửa tài khoản, role, ma trận quyền — trong giới hạn quyền mình có). Chỉ System Admin xoá được role.
 
 ---
 
 ## 3. Bản đồ module & mối liên kết (Module Map)
+
+Theo năm nhóm chức năng đã chốt 2026-11-04:
+
+| Nhóm chức năng | Module |
+|----------------|--------|
+| **Quản lý thiết kế** (khách tự thiết kế) | [12](../ecommerce/12-product-design/README.md) |
+| **Bán hàng** — sàn bán hàng, bảng giá nội bộ, báo giá, đơn hàng theo số lượng, hợp đồng từng đơn, chat, khách hàng | [13](../ecommerce/13-catalog/README.md), [14](../ecommerce/14-cart-and-order/README.md), [16](../ecommerce/16-sales-chat/README.md), [17](../ecommerce/17-order-management/README.md), [18](../ecommerce/18-customer-information/README.md) |
+| **Quản lý thanh toán** — theo hợp đồng, công nợ; hoá đơn điện tử theo lần giao *(bổ sung 2026-11-06)* | [15](../ecommerce/15-payment/README.md), [21](../ecommerce/21-e-invoice/README.md) |
+| **Quản lý kho** — dữ liệu sản phẩm, nhập kho thành phẩm, vận hành kho, xuất kho, kiểm soát tồn | [01](../warehouse/01-product-creation/README.md), [03](../warehouse/03-receipt/README.md), [05](../warehouse/05-putaway/README.md)–[08](../warehouse/08-packing/README.md), [11](../warehouse/11-intra-warehouse-transfer/README.md), [20](../warehouse/20-inventory-control/README.md) |
+| **Quản lý giao hàng** | [09](../warehouse/09-shipping/README.md) |
 
 ```mermaid
 flowchart TB
@@ -172,118 +197,116 @@ flowchart TB
         PC[01 · Product Creation]
     end
 
-    subgraph WH["Mảng A — Kho vận (Warehouse / Back-office)"]
+    subgraph WH["Mảng A — Kho thành phẩm (Warehouse / Back-office)"]
         direction TB
-        PO[02 · Purchase Order]
-        RC[03 · Receipt]
-        INV[04 · Invoice]
+        RC[03 · Nhập kho thành phẩm]
         PA[05 · Putaway]
         MAP[06 · Warehouse Map & Slotting]
         PICK[07 · Picking]
-        PACK[08 · Packing]
+        PACK[08 · Kiểm thùng & Dán nhãn]
         SHIP[09 · Shipping]
-        INTER[10 · Inter-warehouse Transfer]
         INTRA[11 · Intra-warehouse Transfer]
-        PROD[19 · Production]
         CTRL[20 · Inventory Control]
     end
 
-    subgraph EC["Mảng B — Bán hàng sỉ (B2B Sales / Customer Portal)"]
+    subgraph EC["Mảng B — Bán hàng sỉ (B2B Sales / Sàn bán hàng)"]
         direction TB
-        DSN[12 · Product Design]
+        DSN[12 · Mẫu & Thiết kế]
         CAT[13 · Catalog]
-        CO[14 · Quote & Order]
-        PAY[15 · Payment]
+        CO[14 · Báo giá, Đơn hàng & Hợp đồng]
+        PAY[15 · Thanh toán theo hợp đồng]
         CHAT[16 · Sales Chat]
         OM[17 · Order Management]
         CIM[18 · Customer Information]
+        EINV[21 · Hoá đơn điện tử]
     end
 
-    INVENTORY[(Tồn kho / Inventory\n— theo Inventory Item & vị trí,\ntổng hợp theo kho)]
+    PRODEXT[[Đơn vị sản xuất\n— ngoài hệ thống]]
+    EINVP[[Nhà cung cấp hoá đơn điện tử\n— ngoài hệ thống]]
+    INVENTORY[(Tồn kho thành phẩm\n— theo Inventory Item & vị trí,\ntổng hợp theo kho)]
 
-    PC --> PO
+    DSN -- mẫu đã chốt sinh SKU --> PC
     PC --> CAT
-    PC --> DSN
-    PO --> RC
-    RC --> INV
-    RC --> PA
-    PA --> MAP
-    MAP -. gợi ý vị trí .-> PA
-    PA --> INVENTORY
-
     CAT --> CO
     DSN --> CO
-    CO --> PAY
-    PAY --> OM
     CHAT -. hỗ trợ .-> CO
     CHAT -. hỗ trợ .-> OM
     CIM --> CO
     CIM --> CHAT
+    CO -- hợp đồng & đợt thanh toán --> PAY
+    CO --> OM
+    PAY -. đủ điều kiện theo hợp đồng .-> OM
+
+    OM -- Đơn sản xuất --> PRODEXT
+    PRODEXT -- thành phẩm --> RC
+    RC --> PA
+    PA --> MAP
+    MAP -. gợi ý vị trí .-> PA
+    PA --> INVENTORY
+    MAP -. sức chứa kho m³ .-> OM
 
     OM --> PICK
-    OM --> PROD
-    DSN -. thiết kế đã khoá / file in .-> PROD
-    PICK -- phôi --> PROD
-    PROD -- thành phẩm --> PACK
-    PROD -. PO gia công .-> PO
     INVENTORY --> PICK
-    PICK --> PACK
+    PICK -- khu chờ xuất / khu xuất hàng --> PACK
     PACK --> SHIP
+    PAY -. chặn bàn giao nếu đợt trước giao chưa thu .-> SHIP
     SHIP --> OM
+    SHIP -- giao thành công sinh hoá đơn nháp --> EINV
+    CO -. dòng đơn & thuế suất .-> EINV
+    CIM -. thông tin bên mua .-> EINV
+    EINV -- phát hành qua API --> EINVP
 
-    INTER <--> INVENTORY
     INTRA <--> INVENTORY
-    CTRL <-->|kiểm kê, điều chỉnh, cảnh báo| INVENTORY
+    CTRL <-->|kiểm kê, điều chỉnh, cách ly| INVENTORY
     MAP -. gợi ý vị trí .-> INTRA
 ```
 
 ---
 
-## 4. Sơ đồ luồng tổng thể end-to-end (Product → Delivery)
+## 4. Sơ đồ luồng tổng thể end-to-end (Mẫu → Giao hàng → Công nợ)
 
-Luồng "hạnh phúc" (happy path) từ lúc tạo sản phẩm đến lúc giao hàng thành công:
+Luồng "hạnh phúc" (happy path) từ lúc khách tự thiết kế trên app đến lúc giao hàng và thu đủ tiền:
 
 ```mermaid
 flowchart LR
-    A[Tạo sản phẩm\nProduct Creation] --> A1[Cảnh báo tồn\nREORDER / SAFETY]
-    A1 --> B[Lập PO\nPurchase Order]
-    B --> C[Nhận hàng\nReceipt]
-    C --> D[Đối chiếu hoá đơn\nInvoice matching]
-    C --> E[Cất hàng vào kho\nPutaway]
-    C --> C1[Kiểm tra chất lượng\nQC - nếu SKU yêu cầu]
-    C1 --> E
-    E --> F[(Tồn kho khả dụng\nAvailable stock)]
-
-    G[Thiết kế & khách xác nhận\nProduct Design] --> G1[Báo giá\nQuote]
-    G1 --> G2{Thiết kế mới?}
-    G2 -- Có --> S[Làm mẫu & khách duyệt\nSample]
-    S --> J
-    G2 -- Không --> J
-    I[Cổng khách hàng\nCatalog & giá riêng] --> J[Đơn bán\nOrder]
-    J --> K[Thanh toán\ncọc / trả trước / công nợ]
-    K --> L[Đơn xác nhận\nConfirmed Order]
-    L --> R[Release đơn]
-
-    R -- dòng in --> PR[Sản xuất in\nProduction]
-    R -- dòng sẵn --> M[Lấy hàng\nPicking]
-    F --> M
-    M -- phôi --> PR
-    PR -- thành phẩm đạt QC --> N[Đóng gói\nPacking]
-    M --> N
-    N --> O[Bàn giao vận chuyển\nShipping]
-    O --> P[Giao thành công\nDelivered]
-    P --> Q[Đóng đơn\nOrder Closed]
+    A[Khách tự thiết kế\ntrên app · gửi duyệt] --> A1[Hệ thống tự kiểm\nQuản lý kinh doanh duyệt]
+    A1 --> A2[Xuất file in PDF/X\nsinh SKU thành phẩm của khách]
+    A2 --> B[Yêu cầu báo giá\nBáo giá]
+    I[Sàn bán hàng\nxem hàng · chat với Sale] --> B
+    B --> C[Đơn hàng\ntheo số lượng]
+    C --> D[Hợp đồng mua bán\nký & tải lên]
+    D --> D1{Đợt thu khi ký\nđã thu?}
+    D1 -- Có / không có đợt này --> E[Đơn xác nhận\nConfirmed]
+    E --> F{Đủ tồn\nthành phẩm?}
+    F -- Thiếu --> G[Đơn sản xuất\nSale lập · Sales Manager duyệt & gửi]
+    G --> G1{Cần duyệt\nmẫu in?}
+    G1 -- Có --> G2[Khách duyệt\nmẫu in]
+    G2 --> G3[Sản xuất\nhàng loạt]
+    G1 -- Không --> G3
+    G3 --> H[Nhập kho thành phẩm\nđã đóng thùng · đếm đủ / thiếu]
+    H --> H1[Cất hàng\nPutaway]
+    H1 --> F
+    F -- Đủ --> K[Lấy nguyên thùng\nPicking]
+    K --> K1[Khu chờ xuất\nnếu cần giữ hàng]
+    K1 --> L[Kiểm thùng & dán nhãn\ntại khu xuất hàng]
+    K --> L
+    L --> M[Bàn giao vận chuyển\nShipping]
+    M --> N[Giao thành công\nDelivered]
+    N --> N1[Hoá đơn điện tử\nKế toán phát hành qua nhà cung cấp hoá đơn điện tử]
+    N1 --> O[Công nợ phải thu\nthu các đợt còn lại]
+    O --> P[Đóng đơn\nOrder Closed]
 ```
 
 **Diễn giải theo từng chặng:**
 
 | Chặng | Bắt đầu bằng | Kết thúc bằng | Module chịu trách nhiệm |
 |-------|--------------|---------------|-------------------------|
-| **1. Chuẩn bị hàng hoá (Procurement)** | Nhu cầu bổ sung tồn | Hàng nằm ở vị trí kho, sẵn bán | 01 → 02 → 03 → 04 → 05 → 06 |
-| **2. Bán hàng sỉ (B2B Sales)** | Khách liên hệ / yêu cầu báo giá | Đơn đã xác nhận (đủ cọc, trả trước, hoặc trong hạn mức công nợ) | 18 → 12 → 14 → 15 (làm mẫu: 19; hỗ trợ: 16, 13) |
-| **3. Sản xuất (Production)** | Đơn release có dòng in | Thành phẩm ở khu đóng gói | 17 → 07 (cấp phôi) → 19 (gia công ngoài một phần: 02, 03, 04) |
-| **4. Hoàn tất đơn (Fulfillment)** | Đơn release / sản xuất xong | Kiện hàng đã giao cho khách | 17 → 07 → 08 → 09 |
-| **5. Điều phối tồn kho (Inventory ops)** | Chênh lệch/tối ưu vị trí; cảnh báo tồn / hạn dùng | Tồn kho cân đối giữa & trong kho, số tồn khớp thực tế | 10, 11, 06, 20 |
+| **1. Mẫu & thiết kế** | Khách tự thiết kế trên app, trên quy cách đã có khuôn in (cấu hình in ở 01) | Quản lý kinh doanh duyệt bản thiết kế; file in PDF/X và SKU thành phẩm của khách được tạo | 01 (cấu hình in) → 13 → 12 → 01 (SKU riêng) |
+| **2. Bán hàng & hợp đồng** | Khách yêu cầu báo giá từ bản thiết kế / xem hàng / chat với Sale | Hợp đồng đã ký, đơn `Confirmed` | 13 → 14 → 15 (hỗ trợ: 16, 18) |
+| **3. Đáp ứng tồn (Đơn sản xuất & nhập kho)** | Đơn thiếu tồn thành phẩm tại kho xuất (SKU riêng của khách) | Thành phẩm nằm ở vị trí kho xuất, sẵn cho đơn | 17 (Đơn sản xuất, duyệt mẫu in) → (đơn vị sản xuất, ngoài hệ thống) → 03 → 05 → 06 |
+| **4. Xuất kho & giao hàng (Fulfillment)** | Đơn release cho kho | Kiện hàng đã giao cho khách | 17 → 07 → 08 → 09 |
+| **5. Thanh toán, hoá đơn & công nợ** | Hợp đồng đã ký | Mọi đợt thanh toán đã thu, mọi lần giao đã có hoá đơn, đơn đóng | 15 (liên quan 14, 17, 18); 21 (hoá đơn theo lần giao, liên quan 09) |
+| **6. Kiểm soát tồn kho (Inventory ops)** | Chênh lệch / tối ưu vị trí; theo dõi sức chứa kho; hàng hoàn | Số tồn khớp thực tế, kho đủ chỗ cho hàng sắp về | 11, 06, 20, 03 |
 
 ---
 
@@ -291,28 +314,25 @@ flowchart LR
 
 | Luồng | Chuỗi module | Chứng từ xuyên suốt | Sơ đồ chi tiết |
 |-------|--------------|---------------------|----------------|
-| **Procurement** | Hoạch định nhu cầu → PO → Receipt (WH/Input) → QC (WH/Quality Control, nếu SKU yêu cầu) → Putaway (WH/Stock); Invoice song song | PO number liên kết Receipt & Invoice; Receipt liên kết nhiệm vụ chuyển QC, kết quả QC & Putaway | [diagrams §1](../diagrams/README.md#1-luồng-procurement) |
-| **Fulfillment** | Order → (Production: lấy phôi → in → QC, với dòng tùy chỉnh) → Picking → Packing → Shipping (gửi kiện qua hãng, hoặc giao nguyên chuyến có lập kế hoạch xếp hàng 3D) | Order number liên kết Production Order, Pick List, Package, Shipment, Load Plan (nếu giao nguyên chuyến) | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
-| **Transfer** | Transfer Order → (xuất kho nguồn, có lập kế hoạch xếp hàng 3D nếu đi xe tải / container) → (vận chuyển) → (nhận kho đích) → Putaway | Transfer Order number; Load Plan (nếu có) | [diagrams §3](../diagrams/README.md#3-luồng-transfer-giữa-các-kho) |
-| **Đặt hàng sỉ** | Design → Báo giá → (Làm mẫu) → Order → Payment; hoặc khách tự đặt trên cổng | Quote number → Order number → Payment transaction | — |
-| **Sản xuất mẫu** | Yêu cầu làm mẫu → LSX `SAMPLE` → Khách duyệt mẫu | Sample request → LSX | [19](../warehouse/19-production/README.md) |
-| **Sản xuất đơn hàng** | Release đơn → LSX `ORDER` (lấy phôi → in nội bộ hoặc tách gia công ngoài → QC) → Packing | Order number → LSX (+ LSX con, PO gia công) → Package | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
+| **Nhập kho thành phẩm** | Đơn sản xuất → (đơn vị sản xuất) → Nhập kho (WH/Input) → Putaway (WH/Stock) | Số Đơn sản xuất liên kết phiếu nhập kho, lô hàng & nhiệm vụ cất hàng | [diagrams §1](../diagrams/README.md#1-luồng-nhập-kho-thành-phẩm) |
+| **Fulfillment** | Order → kiểm tồn (thiếu → Đơn sản xuất) → Picking nguyên thùng → (khu chờ xuất) → Kiểm thùng & dán nhãn giao hàng → Shipping (giao nguyên chuyến: lập kế hoạch xếp hàng 3D, đặt xe, mã vận đơn, ký bàn giao) → kết quả giao (webhook của hãng hoặc ghi tay) | Order number liên kết Đơn sản xuất, pick task, thùng LPN (kiện giao), Shipment, Load Plan, chuyến xe ↔ mã vận đơn của hãng | [diagrams §2](../diagrams/README.md#2-luồng-fulfillment) |
+| **Nhập hàng hoàn** | Hãng hoàn hàng (RTO) / khách trả → Phiếu nhập loại Hàng hoàn → khu `QUARANTINE` → gỡ cách ly về bin hoặc ghi giảm có duyệt | Shipment / yêu cầu trả liên kết phiếu nhập hàng hoàn | [diagrams §1.3](../diagrams/README.md#1-luồng-nhập-kho-thành-phẩm), [03](../warehouse/03-receipt/README.md) |
+| **Bán sỉ theo hợp đồng** | Khách tự thiết kế → Yêu cầu báo giá → Báo giá → Order → Hợp đồng mua bán → Đợt thanh toán → Công nợ; song song: mỗi lần giao thành công → Hoá đơn điện tử | Design snapshot → Quote number → Order number ↔ Contract number → Payment installment → Payment transaction; Shipment → E-invoice (mã hoá đơn nội bộ ↔ số hoá đơn của nhà cung cấp) | [diagrams §3.1, §3.5](../diagrams/README.md#3-phụ-lục) |
 
 ---
 
 ## 6. Nguyên tắc dữ liệu xuyên suốt (Cross-cutting Data Principles)
 
 1. **SKU là đơn vị định danh hàng hoá nhỏ nhất** để quản lý tồn (mỗi biến thể sản phẩm = 1 SKU). Mỗi SKU có **đúng một Inventory Item** (hồ sơ hàng vật lý, quan hệ 1:1) — đối tượng được theo dõi tồn; nội dung bán hàng thuộc Product/Variant, không thuộc Inventory Item. Xem [01 · Product Creation](../warehouse/01-product-creation/README.md) và [Glossary](../glossary/README.md).
-2. **Tồn kho luôn gắn với vị trí (location-based inventory)**: một số lượng SKU luôn thuộc về một vị trí cụ thể — **bin** trên tầng kệ, hoặc **khu vực chứa hàng (Area)** như khu nhận, cách ly, đóng gói, chờ giao (xem [06](../warehouse/06-warehouse-map-slotting/README.md)) — hoặc một trạng thái quá cảnh (in-transit). Tồn **theo kho** (Inventory Level) và tồn toàn hệ thống là số **tổng hợp** từ tồn theo vị trí, không phải nguồn dữ liệu riêng.
-3. **Mọi thay đổi tồn kho phải có chứng từ nguồn (source document)**: Receipt, Pick, Adjustment, Transfer… Không có nghiệp vụ nào sửa tồn "trần" mà không để lại vết.
+2. **Tồn kho luôn gắn với vị trí (location-based inventory)**: một số lượng SKU luôn thuộc về một vị trí cụ thể — **bin** trên tầng kệ, hoặc **khu vực chứa hàng (Area)** thuộc một trong 5 loại: khu nhận (`RECEIVING`), khu cách ly (`QUARANTINE`), khu tạm (`OVERFLOW`), khu chờ xuất (`STAGING`), khu xuất hàng (`DISPATCH` — nơi kiểm thùng & dán nhãn giao hàng, gom shipment, chờ xe). Khu `NON_STORAGE` chỉ vẽ trên bản đồ, không chứa hàng. Xem [06](../warehouse/06-warehouse-map-slotting/README.md). Tồn **theo kho** (Inventory Level) và tồn toàn hệ thống là số **tổng hợp** từ tồn theo vị trí, không phải nguồn dữ liệu riêng.
+3. **Mọi thay đổi tồn kho phải có chứng từ nguồn (source document)**: phiếu nhập kho thành phẩm hoặc hàng hoàn (Receipt), Pick, Adjustment… Không có nghiệp vụ nào sửa tồn "trần" mà không để lại vết.
 4. **Trạng thái chứng từ chỉ tiến, không lùi tự do**: chuyển trạng thái theo sơ đồ vòng đời của từng module; huỷ/hoàn phải là hành động có kiểm soát và ghi log.
-5. **Sản phẩm tùy chỉnh mang theo "artifact thiết kế"**: đơn hàng chứa sản phẩm in luôn đính kèm file/định nghĩa thiết kế đã chốt (design snapshot), bất biến sau khi đơn confirmed. Thiết kế mới phải có **mẫu được khách duyệt** trước khi sản xuất đơn hàng ([19](../warehouse/19-production/README.md)).
-6. **Phạm vi tổ chức**: hệ thống phục vụ **một pháp nhân duy nhất** (một công ty, một mã số thuế, một sổ cái) sở hữu **nhiều kho vật lý (multi-warehouse)**. Chuyển hàng giữa các kho là **luân chuyển tồn nội bộ** (xem [10 · Inter-warehouse Transfer](../warehouse/10-inter-warehouse-transfer/README.md)), **không** phát sinh hoá đơn/công nợ nội bộ. Hệ thống **không** hỗ trợ đa công ty / đa pháp nhân (multi-entity).
-7. **Công thức số lượng tồn thống nhất**: **ATP = Tồn khả dụng (`Available`) − Phần đang giữ hàng (reservation)**. Tồn khả dụng chỉ gồm hàng `Available` **chưa hết hạn** và **không bị giữ** (không có khoản phân bổ, giữ cho sản xuất hay cho lệnh chuyển kho). Hàng `Inbound`, `Allocated`, `Blocked`, `Quarantine`, `Expired`, `In Production`, `In-Transit` không thuộc tồn khả dụng. Chi tiết: [20 · Inventory Control BR-01](../warehouse/20-inventory-control/README.md). Định nghĩa On-hand, Inventory Level, Available, ATP xem [Glossary](../glossary/README.md).
-8. **Số lượng tồn luôn theo đơn vị cơ sở (base UoM)**: tồn kho và mọi chứng từ kho ghi số lượng theo đơn vị cơ sở của SKU (ví dụ *cái*). Số lượng nhập theo **đơn vị quy đổi** (ví dụ *thùng* = 1.000 cái) được hệ thống nhân hệ số trước khi ghi. Xem [01 · Product Creation](../warehouse/01-product-creation/README.md).
+5. **Hàng in theo mẫu của khách là SKU thành phẩm riêng**: khi Quản lý kinh doanh duyệt bản thiết kế khách tự làm, hệ thống xuất file in PDF/X và sinh một SKU gắn với khách và bản thiết kế đã chốt (design snapshot, bất biến). Tồn, nhập, xuất đều theo SKU này; snapshot (kèm file in PDF/X) được đính kèm Đơn sản xuất gửi đơn vị sản xuất ([12](../ecommerce/12-product-design/README.md), [17](../ecommerce/17-order-management/README.md)).
+6. **Phạm vi tổ chức**: hệ thống phục vụ **một pháp nhân duy nhất** (một công ty, một mã số thuế, một sổ cái) sở hữu **nhiều kho vật lý (multi-warehouse)**. *(Đã chốt 2026-11-05)* **Mỗi đơn bán xuất từ đúng một kho** (Sale chọn khi đơn `Confirmed`); mọi Đơn sản xuất của đơn ghi **kho nhận = kho xuất**, nên **không có chuyển hàng giữa các kho** (đã bỏ module 10). Đơn vẫn giao nhiều đợt từ cùng kho xuất. Dời / đóng kho (hiếm) xử lý bằng điều chỉnh tồn có duyệt. Hệ thống **không** hỗ trợ đa công ty / đa pháp nhân (multi-entity).
+7. **Công thức số lượng tồn thống nhất**: **ATP = Tồn khả dụng (`Available`) − Phần đang giữ hàng (reservation)**. Tồn khả dụng chỉ gồm hàng `Available` **không bị giữ** (không có khoản phân bổ cho đơn — kể cả hàng đang giữ ở khu chờ xuất). Hàng `Inbound`, `Allocated`, `Quarantine` không thuộc tồn khả dụng. Chi tiết: [20 · Inventory Control BR-01](../warehouse/20-inventory-control/README.md). Định nghĩa On-hand, Inventory Level, Available, ATP xem [Glossary](../glossary/README.md).
+8. **Bán, nhập và xuất theo thùng; giá theo cái** *(Đã chốt 2026-11-05)*: khách sỉ đặt theo **số thùng** (không đặt lẻ); mỗi SKU riêng có **số cái chuẩn / thùng** cố định và mọi thùng nhập về phải đúng số chuẩn. Báo giá, đơn, hợp đồng, Đơn sản xuất, phiếu nhập, phân bổ, kiểm kê đều tính theo số thùng; **đơn giá ghi theo cái**, thành tiền = số thùng × số cái / thùng × đơn giá cái. Nội bộ tồn vẫn quy ra đơn vị cơ sở (cái) để truy vết. Xem [01 · Product Creation](../warehouse/01-product-creation/README.md).
 9. **Tiền tố kho (warehouse prefix)**: mỗi kho có một prefix duy nhất, không sửa được sau khi tạo, dùng cho **mã vị trí** (bin: prefix + mã kệ + tầng + mã bin, ví dụ `HN-A01-2-03`; khu vực: prefix + mã khu vực, ví dụ `HN-RCV01`) và **mã chứng từ phát sinh tại kho** (ví dụ `HN-RC-000123`). Xem [06](../warehouse/06-warehouse-map-slotting/README.md).
 
-> ⚠️ Giả định: chứng từ liên quan hai kho (Transfer Order) dùng prefix của **kho nguồn**. Xem [open-questions](../open-questions/README.md).
 
 ### Thông báo trong ứng dụng (In-app notifications)
 
@@ -323,14 +343,19 @@ flowchart LR
 
 | Sự việc | Mức độ | Người nhận | Kèm email |
 |---------|--------|------------|-----------|
-| Khách **chấp nhận / yêu cầu sửa / yêu cầu đặt lại** báo giá ([14](../ecommerce/14-cart-and-order/README.md)) | `INFO` | Sale phụ trách báo giá; tài khoản đó ngừng hoạt động thì mọi Sale (đánh dấu bàn giao) | Có |
-| Đơn đã bắt đầu in mà **thanh toán thất bại / không về**, cần nhân viên quyết huỷ ([17](../ecommerce/17-order-management/README.md) §4.5) | `WARN` | Mọi Sale và Điều phối đơn hàng | Không |
-| **Lệnh sản xuất bị treo** ([19](../warehouse/19-production/README.md) §4.9) | `WARN` | File lỗi / chờ khách → Sale; thiếu phôi → Procurement; máy hỏng / gia công trễ / lý do khác → Quản lý kho của kho đó | Có |
-| **Cảnh báo tồn** ([20](../warehouse/20-inventory-control/README.md)) | `REORDER`, `EXPIRING`: `WARN`; `SAFETY`, `EXPIRED`: `CRITICAL` | Đặt lại / tồn an toàn → Inventory Planner, System Admin; sắp hết hạn / hết hạn → Quản lý kho, Inventory Planner, System Admin (theo kho được gán hoặc toàn hệ thống). Tối đa một lần mỗi loại, mỗi kho, mỗi ngày | Tắt mặc định |
+| Khách **chấp nhận / yêu cầu sửa** báo giá ([14](../ecommerce/14-cart-and-order/README.md)) | `INFO` | Sale phụ trách báo giá; tài khoản đó ngừng hoạt động thì mọi Sale (đánh dấu bàn giao) | Có |
+| **Đơn sản xuất được gửi** về kho (số thùng, thể tích, ngày cần hàng) ([17](../ecommerce/17-order-management/README.md) §4.3) *(Đã chốt 2026-11-05)* | `INFO` | Quản lý kho của kho nhận | Không |
+| **Còn trống dự kiến** của kho chuyển sang **âm** do một Đơn sản xuất được gửi ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6) *(Đã chốt 2026-11-05)* | `WARN` | Quản lý kho của kho nhận | Không |
+| **Đơn đã bàn giao vận chuyển** — theo từng xe: tên hãng, **mã vận đơn**, biển số ([17](../ecommerce/17-order-management/README.md) §5.2, [09](../warehouse/09-shipping/README.md)) *(✅ Đã chốt 2026-11-05)* | `INFO` | Tài khoản khách của đơn | Không |
+| **Hoá đơn nháp chờ phát hành** (khi shipment `Delivered`; nhắc lại sau 1 ngày nếu chưa phát hành) ([21](../ecommerce/21-e-invoice/README.md)) *(✅ Đã chốt 2026-11-06)* | `INFO` | Kế toán | Không |
+| **Phát hành hoá đơn lỗi / chưa xác nhận**, **sắp hết / hết lượt phát hành** ([21](../ecommerce/21-e-invoice/README.md)) | `WARN` | Kế toán | Không |
+| **Hoá đơn đã phát hành** (số, ký hiệu, link tải XML / PDF) ([21](../ecommerce/21-e-invoice/README.md)) | `INFO` | Tài khoản khách của đơn | Không (email hoá đơn do nhà cung cấp gửi — ⚠️ [open-questions G11](../open-questions/README.md)) |
 
-Email ngoài hộp thông báo: **email mời** người liên hệ của khách (§2.5.2), **gửi PO cho NCC** ([02](../warehouse/02-purchase-order/README.md)).
+Email ngoài hộp thông báo: **email mời** người liên hệ của khách (§2.5.2).
 
-> ⚠️ Giả định: **thông báo cho khách** (đơn đã đặt, thanh toán thất bại, đã bàn giao / đã giao) và **thông báo yêu cầu huỷ mới cho nhân viên** thuộc phạm vi giai đoạn sau — hiện hệ thống chỉ ghi nhật ký, không gửi. Xem [open-questions A10](../open-questions/README.md).
+> ⚠️ Giả định: thông báo **"đã bàn giao vận chuyển"** cho khách chỉ gửi vào **hộp thông báo**, không gửi email. Xem [open-questions E23](../open-questions/README.md).
+
+> ⚠️ Giả định: các **thông báo khác cho khách** (đơn đã tạo, hợp đồng chờ ký, đợt thanh toán đến hạn, đã giao), **email cho khách** (kể cả thông báo đã bàn giao) và **thông báo yêu cầu huỷ mới cho nhân viên** thuộc phạm vi giai đoạn sau — hiện hệ thống chỉ ghi nhật ký, không gửi. Xem [open-questions A10](../open-questions/README.md).
 
 ---
 
