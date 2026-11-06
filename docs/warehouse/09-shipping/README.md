@@ -198,7 +198,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 7. **Bắt đầu xếp xe** → chuyến `Loading`. Từ đây kế hoạch **bị khoá** (BR-14); muốn dừng xe hoặc kế hoạch chỉ có **huỷ có kiểm soát** (BR-14).
    - **Huỷ có kiểm soát** cả kế hoạch hoặc một xe, và **bỏ xe khỏi kế hoạch** (xe còn `Planned` khi mọi xe khác đã rời kho): Quản lý kho / System Admin, bắt buộc mã lý do + ghi chú (BR-14) *(Quyết định 02/11/2026)*.
    - Đơn không cho giao một phần phải có đủ phần còn lại trong kế hoạch.
-   - Đơn còn đợt `BEFORE_DELIVERY` chưa thu được **cảnh báo** khi bắt đầu xếp (không chặn); việc chặn nằm ở bước ký bàn giao (BR-04).
+   - Đơn còn đợt `BEFORE_DELIVERY` chưa thu, hoặc shipment thuộc đợt giao **chưa tới ngày bắt đầu cửa sổ giao**, được **cảnh báo** khi bắt đầu xếp (không chặn); việc chặn nằm ở bước ký bàn giao (BR-04).
    - Kiện bị để lại được **tách sang shipment mới** `Ready to Dispatch` để đi chuyến sau (nhãn giao hàng không ghi mã shipment nên không phải in lại).
 8. **Quét & bàn giao từng xe** — quét mã LPN trên nhãn giao hàng của từng kiện. Hệ thống chặn kiện:
    - không thuộc shipment nào (chưa kiểm & dán nhãn ở [08](../08-packing/README.md)), hoặc shipment không còn `Ready to Dispatch`;
@@ -209,7 +209,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - **đã quét đủ mọi kiện** của xe (thiếu thì hệ thống liệt kê từng kiện chưa quét);
    - chuyến **đã có mã vận đơn** (BR-23);
    - nhập người đại diện hãng, biển số (nếu chưa có), xác nhận **đã ký**; mã chữ ký / ảnh biên bản tuỳ chọn cho tới khi có chức năng tải ảnh *(Quyết định 21/10/2026)*;
-   - mọi shipment trên xe được phép đi: hợp đồng của đơn không còn **đợt `BEFORE_DELIVERY` chưa thu** (BR-04), đơn không đang treo, đơn không cho giao một phần thì không thiếu kiện.
+   - mọi shipment trên xe được phép đi: hợp đồng của đơn không còn **đợt `BEFORE_DELIVERY` chưa thu** áp cho shipment đó (BR-04), **đã tới ngày bắt đầu cửa sổ giao** của đợt giao chứa shipment (BR-04), đơn không đang treo, đơn không cho giao một phần thì không thiếu kiện.
 
    Bàn giao là **tất cả hoặc không**: chỉ một shipment không được phép đi thì **cả xe bị từ chối**, kèm danh sách đơn và số tiền đợt còn thiếu. Muốn cho xe đi mà không có shipment đó thì dỡ kiện qua **huỷ có kiểm soát** xe đó (bước 9, BR-14).
 
@@ -488,10 +488,12 @@ stateDiagram-v2
   - `Delivered` / `Delivery Failed` / `Returned` cập nhật **tự động từ webhook** của hãng (§4.5); hoặc do **Quản lý kho** của kho xuất **ghi tay** khi hãng không có webhook / webhook chưa về, và **sửa tay kèm lý do** khi hãng báo sai (§4.3).
   - Mỗi lần cập nhật ghi nguồn (webhook / tay), người hoặc sự kiện, thời điểm; cập nhật lại cùng trạng thái không đổi gì.
   - Hệ thống **không chủ động gọi API** hãng để hỏi trạng thái — phạm vi sau. Ngoại lệ *(✅ 2026-11-06)*: với hãng **tích hợp API đặt xe** hệ thống gọi API để **tạo / huỷ đơn đặt xe** (BR-29).
-- **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn đã `Handed Over`. Còn phần chưa giao thì đơn ở `Partially Fulfilled`; điều này chỉ xảy ra khi đơn được Sale cho phép giao một phần.
-- **BR-04:** **Chặn bàn giao theo hợp đồng.** Shipment của đơn chỉ được bàn giao khi **mọi đợt thanh toán mốc `BEFORE_DELIVERY`** trong hợp đồng mua bán của đơn đã `Paid` ([15](../../ecommerce/15-payment/README.md)); đợt `Partially Paid` vẫn bị chặn. Đợt `AFTER_DELIVERY` không chặn bàn giao. Hệ thống **không thu tiền khi giao** (không có thu hộ). *(Đã chốt 2026-11-04.)*
+- **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn (mọi đợt giao) đã `Handed Over`. Còn phần chưa giao thì đơn ở `Partially Fulfilled`; điều này xảy ra khi đơn có **lịch giao nhiều đợt** ([14](../../ecommerce/14-cart-and-order/README.md) BR-23), hoặc khi đơn được Sale cho phép giao một phần.
+- **BR-04:** **Chặn bàn giao theo hợp đồng.** Shipment của đơn chỉ được bàn giao khi:
+  - **đợt thanh toán mốc `BEFORE_DELIVERY`** áp cho shipment đã `Paid` ([15](../../ecommerce/15-payment/README.md)): đợt **không gắn đợt giao** áp cho mọi shipment của đơn; đợt **gắn đợt giao *k*** chỉ áp cho shipment của đợt *k*. Đợt `Partially Paid` vẫn bị chặn. Đợt `AFTER_DELIVERY` không chặn bàn giao. Hệ thống **không thu tiền khi giao** (không có thu hộ). *(Đã chốt 2026-11-04.)*
+  - **đã tới ngày bắt đầu cửa sổ giao** của đợt giao chứa shipment ([17](../../ecommerce/17-order-management/README.md) BR-29) — khách có quyền không nhận hàng giao trước hạn; muốn giao sớm thì Sale dời cửa sổ giao trước ([17](../../ecommerce/17-order-management/README.md) BR-28). Lập kế hoạch xe, đặt xe, xếp xe làm trước được; chỉ bước ký bàn giao bị chặn.
 
-  > ✅ Đã chốt 2026-11-05: với đơn giao nhiều lần (giao một phần), **mọi** đợt `BEFORE_DELIVERY` của hợp đồng phải thu trước **lần bàn giao đầu tiên**; gắn từng đợt `BEFORE_DELIVERY` với từng lần giao là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
+  > ✅ Đã chốt 2026-11-05, cập nhật 2026-11-07: với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` **không gắn đợt giao** phải thu trước **lần bàn giao đầu tiên**; từ 2026-11-07 đợt **gắn được với một đợt giao** và chỉ chặn đợt đó (trước đây là phạm vi sau). Xem [open-questions D23, D37](../../open-questions/README.md).
 - **BR-05:** Trạng thái đơn phía khách hàng phản ánh trạng thái shipment. Nhiều kiện → hiển thị trạng thái tổng hợp (ví dụ "giao một phần"). Khách xem tên hãng, mã vận đơn, biển số và mốc hành trình theo từng xe; không xem file vận đơn / POD.
 - **BR-06:** Hàng hoàn (RTO) nhập lại kho **chỉ qua [03](../03-receipt/README.md) phiếu loại Hàng hoàn** (không cộng thẳng tồn): chỉ nhận thùng thuộc shipment, nhập thẳng vào khu `QUARANTINE`; Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt ([20](../20-inventory-control/README.md)).
 - **BR-07:** Phí vận chuyển thu của khách (nếu có) và cước trả hãng là hai khoản độc lập; đối soát riêng. **09 không tính phí thu của khách**: phí đó là **dòng phí vận chuyển** Sale nhập trên báo giá / đơn / hợp đồng ([14](../../ecommerce/14-cart-and-order/README.md) BR-20), thu theo các đợt thanh toán ([15](../../ecommerce/15-payment/README.md)) *(✅ Đã chốt 2026-11-05)*.
@@ -534,7 +536,7 @@ stateDiagram-v2
   - phải quét đủ mọi kiện của chuyến;
   - chuyến phải **có mã vận đơn** (BR-23);
   - phải xác nhận đã ký, có người đại diện hãng và biển số;
-  - mọi shipment phải được đơn cho phép đi: đợt `BEFORE_DELIVERY` đã thu (BR-04), không đang treo, không thiếu phần khi đơn không cho giao một phần.
+  - mọi shipment phải được đơn cho phép đi: đợt `BEFORE_DELIVERY` áp cho shipment đã thu và đã tới ngày bắt đầu cửa sổ giao (BR-04), không đang treo, không thiếu phần khi đơn không cho giao một phần.
 - **BR-19:** Chuyến chỉ thay đổi qua kế hoạch (chốt, mở lại, huỷ), ghi nhận / huỷ đặt xe, hoặc qua huỷ có kiểm soát / bỏ xe khỏi kế hoạch (BR-14). Không có huỷ chuyến riêng lẻ ngoài các đường này.
 - **BR-20:** Ước tính tải **chỉ để tham khảo**; không chốt kế hoạch, không chặn kiểm thùng.
 
@@ -609,7 +611,7 @@ stateDiagram-v2
 | [07 · Picking](../07-picking/README.md) | Các thùng đã phân bổ dùng cho ước tính tải; shipment huỷ → thùng cất lại |
 | [01 · Product Creation](../01-product-creation/README.md) | Quy cách thùng của SKU (số cái chuẩn / thùng, kích thước, khối lượng thùng đầy, cờ cho phép xoay) cho ước tính tải, Load Planning và nhãn |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Khu xuất hàng (`DISPATCH`) — nơi kiểm thùng & dán nhãn, gom shipment, chờ xe; địa chỉ kho in trên nhãn kiện và biên bản |
-| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Mọi đơn giao nguyên chuyến (17 BR-16); kết quả giao từ webhook / ghi tay và thông tin vận chuyển khách xem (17 BR-27); kho xuất do Sale chọn ở đơn; giao một phần do Sale quyết; trạng thái `Shipped` / `Partially Fulfilled` / `Delivered` / `Delivery Failed` / `Returned`; đơn không huỷ được từ khi thùng đầu tiên dán nhãn; trang đơn & thông báo "đã bàn giao vận chuyển" hiển thị tên hãng, mã vận đơn, biển số, mốc hành trình theo từng xe |
+| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Mọi đơn giao nguyên chuyến (17 BR-16); kết quả giao từ webhook / ghi tay và thông tin vận chuyển khách xem (17 BR-27); kho xuất do Sale chọn ở đơn; giao theo **lịch giao** (đợt giao, cửa sổ giao — chặn bàn giao trước ngày bắt đầu, 17 BR-29) và giao một phần do Sale quyết; trạng thái `Shipped` / `Partially Fulfilled` / `Delivered` / `Delivery Failed` / `Returned`; đơn không huỷ được từ khi thùng đầu tiên dán nhãn; trang đơn & thông báo "đã bàn giao vận chuyển" hiển thị tên hãng, mã vận đơn, biển số, mốc hành trình theo từng xe |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) | Cổng khách hàng: khách xem thông tin vận chuyển của đơn (tên hãng, mã vận đơn, biển số, mốc hành trình) |
 | [15 · Payment](../../ecommerce/15-payment/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` của hợp đồng chưa thu; ngày giao thành công (từ webhook hoặc ghi tay) là mốc đến hạn của đợt `AFTER_DELIVERY` |
 | [14 · Quote, Order & Contract](../../ecommerce/14-cart-and-order/README.md) | Hợp đồng mua bán của đơn: điều khoản giao hàng, lịch các đợt thanh toán; **dòng phí vận chuyển** thu của khách do Sale nhập ở 14 (09 không tính phí) |

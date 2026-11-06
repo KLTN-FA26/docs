@@ -78,7 +78,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 8. **Hoàn tất kiểm thùng** — hệ thống kiểm theo thứ tự:
    1. mọi thùng của phần lấy hàng đã `Labeled` hoặc `Removed`;
    2. có ít nhất một thùng `Labeled`;
-   3. thiếu thùng so với dòng đơn (thùng bị loại, dòng lấy hàng bị thiếu) thì phải chọn **giao một phần** kèm **ghi chú**, và đơn phải được Sale cho phép giao một phần.
+   3. thiếu thùng so với dòng đơn **trong đợt giao của task** (thùng bị loại, dòng lấy hàng bị thiếu) thì phải chọn **giao một phần** kèm **ghi chú**, và đơn phải được Sale cho phép giao một phần. Các thùng thuộc đợt giao sau không tính là thiếu ([17](../../ecommerce/17-order-management/README.md) BR-29).
 
    Các thùng `Labeled` của lần hoàn tất gom thành **một shipment** `Ready to Dispatch`:
    - đủ thùng → phiên `Completed`, đơn `Packed`;

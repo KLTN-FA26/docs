@@ -73,10 +73,12 @@ Payment quyết định các mốc tiền của đơn:
    | Mốc | Chuyển `Due` khi | Hạn trả (để tính quá hạn) |
    |-----|------------------|---------------------------|
    | `ON_SIGNING` | Hợp đồng `Signed` | Ngày ký + N ngày |
-   | `BEFORE_DELIVERY` | Đơn `Ready to Fulfill` (hàng đã đủ, chuẩn bị xuất) | Không có ngày hạn; chặn bàn giao tới khi trả đủ |
-   | `AFTER_DELIVERY` | Đơn giao thành công (`Delivered`) — tự cập nhật từ webhook của hãng vận chuyển, hoặc Quản lý kho ghi tay ([09](../../warehouse/09-shipping/README.md)) | Ngày giao thành công + N ngày (mặc định = kỳ hạn công nợ của khách) |
+   | `BEFORE_DELIVERY` | Đơn `Ready to Fulfill` (hàng đã đủ, chuẩn bị xuất). **Gắn đợt giao *k***: khi đợt *k* "Sẵn sàng" ([17](../17-order-management/README.md) §5.5) | Không có ngày hạn; chặn bàn giao tới khi trả đủ — gắn đợt *k* thì chỉ chặn bàn giao của **đợt k** |
+   | `AFTER_DELIVERY` | Đơn giao thành công (`Delivered`) — tự cập nhật từ webhook của hãng vận chuyển, hoặc Quản lý kho ghi tay ([09](../../warehouse/09-shipping/README.md)). **Gắn đợt giao *k***: khi **đợt k** giao thành công hết | Ngày giao thành công (của đơn, hoặc của đợt *k* khi gắn) + N ngày (mặc định = kỳ hạn công nợ của khách) |
 
-   > ✅ Đã chốt 2026-11-05: đợt `BEFORE_DELIVERY` đến hạn khi đơn `Ready to Fulfill` và không có ngày quá hạn; với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` phải trả đủ trước **lần bàn giao đầu tiên**, đợt `AFTER_DELIVERY` tính từ **lần giao cuối cùng** (hoặc ngày đóng phần còn lại). Xem [open-questions](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-05: đợt `BEFORE_DELIVERY` đến hạn khi đơn `Ready to Fulfill` và không có ngày quá hạn; với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` **không gắn đợt giao** phải trả đủ trước **lần bàn giao đầu tiên**, đợt `AFTER_DELIVERY` **không gắn đợt giao** tính từ **lần giao cuối cùng** (hoặc ngày đóng phần còn lại). Xem [open-questions D23](../../open-questions/README.md).
+   >
+   > ✅ Đã chốt 2026-11-07 (lịch giao nhiều đợt): đợt `BEFORE_DELIVERY` / `AFTER_DELIVERY` **gắn được một đợt giao** của lịch giao ([14](../14-cart-and-order/README.md) BR-13, BR-23) — cách thanh toán phổ biến "trả theo giá trị từng đợt nhận hàng"; số tiền gợi ý = giá trị hàng của đợt giao (có thuế). Xem [open-questions D37](../../open-questions/README.md).
 3. Đợt đã được trả trước (`Partially Paid` / `Paid` từ khi còn chưa đến hạn — §4.2 bước 6) **giữ trạng thái** khi tới mốc; đợt `Partially Paid` từ đây có hạn trả để tính quá hạn.
 4. **Quét quá hạn** — **mỗi đêm 00:15**, đợt `Due` / `Partially Paid` đã tới mốc, đã qua hạn trả mà chưa trả đủ → `Overdue`.
 
@@ -98,7 +100,7 @@ Payment quyết định các mốc tiền của đơn:
 7. **Kết quả** — hệ thống tính lại các đợt có trong phiếu:
    - Đợt trả một phần → `Partially Paid`; trả đủ → `Paid`.
    - Mọi đợt `ON_SIGNING` của hợp đồng `Paid` → đơn `Pending Payment` tự chuyển `Confirmed`.
-   - Mọi đợt `BEFORE_DELIVERY` `Paid` → mở chặn bàn giao ([09](../../warehouse/09-shipping/README.md)).
+   - Mọi đợt `BEFORE_DELIVERY` `Paid` → mở chặn bàn giao ([09](../../warehouse/09-shipping/README.md)); đợt gắn đợt giao *k* `Paid` → mở chặn cho **đợt k** (các đợt `BEFORE_DELIVERY` không gắn vẫn phải `Paid` trước lần bàn giao đầu tiên).
    - Đơn đã hoàn tất và mọi đợt `Paid` → hợp đồng `Completed` ([14](../14-cart-and-order/README.md)).
 
 ### 4.3. Công nợ phải thu & hạn mức
@@ -148,7 +150,7 @@ Payment quyết định các mốc tiền của đơn:
     - Các đợt chưa `Paid` của đơn → `Cancelled`.
     - Tổng tiền đã thu của các đợt của đơn **trả phí huỷ trước** (nếu có phí).
     - Phần thừa → **số tiền phải hoàn** (§4.5). Phần phí còn thiếu → **khoản phí huỷ**, đến hạn ngay ngày huỷ, do khách trả (vòng đời như đợt, bắt đầu từ `Due`; thu bằng phiếu thu).
-19. **Đóng phần còn lại** của đơn giao một phần: hệ thống **giảm số còn phải thu** của các đợt chưa trả đủ theo giá trị phần bị đóng (= số thùng bị đóng × số cái / thùng × đơn giá / cái — [14](../14-cart-and-order/README.md) BR-08 — cộng tiền thuế VAT tương ứng của dòng; đợt muộn nhất trước — `AFTER_DELIVERY` trước), để khách không bao giờ trả nhiều hơn giá trị hàng đã nhận cộng phí (nếu có). Đã thu vượt phần phải giữ → số tiền phải hoàn.
+19. **Đóng phần còn lại** của đơn giao một phần: hệ thống **giảm số còn phải thu** của các đợt chưa trả đủ theo giá trị phần bị đóng (= số thùng bị đóng × số cái / thùng × đơn giá / cái — [14](../14-cart-and-order/README.md) BR-08 — cộng tiền thuế VAT tương ứng của dòng; **đợt gắn với đợt giao bị đóng trước**, rồi đợt muộn nhất trước — `AFTER_DELIVERY` trước), để khách không bao giờ trả nhiều hơn giá trị hàng đã nhận cộng phí (nếu có). Đã thu vượt phần phải giữ → số tiền phải hoàn.
 
     > ✅ Đã chốt 2026-11-05: **dòng phí khuôn / bản in** không thuộc "phần bị đóng" — đóng phần còn lại chỉ giảm theo giá trị hàng chưa giao, phí khuôn / bản in vẫn phải thu đủ (khuôn / bản in đã làm). Xem [open-questions](../../open-questions/README.md).
 
@@ -245,8 +247,8 @@ stateDiagram-v2
 - **BR-05:** Phiếu thu chỉ ghi cho **đợt chưa `Paid` / `Cancelled`** (kể cả đợt `Not Due` — khách trả sớm) hoặc **khoản phí huỷ** của **cùng một khách**; mỗi dòng không vượt số còn phải thu. Một phiếu thu được có nhiều dòng (khách chuyển một lần trả nhiều đợt). Không có **tiền dư** trong hệ thống *(✅ Đã chốt 2026-11-06)*.
 - **BR-06:** Khoản tiền **không gắn được với đợt** (nội dung chuyển khoản sai, chuyển thừa, tiền về sau khi huỷ đơn) không ghi vào hệ thống; xử lý ở phần mềm kế toán *(✅ Đã chốt 2026-11-06 — [open-questions D36](../../open-questions/README.md))*.
 - **BR-07:** Đơn chỉ `Confirmed` khi **mọi đợt `ON_SIGNING`** đã `Paid` (cùng các điều kiện ở [14](../14-cart-and-order/README.md) BR-15).
-- **BR-08:** Còn đợt `BEFORE_DELIVERY` chưa `Paid` → **chặn bàn giao** cho đơn vị vận chuyển (ký bàn giao chuyến xe — mọi đơn giao nguyên chuyến, [09](../../warehouse/09-shipping/README.md)).
-- **BR-09:** Đợt `AFTER_DELIVERY` là **công nợ phải thu**: hạn trả = ngày giao thành công + N ngày (ngày giao thành công đến từ webhook của hãng vận chuyển hoặc do Quản lý kho ghi — [09](../../warehouse/09-shipping/README.md)); quá hạn chưa trả đủ → `Overdue` (quét mỗi đêm), giữ `Overdue` tới khi trả đủ.
+- **BR-08:** Còn đợt `BEFORE_DELIVERY` chưa `Paid` → **chặn bàn giao** cho đơn vị vận chuyển (ký bàn giao chuyến xe — mọi đơn giao nguyên chuyến, [09](../../warehouse/09-shipping/README.md)). Đợt **gắn đợt giao *k*** chỉ chặn bàn giao của đợt *k*; đợt **không gắn** chặn từ lần bàn giao đầu tiên *(✅ Đã chốt 2026-11-07)*.
+- **BR-09:** Đợt `AFTER_DELIVERY` là **công nợ phải thu**: hạn trả = ngày giao thành công (của đơn — lần giao cuối; hoặc của **đợt giao gắn kèm** — lần giao cuối của đợt đó) + N ngày (ngày giao thành công đến từ webhook của hãng vận chuyển hoặc do Quản lý kho ghi — [09](../../warehouse/09-shipping/README.md)); quá hạn chưa trả đủ → `Overdue` (quét mỗi đêm), giữ `Overdue` tới khi trả đủ.
 - **BR-10:** **Dư nợ (exposure)** = phần chưa thu của mọi đợt `AFTER_DELIVERY` thuộc các hợp đồng `Signed` (kể cả `Not Due`) + khoản phí huỷ chưa trả. **Hạn mức còn lại** = hạn mức − dư nợ, không âm.
 - **BR-11:** Kiểm tín dụng lúc **gửi hợp đồng** chỉ cảnh báo; lúc **ký** thì `OVERDUE` / `OVER_LIMIT` → đơn `On Hold` lý do tín dụng. Chỉ **kế toán** duyệt / từ chối, bắt buộc ghi chú, ghi lịch sử.
 - **BR-12:** Hạn mức và kỳ hạn công nợ do **kế toán duyệt** (ghi người và thời điểm — [18](../18-customer-information/README.md)). Hợp đồng đã ký giữ lịch thanh toán của nó dù hạn mức / kỳ hạn của khách đổi sau đó.
@@ -287,9 +289,9 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [14 · Quote, Order & Contract](../14-cart-and-order/README.md) | Hợp đồng `Signed` sinh các đợt (chia từ tổng có thuế, gồm cả dòng phí khuôn / bản in và phí vận chuyển); đủ đợt `ON_SIGNING` → đơn `Confirmed`; mọi đợt `Paid` → hợp đồng `Completed`; kiểm tín dụng lúc gửi / ký |
+| [14 · Quote, Order & Contract](../14-cart-and-order/README.md) | Hợp đồng `Signed` sinh các đợt (chia từ tổng có thuế, gồm cả dòng phí khuôn / bản in và phí vận chuyển; đợt có thể **gắn đợt giao** của lịch giao); đủ đợt `ON_SIGNING` → đơn `Confirmed`; mọi đợt `Paid` → hợp đồng `Completed`; kiểm tín dụng lúc gửi / ký |
 | [17 · Order Management](../17-order-management/README.md) | Treo / duyệt đơn tín dụng; Sale treo / gỡ treo lý do thanh toán (kể cả sau khi huỷ phiếu thu); mốc `Ready to Fulfill` / `Delivered` làm đợt đến hạn; phí huỷ và số tiền phải hoàn khi huỷ / đóng phần còn lại / trả hàng; ghi nhận đã hoàn → đơn `Refunded` / `Partially Refunded` |
-| [09 · Shipping](../../warehouse/09-shipping/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa thu đủ; ngày giao thành công (từ webhook của hãng hoặc Quản lý kho ghi tay) làm đợt `AFTER_DELIVERY` đến hạn |
+| [09 · Shipping](../../warehouse/09-shipping/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa thu đủ (theo đợt giao gắn kèm, nếu có); ngày giao thành công (của đơn hoặc của đợt giao gắn kèm) (từ webhook của hãng hoặc Quản lý kho ghi tay) làm đợt `AFTER_DELIVERY` đến hạn |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Sale gửi thông tin chuyển khoản theo đợt, nhắc công nợ |
 | [18 · Customer Information](../18-customer-information/README.md) | Hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định; vị thế tín dụng hiển thị cho khách |
 | Kế toán / Ngân hàng (ngoài hệ thống) | Đối soát sao kê; sổ sách tiền đầy đủ (kể cả khoản chưa xác định được đợt, tiền thừa); chuyển khoản hoàn |
