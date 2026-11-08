@@ -37,6 +37,7 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 | **Quản lý kho (Warehouse Manager)** | Lập phiếu kiểm kê và giao người đếm. Xem số sổ sách. Yêu cầu đếm lại, huỷ phiếu kiểm kê. Đề nghị điều chỉnh tồn. **Duyệt / từ chối điều chỉnh tồn** (không duyệt đề nghị của chính mình). **Cách ly / gỡ cách ly** thùng lỗi; **quyết định hàng hoàn** trong khu cách ly (§4.4, §4.8). Có đủ quyền thao tác như nhân viên kho. |
 | **Quản trị hệ thống (System Admin)** | Toàn quyền. **Duyệt điều chỉnh tồn** khi kho chỉ có một quản lý và người đó là người đề nghị (BR-05). |
 | **Nhân viên Sale (Sales Staff)** | Xem tồn khả dụng theo kho khi chọn kho xuất và lập báo giá / đơn ([17](../../ecommerce/17-order-management/README.md)). Không thao tác tồn. |
+| **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | Xem tồn khả dụng theo kho khi lập Đơn sản xuất; **nhận thông báo** khi thùng thuộc lô một Đơn sản xuất bị ghi giảm `DAMAGED` và lập **Đơn sản xuất bù** ([17 §4.13](../../ecommerce/17-order-management/README.md)). Không thao tác tồn. |
 | **Hệ thống** | Tự mở phiếu kiểm kê khi có short pick ([07](../07-picking/README.md)). Ghi sổ biến động cho mọi thay đổi tồn. Tính ATP. |
 
 - Mọi thao tác chỉ trong phạm vi **các kho được gán** cho người dùng.
@@ -67,7 +68,8 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 | **Phiếu kiểm kê** và chênh lệch từng thùng | Quản lý kho |
 | **Phiếu điều chỉnh tồn** (`Pending Approval` → `Posted` / `Rejected` / `Withdrawn`) | Quản lý kho, Kế toán |
 | **Dòng sổ biến động tồn** cho mọi thay đổi | Truy vết, kiểm toán |
-| **Báo cáo truy xuất lô**: nguồn gốc (Đơn sản xuất, phiếu nhận) → thùng còn lại theo vị trí → khoản đang giữ → đơn khách đã xuất | Quản lý kho, Sale (CSKH), thu hồi hàng (recall) |
+| **Báo cáo truy xuất lô**: nguồn gốc (Đơn sản xuất, phiếu nhận) → thùng còn lại theo vị trí → khoản đang giữ → đơn khách đã xuất | Quản lý kho, Sale (CSKH), Điều phối sản xuất, thu hồi hàng (recall) |
+| **Thông báo thùng lỗi bị ghi giảm** (điều chỉnh `DAMAGED` đã duyệt của thùng có lô là một Đơn sản xuất): thùng, SKU, lô, đơn bán đang thiếu — căn cứ lập Đơn sản xuất bù *(✅ 2026-11-07)* | Điều phối sản xuất ([17 §4.13](../../ecommerce/17-order-management/README.md)) |
 
 ---
 
@@ -190,9 +192,11 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 2. Hàng `Quarantine` **không thuộc ATP**, không phân bổ. Chỉ thùng tự do mới cách ly được; thùng đang giữ cho đơn phải được nhả / phân bổ lại trước.
 3. **Xử lý** (Quản lý kho):
    - thùng dùng được → **gỡ cách ly** → nhiệm vụ cất về bin ([05](../05-putaway/README.md)); cất xong thành `Available`;
-   - thùng lỗi → ghi giảm cả thùng bằng điều chỉnh `DAMAGED` đã duyệt (§4.3). Việc đổi trả với đơn vị sản xuất làm **ngoài hệ thống**; hàng thay thế (nếu có) nhập kho qua [03](../03-receipt/README.md) như thành phẩm mới.
+   - thùng lỗi → ghi giảm cả thùng bằng điều chỉnh `DAMAGED` đã duyệt (§4.3). Thùng có lô là một Đơn sản xuất thì khi điều chỉnh được duyệt, hệ thống **báo Điều phối sản xuất**; nếu đơn bán còn thiếu do thùng lỗi, Điều phối sản xuất lập **Đơn sản xuất bù** (tham chiếu Đơn sản xuất gốc và phiếu điều chỉnh) và hàng thay thế nhập kho qua [03](../03-receipt/README.md) theo Đơn sản xuất bù ([17 §4.13](../../ecommerce/17-order-management/README.md)). Thoả thuận chi phí / đổi trả với đơn vị sản xuất làm **ngoài hệ thống**.
 
-> ✅ Đã chốt 2026-11-05: hàng lỗi phát hiện sau khi nhận được đổi trả với đơn vị sản xuất ngoài hệ thống; hệ thống chỉ ghi nhận bằng cách ly ở khu `QUARANTINE` và điều chỉnh tồn. Cách ly / gỡ cách ly là đổi trạng thái, không đổi số lượng nên không qua duyệt bốn mắt. Xem [open-questions](../../open-questions/README.md).
+   > ⚠️ Giả định: thông báo cho Điều phối sản xuất do hệ thống tự gửi khi điều chỉnh `DAMAGED` của thùng có lô Đơn sản xuất được duyệt. Xem [open-questions B45](../../open-questions/README.md).
+
+> ✅ Đã chốt 2026-11-05: hàng lỗi phát hiện sau khi nhận được đổi trả với đơn vị sản xuất ngoài hệ thống; hệ thống chỉ ghi nhận bằng cách ly ở khu `QUARANTINE` và điều chỉnh tồn. Cách ly / gỡ cách ly là đổi trạng thái, không đổi số lượng nên không qua duyệt bốn mắt. ✅ Cập nhật 2026-11-07: hàng thay thế do đơn vị sản xuất làm lại đi qua **Đơn sản xuất bù** do Điều phối sản xuất lập. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.9. Tồn ở khu chờ xuất (Staging)
 
@@ -368,7 +372,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 - **BR-11 — Short pick chặn bán.** Thùng của dòng short pick bị loại khỏi ATP và khỏi phân bổ tới khi mọi điều chỉnh của dòng đó có quyết định. Mọi điều chỉnh **giảm** đang chờ duyệt cũng chặn thùng đó, bất kể nguồn phiếu.
 - **BR-12 — Phạm vi kiểm kê.** Tối đa 500 dòng (thùng) mỗi phiếu, 50 zone, 200 SKU. Người đếm phải là nhân viên kho hoặc quản lý kho đang hoạt động của kho đó. Người đếm chỉ đổi được trước khi bắt đầu đếm.
 - **BR-13 — Không có cảnh báo tồn.** Module không sinh cảnh báo tồn nào *(Đã chốt 2026-11-05)*:
-  - không cảnh báo tồn thấp: SKU thành phẩm theo mẫu của khách sản xuất theo đơn, phần thiếu do Sale lập Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md));
+  - không cảnh báo tồn thấp: SKU thành phẩm theo mẫu của khách sản xuất theo đơn, phần thiếu do Điều phối sản xuất lập Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md));
   - không theo dõi hạn dùng: ly / bao bì không có hạn dùng.
 - **BR-14 — Nguyên thùng.** Mọi tồn nằm trong thùng LPN. Cất, di chuyển, lấy, cách ly, kiểm kê và điều chỉnh đều theo **nguyên thùng**; kho không mở thùng, không lấy hoặc điều chỉnh một phần thùng, không có hàng nằm ngoài thùng.
 - **BR-15 — Hàng hoàn vào cách ly.** Hàng hoàn (RTO hoặc khách trả) chỉ nhập lại kho qua phiếu loại **Hàng hoàn** của [03](../03-receipt/README.md), chỉ nhận thùng thuộc shipment / đơn được tham chiếu, và **luôn vào `Quarantine`**; không cộng thẳng vào tồn khả dụng. Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt (§4.4).
@@ -409,7 +413,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 | Thùng rách hoặc nghi số cái trong thùng khác số cái chuẩn | Cách ly cả thùng sang khu `QUARANTINE` (§4.8) — thùng lệch không được phân bổ; xử lý với đơn vị sản xuất ngoài hệ thống; thùng không dùng được ghi giảm `DAMAGED` qua duyệt. |
 | Người đề nghị điều chỉnh cũng là quản lý duy nhất của kho | Không tự duyệt được; System Admin duyệt (BR-05). |
 | Tồn đầu kỳ không có phiếu nhận | Thùng mang lô `UNTRACED`; truy xuất lô ghi nguồn gốc `UNTRACED`, không truy được về Đơn sản xuất (⚠️ giả định — [open-questions C45](../../open-questions/README.md)). |
-| Phát hiện thùng lỗi trong bin sau khi đã nhập kho | Quản lý kho cách ly nguyên thùng sang khu `QUARANTINE` (§4.8); đổi trả với đơn vị sản xuất ngoài hệ thống; thùng lỗi ghi giảm `DAMAGED` qua duyệt. |
+| Phát hiện thùng lỗi trong bin sau khi đã nhập kho | Quản lý kho cách ly nguyên thùng sang khu `QUARANTINE` (§4.8); thùng lỗi ghi giảm `DAMAGED` qua duyệt; hệ thống báo Điều phối sản xuất, lập Đơn sản xuất bù nếu đơn bán còn thiếu ([17 §4.13](../../ecommerce/17-order-management/README.md)); chi phí / đổi trả với đơn vị sản xuất ngoài hệ thống. |
 | Thùng lỗi nằm trong phần đang giữ cho đơn | Không cách ly thẳng được (BR-21); Quản lý kho nhả / phân bổ lại cho đơn ([07](../07-picking/README.md)) rồi mới cách ly. |
 | Hàng hoàn về nguyên vẹn | Nhập qua phiếu Hàng hoàn vào `Quarantine`; Quản lý kho gỡ cách ly, cất về bin (05) → `Available`; dùng được cho đơn sau của chính khách (§4.4). |
 | Hàng hoàn về hư hỏng | Giữ ở `Quarantine`; ghi giảm cả thùng bằng điều chỉnh `DAMAGED` qua duyệt. |
@@ -434,5 +438,5 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
 | [09 · Shipping](../09-shipping/README.md) | Hàng hoàn (RTO) do Quản lý kho ghi nhận, nhập lại qua 03 vào `Quarantine` |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển nguyên thùng ghi sổ `MOVE`; thùng đang kiểm kê không di chuyển được (BR-10); sửa lệch vị trí phát hiện khi kiểm kê |
 | [13 · Catalog](../../ecommerce/13-catalog/README.md) · [14 · Quote, Order & Contract](../../ecommerce/14-cart-and-order/README.md) | ATP (BR-01) cấp **theo số thùng**; 13 dùng làm chỉ báo còn hàng trên sàn (ngưỡng "sắp hết" do 13 quy định), 14 dùng làm tồn khả dụng khi lập báo giá / đơn |
-| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Sale chọn kho xuất (giữ hàng chỉ trên tồn kho xuất — BR-17); Quản lý kho release → phân bổ đủ số thùng của dòng; Đơn sản xuất là nguồn gốc lô; yêu cầu trả của khách → hàng hoàn qua 03; short pick → đơn treo xử lý |
+| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Sale chọn kho xuất (giữ hàng chỉ trên tồn kho xuất — BR-17); Quản lý kho release → phân bổ đủ số thùng của dòng; Đơn sản xuất là nguồn gốc lô; ghi giảm `DAMAGED` thùng của Đơn sản xuất → báo Điều phối sản xuất lập **Đơn sản xuất bù** (§4.13 của 17); yêu cầu trả của khách → hàng hoàn qua 03; short pick → đơn treo xử lý |
 | [00 · System Overview §6](../../00-system-overview/README.md) | Nguyên tắc chứng từ nguồn và công thức ATP |

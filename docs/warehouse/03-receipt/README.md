@@ -53,7 +53,8 @@ Phiếu nhập kho là **điểm hàng hoá chính thức thuộc quyền kiểm
 |-------|---------|
 | **Nhân viên kho (Warehouse Staff / Receiver)** | Tạo phiếu nhập (cả hai loại), kiểm đếm theo thùng, dán nhãn thùng LPN (in / in lại nhãn), quét LPN thùng hàng hoàn, xác nhận phiếu, huỷ phiếu nháp |
 | **Quản lý kho (Warehouse Manager)** | Theo dõi phiếu nhập của kho; xử lý **nhận thiếu / thừa / thùng lệch số chuẩn**; **quyết định hàng hoàn trong khu cách ly** — gỡ cách ly đưa lại tồn khả dụng hoặc ghi giảm bằng điều chỉnh có duyệt ([20](../20-inventory-control/README.md)); xử lý chênh lệch sau khi xác nhận bằng điều chỉnh tồn có duyệt. Có đủ quyền thao tác như nhân viên kho (làm thay khi cần) |
-| **Nhân viên Sale (Sales Staff)** | Không thao tác phiếu nhập. Người lập và theo dõi Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md)): theo dõi số đã nhận / còn thiếu, được báo khi nhận thiếu hoặc thùng bị từ chối nhận, làm việc lại với đơn vị sản xuất, quyết định **đóng thiếu** Đơn sản xuất |
+| **Điều phối sản xuất (Production Coordinator)** *(thay Sale từ 2026-11-07)* | Không thao tác phiếu nhập. Người lập và theo dõi Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md)): theo dõi số đã nhận / còn thiếu, được báo khi nhận thiếu hoặc thùng bị từ chối nhận, làm việc lại với đơn vị sản xuất, quyết định **đóng thiếu** Đơn sản xuất |
+| **Nhân viên Sale (Sales Staff)** | Không thao tác phiếu nhập; được báo khi hàng hoàn về thiếu thùng so với shipment / RMA ([17 §4.10](../../ecommerce/17-order-management/README.md)) để làm việc với khách |
 | **Đơn vị sản xuất** *(ngoài hệ thống)* | Giao thành phẩm **đã đóng thùng đúng số chuẩn** tới đúng **kho nhận** của Đơn sản xuất, kèm phiếu giao ghi số Đơn sản xuất và số thùng; nhận lại thùng thừa / thùng lỗi / thùng lệch số chuẩn bị từ chối |
 | **Hãng vận chuyển / Khách hàng sỉ** *(hàng hoàn)* | Hãng trả kiện không giao được về kho (RTO); khách gửi hàng trả theo RMA ([17 §4.10](../../ecommerce/17-order-management/README.md)) |
 | **Hệ thống** | Kiểm số thùng nhận luỹ kế không vượt số thùng của Đơn sản xuất; cấp mã LPN; **tự gán lô = mã Đơn sản xuất** cho thùng; ghi tồn `Inbound` theo thùng và sổ biến động; cập nhật trạng thái Đơn sản xuất; mở nhiệm vụ cất; đóng phiếu khi cất xong. Với hàng hoàn: chỉ nhận thùng LPN thuộc shipment / đơn được tham chiếu, ghi tồn `Quarantine` tại khu cách ly, báo 17 |
@@ -89,7 +90,7 @@ Phiếu nhập kho là **điểm hàng hoá chính thức thuộc quyền kiểm
 | Kết quả | Dùng bởi |
 |---------|----------|
 | **Receipt number** (mã phiếu nhập, kèm loại phiếu) | 05 Putaway, 17 (tiến độ Đơn sản xuất; hàng trả về kho), truy vết |
-| **Kết quả kiểm đếm** theo dòng, tính theo **số thùng** (kèm số cái): số trên Đơn sản xuất, số đã nhận luỹ kế, số còn thiếu | Sale ([17](../../ecommerce/17-order-management/README.md)), Quản lý kho |
+| **Kết quả kiểm đếm** theo dòng, tính theo **số thùng** (kèm số cái): số trên Đơn sản xuất, số đã nhận luỹ kế, số còn thiếu | Điều phối sản xuất ([17](../../ecommerce/17-order-management/README.md)), Quản lý kho |
 | **Thùng LPN** — mã `LPN-yyyyMMdd-NNNNNN`, nhãn PDF (mã chữ, QR, Code 128) | Dán lên thùng; [05](../05-putaway/README.md), [07](../07-picking/README.md), [20](../20-inventory-control/README.md) |
 | **Cập nhật Đơn sản xuất**: số thùng đã nhận, số thùng còn thiếu, trạng thái (`Partially Received` / `Received`) | [17](../../ecommerce/17-order-management/README.md) |
 | **Tồn `Inbound` ở khu nhận hàng** theo SKU + lô, **nằm trong từng thùng** (thùng `In Stock`) khi phiếu theo Đơn sản xuất được xác nhận | 05 Putaway, báo cáo tồn |
@@ -106,7 +107,7 @@ Phiếu nhập kho là **điểm hàng hoá chính thức thuộc quyền kiểm
 **Chặng 1 — Nhập vào WH/Input**
 
 1. **Tạo phiếu nhập** — Đơn vị sản xuất giao các thùng thành phẩm kèm phiếu giao ghi số Đơn sản xuất. NV kho chọn **một Đơn sản xuất** nhận được hàng (BR-01, BR-15), kho nhận đúng kho mình → phiếu `Draft`.
-   - Đơn sản xuất **bật cờ cần duyệt mẫu in** mà mẫu **chưa được khách duyệt** (đơn còn `Sent` / `Accepted` / `Sample Pending`) → **chặn** tạo phiếu; báo Sale ([17](../../ecommerce/17-order-management/README.md)).
+   - Đơn sản xuất **bật cờ cần duyệt mẫu in** mà mẫu **chưa được khách duyệt** (đơn còn `Sent` / `Accepted` / `Sample Pending`) → **chặn** tạo phiếu; báo Điều phối sản xuất ([17](../../ecommerce/17-order-management/README.md)).
    - Kho đầy **không chặn nhận**: hàng vẫn nhận vào `RECEIVING`; thùng không còn bin hợp lệ được cất vào khu tạm `OVERFLOW` ([05](../05-putaway/README.md), [06 §4.6](../06-warehouse-map-slotting/README.md)).
 2. **Kiểm đếm theo thùng** — với từng dòng (dòng Đơn sản xuất): chọn khu nhận hàng, rồi **liệt kê các thùng** nhận; hệ thống tự gán **lô = mã Đơn sản xuất** cho mọi thùng của dòng (BR-03). Mỗi thùng mang đúng số cái chuẩn / thùng của SKU; thùng có số cái **khác số chuẩn** thì **không liệt kê, không nhận** — trả lại đơn vị sản xuất (BR-13). Hệ thống:
    - cấp **mã LPN** cho thùng mới → thùng `Receiving`; thùng đã liệt kê trước được đếm lại; thùng có trên lần lưu trước mà lần này không còn → `Void`;
@@ -121,7 +122,7 @@ Phiếu nhập kho là **điểm hàng hoá chính thức thuộc quyền kiểm
    | Kết quả | Điều kiện | Xử lý |
    |---------|-----------|-------|
    | **Đủ** | Số thùng nhận luỹ kế = số thùng trên Đơn sản xuất | Dòng Đơn sản xuất nhận xong |
-   | **Thiếu** | Số thùng nhận luỹ kế < số thùng trên Đơn sản xuất (kể cả do thùng lệch số chuẩn bị trả lại) | Nhận các thùng đúng chuẩn thực có; phần thiếu **vẫn mở** trên Đơn sản xuất (BR-10, BR-13); Sale được báo |
+   | **Thiếu** | Số thùng nhận luỹ kế < số thùng trên Đơn sản xuất (kể cả do thùng lệch số chuẩn bị trả lại) | Nhận các thùng đúng chuẩn thực có; phần thiếu **vẫn mở** trên Đơn sản xuất (BR-10, BR-13); Điều phối sản xuất được báo |
    | **Thừa** | Số thùng nhận luỹ kế > số thùng trên Đơn sản xuất | **Chặn**; không nhận thùng làm vượt số còn mở — trả nguyên thùng lại đơn vị sản xuất (BR-02) |
 
 4. **In & dán nhãn LPN** — NV kho **in nhãn** theo dòng nhập, hoặc **in lại** theo mã LPN (tối đa 500 nhãn một lần; không in thùng `Void` hoặc thất lạc; thùng đã lấy cho đơn vẫn in lại được khi nhãn LPN rách / mất — xem vòng đời thùng ở [20](../20-inventory-control/README.md)), rồi dán lên từng thùng.
@@ -137,7 +138,7 @@ Phiếu nhập kho là **điểm hàng hoá chính thức thuộc quyền kiểm
 7. **Bàn giao cho Putaway** — hệ thống mở **nhiệm vụ cất hàng** ([05](../05-putaway/README.md)): **mỗi thùng một nhiệm vụ**, cất nguyên thùng.
 8. **Đóng phiếu nhập** — khi mọi thùng của phiếu đã được cất → `Closed` tự động. Hàng cất xong thành tồn `Available`; [17](../../ecommerce/17-order-management/README.md) dùng tồn này để đưa đơn `Awaiting Stock` sang `Ready to Fulfill`.
 
-> ✅ Đã chốt 2026-11-05: Đơn sản xuất **không bật** cờ cần duyệt mẫu in mà hàng về khi còn `Sent` / `Accepted` (bên sản xuất chưa báo / Sale chưa ghi nhận tiến độ) vẫn được nhận; lúc xác nhận phiếu, hệ thống tự chuyển Đơn sản xuất qua `In Production` rồi `Partially Received` / `Received`. Đơn sản xuất **bật** cờ mà mẫu chưa được khách duyệt thì **chặn** nhập: hàng in hàng loạt chưa được khách chấp thuận mẫu. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: Đơn sản xuất **không bật** cờ cần duyệt mẫu in mà hàng về khi còn `Sent` / `Accepted` (bên sản xuất chưa báo / Điều phối sản xuất chưa ghi nhận tiến độ) vẫn được nhận; lúc xác nhận phiếu, hệ thống tự chuyển Đơn sản xuất qua `In Production` rồi `Partially Received` / `Received`. Đơn sản xuất **bật** cờ mà mẫu chưa được khách duyệt thì **chặn** nhập: hàng in hàng loạt chưa được khách chấp thuận mẫu. Xem [open-questions](../../open-questions/README.md).
 
 ### 4.2. Phiếu hàng hoàn
 
@@ -202,7 +203,7 @@ stateDiagram-v2
   - Thùng luôn được cất **nguyên thùng** ([05](../05-putaway/README.md)).
   - Dòng đã có thùng không bỏ được.
   - Mã LPN không trùng; có thể có khoảng trống trong dãy số. Thùng hàng hoàn giữ mã LPN gốc.
-- **BR-10:** **Nhận thiếu** không đóng dòng Đơn sản xuất: phần thiếu vẫn mở để nhận ở phiếu sau. Chỉ **Sale** **đóng thiếu** Đơn sản xuất ở [17](../../ecommerce/17-order-management/README.md); phiếu nhập không tự đóng Đơn sản xuất.
+- **BR-10:** **Nhận thiếu** không đóng dòng Đơn sản xuất: phần thiếu vẫn mở để nhận ở phiếu sau. Chỉ **Điều phối sản xuất** **đóng thiếu** Đơn sản xuất ở [17](../../ecommerce/17-order-management/README.md); phiếu nhập không tự đóng Đơn sản xuất.
 - **BR-11:** Hàng nhập ghi tồn theo **đúng SKU trên dòng Đơn sản xuất**. Tồn thuộc SKU, **không gắn sẵn với đơn** (gắn đơn là việc phân bổ ở [17](../../ecommerce/17-order-management/README.md) / [20](../20-inventory-control/README.md)).
 - **BR-12:** **Chỉ nhập theo thùng** *(Đã chốt 2026-11-04)*: mọi hàng nhận đều nằm trong một thùng LPN; mỗi dòng nhập có ít nhất một thùng; số thực nhận của dòng bằng số thùng. Không có tồn ngoài thùng.
 - **BR-13:** **Mọi thùng đúng số cái chuẩn** *(Đã chốt 2026-11-05)*: số cái trong mỗi thùng nhận vào bằng **số cái chuẩn / thùng** của SKU ([01](../01-product-creation/README.md) BR-11). Thùng có số cái khác số chuẩn (thiếu hay thừa) **không được nhận**: trả nguyên thùng lại đơn vị sản xuất, phần tương ứng **vẫn mở** trên Đơn sản xuất.
@@ -215,20 +216,20 @@ stateDiagram-v2
 |------------|-------------|
 | Hàng về không có Đơn sản xuất | Chưa hỗ trợ nhận không chứng từ; mọi phiếu nhập thành phẩm phải theo một Đơn sản xuất đang mở (Đơn sản xuất chỉ phát sinh từ đơn bán — [17](../../ecommerce/17-order-management/README.md)). ⚠️ Giả định: nhận không chứng từ (blind receipt) là phạm vi sau — [open-questions C19](../../open-questions/README.md) |
 | Một chuyến giao hàng của nhiều Đơn sản xuất | Mỗi Đơn sản xuất một phiếu nhập |
-| Đơn vị sản xuất giao tới kho khác kho nhận của Đơn sản xuất | Không tạo được phiếu tại kho đó (BR-01); đơn vị sản xuất phải giao đúng kho nhận; báo Sale |
-| Giao SKU không có trên Đơn sản xuất | Không nhận các thùng đó; trả lại đơn vị sản xuất; báo Sale |
+| Đơn vị sản xuất giao tới kho khác kho nhận của Đơn sản xuất | Không tạo được phiếu tại kho đó (BR-01); đơn vị sản xuất phải giao đúng kho nhận; báo Điều phối sản xuất |
+| Giao SKU không có trên Đơn sản xuất | Không nhận các thùng đó; trả lại đơn vị sản xuất; báo Điều phối sản xuất |
 | Hàng giao rời, chưa đóng thùng | Không nhận (BR-12); đơn vị sản xuất đóng thùng rồi giao lại |
-| Thùng có số cái khác số chuẩn / thùng (thiếu hoặc thừa) | Không nhận thùng đó, trả lại đơn vị sản xuất; phần đó vẫn mở trên Đơn sản xuất để nhận ở phiếu sau (BR-13); Quản lý kho xử lý, báo Sale |
+| Thùng có số cái khác số chuẩn / thùng (thiếu hoặc thừa) | Không nhận thùng đó, trả lại đơn vị sản xuất; phần đó vẫn mở trên Đơn sản xuất để nhận ở phiếu sau (BR-13); Quản lý kho xử lý, báo Điều phối sản xuất |
 | Giao vượt số trên Đơn sản xuất | Chặn; nhận các thùng trong phạm vi số còn mở, thùng làm vượt trả nguyên thùng lại đơn vị sản xuất (BR-02) |
-| Giao thiếu | Nhận các thùng thực có; Đơn sản xuất → `Partially Received`; lần giao sau là phiếu nhập mới, hoặc Sale đóng thiếu ở 17 |
+| Giao thiếu | Nhận các thùng thực có; Đơn sản xuất → `Partially Received`; lần giao sau là phiếu nhập mới, hoặc Điều phối sản xuất đóng thiếu ở 17 |
 | Hàng về khi Đơn sản xuất còn `Sent` / `Accepted`, không bật cờ duyệt mẫu in | Nhận bình thường; Đơn sản xuất tự qua `In Production` khi xác nhận phiếu (BR-15) |
-| Hàng về khi Đơn sản xuất bật cờ duyệt mẫu in mà mẫu chưa được khách duyệt (`Sent` / `Accepted` / `Sample Pending`) | **Chặn** nhập (BR-15); không nhận hàng, báo Sale xử lý với khách và đơn vị sản xuất ở [17](../../ecommerce/17-order-management/README.md) |
+| Hàng về khi Đơn sản xuất bật cờ duyệt mẫu in mà mẫu chưa được khách duyệt (`Sent` / `Accepted` / `Sample Pending`) | **Chặn** nhập (BR-15); không nhận hàng, báo Điều phối sản xuất xử lý với đơn vị sản xuất (Sale xử lý với khách) ở [17](../../ecommerce/17-order-management/README.md) |
 | Kho đầy khi hàng về | Không chặn nhận; thùng không còn bin hợp lệ được cất vào khu `OVERFLOW` ([05](../05-putaway/README.md)); Bảng sức chứa kho đã cảnh báo từ lúc lập Đơn sản xuất ([06](../06-warehouse-map-slotting/README.md)) |
 | Thùng lỗi thấy rõ khi kiểm đếm (móp, in sai, bẩn) | ✅ Đã chốt 2026-11-05: không nhận thùng lỗi, trả nguyên thùng lại đơn vị sản xuất ngay khi giao; phần đó vẫn mở trên Đơn sản xuất. Xem [open-questions](../../open-questions/README.md) |
 | Hàng lỗi phát hiện sau khi đã xác nhận phiếu | Điều chỉnh tồn có duyệt hoặc chuyển thùng sang khu `QUARANTINE` ([20](../20-inventory-control/README.md)); đổi trả với đơn vị sản xuất ngoài hệ thống (✅ đã chốt 2026-11-05, §1) |
 | Đếm lại một dòng đã dán thùng | Lưu lại bản đếm: thùng còn liệt kê được đếm lại, thùng bỏ ra thành `Void` |
 | Nhãn LPN bị rách / mất trước khi cất | In lại theo mã LPN |
-| Sau khi xác nhận mới phát hiện một thùng lệch số cái chuẩn | ✅ Đã chốt 2026-11-05: thùng lệch không được phân bổ — chuyển thùng sang khu `QUARANTINE` rồi loại cả thùng khỏi tồn bằng điều chỉnh tồn có duyệt ([20 §4.3](../20-inventory-control/README.md)); đổi trả với đơn vị sản xuất ngoài hệ thống; báo Sale. Xem [open-questions](../../open-questions/README.md) |
+| Sau khi xác nhận mới phát hiện một thùng lệch số cái chuẩn | ✅ Đã chốt 2026-11-05: thùng lệch không được phân bổ — chuyển thùng sang khu `QUARANTINE` rồi loại cả thùng khỏi tồn bằng điều chỉnh tồn có duyệt ([20 §4.3](../20-inventory-control/README.md)); đổi trả với đơn vị sản xuất ngoài hệ thống; báo Điều phối sản xuất — lập Đơn sản xuất bù nếu đơn bán còn thiếu ([17 §4.13](../../ecommerce/17-order-management/README.md)). Xem [open-questions](../../open-questions/README.md) |
 | Huỷ hoặc đóng thiếu Đơn sản xuất khi đang có phiếu nhập nháp | Chặn; xác nhận hoặc huỷ phiếu nháp trước |
 | Quét thùng hàng hoàn không thuộc shipment / đơn được tham chiếu | Từ chối thùng đó (BR-14); kiểm lại chứng từ tham chiếu |
 | Hàng hoàn về thiếu thùng so với shipment / RMA | ✅ Đã chốt 2026-11-05: xác nhận các thùng thực có; Quản lý kho xử lý phần thiếu với hãng vận chuyển / khách ngoài hệ thống; báo Sale. Xem [open-questions](../../open-questions/README.md) |

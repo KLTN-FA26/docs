@@ -40,7 +40,8 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 |-------|---------|
 | **Khách hàng sỉ (B2B Customer)** — chủ sở hữu | Trên sàn: bấm **"Thiết kế"** ở một quy cách để tạo bản thiết kế; tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D; **lưu**, xem lại trong **mẫu thiết kế của tôi** ([13](../13-catalog/README.md)); xoá bản nháp; **gửi duyệt** (có thể kèm yêu cầu báo giá); **tạo bản sửa** từ bản đã duyệt; **yêu cầu báo giá** từ bản đã duyệt. Tạo và đóng **dự án thiết kế**, thêm / gỡ bản, quản lý **thư viện tài nguyên** của dự án; **gửi duyệt cả bộ**; **yêu cầu báo giá cả dự án**. Duyệt **mẫu in** của Đơn sản xuất ([17](../17-order-management/README.md)). |
 | **Quản lý kinh doanh (Sales Manager)** | Khai báo **cấu hình in** (khuôn 2D, vùng in, lề, model 3D, ràng buộc file) cho quy cách ([01 §4.10](../../warehouse/01-product-creation/README.md)). **Duyệt kỹ thuật + kiểm duyệt nội dung** bản thiết kế khách gửi: **Duyệt** hoặc **Trả lại** kèm lý do (quyền **Duyệt kỹ thuật thiết kế**); với **lượt duyệt dự án**, xem cả bộ cạnh nhau và kiểm thêm sự đồng bộ giữa các bản (§4.10). Duyệt và gửi Đơn sản xuất ([17](../17-order-management/README.md)). |
-| **Nhân viên Sale (Sales Staff)** | **Nhận yêu cầu báo giá** từ bản thiết kế hoặc **cả dự án** qua [chat](../16-sales-chat/README.md); tra thiết kế đã duyệt và SKU riêng của khách để báo giá ([14](../14-cart-and-order/README.md)). Lập **Đơn sản xuất** cho SKU riêng ([17](../17-order-management/README.md)) — snapshot của SKU được đính kèm; tải file theo quyền. Không thiết kế, không sửa bản thiết kế của khách. |
+| **Nhân viên Sale (Sales Staff)** | **Nhận yêu cầu báo giá** từ bản thiết kế hoặc **cả dự án** qua [chat](../16-sales-chat/README.md); tra thiết kế đã duyệt và SKU riêng của khách để báo giá ([14](../14-cart-and-order/README.md)). Không thiết kế, không sửa bản thiết kế của khách. |
+| **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | Lập **Đơn sản xuất** cho SKU riêng ([17](../17-order-management/README.md)) — snapshot của SKU được đính kèm; tải file theo quyền (chỉ xem thiết kế đã duyệt). |
 | **Đơn vị sản xuất** *(ngoài hệ thống — xưởng của công ty hoặc đối tác ngoài)* | Nhận bộ file chốt kèm Đơn sản xuất; in **mẫu in thử** theo bộ file khi Đơn sản xuất cần duyệt mẫu in ([17](../17-order-management/README.md)); không thao tác trong module này. |
 | **Hệ thống** | Quét mã độc file tải lên; dựng xem trước 2D / 3D; **preflight** khi gửi duyệt; khi duyệt: **xuất bộ file** (file in PDF/X), tính checksum, chốt snapshot, **sinh SKU thành phẩm riêng**. Kiểm lại checksum khi gắn báo giá / đơn / Đơn sản xuất và khi cấp link tải. Mở chat kèm thẻ yêu cầu báo giá (nhiều dòng khi yêu cầu cả dự án — [16](../16-sales-chat/README.md)). Chạy preflight từng bản khi gửi duyệt cả bộ, mở và tự đóng **lượt duyệt dự án**. Ghi lịch sử quyết định. |
 
@@ -83,7 +84,7 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 | **Lượt duyệt dự án** | Các bản gửi duyệt cùng lúc từ một dự án; hiện thành **một mục** trong hàng chờ duyệt; tự đóng khi mọi bản đã có quyết định (§4.10) | Quản lý kinh doanh |
 | **Yêu cầu báo giá cả dự án** | Dự án, các bản / SKU riêng, số thùng từng bản, ngày giao mong muốn chung; hiện thành **thẻ yêu cầu báo giá nhiều dòng** trong chat | [16](../16-sales-chat/README.md), [14](../14-cart-and-order/README.md) |
 | **Lịch sử quyết định** | Mọi bước của bản thiết kế (BR-13, §5.3) và của dự án (§5.4) | Quản lý kinh doanh, Sale, kiểm toán |
-| **Link tải file** | Link ngắn hạn, cấp theo quyền; file trong snapshot chỉ cấp khi checksum còn khớp | Khách, Sale, Quản lý kinh doanh, đơn vị sản xuất (qua Đơn sản xuất) |
+| **Link tải file** | Link ngắn hạn, cấp theo quyền; file trong snapshot chỉ cấp khi checksum còn khớp | Khách, Sale, Quản lý kinh doanh, Điều phối sản xuất, đơn vị sản xuất (qua Đơn sản xuất) |
 
 **Vai trò của file trong bộ file xuất:**
 
@@ -156,7 +157,7 @@ SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-cata
 ### 4.6. Dùng thiết kế đã duyệt
 
 18. Sale tra **danh sách thiết kế đã duyệt và SKU riêng** của khách (lọc theo sản phẩm hoặc SKU) và xem trước, để chọn SKU riêng vào **dòng báo giá / đơn hàng** ([14](../14-cart-and-order/README.md)).
-19. Khi đơn thiếu hàng của SKU riêng, Sale lập **Đơn sản xuất** ([17](../17-order-management/README.md)), Quản lý kinh doanh duyệt và gửi; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) qua link tải có kiểm checksum.
+19. Khi đơn thiếu hàng của SKU riêng, Điều phối sản xuất lập **Đơn sản xuất** ([17](../17-order-management/README.md)), Quản lý kinh doanh duyệt và gửi; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) qua link tải có kiểm checksum.
     - **Duyệt mẫu in** ([17](../17-order-management/README.md)) — khi Đơn sản xuất bật cờ "cần duyệt mẫu in" (mặc định bật cho lần sản xuất đầu của SKU), đơn vị sản xuất in mẫu thử **theo đúng bộ file của snapshot**; khách xem ảnh / video mẫu ở mẫu thiết kế của tôi ([13](../13-catalog/README.md)) hoặc thẻ trong [chat](../16-sales-chat/README.md), rồi **Duyệt** hoặc **Yêu cầu in lại**.
     - Duyệt mẫu in **không sửa snapshot** (BR-14). Mẫu lỗi in hoặc khách muốn in lại cùng file → in lại vòng mới ở 17. Khách cần **sửa file thiết kế** → tạo bản sửa (§4.7), sinh SKU riêng mới, đổi SKU dòng đơn theo quy trình ở [17](../17-order-management/README.md).
 20. Mỗi lần gắn (báo giá, đơn, Đơn sản xuất) và mỗi lần cấp link tải, hệ thống kiểm (BR-10):
@@ -304,7 +305,7 @@ Lịch sử của dự án (BR-13):
 
 - **BR-01:** Mỗi bản thiết kế thuộc **đúng một khách**, **một sản phẩm `CUSTOMIZABLE`** và **một quy cách**. Chủ sở hữu là tài khoản khách hàng đang hoạt động **của chính khách đó** (mỗi khách một tài khoản đăng nhập) và là **người tạo duy nhất**; nhân viên không tạo, không sửa bản thiết kế của khách.
 - **BR-02:** Chỉ bắt đầu thiết kế được trên quy cách `Active` của sản phẩm `Approved` / `Published` **đã có khuôn in** (khuôn 2D + vùng in — [01 §4.10](../../warehouse/01-product-creation/README.md)).
-- **BR-03:** **Phạm vi nhìn thấy.** Bản `Draft` chỉ chủ sở hữu thấy. Bản `Pending Review` thêm Quản lý kinh doanh (hàng chờ duyệt) và Sale nhận yêu cầu báo giá gắn bản đó (chỉ xem). Thiết kế **đã duyệt** và SKU riêng thì Sale và Quản lý kinh doanh tra được theo khách (để báo giá, lập đơn, lập Đơn sản xuất). Khách chỉ thấy thiết kế và SKU của chính mình; với người khác coi như không tồn tại.
+- **BR-03:** **Phạm vi nhìn thấy.** Bản `Draft` chỉ chủ sở hữu thấy. Bản `Pending Review` thêm Quản lý kinh doanh (hàng chờ duyệt) và Sale nhận yêu cầu báo giá gắn bản đó (chỉ xem). Thiết kế **đã duyệt** và SKU riêng thì Sale, Quản lý kinh doanh và Điều phối sản xuất tra được theo khách (để báo giá, lập đơn, lập Đơn sản xuất). Khách chỉ thấy thiết kế và SKU của chính mình; với người khác coi như không tồn tại.
 
   > ⚠️ Giả định: nhân viên **không xem** bản `Draft` của khách (khách cần hỗ trợ thì gửi ảnh chụp / mô tả qua chat). Xem [open-questions B38](../../open-questions/README.md).
 - **BR-04:** File tải lên phải đúng **định dạng**, **dung lượng** theo ràng buộc file của quy cách và qua **quét mã độc**; sai thì từ chối ngay, không lưu. Chỉ bản `Draft` nhận file và sửa bố cục.
@@ -349,7 +350,7 @@ Lịch sử của dự án (BR-13):
 | "Gửi duyệt và yêu cầu báo giá" nhưng bản bị trả lại | Thẻ yêu cầu báo giá vẫn ở chat; Sale chờ tới khi bản đó được gửi lại và duyệt mới lập báo giá (BR-15). ⚠️ Giả định — xem [open-questions B40](../../open-questions/README.md). |
 | Khách muốn đổi thiết kế sau khi đã duyệt | Tạo bản sửa từ snapshot (§4.7) → gửi duyệt → duyệt → SKU riêng mới. |
 | Mẫu in thử bị lỗi in (lệch màu, nhoè, sai vị trí so với file) | Không đụng thiết kế: khách **Yêu cầu in lại**, vòng mẫu mới ghi lý do lỗi in của bên sản xuất ([17](../17-order-management/README.md)). |
-| Xem mẫu in thử, khách muốn đổi logo / màu / nội dung file | Không sửa snapshot (BR-14): tạo bản sửa (§4.7) → duyệt → SKU riêng mới; Sale đổi SKU dòng đơn và xử lý Đơn sản xuất theo quy trình ở [17](../17-order-management/README.md). |
+| Xem mẫu in thử, khách muốn đổi logo / màu / nội dung file | Không sửa snapshot (BR-14): tạo bản sửa (§4.7) → duyệt → SKU riêng mới; Sale đổi SKU dòng đơn, Điều phối sản xuất xử lý Đơn sản xuất theo quy trình ở [17](../17-order-management/README.md). |
 | Gắn SKU riêng của khách khác vào báo giá / đơn | Hệ thống từ chối (BR-10). |
 | File trong kho lưu trữ bị thay / hỏng sau khi duyệt | Kiểm checksum thất bại: không gắn báo giá / đơn / Đơn sản xuất, không cấp link tải. Khách tạo bản sửa (Sale hướng dẫn qua chat), gửi duyệt lại → SKU mới. |
 | File tải lên nhiễm mã độc / sai định dạng / quá dung lượng | Từ chối ngay, không lưu (BR-04). |

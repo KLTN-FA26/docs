@@ -26,9 +26,9 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ (B2B Customer)** | Mở hội thoại trên cổng khách hàng (từ trang sản phẩm, mẫu thiết kế, báo giá, đơn, hợp đồng, hoặc nút "Chat với Sale"); **yêu cầu báo giá từ bản thiết kế** (hệ thống mở hội thoại kèm thẻ yêu cầu báo giá — [13](../13-catalog/README.md)); gửi câu hỏi, ảnh / file; nhận báo giá, hợp đồng, thông tin chuyển khoản, mẫu in thử; thao tác trên các thẻ hành động (chấp nhận báo giá, **duyệt mẫu in**) |
-| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn (kể cả hướng dẫn khách tự thiết kế); **nhận yêu cầu báo giá từ bản thiết kế** và lập báo giá khi bản đã duyệt; gửi báo giá, hợp đồng, thông tin chuyển khoản theo đợt, nhắc công nợ, **thẻ duyệt mẫu in**; báo khách tiến độ Đơn sản xuất; tạo yêu cầu đổi / huỷ / trả; chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
+| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn (kể cả hướng dẫn khách tự thiết kế); **nhận yêu cầu báo giá từ bản thiết kế** và lập báo giá khi bản đã duyệt; gửi báo giá, hợp đồng, thông tin chuyển khoản theo đợt, nhắc công nợ, **thẻ duyệt mẫu in** (mẫu do Điều phối sản xuất tải lên); báo khách tiến độ Đơn sản xuất (Điều phối sản xuất ghi nhận ở 17); tạo yêu cầu đổi / huỷ / trả; chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
 | **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản lý kinh doanh hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
-| **Kế toán (Accountant)**, **Quản lý kho (Warehouse Manager)**, **Quản lý kinh doanh (Sales Manager)** | Không chat trực tiếp với khách (trừ khi giữ quyền giám sát chat); agent chuyển câu hỏi nội bộ (đối soát tiền → Kế toán; nhập kho, xuất kho, kết quả giao → Quản lý kho; duyệt Đơn sản xuất, giảm giá vượt hạn mức, duyệt bản thiết kế của khách → Quản lý kinh doanh) và chờ phản hồi |
+| **Kế toán (Accountant)**, **Quản lý kho (Warehouse Manager)**, **Quản lý kinh doanh (Sales Manager)**, **Điều phối sản xuất (Production Coordinator)** | Không chat trực tiếp với khách (trừ khi giữ quyền giám sát chat); agent chuyển câu hỏi nội bộ (đối soát tiền → Kế toán; nhập kho, xuất kho, kết quả giao → Quản lý kho; tiến độ sản xuất, mẫu in, ngày hoàn thành dự kiến → Điều phối sản xuất; duyệt Đơn sản xuất, giảm giá vượt hạn mức, duyệt bản thiết kế của khách → Quản lý kinh doanh) và chờ phản hồi |
 | **Hệ thống (định tuyến & nhắc SLA)** | Định tuyến hội thoại tới Sale phụ trách; sinh **thẻ ngữ cảnh / thẻ hành động** từ chứng từ, gồm **thẻ yêu cầu báo giá** khi khách yêu cầu báo giá và cập nhật trạng thái bản thiết kế trên thẻ; nhắc SLA; lưu lịch sử |
 
 > ⚠️ Giả định: phạm vi là **chat 1–1 khách sỉ ↔ Sale trong cổng khách hàng**. Tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI là phạm vi sau — xem [open-questions F1, F2](../../open-questions/README.md).
@@ -43,7 +43,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 |--------|-------|----------|
 | Người khởi tạo | Khách (từ trang sản phẩm, mẫu thiết kế, báo giá, đơn, hợp đồng, nút "Chat với Sale", hoặc **"Yêu cầu báo giá"** / **"Gửi duyệt và yêu cầu báo giá"** trên bản thiết kế) hoặc Sale (chủ động) | Có |
 | Ngữ cảnh đính kèm | Một trong: sản phẩm / quy cách / SKU riêng của khách ([13](../13-catalog/README.md)), bản thiết kế ([12](../12-product-design/README.md)), báo giá, đơn hàng, hợp đồng ([14](../14-cart-and-order/README.md)), Đơn sản xuất kèm vòng mẫu in ([17](../17-order-management/README.md)) — chỉ chứng từ thuộc đúng khách | Không |
-| Vòng mẫu in | Của Đơn sản xuất `Sample Pending`: số vòng, **ảnh / video mẫu** Sale tải lên, ngày gửi mẫu vật (nếu có) — dữ liệu cho thẻ duyệt mẫu in ([17](../17-order-management/README.md)) | Khi gửi thẻ duyệt mẫu in |
+| Vòng mẫu in | Của Đơn sản xuất `Sample Pending`: số vòng, **ảnh / video mẫu** Điều phối sản xuất tải lên, ngày gửi mẫu vật (nếu có) — dữ liệu cho thẻ duyệt mẫu in ([17](../17-order-management/README.md)) | Khi gửi thẻ duyệt mẫu in |
 | **Yêu cầu báo giá** | Khi khách yêu cầu báo giá từ bản thiết kế ([13](../13-catalog/README.md)): bản thiết kế, SKU riêng (nếu đã sinh), **trạng thái bản thiết kế** (`Pending Review` / `Approved` — [12](../12-product-design/README.md)), **số thùng mong muốn** (gợi ý), **ngày giao mong muốn** (nếu có) — dữ liệu cho thẻ yêu cầu báo giá. **Cả dự án**: tên dự án, nhiều dòng (bản `Approved` / SKU riêng, số thùng mong muốn từng dòng), một ngày giao mong muốn chung | Khi khách yêu cầu báo giá |
 | Nội dung tin nhắn | Chữ, ảnh, file (ảnh tham khảo, ảnh sản phẩm lỗi, file hợp đồng đã ký), link | Có |
 | Thông tin khách | Hồ sơ từ [18 Customer Information](../18-customer-information/README.md) | Có (khách đã đăng nhập) |
@@ -67,7 +67,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 
 1. **Khởi tạo** — khách bấm "Chat với Sale" (hoặc "Yêu cầu báo giá", "Gửi duyệt và yêu cầu báo giá", "Đặt lại") từ một trang; hệ thống tạo hội thoại và đính **ngữ cảnh** của trang đó. Sale cũng có thể chủ động mở hội thoại với khách, gắn ngữ cảnh chứng từ.
 2. **Định tuyến (routing)** — hệ thống gán agent theo thứ tự:
-   1. Sale phụ trách chứng từ ngữ cảnh (người lập báo giá / đơn / hợp đồng / Đơn sản xuất);
+   1. Sale phụ trách chứng từ ngữ cảnh (người lập báo giá / đơn / hợp đồng; với Đơn sản xuất — Sale phụ trách **đơn bán liên quan**, vì Điều phối sản xuất không chat với khách — *cập nhật 2026-11-07*);
    2. Sale đã chăm sóc khách gần nhất;
    3. hàng đợi chung — người giám sát chat phân công.
 3. **Chờ & phản hồi** — ngoài giờ / Sale không trực tuyến: hiển thị thời gian phản hồi dự kiến; tin nhắn được giữ trong hội thoại, khách nhận thông báo khi Sale trả lời. Trong giờ: agent nhận thông báo, mở hội thoại thấy ngữ cảnh + hồ sơ khách + lịch sử.
@@ -99,14 +99,14 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 
 ### 4.5. Duyệt mẫu in & tiến độ sản xuất
 
-11. Khi Đơn sản xuất của đơn khách ở `Sample Pending` ([17](../17-order-management/README.md)), Sale tải **ảnh / video mẫu in thử** lên vòng mẫu ở 17 rồi gửi **thẻ duyệt mẫu in** vào hội thoại gắn ngữ cảnh Đơn sản xuất. Thẻ hiện: SKU riêng, số vòng, ảnh / video mẫu, ngày gửi mẫu vật (nếu Sale đã gửi mẫu vật cho khách), kết quả các vòng trước.
+11. Khi Đơn sản xuất của đơn khách ở `Sample Pending` ([17](../17-order-management/README.md)), Điều phối sản xuất tải **ảnh / video mẫu in thử** lên vòng mẫu ở 17 *(cập nhật 2026-11-07)*; Sale gửi **thẻ duyệt mẫu in** vào hội thoại gắn ngữ cảnh Đơn sản xuất. Thẻ hiện: SKU riêng, số vòng, ảnh / video mẫu, ngày gửi mẫu vật (nếu đã gửi mẫu vật cho khách), kết quả các vòng trước.
 12. Khách bấm ngay trên thẻ — cùng thao tác như ở mục mẫu thiết kế của tôi ([13](../13-catalog/README.md)):
     - **Duyệt** → Đơn sản xuất sang `In Production`;
-    - **Yêu cầu in lại** kèm **ghi chú** (bắt buộc) → Sale mở vòng mẫu mới và ghi lý do in lại ở [17](../17-order-management/README.md).
+    - **Yêu cầu in lại** kèm **ghi chú** (bắt buộc) → Điều phối sản xuất mở vòng mẫu mới và ghi lý do in lại ở [17](../17-order-management/README.md).
 
     Thẻ cập nhật kết quả dù khách thao tác trên thẻ hay trên sàn.
 13. Khách nhắn rằng cần **sửa thiết kế** (đổi logo, màu, nội dung — không phải lỗi in) → agent hướng dẫn khách tự **tạo bản sửa** từ bản `Approved` trong mục mẫu thiết kế của tôi ([13](../13-catalog/README.md)) và gửi duyệt ([12](../12-product-design/README.md)); bản sửa được duyệt sinh SKU riêng mới, agent đổi SKU dòng đơn theo [17](../17-order-management/README.md); thẻ duyệt mẫu in không dùng để sửa thiết kế.
-14. Sale báo khách **tiến độ Đơn sản xuất** (đã nhận đơn, ngày hoàn thành dự kiến, đã nhập kho một phần / đủ) qua chat ([17](../17-order-management/README.md)).
+14. Sale báo khách **tiến độ Đơn sản xuất** (đã nhận đơn, ngày hoàn thành dự kiến, đã nhập kho một phần / đủ — do Điều phối sản xuất ghi nhận) qua chat ([17](../17-order-management/README.md)).
 
 ### 4.6. Sau bán, escalate & kết thúc
 
@@ -199,7 +199,7 @@ stateDiagram-v2
 | Khách muốn đổi thiết kế khi Đơn sản xuất đã `In Production` | Agent giải thích không đổi được; ghi nhận; đề xuất phương án (đơn mới với SKU từ bản sửa) |
 | Khách nhắn "mẫu in ok" bằng chữ nhưng không bấm trên thẻ | Agent nhắc khách bấm **Duyệt** trên thẻ (hoặc ở mục mẫu thiết kế của tôi); không duyệt thay (BR-10) |
 | Khách bấm trên thẻ duyệt mẫu in của vòng đã có kết quả / Đơn sản xuất đã huỷ | Từ chối theo trạng thái ở [17](../17-order-management/README.md); thẻ hiển thị kết quả / trạng thái hiện tại |
-| Mẫu in lỗi rõ (lệch màu, sai vị trí) | Khách bấm **Yêu cầu in lại** kèm ghi chú; Sale ghi lý do lỗi in của bên sản xuất ở [17](../17-order-management/README.md) (không tính vào số lần in mẫu miễn phí) |
+| Mẫu in lỗi rõ (lệch màu, sai vị trí) | Khách bấm **Yêu cầu in lại** kèm ghi chú; Điều phối sản xuất ghi lý do lỗi in của bên sản xuất (`PRINT_DEFECT`) ở [17](../17-order-management/README.md) (không tính vào số lần in mẫu miễn phí) |
 | Tranh chấp "đã hứa giảm giá qua chat" | Lịch sử hội thoại là bằng chứng; ưu đãi chỉ có hiệu lực khi đã ghi trên báo giá (BR-04) |
 | Spam / lạm dụng | Chặn theo tài khoản; cảnh báo người giám sát chat |
 

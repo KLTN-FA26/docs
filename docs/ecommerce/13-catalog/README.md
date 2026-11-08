@@ -43,7 +43,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 | **Khách hàng sỉ (B2B Customer)** | Đăng nhập cổng; duyệt danh mục, tìm kiếm, xem chi tiết sản phẩm và quy cách, xem **SKU riêng** của mình (không có giá). **Tự thiết kế**: bấm **"Thiết kế"** trên quy cách đã có khuôn in; trong **mẫu thiết kế của tôi** sửa bản nháp, xem lại, **gửi duyệt**, **tạo bản sửa** từ bản đã duyệt; tạo **dự án thiết kế**, quản lý thư viện tài nguyên, **gửi duyệt cả bộ** ([12](../12-product-design/README.md)). **Yêu cầu báo giá** từ bản thiết kế đã duyệt hoặc **cả dự án** (nêu số thùng mong muốn, ngày giao mong muốn nếu có). Hồ sơ `Active` mới xem được **tình trạng còn hàng** của SKU riêng. **Duyệt mẫu in**: xem ảnh / video mẫu in thử, bấm **Duyệt** hoặc **Yêu cầu in lại** kèm ghi chú. **Mở chat với Sale** từ sản phẩm, quy cách, SKU riêng, mẫu thiết kế hoặc đơn cũ. Không tự đặt hàng. |
 | **Quản lý kinh doanh (Sales Manager)** | Sửa **slug và nội dung SEO**; **xuất bản / ẩn** sản phẩm; khai báo **giá nội bộ (bảng giá riêng)** của khách (đơn giá / cái, bậc theo số thùng) cho SKU riêng của chính khách đó |
 | **Quản trị hệ thống (System Admin)** | Như Quản lý kinh doanh |
-| **Nhân viên Sale (Sales Staff)** | **Xem** giá nội bộ làm giá gợi ý khi tư vấn và lập báo giá; nhận hội thoại khách mở từ catalog, gồm **yêu cầu báo giá từ bản thiết kế** hoặc **cả dự án** ([16](../16-sales-chat/README.md)); gửi link sản phẩm / SKU riêng qua [chat](../16-sales-chat/README.md); tải ảnh / video mẫu in thử lên vòng mẫu của Đơn sản xuất ([17](../17-order-management/README.md)) để khách xem ở đây |
+| **Nhân viên Sale (Sales Staff)** | **Xem** giá nội bộ làm giá gợi ý khi tư vấn và lập báo giá; nhận hội thoại khách mở từ catalog, gồm **yêu cầu báo giá từ bản thiết kế** hoặc **cả dự án** ([16](../16-sales-chat/README.md)); gửi link sản phẩm / SKU riêng qua [chat](../16-sales-chat/README.md); gửi thẻ duyệt mẫu in, nhắc khách duyệt mẫu in hiện ở đây (ảnh / video mẫu do **Điều phối sản xuất** tải lên vòng mẫu của Đơn sản xuất — [17](../17-order-management/README.md), *cập nhật 2026-11-07*) |
 | **Hệ thống** | Dựng bản hiển thị (projection) và chỉ mục tìm kiếm theo sự kiện; lọc SKU riêng, bản thiết kế và mẫu in theo khách sở hữu; chỉ hiện nút "Thiết kế" trên quy cách đã có khuôn in; tính chỉ báo còn hàng từ ATP; mở hội thoại kèm **thẻ yêu cầu báo giá** khi khách yêu cầu báo giá ([16](../16-sales-chat/README.md)); gửi kết quả duyệt mẫu in về Đơn sản xuất ([17](../17-order-management/README.md)) |
 
 ---
@@ -59,7 +59,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 | **Mẫu thiết kế của khách** | Bản thiết kế mà khách là chủ sở hữu: trạng thái (`Draft` / `Pending Review` / `Approved`), ảnh xem trước 2D / 3D, lý do trả lại gần nhất (nếu có), SKU riêng (nếu đã duyệt), dự án chứa bản (nếu có) | [12](../12-product-design/README.md) |
 | **Dự án thiết kế của khách** | Dự án mà khách là chủ sở hữu: tên, mô tả, trạng thái (`Active` / `Archived`), các bản thiết kế trong dự án, thư viện tài nguyên | [12](../12-product-design/README.md) |
 | **Yêu cầu báo giá** | Từ một bản thiết kế `Approved` (hoặc kèm khi gửi duyệt): **số thùng mong muốn** (số nguyên ≥ 1 — chỉ là gợi ý cho Sale), **ngày giao mong muốn** (không bắt buộc, không ở quá khứ). **Cả dự án**: các bản `Approved` được chọn, số thùng mong muốn từng bản, **một ngày giao mong muốn chung** | Khách |
-| **Mẫu in chờ duyệt** | Vòng mẫu in đang chờ khách của các Đơn sản xuất `Sample Pending` thuộc khách: SKU riêng, mã Đơn sản xuất, số vòng, **ảnh / video mẫu** Sale tải lên, ngày gửi mẫu vật (nếu có), kết quả các vòng trước | [17](../17-order-management/README.md) |
+| **Mẫu in chờ duyệt** | Vòng mẫu in đang chờ khách của các Đơn sản xuất `Sample Pending` thuộc khách: SKU riêng, mã Đơn sản xuất, số vòng, **ảnh / video mẫu** Điều phối sản xuất tải lên, ngày gửi mẫu vật (nếu có), kết quả các vòng trước | [17](../17-order-management/README.md) |
 | Ảnh | Ảnh **đã đăng** (bốn mắt) của từng quy cách, ảnh bìa | [01](../../warehouse/01-product-creation/README.md) |
 | Cây danh mục | Danh mục đang hoạt động, thứ tự, ảnh, SEO của danh mục | [01](../../warehouse/01-product-creation/README.md) |
 | Nội dung catalog | **Slug** (khoá sau lần xuất bản đầu), **tiêu đề SEO** (≤ 255), **mô tả SEO** | Quản lý kinh doanh |
@@ -162,9 +162,9 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
    | `Approved` — đã duyệt | Ảnh xem trước 2D / 3D (chỉ xem); **SKU riêng** sinh ra kèm số cái / thùng và chỉ báo còn hàng (không có giá) | **Tạo bản sửa** (bản thiết kế mới `Draft`, sao chép nội dung; duyệt xong sinh SKU mới, SKU cũ giữ nguyên); **Yêu cầu báo giá** (§4.6) |
 
 4. SKU riêng vẫn hiện ở đây kể cả khi sản phẩm gốc đang `Unlisted`, chừng nào SKU còn `Active`.
-5. **Mẫu in chờ duyệt** — với SKU riêng có Đơn sản xuất đang `Sample Pending` ([17](../17-order-management/README.md)), mục này hiện vòng mẫu in đang chờ khách: số vòng, **ảnh / video mẫu** Sale tải lên, ngày gửi mẫu vật (nếu có), kết quả các vòng trước. Khách chọn:
+5. **Mẫu in chờ duyệt** — với SKU riêng có Đơn sản xuất đang `Sample Pending` ([17](../17-order-management/README.md)), mục này hiện vòng mẫu in đang chờ khách: số vòng, **ảnh / video mẫu** Điều phối sản xuất tải lên, ngày gửi mẫu vật (nếu có), kết quả các vòng trước. Khách chọn:
    - **Duyệt** → Đơn sản xuất sang `In Production` ([17](../17-order-management/README.md));
-   - **Yêu cầu in lại** kèm **ghi chú** (bắt buộc) → Sale mở vòng mẫu mới và ghi lý do in lại ở [17](../17-order-management/README.md).
+   - **Yêu cầu in lại** kèm **ghi chú** (bắt buộc) → Điều phối sản xuất mở vòng mẫu mới và ghi lý do in lại ở [17](../17-order-management/README.md).
 
    Mẫu in được in theo đúng file in đã chốt của bản thiết kế; khách muốn **sửa thiết kế** thì tự **tạo bản sửa** từ bản `Approved` ngay trong mục này và gửi duyệt ([12](../12-product-design/README.md)); duyệt xong sinh SKU riêng mới, Sale đổi SKU của dòng đơn theo [17](../17-order-management/README.md) — không làm trong bước duyệt mẫu. Cùng thao tác duyệt mẫu có trên thẻ hành động trong [chat](../16-sales-chat/README.md); làm ở một nơi thì nơi kia hiện kết quả.
 6. Từ mỗi mẫu, khách có thể **mở chat với Sale** gắn ngữ cảnh mẫu thiết kế (hỏi tư vấn, góp ý).
@@ -257,7 +257,7 @@ stateDiagram-v2
 | Khách hỏi giá trên sàn | Sàn không hiện giá (BR-04); khách bấm "Yêu cầu báo giá" → chat với Sale, nhận báo giá |
 | Khách có nhiều SKU riêng, một số hết hàng | Mỗi SKU riêng có chỉ báo riêng |
 | SKU riêng vừa sinh, chưa có giá nội bộ | Sale tự nhập bậc giá trên báo giá; khách không thấy khác biệt trên sàn |
-| Khách duyệt mẫu in trên sàn trong khi Sale vừa ghi kết quả qua thẻ chat | Vòng mẫu đã có kết quả; thao tác sau bị từ chối, màn hình hiện kết quả hiện tại (BR-13) |
+| Khách duyệt mẫu in trên sàn trong khi đã có kết quả ghi qua thẻ chat | Vòng mẫu đã có kết quả; thao tác sau bị từ chối, màn hình hiện kết quả hiện tại (BR-13) |
 | Khách xem mẫu in và muốn đổi logo / màu (không phải lỗi in) | Không chọn được "sửa file" ở bước duyệt mẫu; khách tự **tạo bản sửa** từ bản `Approved` trong mẫu thiết kế của tôi, gửi duyệt ([12](../12-product-design/README.md)) → SKU riêng mới; Sale đổi SKU dòng đơn theo [17](../17-order-management/README.md) |
 | Mẫu in chờ duyệt nhưng khách không phản hồi | Đơn sản xuất ở lại `Sample Pending`; Sale nhắc khách qua [chat](../16-sales-chat/README.md) |
 | Khách cần một số cái không chia hết cho số cái / thùng | Không bán lẻ (BR-12); khách trao đổi với Sale qua chat để chọn số thùng nguyên |
