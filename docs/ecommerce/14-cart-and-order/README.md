@@ -287,7 +287,7 @@ stateDiagram-v2
 | Lịch giao lệch số thùng của đơn (tổng các đợt khác số thùng dòng) | Không lưu / không gửi hợp đồng được; hệ thống chỉ rõ SKU lệch (BR-23) |
 | Khách muốn mỗi đợt giao về một chi nhánh khác nhau | Chưa hỗ trợ: mọi đợt về một địa chỉ (BR-23); Sale tách thành nhiều đơn / hợp đồng theo địa chỉ, hoặc chờ phạm vi sau (⚠️ D38) |
 | Khách xin đổi số thùng giữa các đợt sau khi ký | Không sửa trong hệ thống (cần phụ lục — phạm vi sau); chỉ dời được cửa sổ giao ([17](../17-order-management/README.md) §4.5) |
-| Thiếu tồn thành phẩm lúc tạo đơn | Không chặn; Sale lập lịch giao theo thời gian sản xuất (kể cả thời gian duyệt mẫu in nếu SKU sản xuất lần đầu). Sau khi đơn `Confirmed`, Sale chọn kho xuất và lập Đơn sản xuất cho phần thiếu, Sales Manager duyệt & gửi ([17](../17-order-management/README.md)) |
+| Thiếu tồn thành phẩm lúc tạo đơn | Không chặn; Sale lập lịch giao theo thời gian sản xuất (kể cả thời gian duyệt mẫu in nếu SKU sản xuất lần đầu). Sau khi đơn `Confirmed`, Sale chọn kho xuất; Điều phối sản xuất lập Đơn sản xuất cho phần thiếu, Sales Manager duyệt & gửi ([17](../17-order-management/README.md)) |
 | Khách cần một số cái không chia hết cho số cái / thùng | Không đặt lẻ (BR-08); Sale thoả thuận với khách số thùng nguyên (làm tròn lên hoặc xuống) rồi báo giá theo số thùng |
 | Khách muốn hàng in theo bản thiết kế chưa duyệt (`Draft` / `Pending Review`) | Chưa báo giá được (BR-22): khách gửi duyệt trên app ([12](../12-product-design/README.md)); Sale chờ bản `Approved` và SKU riêng được sinh |
 | Khách "Gửi duyệt và yêu cầu báo giá", bản thiết kế bị trả lại | Bản về `Draft`; Sale chưa lập báo giá; khách sửa và gửi duyệt lại, Sale lập khi bản `Approved` |
