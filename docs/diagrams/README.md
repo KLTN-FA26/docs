@@ -84,6 +84,8 @@ flowchart TD
     RC_CONFIRM --> PA_TASK["Mở nhiệm vụ cất<br/>mỗi thùng LPN một nhiệm vụ — Pending"]
     PA_TASK --> PA_SUGGEST{"Gợi ý tối đa 10 bin hợp lệ<br/>còn thể tích m³ và tải trọng<br/>cùng lô → bin trống nhỏ nhất chứa được cả lô → cùng SKU lô khác → SKU khác<br/>trong nhóm lấp đầy bin đang dở trước; bin thiếu thể tích xếp cuối"}
     PA_SUGGEST -->|"Có bin"| PA_MOVE["NV kho quét LPN + quét bin đích, cất cả thùng<br/>hệ thống kiểm lại ràng buộc cứng"]
+    PA_TASK -.->|"cất theo lượt — 05 §4.5"| PA_TRIP["Lượt cất: quét nhiều thùng lên xe<br/>bắt đầu đi: gán bin cho cả xe, giữ chỗ — nhả sau 30 phút không thao tác<br/>lộ trình láng giềng gần nhất từ khu nhận, OVERFLOW cuối"]
+    PA_TRIP --> PA_MOVE
     PA_SUGGEST -->|"Gợi ý rỗng — kho đầy"| PA_OVF["Quét vị trí khu tạm OVERFLOW để hoàn tất nhiệm vụ<br/>Quản lý kho dời lên bin khi có chỗ — 11"]
     PA_MOVE --> PA_DONE["Nhiệm vụ cất Done<br/>tồn Inbound → Available"]
     PA_OVF --> PA_DONE
@@ -170,6 +172,10 @@ sequenceDiagram
     RC->>INVSYS: Ghi tồn Inbound trong từng thùng tại khu RECEIVING (thùng In Stock)
     RC->>PO: Cập nhật số thùng đã nhận → Partially Received / Received
     RC->>WH: Mở nhiệm vụ cất (mỗi thùng LPN một nhiệm vụ)
+    opt Cất theo lượt (05 §4.5)
+        WH->>SLOT: Quét các thùng lên xe, bắt đầu đi cất
+        SLOT-->>WH: Bin gán cho từng thùng (giữ chỗ) + lộ trình qua các điểm đứng
+    end
     WH->>SLOT: Xem nhiệm vụ cất
     SLOT-->>WH: Tối đa 10 bin hợp lệ (còn thể tích, tải trọng)
     alt Có bin hợp lệ
