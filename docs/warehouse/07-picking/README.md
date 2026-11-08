@@ -39,7 +39,8 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 |-------|---------|
 | **Nhân viên kho (Picker)** | Bắt đầu task được giao; tại mỗi dòng: quét vị trí, quét **mã LPN** của thùng; **báo thiếu (short pick)** khi không lấy được thùng; hoàn tất phần lấy hàng; mang thùng tới đích (`DISPATCH` / `STAGING`) và từ khu chờ xuất sang khu xuất hàng. Cất lại thùng của đơn bị huỷ (put-back). |
 | **Quản lý kho (Warehouse Manager)** — của kho xuất | Xem danh sách đơn chờ release / chờ tạo task, **release đơn, tạo task, chọn đích lấy hàng và giao người**, đổi người / đổi đích khi task chưa bắt đầu. **Phân bổ lại** dòng bị thiếu. **Phân bổ bổ sung** khi phần hàng còn thiếu của đơn đã về kho. **Cho chuyển cả tác vụ từ khu chờ xuất sang khu xuất hàng.** Theo dõi mọi task trong kho. Có đủ quyền thao tác như nhân viên kho (làm thay khi cần). |
-| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi không đủ thùng (lập Đơn sản xuất cho phần thiếu, thoả thuận lại số thùng, giao một phần, huỷ) theo [17](../../ecommerce/17-order-management/README.md). Không thao tác trên task. |
+| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi không đủ thùng (chờ sản xuất phần thiếu, thoả thuận lại số thùng, giao một phần, huỷ) theo [17](../../ecommerce/17-order-management/README.md). Không thao tác trên task. |
+| **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | Khi Sale chọn chờ sản xuất phần thiếu: lập Đơn sản xuất (theo số thùng, kho nhận = kho xuất) theo [17](../../ecommerce/17-order-management/README.md). Không thao tác trên task. |
 | **Hệ thống** | Lập dòng lấy hàng từ các thùng đã phân bổ cho đơn. Trừ tồn khi quét (đích `DISPATCH`) hoặc chuyển thùng sang khu chờ xuất (đích `STAGING`). Treo đơn khi thiếu hàng, tự mở kiểm kê mù ([20](../20-inventory-control/README.md)), gỡ treo khi đã phân bổ lại xong. Đưa thùng của đơn huỷ vào hàng chờ cất lại. |
 
 - Người được giao là **nhân viên kho hoặc quản lý kho đang hoạt động, được gán vào kho xuất của đơn**.
@@ -127,7 +128,7 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
     - chọn **đủ số thùng thiếu** từ các thùng khác của SKU, theo BR-03, từ bin cho phép lấy **của kho xuất**, không bao giờ lấy lại thùng vừa thiếu;
     - dòng cũ huỷ, thêm dòng mới để picker lấy tiếp;
     - khi đơn không còn dòng thiếu nào, hệ thống **tự gỡ treo** `INVENTORY`.
-11. **Không phân bổ lại được** (kho xuất không đủ thùng) — đơn ở lại trạng thái treo. Quản lý kho báo Sale; Sale quyết theo [17](../../ecommerce/17-order-management/README.md): lập Đơn sản xuất cho phần thiếu (theo số thùng, kho nhận = kho xuất) và chờ hàng, thoả thuận lại số thùng với khách, giao một phần rồi đóng phần còn lại, hoặc huỷ dòng / đơn.
+11. **Không phân bổ lại được** (kho xuất không đủ thùng) — đơn ở lại trạng thái treo. Quản lý kho báo Sale; Sale quyết theo [17](../../ecommerce/17-order-management/README.md): chờ sản xuất phần thiếu (Điều phối sản xuất lập Đơn sản xuất theo số thùng, kho nhận = kho xuất) và chờ hàng, thoả thuận lại số thùng với khách, giao một phần rồi đóng phần còn lại, hoặc huỷ dòng / đơn.
 
 ### 4.5. Huỷ đơn & cất lại hàng (Put-back)
 
@@ -214,7 +215,7 @@ stateDiagram-v2
 |------------|-------------|
 | Vị trí báo có thùng nhưng thực tế không thấy | Báo thiếu → đơn treo → kiểm kê mù thùng đó → Quản lý kho phân bổ lại thùng khác của kho xuất |
 | Thùng hư hỏng phát hiện khi lấy | Báo thiếu thùng đó; Quản lý kho cách ly nguyên thùng sang khu `QUARANTINE` ([20 §4.8](../20-inventory-control/README.md)); phân bổ lại thùng khác |
-| Kho xuất không còn đủ số thùng cho dòng | Đơn ở lại treo `INVENTORY`; Quản lý kho báo Sale; Sale quyết: lập Đơn sản xuất cho số thùng thiếu (kho nhận = kho xuất) / thoả thuận lại số thùng với khách / giao một phần + đóng phần còn lại / huỷ ([17](../../ecommerce/17-order-management/README.md)) |
+| Kho xuất không còn đủ số thùng cho dòng | Đơn ở lại treo `INVENTORY`; Quản lý kho báo Sale; Sale quyết: chờ sản xuất số thùng thiếu (Điều phối sản xuất lập Đơn sản xuất, kho nhận = kho xuất) / thoả thuận lại số thùng với khách / giao một phần + đóng phần còn lại / huỷ ([17](../../ecommerce/17-order-management/README.md)) |
 | Kho khác còn thùng dư của cùng SKU (SKU riêng của khách) | Không dùng cho đơn này; không chuyển hàng giữa các kho. Phần thiếu xử lý như dòng trên |
 | Khách huỷ đơn khi đang lấy | Task `Cancelled`; thùng đã lấy vào hàng chờ cất lại, cất nguyên thùng |
 | Đơn `Awaiting Stock` (thiếu một phần, chờ Đơn sản xuất) | Quản lý kho chọn: lấy trước các thùng đã có về khu chờ xuất và giữ cho đơn; hoặc (Sale cho phép giao một phần) lấy sang `DISPATCH` để giao trước; hoặc chờ đủ hàng mới tạo task |
@@ -233,7 +234,7 @@ stateDiagram-v2
 
 | Module | Quan hệ |
 |--------|---------|
-| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn đã release (`Ready to Fulfill`, `Awaiting Stock`, `Partially Fulfilled` — release **theo đợt giao**, mỗi đợt một task); kho xuất do Sale chọn; Đơn sản xuất cho phần thiếu (theo số thùng, kho nhận = kho xuất); treo / gỡ treo `INVENTORY`; giao một phần do Sale quyết; huỷ đơn → cất lại |
+| [17 · Order Management](../../ecommerce/17-order-management/README.md) | Nguồn đơn đã release (`Ready to Fulfill`, `Awaiting Stock`, `Partially Fulfilled` — release **theo đợt giao**, mỗi đợt một task); kho xuất do Sale chọn; Đơn sản xuất cho phần thiếu do Điều phối sản xuất lập (theo số thùng, kho nhận = kho xuất); treo / gỡ treo `INVENTORY`; giao một phần do Sale quyết; huỷ đơn → cất lại |
 | [20 · Inventory Control](../20-inventory-control/README.md) | Phân bổ nguyên thùng LPN theo FIFO tại kho xuất; trừ tồn khi quét (thùng `Consumed`); tồn ở khu chờ xuất gắn đơn; kiểm kê mù khi thiếu; cách ly thùng hư hỏng; cất lại thùng |
 | [08 · Kiểm thùng & Dán nhãn giao hàng](../08-packing/README.md) | Task `Picked` mở phần kiểm thùng; thùng đã lấy chính là kiện giao |
 | [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) / [05 · Putaway](../05-putaway/README.md) | Khu xuất hàng `DISPATCH`, khu chờ xuất `STAGING`, khu `QUARANTINE`; vị trí thùng do putaway / slotting quyết định |
