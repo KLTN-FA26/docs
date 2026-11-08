@@ -70,7 +70,7 @@ Warehouse Staff được gọi theo công đoạn được phân công. Đây ch
 | Vai thao tác | Công đoạn | Module |
 |--------------|-----------|--------|
 | Receiver | Nhập kho thành phẩm theo Đơn sản xuất, nhập hàng hoàn vào khu cách ly, kiểm đếm số thùng | [03](../warehouse/03-receipt/README.md) |
-| Putaway Operator | Cất hàng vào vị trí | [05](../warehouse/05-putaway/README.md) |
+| Putaway Operator | Cất hàng vào vị trí — từng thùng, hoặc **theo lượt**: quét thùng lên xe, hệ thống gán bin cho cả xe, giữ chỗ và sắp lộ trình (*✅ 2026-11-08*) | [05](../warehouse/05-putaway/README.md) |
 | Picker | Lấy nguyên thùng theo task được giao (mỗi đơn một task), đưa về khu chờ xuất hoặc khu xuất hàng, báo thiếu, cất lại hàng của đơn huỷ | [07](../warehouse/07-picking/README.md) |
 | Packer | Quét kiểm đủ thùng cho đơn, dán nhãn giao hàng, gom thùng thành shipment (không đóng lại hàng) | [08](../warehouse/08-packing/README.md) |
 | Dispatch Staff | Lập kế hoạch xếp hàng lên xe (Load Planning) cho mọi đơn (giao nguyên chuyến), ghi nhận đặt xe (với hãng tích hợp API đặt xe: hệ thống tạo đơn ở hãng, mã vận đơn có ngay); **nhập mã vận đơn** cho từng xe — tay từng chuyến hoặc **hàng loạt từ file** (khi hãng không đẩy qua webhook); xếp kiện lên xe, quét kiện, ký bàn giao | [09](../warehouse/09-shipping/README.md) |

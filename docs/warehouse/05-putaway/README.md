@@ -4,7 +4,7 @@
 
 Di chuyển các **thùng thành phẩm (LPN)** từ **khu nhận hàng** (Area `RECEIVING`) sau khi [nhập kho thành phẩm](../03-receipt/README.md) — và các **thùng hàng hoàn được gỡ cách ly** từ khu `QUARANTINE` (§4.4) — tới **bin lưu trữ chính thức**, và **cập nhật tồn kho theo vị trí** để hàng trở nên **khả dụng cho lấy hàng / bán hàng**.
 
-Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp đến hiệu suất [Picking](../07-picking/README.md), mật độ lưu trữ và an toàn kho. Hệ thống **gợi ý bin** theo ràng buộc cứng và thứ tự ưu tiên (§4.2). Quyết định cuối cùng là **bin nhân viên quét thực tế**.
+Putaway quyết định *hàng nằm ở đâu* — ảnh hưởng trực tiếp đến hiệu suất [Picking](../07-picking/README.md), mật độ lưu trữ và an toàn kho. Hệ thống **gợi ý bin** theo ràng buộc cứng và thứ tự ưu tiên (§4.2). Quyết định cuối cùng là **bin nhân viên quét thực tế**. NV kho cất **từng thùng** (§4.3), hoặc **theo lượt** — chở nhiều thùng trên một xe, hệ thống gán bin cho cả xe, **giữ chỗ** ở bin và **sắp lộ trình** đi cất (§4.5).
 
 Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input (`RECEIVING`) → WH/Stock (bin). Không có chặng kiểm tra chất lượng tại kho *(Đã chốt 2026-11-04 — [03](../03-receipt/README.md))*.
 
@@ -12,12 +12,12 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 
 > ⚠️ Giả định: các phần sau thuộc **phạm vi giai đoạn sau** (xem [open-questions C18](../../open-questions/README.md)):
 > - **phân công** nhiệm vụ cất cho từng người;
-> - **khoá mềm** sức chứa bin khi nhận nhiệm vụ;
 > - **bắt buộc mã lý do** khi cất khác bin gợi ý;
 > - **cất nhiều chặng** qua khu trung gian;
+> - **quãng đường đi thực tế** cho lộ trình lượt cất (tránh kệ / tường, đồ thị lối đi) và tối ưu lộ trình ngoài láng giềng gần nhất (§4.5);
 > - **tiêu chí mềm nâng cao** của slotting (velocity / ABC, quãng đường, cân bằng tải — [06](../06-warehouse-map-slotting/README.md), [C1](../../open-questions/README.md)).
 >
-> Hiện mọi nhân viên kho của kho đó đều thấy và cất được mọi nhiệm vụ.
+> Hiện mọi nhân viên kho của kho đó đều thấy và cất được mọi nhiệm vụ. *(✅ 2026-11-08: **giữ chỗ bin** — trước đây "khoá mềm" — có khi cất theo lượt, §4.5.)*
 
 > **Đã chốt 2026-11-05:** chỗ trống của bin đo bằng **thể tích (m³)** và **tải trọng (kg)** ([06](../06-warehouse-map-slotting/README.md)), thay cho sức chứa theo đơn vị. **Thể tích bin do hệ thống tự tính** = rộng × dài của bin × chiều cao lọt của tầng kệ (bắt buộc), không nhập tay ([06](../06-warehouse-map-slotting/README.md) BR-19). Thể tích một thùng = D × R × C theo quy cách thùng ([01](../01-product-creation/README.md)); khối lượng một thùng = khối lượng thùng đầy.
 
@@ -27,10 +27,10 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 
 | Actor | Vai trò |
 |-------|---------|
-| **Nhân viên kho (Warehouse Staff)** | Xem nhiệm vụ cất của kho, xem bin gợi ý, quét thùng, quét bin đích, xác nhận cất |
-| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **kích thước bin** và **chiều cao lọt của tầng** (hệ thống tự tính thể tích m³), **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
+| **Nhân viên kho (Warehouse Staff)** | Xem nhiệm vụ cất của kho, xem bin gợi ý, quét thùng, quét bin đích, xác nhận cất. **Cất theo lượt** (§4.5): mở lượt, quét thùng lên xe, bắt đầu đi cất, đi theo lộ trình, đóng lượt |
+| **Quản lý kho (Warehouse Manager)** | Có đủ quyền như nhân viên kho (làm thay khi cần); xử lý khi không còn bin hợp lệ (mở thêm bin, cho cất vào khu `OVERFLOW`), lệch tồn; **gỡ cách ly** thùng hàng hoàn để mở nhiệm vụ cất (§4.4); **đóng lượt cất** của nhân viên khác khi bị bỏ dở (§4.5). Khai báo bản đồ kho: kệ, tầng, bin, cờ **cho phép cất** (`is_putaway_target`), **kích thước bin** và **chiều cao lọt của tầng** (hệ thống tự tính thể tích m³), **tải trọng tối đa** — chi tiết ở [06](../06-warehouse-map-slotting/README.md) |
 | **Quản trị hệ thống (System Admin)** | Như Quản lý kho về khai báo bản đồ kho ([06](../06-warehouse-map-slotting/README.md)) |
-| **Hệ thống** | Mở nhiệm vụ cất khi thùng sẵn sàng (phiếu nhập xác nhận, hoặc thùng hàng hoàn được gỡ cách ly); gợi ý tối đa 10 bin; chặn bin vi phạm ràng buộc cứng; ghi sổ biến động; đóng phiếu nhập khi cất xong |
+| **Hệ thống** | Mở nhiệm vụ cất khi thùng sẵn sàng (phiếu nhập xác nhận, hoặc thùng hàng hoàn được gỡ cách ly); gợi ý tối đa 10 bin; chặn bin vi phạm ràng buộc cứng; với lượt cất: **gán bin cho mọi thùng trên xe, giữ chỗ, sắp lộ trình**, tự nhả chỗ giữ hết hạn; ghi sổ biến động; đóng phiếu nhập khi cất xong |
 | **Quản lý kho — kiểm soát tồn** | Lập kiểm kê, duyệt điều chỉnh tồn khi có sai lệch phát hiện trong / sau putaway — xem [20 · Inventory Control](../20-inventory-control/README.md) |
 
 - Mọi thao tác chỉ trong phạm vi **kho được gán**, và theo vị trí hàng đang đứng.
@@ -50,6 +50,8 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 | **Bin gợi ý** | Tối đa 10 bin, tính mỗi lần xem nhiệm vụ (không lưu) | Không |
 | **Mã LPN** | NV kho quét đúng thùng của nhiệm vụ | Có |
 | **Bin đích thực tế** | NV kho quét khi đặt thùng; bất kỳ bin hợp lệ nào, không bắt buộc là bin gợi ý. Không còn bin hợp lệ: vị trí thuộc khu `OVERFLOW` (§4.3, BR-13) | Có |
+| **Lượt cất** | Các thùng NV kho quét lên xe (nhiệm vụ `Pending` cùng kho, có thể của nhiều phiếu); không giới hạn số thùng (§4.5) | Không (chỉ khi cất theo lượt) |
+| **Toạ độ trên Kho Map** | Toạ độ, kích thước, góc xoay, mặt lấy hàng của kệ; toạ độ bin trong kệ; toạ độ khu nguồn — để tính **điểm đứng** và lộ trình ([06](../06-warehouse-map-slotting/README.md) §4.4) | Không (chỉ khi cất theo lượt) |
 
 ### Output
 
@@ -59,6 +61,8 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 | **Tồn khả dụng để bán** tăng thêm một thùng mỗi nhiệm vụ | 13 Catalog / 14 Order (ATP) |
 | **Dòng sổ biến động** `MOVE` cho mỗi thùng được cất (hoặc `STATUS_CHANGE` khi thùng đã nằm sẵn ở bin) | [20](../20-inventory-control/README.md), truy vết |
 | **Nhiệm vụ `Done`** → phiếu nhập theo Đơn sản xuất `Closed` khi mọi thùng đã cất | 03 Receipt |
+| **Lượt cất**: bin được gán cho từng thùng trên xe, **lộ trình** (danh sách điểm dừng theo thứ tự, đường nối trên Kho Map 2D) | NV kho; [06](../06-warehouse-map-slotting/README.md) (vẽ trên bản đồ) |
+| **Giữ chỗ bin** của lượt (thể tích, khối lượng từng thùng tại bin được gán) | Gợi ý bin cho nhiệm vụ / lượt khác (§4.2) |
 | **Tồn `Available` của SKU** sau khi cất | [17](../../ecommerce/17-order-management/README.md) (đưa đơn `Awaiting Stock` sang `Ready to Fulfill`) |
 
 ---
@@ -76,8 +80,8 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
    - là **bin** (không phải khu vực) của **cùng kho**, cho phép cất (`is_putaway_target`);
    - bin, kệ và kho đều đang **`Active`**;
    - **thùng vừa bin theo từng chiều**: D × R × C của thùng (quy cách thùng — [01](../01-product-creation/README.md)) ≤ rộng × dài của bin × chiều cao lọt của tầng; thùng có cờ **cho phép xoay** được xoay ngang (đổi D và R), vừa theo một trong hai hướng là đạt ([06 §4.4](../06-warehouse-map-slotting/README.md));
-   - **còn chỗ theo thể tích**: thể tích trống của bin (thể tích bin **tự tính** − tổng thể tích các thùng đang nằm trong bin) ≥ thể tích thùng. Bin chưa tính được thể tích (dữ liệu cũ: tầng thiếu chiều cao lọt) coi như không giới hạn (✅ đã chốt 2026-11-05 — [06 §4.6](../06-warehouse-map-slotting/README.md));
-   - **không vượt tải trọng**: tổng khối lượng thùng đang có + khối lượng thùng mới ≤ tải trọng tối đa của bin. Bin không khai báo tải trọng thì không kiểm.
+   - **còn chỗ theo thể tích**: thể tích trống của bin (thể tích bin **tự tính** − tổng thể tích các thùng đang nằm trong bin − thể tích **đang giữ chỗ** cho lượt cất khác, §4.5) ≥ thể tích thùng. Bin chưa tính được thể tích (dữ liệu cũ: tầng thiếu chiều cao lọt) coi như không giới hạn (✅ đã chốt 2026-11-05 — [06 §4.6](../06-warehouse-map-slotting/README.md));
+   - **không vượt tải trọng**: tổng khối lượng thùng đang có + khối lượng đang giữ chỗ cho lượt cất khác + khối lượng thùng mới ≤ tải trọng tối đa của bin. Bin không khai báo tải trọng thì không kiểm.
 
    Độ lấp đầy tính trên **mọi SKU, mọi trạng thái** đang nằm trong bin.
 4. Bin hợp lệ được **xếp hạng** theo thứ tự *(✅ Đã chốt 2026-11-08 — thay thứ tự 2026-10-28 "cùng lô → cùng SKU → bin trống → còn chỗ, nhiều chỗ trống trước")*:
@@ -131,6 +135,26 @@ Putaway là **chặng cuối** của luồng nhập kho **2 bước**: WH/Input 
 
 > ✅ Đã chốt 2026-11-05: gỡ cách ly mở nhiệm vụ cất; thùng **vẫn là `Quarantine`** (không thuộc ATP) tới khi được cất lên bin, lúc đó mới thành `Available`. Xem [open-questions](../../open-questions/README.md).
 
+### 4.5. Cất theo lượt (Putaway trip)
+
+*(✅ Đã chốt 2026-11-08.)* Ngoài cất từng thùng (§4.3), NV kho cất được **theo lượt**: chở nhiều thùng trên một xe, hệ thống gán bin cho cả xe, giữ chỗ và sắp lộ trình. Hai cách dùng song song; ràng buộc cứng và ghi tồn như nhau.
+
+12. **Mở lượt & nhận thùng lên xe** → lượt `Loading`. NV kho quét LPN từng thùng có nhiệm vụ `Pending` của cùng kho để đưa lên xe; mỗi thùng quét được gắn vào lượt. Lượt có thể gồm thùng của **nhiều phiếu nhập** và thùng hàng hoàn đã gỡ cách ly; **không giới hạn số thùng** — lượt là những thùng đang trên xe. Quét bỏ để đưa một thùng ra khỏi lượt trước khi đi. Ở bước này **chưa gán bin, chưa giữ chỗ**.
+13. **Bắt đầu đi cất** → `In Progress`. Hệ thống:
+    - **gán bin** cho từng thùng trên xe theo thứ tự xếp hạng §4.2, thùng cùng lô gán liền nhau; thùng đã gán trừ chỗ trống của bin khi gán thùng sau, nên không gán hai thùng vào cùng một chỗ trống. Không có bin hợp lệ → gán khu `OVERFLOW` (BR-13);
+    - **giữ chỗ bin** — thể tích và khối lượng của từng thùng tại bin được gán được tính **như đã chiếm** khi gợi ý / gán bin cho nhiệm vụ và lượt khác (§4.2). Giữ chỗ **không phải khoá cứng**: ràng buộc cứng vẫn kiểm lúc quét bin (bước 6);
+    - **sắp lộ trình** (bước 14).
+14. **Lộ trình** — mỗi bin có **điểm đứng**: điểm ngay trước mặt lấy hàng của kệ chứa bin, tính từ toạ độ, kích thước, góc xoay của kệ và toạ độ bin trong kệ ([06](../06-warehouse-map-slotting/README.md) §4.4). Điểm xuất phát là tâm **khu nguồn** của thùng quét lên xe cuối cùng (`RECEIVING` hoặc `QUARANTINE`). Hệ thống sắp điểm dừng theo **láng giềng gần nhất (nearest neighbor)**: từ chỗ đang đứng, đi tới điểm dừng chưa ghé có **khoảng cách Manhattan** (|Δx| + |Δy|) nhỏ nhất; bằng nhau thì theo mã vị trí. Nhiều thùng cùng bin gộp thành một điểm dừng; khu `OVERFLOW` luôn là điểm dừng cuối. Màn hình hiện danh sách điểm dừng (bin → các thùng cần đặt) và đường nối các điểm dừng trên Kho Map 2D.
+
+    > ⚠️ Giả định: khoảng cách tính trên mặt bằng, **không tránh kệ / tường**; nearest neighbor không bảo đảm lộ trình ngắn nhất. Quãng đường thực tế (đồ thị lối đi) và cải thiện lộ trình (ví dụ 2-opt) là phạm vi sau. Xem [open-questions C46](../../open-questions/README.md).
+15. **Cất tại từng điểm dừng** — NV kho quét bin, rồi quét LPN thùng đặt vào; hệ thống làm như bước 6–8 (kiểm ràng buộc cứng, ghi tồn, nhiệm vụ `Done`) và nhả chỗ giữ của thùng đó. **Không bắt buộc đi đúng thứ tự**. Cất vào bin khác bin được gán vẫn được nếu bin hợp lệ — chỗ giữ ở bin cũ được nhả. Bin được gán bị từ chối lúc quét → hệ thống gợi ý lại cho thùng đó (§4.2).
+16. **Thời hạn giữ chỗ** — chỗ giữ của lượt **tự nhả khi lượt không có thao tác nào trong 30 phút** (mỗi lần quét trong lượt đếm lại từ đầu). Lượt và thùng trên xe giữ nguyên; khi NV kho quay lại, bin vẫn được kiểm lúc quét, đã bị lấp thì gợi ý lại.
+
+    > ⚠️ Giả định: thời hạn **30 phút không thao tác**, cấu hình theo kho. Xem [open-questions C46](../../open-questions/README.md).
+17. **Kết thúc lượt** — mọi thùng trên xe đã cất → `Completed`. NV kho đóng sớm (hoặc Quản lý kho đóng thay khi lượt bị bỏ dở) → `Closed`: thùng chưa cất trở lại nhiệm vụ `Pending` (thùng đặt lại khu nguồn), chỗ giữ còn lại được nhả.
+
+> Ví dụ: xe chở 6 thùng, sau bước 13 được gán A01-1-02 (3 thùng), C04-2-01 (2 thùng), B02-1-05 (1 thùng); khu nhận ở góc trái dưới bản đồ. Lộ trình: RECEIVING → A01-1-02 → B02-1-05 → C04-2-01 — 3 điểm dừng thay vì 6 lần đi riêng.
+
 ---
 
 ## 5. Trạng thái / Vòng đời (Lifecycle)
@@ -160,11 +184,36 @@ stateDiagram-v2
 
 Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển thẳng thùng từ vị trí nguồn sang bin. Trạng thái tồn và vòng đời thùng đầy đủ xem [20 §5](../20-inventory-control/README.md).
 
+### Trạng thái lượt cất (Putaway trip status)
+
+| Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
+|------------|---------|----------------------|--------------|
+| `Loading` | Đang quét thùng lên xe; chưa gán bin, chưa giữ chỗ | → `In Progress` (bắt đầu đi cất, có ít nhất một thùng), → `Closed` (bỏ lượt, thùng về `Pending`) | NV kho |
+| `In Progress` | Đã gán bin, giữ chỗ, có lộ trình; đang cất | → `Completed` (cất hết thùng trên xe), → `Closed` (đóng sớm) | NV kho / Hệ thống / Quản lý kho (đóng thay) |
+| `Completed` | Mọi thùng của lượt đã cất | *(cuối)* | Hệ thống |
+| `Closed` | Đóng khi còn thùng chưa cất; các thùng đó về nhiệm vụ `Pending`, chỗ giữ được nhả | *(cuối)* | NV kho / Quản lý kho |
+
+```mermaid
+stateDiagram-v2
+    state "In Progress" as InProgress
+    [*] --> Loading: Mở lượt, quét thùng lên xe
+    Loading --> InProgress: Bắt đầu đi cất — gán bin, giữ chỗ, lộ trình
+    Loading --> Closed: Bỏ lượt
+    InProgress --> Completed: Cất hết thùng trên xe
+    InProgress --> Closed: Đóng sớm, thùng còn lại về Pending
+    Completed --> [*]
+    Closed --> [*]
+```
+
+Giữ chỗ hết hạn (30 phút không thao tác — §4.5 bước 16) **không đổi trạng thái lượt**, chỉ nhả chỗ giữ.
+
 ### Dữ liệu tối thiểu cần lưu
 
 | Thực thể | Trường chính |
 |----------|--------------|
 | `PutawayTask` | `id`, `source` (`RECEIPT` / `QUARANTINE_RELEASE`), `receiptLineId?`, `stockPackageId` (thùng), `sku`, `lot`, `quantity` (số cái trong thùng = số cái chuẩn / thùng), `status` |
+| `PutawayTrip` | `id`, `warehouseId`, `operatorId`, `status`, `startLocationId` (khu nguồn), `startedAt?`, `lastActivityAt`, `closedAt?` |
+| `PutawayTripItem` | `tripId`, `putawayTaskId`, `stockPackageId`, `assignedLocationId?`, `stopSequence?`, `holdVolumeM3?`, `holdWeightKg?`, `holdReleasedAt?` |
 | `StockMovement` | `type` (`MOVE` / `STATUS_CHANGE`), `reference = PUTAWAY_TASK`, `fromLocation`, `toLocation`, `sku`, `lot`, `quantity`, `stockPackageId`, `performedBy`, `performedAt` |
 
 ---
@@ -187,6 +236,9 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 - **BR-12:** Available-to-promise chỉ tăng khi thùng đã cất (vào bin, hoặc vào khu `OVERFLOW` theo BR-13); hàng ở khu nhận hàng, khu cách ly không được bán.
 - **BR-13:** **Kho đầy → khu tạm `OVERFLOW`** *(Đã chốt 2026-11-05)*: khi không còn bin hợp lệ — kho đầy, hoặc thùng không vừa bin nào theo kích thước (BR-04) — nhiệm vụ cất được hoàn tất bằng cách quét một vị trí thuộc khu `OVERFLOW` của cùng kho (không kiểm thể tích của khu). Thùng ở `OVERFLOW` được dời lên bin bằng [11](../11-intra-warehouse-transfer/README.md) khi có chỗ. ✅ Đã chốt 2026-11-05: chỉ cho cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available` ở một khu chứa hàng, coi như đã cất xong (thuộc ATP, **giữ cho đơn được ngay**), lấy hàng được nếu khu khai báo cho phép lấy hàng ([06](../06-warehouse-map-slotting/README.md)). Xem [open-questions](../../open-questions/README.md).
 - **BR-14:** Thùng hàng hoàn chỉ được cất lại sau khi **Quản lý kho gỡ cách ly** ([03](../03-receipt/README.md) BR-14, [20](../20-inventory-control/README.md)); tồn `Quarantine` → `Available` khi cất xong (✅ đã chốt 2026-11-05, §4.4).
+- **BR-15:** **Lượt cất** *(✅ Đã chốt 2026-11-08)*: mỗi NV kho có **tối đa một lượt mở** (`Loading` / `In Progress`); một nhiệm vụ thuộc **tối đa một lượt mở**; chỉ nhận lên xe thùng có nhiệm vụ `Pending` của cùng kho; **không giới hạn số thùng**. Bin chỉ được gán khi **bắt đầu đi cất**, cho đúng các thùng đang trên xe (§4.5).
+- **BR-16:** **Giữ chỗ bin**: tạo khi bắt đầu đi cất; được tính như đã chiếm khi gợi ý / gán bin cho mọi nhiệm vụ và lượt khác (§4.2); **không phải khoá cứng** — ràng buộc cứng vẫn kiểm lúc quét (BR-09). Nhả khi thùng được cất, khi cất sang bin khác, khi lượt kết thúc, hoặc khi lượt **30 phút không có thao tác** (⚠️ giả định — [open-questions C46](../../open-questions/README.md)).
+- **BR-17:** **Lộ trình** sắp theo **láng giềng gần nhất**, khoảng cách Manhattan giữa các **điểm đứng** trên Kho Map, xuất phát từ khu nguồn; `OVERFLOW` là điểm dừng cuối. Lộ trình chỉ là hướng dẫn — **không bắt buộc đi đúng thứ tự** (§4.5, ⚠️ C46).
 
 ### Đối chiếu chuẩn tham chiếu
 
@@ -197,6 +249,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Capacity | Thể tích (m³, tự tính từ kích thước bin × chiều cao lọt của tầng) và tải trọng tối đa (kg) của bin, so với tổng thể tích / khối lượng thùng | Odoo có storage category/capacity |
 | Cất khác gợi ý | Cho phép nếu không vi phạm ràng buộc cứng | Phù hợp thực tế vận hành barcode/WMS: người làm kho xác nhận theo thực địa |
 | Theo thùng | Mỗi thùng LPN là một nhiệm vụ, cất nguyên thùng; không có hàng ngoài thùng | Tương tự package / LPN putaway của các WMS phổ biến |
+| Cất theo lượt | Gán bin cho mọi thùng trên xe khi bắt đầu đi, giữ chỗ có hạn, lộ trình láng giềng gần nhất theo toạ độ Kho Map | Tương tự cluster / batch putaway của các WMS; lộ trình là ước lượng trên mặt bằng, chưa theo lối đi thực tế |
 | FIFO | Bảo đảm ở bước phân bổ khi lấy hàng (không có hạn dùng nên không dùng FEFO) | Khớp chiến lược xuất kho phổ biến trong Odoo/MISA |
 
 ### Edge case
@@ -218,6 +271,12 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Thùng hàng hoàn được gỡ cách ly | Mở nhiệm vụ cất từ khu `QUARANTINE`; cất như thùng mới nhập (§4.4) |
 | Thùng hàng hoàn chưa có quyết định của Quản lý kho | Không có nhiệm vụ cất; thùng nằm ở khu cách ly (BR-01) |
 | Đặt nhầm vị trí và đã xác nhận | Sửa bằng di chuyển nguyên thùng ([11](../11-intra-warehouse-transfer/README.md)), không sửa trực tiếp nhiệm vụ |
+| NV kho bỏ xe giữa lượt | Sau 30 phút không thao tác, chỗ giữ tự nhả (BR-16); Quản lý kho đóng lượt → thùng chưa cất về `Pending` |
+| Tới bin được gán thì bin đã bị lấp (giữ chỗ đã hết hạn, hoặc dữ liệu bin đổi) | Lúc quét hệ thống từ chối (BR-09); gợi ý lại cho thùng đó |
+| Hai lượt cùng cần chỗ trong một bin gần đầy | Lượt bắt đầu sau thấy phần đã giữ của lượt trước, không được gán vượt chỗ trống còn lại (BR-16) |
+| Thùng trên xe không có bin hợp lệ | Gán khu `OVERFLOW`, là điểm dừng cuối của lộ trình (BR-13, BR-17) |
+| Quét lên xe thùng đang thuộc lượt mở của người khác | Từ chối (BR-15); Quản lý kho đóng lượt kia nếu bị bỏ dở |
+| Lộ trình đi xuyên kệ / tường trên bản đồ | Khoảng cách chỉ là ước lượng trên mặt bằng (⚠️ C46); NV kho đi theo lối thực tế, không bắt buộc thứ tự |
 
 ---
 
@@ -226,7 +285,7 @@ Hàng không có trạng thái "đang di chuyển": mỗi lần cất chuyển t
 | Module | Quan hệ |
 |--------|---------|
 | [03 · Receipt](../03-receipt/README.md) | Xác nhận phiếu nhập theo Đơn sản xuất mở nhiệm vụ cất (mỗi thùng một nhiệm vụ); cất xong mọi thùng → phiếu nhập `Closed`. Phiếu hàng hoàn đưa thùng vào khu `QUARANTINE`, cất lại sau khi gỡ cách ly |
-| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Bin, cờ cho phép cất, kích thước bin và chiều cao lọt của tầng (kiểm thùng vừa bin), thể tích (m³, tự tính), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy hoặc thùng không vừa bin nào; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
+| [06 · Warehouse Map & Slotting](../06-warehouse-map-slotting/README.md) | Toạ độ kệ / bin / khu để tính **điểm đứng** và vẽ **lộ trình lượt cất**; giữ chỗ của lượt trừ vào chỗ trống khi gợi ý; bin, cờ cho phép cất, kích thước bin và chiều cao lọt của tầng (kiểm thùng vừa bin), thể tích (m³, tự tính), tải trọng; khu `RECEIVING` / `QUARANTINE` là vị trí nguồn; khu `OVERFLOW` khi kho đầy hoặc thùng không vừa bin nào; cất xong cập nhật "Đang chiếm" của Bảng sức chứa kho |
 | [01 · Product Creation](../01-product-creation/README.md) | Quy cách thùng của SKU (kích thước D × R × C, thể tích thùng, khối lượng thùng đầy) và cờ cho phép xoay |
 | [07 · Picking](../07-picking/README.md) | Vị trí cất hợp lý và gom lô giúp lấy nguyên thùng nhanh; FIFO ở bước phân bổ |
 | [11 · Intra-warehouse Transfer](../11-intra-warehouse-transfer/README.md) | Di chuyển nguyên thùng bằng tay để sửa vị trí sau khi đã cất, hoặc dời thùng từ `OVERFLOW` lên bin |
