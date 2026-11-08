@@ -82,7 +82,7 @@ flowchart TD
     PO_CHECK -->|Đủ| PO_RECEIVED["Đơn sản xuất: Received"]
 
     RC_CONFIRM --> PA_TASK["Mở nhiệm vụ cất<br/>mỗi thùng LPN một nhiệm vụ — Pending"]
-    PA_TASK --> PA_SUGGEST{"Gợi ý tối đa 10 bin hợp lệ<br/>còn thể tích m³ và tải trọng<br/>cùng lô → cùng SKU → bin trống → bin còn chỗ"}
+    PA_TASK --> PA_SUGGEST{"Gợi ý tối đa 10 bin hợp lệ<br/>còn thể tích m³ và tải trọng<br/>cùng lô → bin trống nhỏ nhất chứa được cả lô → cùng SKU lô khác → SKU khác<br/>trong nhóm lấp đầy bin đang dở trước; bin thiếu thể tích xếp cuối"}
     PA_SUGGEST -->|"Có bin"| PA_MOVE["NV kho quét LPN + quét bin đích, cất cả thùng<br/>hệ thống kiểm lại ràng buộc cứng"]
     PA_SUGGEST -->|"Gợi ý rỗng — kho đầy"| PA_OVF["Quét vị trí khu tạm OVERFLOW để hoàn tất nhiệm vụ<br/>Quản lý kho dời lên bin khi có chỗ — 11"]
     PA_MOVE --> PA_DONE["Nhiệm vụ cất Done<br/>tồn Inbound → Available"]
