@@ -342,7 +342,7 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | `Posted` / `Rejected` / `Withdrawn` | Điều chỉnh tồn | Đã duyệt và ghi tồn / bị từ chối / người đề nghị rút lại |
 | `Ready to Dispatch` / `Handed Over` | Shipment | Các thùng đã kiểm & dán nhãn giao, chờ ở khu xuất hàng `DISPATCH` / đã quét lên xe & ký bàn giao ([09](../warehouse/09-shipping/README.md)) |
 | `Shipped` / `Delivered` | Order, Shipment | Đã gửi đi (chuyến đã có mã vận đơn; mốc hành trình ghi kèm, không đổi trạng thái) / đã giao đến khách — từ webhook của hãng hoặc Quản lý kho ghi tay; → `Delivery Failed` chỉ khi Quản lý kho sửa tay kèm lý do (⚠️ [open-questions E17](../open-questions/README.md)) |
-| `Partially Fulfilled` | Order | Đã giao một phần; phần còn lại chờ giao hoặc bị đóng ([17](../ecommerce/17-order-management/README.md) §5.1) |
+| `Partially Fulfilled` | Order | Giao một phần: đã hoàn tất kiểm thùng một phần ([08](../warehouse/08-packing/README.md) §4.4, kể cả khi chưa bàn giao) hoặc đã bàn giao một phần; phần còn lại chờ giao hoặc bị đóng ([17](../ecommerce/17-order-management/README.md) §5.1; ✅ đã chốt 2026-11-12) |
 | `Delivery Failed` / `Returned` | Order, Shipment | Hãng báo giao không thành (lý do ánh xạ sang mã nội bộ) / hãng báo hoàn hàng, hàng về kho — từ webhook của hãng hoặc Quản lý kho ghi tay ([09 §4.3, §4.5](../warehouse/09-shipping/README.md)) |
 | `Return Requested` | Order | Khách yêu cầu trả hàng; từ chối thì đơn quay về `Delivered` |
 | `Refunded` / `Partially Refunded` | Order | Đã hoàn tiền toàn phần / một phần (trạng thái của đơn, không phải trạng thái thanh toán) |

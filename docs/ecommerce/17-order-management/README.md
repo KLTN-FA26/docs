@@ -200,7 +200,7 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
 - **Xuất kho theo đợt** — Quản lý kho release tác vụ lấy hàng cho **các thùng của đợt giao kế tiếp** khi đợt đó đủ hàng (hoặc về `STAGING` như §4.4). Release, lấy hàng, kiểm thùng làm được **trước** ngày bắt đầu cửa sổ giao để kịp xếp xe.
 - **Không bàn giao trước cửa sổ giao** — shipment của một đợt chỉ được ký bàn giao vận chuyển từ **ngày bắt đầu** cửa sổ giao của đợt đó ([09](../../warehouse/09-shipping/README.md) BR-04); khách có quyền không nhận hàng giao trước hạn. Khách đồng ý nhận sớm → Sale **dời cửa sổ giao** (dưới đây). Hàng xong sớm thì giữ tại kho (bin hoặc `STAGING`) (BR-29).
 - **Đợt thanh toán gắn đợt giao** — `BEFORE_DELIVERY` gắn đợt *k* chặn bàn giao của đợt *k*; `AFTER_DELIVERY` gắn đợt *k* đến hạn khi đợt *k* giao xong ([15](../15-payment/README.md) §4.1).
-- **Trạng thái đơn không thêm mới** — trước khi đợt 1 bàn giao, đơn đi như hiện nay theo đợt 1 (`Confirmed` → `Awaiting Stock` / `Ready to Fulfill` → `Picking` → `Packed`); đợt 1 bàn giao mà còn đợt chưa giao → `Partially Fulfilled`; các đợt sau được lấy hàng, kiểm thùng, bàn giao trong lúc đơn ở `Partially Fulfilled`; đợt cuối bàn giao → `Shipped`; mọi đợt giao thành công → `Delivered`. Tình trạng từng đợt là **trạng thái hiển thị** do hệ thống tính (§5.5).
+- **Trạng thái đơn không thêm mới** — trước khi đợt 1 bàn giao, đơn đi như hiện nay theo đợt 1 (`Confirmed` → `Awaiting Stock` / `Ready to Fulfill` → `Picking` → `Packed`; đợt 1 **hoàn tất kiểm thùng một phần** (giao một phần, bước 18) → `Partially Fulfilled` **ngay lúc hoàn tất** — [08](../../warehouse/08-packing/README.md) §4.4); đợt 1 bàn giao mà còn đợt chưa giao → `Partially Fulfilled`; các đợt sau được lấy hàng, kiểm thùng, bàn giao trong lúc đơn ở `Partially Fulfilled`; đợt cuối bàn giao → `Shipped`; mọi đợt giao thành công → `Delivered`. Tình trạng từng đợt là **trạng thái hiển thị** do hệ thống tính (§5.5).
 - **Dời cửa sổ giao** *(BR-28)* — Sale dời cửa sổ giao của một đợt **chưa có thùng nào bàn giao**, khi hai bên đồng ý (khách xin dời, khách đồng ý nhận sớm, hoặc bên bán giao trễ):
   - nhập cửa sổ mới (không ở quá khứ; vẫn giữ thứ tự với các đợt khác — cần thì dời cả các đợt sau);
   - chọn **mã lý do**: `CUSTOMER_REQUEST` (khách xin dời / đồng ý nhận sớm) hoặc `SELLER_DELAY` (bên bán chậm, ví dụ sản xuất trễ); ghi chú bắt buộc;
@@ -211,7 +211,9 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
   > ⚠️ Giả định: phạt chậm giao (khi `SELLER_DELAY`) xử lý **ngoài hệ thống**; hệ thống chỉ lưu dấu vết qua mã lý do. Xem [open-questions D37](../../open-questions/README.md).
 
 18. **Giao một phần** — áp cho phần **thiếu hàng trong một đợt giao** (giao trước phần có sẵn của đợt, phần còn lại của đợt đi sau); giao nhiều đợt theo lịch giao **không cần** bật quyết định này. Sale quyết định **cho phép giao một phần** theo từng đơn (mặc định tắt; bật / tắt, ghi chú ≤ 500 ký tự; mọi lần quyết định được ghi lại); kho chỉ làm theo *(Quyết định 19/10 và 21/10/2026)*. Mọi đợt giao đều **từ cùng kho xuất** của đơn — **không tách giao từ hai kho** (BR-22).
-    - Có cho phép: các thùng có sẵn được kiểm, dán nhãn giao hàng và **bàn giao trước** trong lúc chờ phần thiếu từ Đơn sản xuất; đơn → `Partially Fulfilled`.
+    - Có cho phép: các thùng có sẵn được kiểm, dán nhãn giao hàng và **bàn giao trước** trong lúc chờ phần thiếu từ Đơn sản xuất; đơn → `Partially Fulfilled` **ngay khi hoàn tất kiểm thùng một phần** ([08](../../warehouse/08-packing/README.md) §4.4), không đợi tới lúc bàn giao. Bàn giao phần đã kiểm → đơn vẫn `Partially Fulfilled`; phần còn lại kiểm đủ → `Packed`; bàn giao hết → `Shipped`.
+
+      > ✅ Đã chốt 2026-11-12: theo 08 §4.4 — hoàn tất kiểm thùng một phần thì đơn chuyển `Partially Fulfilled` ngay lúc hoàn tất (trước đây §5.1 chỉ ghi `Partially Fulfilled` khi đã bàn giao một phần).
     - Không cho phép: không được để lại hàng khi bàn giao.
     - Quyết định **khoá** từ khi đơn `Shipped` trở đi, hoặc khi đã có hàng rời kho trên một chuyến xe.
     - Nhiều đơn đi chung một xe: xử lý ở lập kế hoạch chuyến xe ([09](../../warehouse/09-shipping/README.md)); mỗi thùng vẫn thuộc một đơn.
@@ -284,7 +286,7 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
     - Đơn sản xuất `In Production` không huỷ được trong hệ thống: Điều phối sản xuất báo đơn vị sản xuất dừng qua kênh kết nối; hàng đã làm nếu giao về vẫn nhập kho theo Đơn sản xuất (BR-07); không giao gì thì Điều phối sản xuất đóng Đơn sản xuất (`Closed`).
 31. **Mốc khoá huỷ** *(Quyết định 21/10/2026: đơn `Packed` không huỷ được; 2026-11-04: mốc dời về thùng đầu tiên dán nhãn)* — Khi **một thùng của đơn đã được kiểm và dán nhãn giao hàng** (hoặc đã bàn giao), đơn **không huỷ được nữa**; mọi thay đổi đi qua **trả hàng** (§4.10).
 32. **Dừng tác vụ kho khi huỷ** — huỷ pick task, put-back nguyên thùng đã lấy (kể cả thùng ở khu `STAGING`), huỷ nhãn giao hàng / gỡ thùng khỏi kế hoạch xếp hàng, huỷ Đơn sản xuất chưa in hàng loạt, nhả giữ hàng ([20](../../warehouse/20-inventory-control/README.md)).
-33. **Đóng phần còn lại** — Đơn `Partially Fulfilled` mà phần còn lại sẽ không giao nữa → Sale **đóng phần còn lại** (kèm mã lý do nội bộ; đơn đang treo thì phải gỡ treo trước):
+33. **Đóng phần còn lại** — Đơn `Partially Fulfilled` mà phần còn lại sẽ không giao nữa → Sale **đóng phần còn lại** (kèm mã lý do nội bộ; đơn đang treo thì phải gỡ treo trước; đơn vừa hoàn tất kiểm thùng một phần mà **chưa bàn giao** phần đã kiểm thì bàn giao phần đó trước rồi mới đóng phần còn lại):
     - Mọi thùng chưa giao bị đóng; đơn đi theo trạng thái các chuyến đã giao, không chuyển thẳng `Completed` *(Quyết định 21/10/2026)*.
     - Đơn sản xuất liên quan: chưa in hàng loạt → huỷ; `In Production` / `Partially Received` → đóng (`Closed`).
     - Phí chỉ tính khi phần bị đóng có hàng đơn vị sản xuất đã làm, ≤ giá trị các thùng bị đóng (số thùng × số cái / thùng × đơn giá / cái), kèm lý do và chi tiết.
@@ -382,9 +384,9 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | `Confirmed` | Hợp đồng đã ký, đủ điều kiện theo hợp đồng; Sale chọn kho xuất, hệ thống kiểm tồn & giữ hàng tại kho xuất; Đơn sản xuất (nếu thiếu) đang lập / chờ duyệt | → `Ready to Fulfill`, → `Awaiting Stock`, → `On Hold`, → `Cancelled` | Sale / Hệ thống |
 | `Awaiting Stock` | Thiếu thành phẩm; có Đơn sản xuất đang mở (đã gửi) | → `Ready to Fulfill`, → `Partially Fulfilled` (giao trước phần có sẵn), → `On Hold`, → `Cancelled` | Hệ thống (nhận đủ hàng) / Sale |
 | `Ready to Fulfill` | Đủ hàng tại kho xuất, chờ / đã được Quản lý kho release | → `Picking`, → `On Hold`, → `Cancelled` | Hệ thống / Quản lý kho → 07 |
-| `Picking` | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu xuất hàng) | → `Packed`, → `Partially Fulfilled`, → `On Hold`, → `Cancelled` | 07 |
+| `Picking` | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu xuất hàng) | → `Packed` (hoàn tất kiểm thùng đủ), → `Partially Fulfilled` (hoàn tất kiểm thùng một phần — 08 §4.4), → `On Hold`, → `Cancelled` | 07 / 08 |
 | `Packed` | Đã kiểm đủ thùng & dán nhãn giao hàng; **không huỷ được nữa**; bàn giao bị chặn nếu đợt `BEFORE_DELIVERY` chưa thu đủ | → `Shipped`, → `Partially Fulfilled`, → `On Hold` | 08 / 09 |
-| `Partially Fulfilled` | Đã giao một phần (từ kho xuất), phần còn lại chờ hoặc bị đóng | → `Packed`, → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `On Hold` | 07 / 08 / 09 |
+| `Partially Fulfilled` | Giao một phần: đã **hoàn tất kiểm thùng một phần** (08 §4.4 — kể cả khi phần đã kiểm chưa bàn giao) hoặc đã bàn giao một phần (từ kho xuất); phần còn lại chờ hoặc bị đóng *(✅ Đã chốt 2026-11-12)* | → `Packed` (phần còn lại kiểm đủ), → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `On Hold` | 07 / 08 / 09 |
 | `On Hold` | Tạm giữ (§4.9) | → trạng thái trước khi treo; → `Pending Payment` / `Confirmed` (kế toán duyệt tín dụng); → `Cancelled` | Hệ thống / Sale / Kế toán |
 | `Shipped` | Đã bàn giao đơn vị vận chuyển (xe đã có mã vận đơn); mốc hành trình từ webhook của hãng được ghi kèm thời điểm, không đổi trạng thái | → `Delivered`, → `Delivery Failed`, → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do) | → `Delivered`, → `Returned` (hàng hoàn nhập lại qua 03), → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
@@ -422,10 +424,10 @@ stateDiagram-v2
     AwaitingStock --> ReadyToFulfill: Nhận đủ hàng
     AwaitingStock --> PartiallyFulfilled: Giao trước phần có sẵn
     ReadyToFulfill --> Picking: Quản lý kho release, tạo task
-    Picking --> Packed
-    Picking --> PartiallyFulfilled
-    Packed --> PartiallyFulfilled
-    PartiallyFulfilled --> Packed
+    Picking --> Packed: Kiểm đủ thùng
+    Picking --> PartiallyFulfilled: Hoàn tất kiểm thùng một phần
+    Packed --> PartiallyFulfilled: Bàn giao một phần
+    PartiallyFulfilled --> Packed: Phần còn lại kiểm đủ
     Packed --> Shipped: Bàn giao (đợt BEFORE_DELIVERY đã thu)
     PartiallyFulfilled --> Shipped
     Shipped --> PartiallyFulfilled

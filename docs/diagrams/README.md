@@ -622,9 +622,9 @@ stateDiagram-v2
     AwaitingStock --> PartiallyFulfilled: Giao trước phần có sẵn
     ReadyToFulfill --> Picking: Quản lý kho release, tạo task
     Picking --> Packed: Kiểm đủ thùng và dán nhãn
-    Picking --> PartiallyFulfilled
-    Packed --> PartiallyFulfilled
-    PartiallyFulfilled --> Packed
+    Picking --> PartiallyFulfilled: Hoàn tất kiểm thùng một phần
+    Packed --> PartiallyFulfilled: Bàn giao một phần
+    PartiallyFulfilled --> Packed: Phần còn lại kiểm đủ
     Packed --> Shipped: Bàn giao (đợt BEFORE_DELIVERY đã thu)
     PartiallyFulfilled --> Shipped
     Shipped --> PartiallyFulfilled
