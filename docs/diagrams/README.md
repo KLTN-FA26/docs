@@ -624,7 +624,7 @@ stateDiagram-v2
     Picking --> Packed: Kiểm đủ thùng và dán nhãn
     Picking --> PartiallyFulfilled: Hoàn tất kiểm thùng một phần
     Packed --> PartiallyFulfilled: Bàn giao một phần
-    PartiallyFulfilled --> Packed: Phần còn lại kiểm đủ
+    PartiallyFulfilled --> Packed: Phần còn lại kiểm đủ, chưa bàn giao gì
     Packed --> Shipped: Bàn giao (đợt BEFORE_DELIVERY đã thu)
     PartiallyFulfilled --> Shipped
     Shipped --> PartiallyFulfilled
