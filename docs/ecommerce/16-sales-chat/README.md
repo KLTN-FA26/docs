@@ -95,7 +95,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 ### 4.4. Thanh toán theo đợt & công nợ
 
 9. Khi một **đợt thanh toán** của hợp đồng đến hạn (`Due`), agent gửi **thẻ thông tin chuyển khoản** cho đợt đó: tài khoản nhận của doanh nghiệp, số tiền đợt, nội dung chuyển khoản (mã hợp đồng + mã đợt), hạn thanh toán ([15](../15-payment/README.md)).
-10. Đợt `Overdue` hoặc công nợ phải thu sắp / đã quá hạn: agent gửi **nhắc công nợ** kèm thẻ thông tin chuyển khoản. Việc ghi nhận tiền về (phiếu thu theo đợt) do Kế toán làm ở [15](../15-payment/README.md); chat không ghi nhận thanh toán.
+10. Đợt quá hạn hoặc công nợ phải thu sắp / đã quá hạn: agent gửi **nhắc công nợ** kèm thẻ thông tin chuyển khoản. Việc ghi nhận tiền về (phiếu thu theo đợt) do Kế toán làm ở [15](../15-payment/README.md); chat không ghi nhận thanh toán.
 
 ### 4.5. Duyệt mẫu in & tiến độ sản xuất
 

@@ -294,7 +294,7 @@ flowchart TD
     FAILED -->|"Hãng giao lại thành công"| DELIVERED
     DELIVERED -.->|"Hãng báo sai: Quản lý kho sửa tay, có lý do"| FAILED
     FAILED -->|"Hàng hoàn về kho xuất"| RTO(["Đơn: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE, §1.3<br/>xử lý hoàn tiền"])
-    DELIVERED --> AUTO["Mỗi đêm: sau 7 ngày, mọi đợt Paid,<br/>không có yêu cầu trả hàng — Đơn: Completed"]
+    DELIVERED --> AUTO["Mỗi đêm: sau 7 ngày, mọi đợt Paid,<br/>không có yêu cầu trả hàng, mọi lần giao có hoá đơn phát hành — Đơn: Completed"]
     AUTO --> CLOSED(["Sau 30 ngày: Closed"])
 ```
 
@@ -399,7 +399,7 @@ sequenceDiagram
         OM->>PAY: Đợt AFTER_DELIVERY đến hạn (công nợ phải thu)
         CUST->>ACC: Chuyển khoản theo kỳ hạn
         ACC->>PAY: Ghi nhận theo sao kê → đợt Paid
-        OM->>OM: Sau 7 ngày, mọi đợt Paid → Completed, sau 30 ngày → Closed
+        OM->>OM: Sau 7 ngày, mọi đợt Paid, mọi lần giao có hoá đơn phát hành → Completed, sau 30 ngày → Closed
     else Giao thất bại
         alt Hãng có webhook
             CARRIER-->>SHIP: Sự kiện giao thất bại (lý do ánh xạ sang mã nội bộ) — hãng tích hợp API: điểm giao thất bại
@@ -696,14 +696,10 @@ stateDiagram-v2
     NotDue --> Due: Tới mốc (ký / sẵn sàng xuất / giao xong)
     Due --> PartiallyPaid: Phân bổ một phần
     Due --> Paid: Phân bổ đủ
-    Due --> Overdue: Quét đêm, quá hạn
     PartiallyPaid --> Paid
-    PartiallyPaid --> Overdue
-    Overdue --> Paid: Trả đủ
     NotDue --> Cancelled: Huỷ đơn
     Due --> Cancelled: Huỷ đơn
     PartiallyPaid --> Cancelled: Huỷ đơn
-    Overdue --> Cancelled: Huỷ đơn
     Paid --> [*]
     Cancelled --> [*]
 ```
@@ -769,10 +765,10 @@ sequenceDiagram
         SYS->>SYS: Lưu số hoá đơn, ký hiệu — Issued
         SYS-->>CUS: Thông báo hoá đơn đã phát hành, tải XML / PDF trên trang đơn
         EINVP-->>CUS: Email hoá đơn (⚠️ giả định — G11)
-    else Failed
-        SYS-->>ACC: Báo lỗi kèm lý do — sửa rồi phát hành lại cùng mã
-    else Chưa xác nhận được kết quả
-        SYS-->>ACC: Unknown — không gửi lại, liên hệ nhà cung cấp rồi tra lại
+    else Bị từ chối
+        SYS-->>ACC: Rejected kèm lý do — mở lại thành nháp, sửa rồi phát hành lại cùng mã
+    else Nhà cung cấp không biết giao dịch
+        SYS-->>ACC: Vẫn Submitting, có cờ — không tự gửi lại; gửi như giao dịch mới khi nhà cung cấp xác nhận không giữ hoá đơn
     end
 ```
 
@@ -782,21 +778,15 @@ sequenceDiagram
 stateDiagram-v2
     [*] --> Draft: Shipment Delivered / lập điều chỉnh, thay thế
     Draft --> Submitting: Kế toán phát hành
-    Draft --> Cancelled: Giao bị sửa thành thất bại / huỷ nháp
+    state "Voided Draft" as VoidedDraft
+    Draft --> VoidedDraft: Giao bị sửa thành thất bại / huỷ nháp
     Submitting --> Issued: Phát hành thành công
-    Submitting --> Failed: Phát hành thất bại
-    Submitting --> Unknown: Nhà cung cấp chưa xác nhận
-    Failed --> Submitting: Sửa lỗi, phát hành lại
-    Failed --> Cancelled: Huỷ
-    Unknown --> Issued: Tra lại
-    Unknown --> Failed: Tra lại
-    Issued --> Adjusted: Có hoá đơn điều chỉnh
-    Adjusted --> Adjusted: Điều chỉnh tiếp
-    Issued --> Replaced: Có hoá đơn thay thế
+    Submitting --> Rejected: Nhà cung cấp / cơ quan thuế từ chối
+    Rejected --> Draft: Mở lại, sửa nguyên nhân
+    Issued --> Replaced: Hoá đơn thay thế được phát hành
     Issued --> [*]
-    Adjusted --> [*]
     Replaced --> [*]
-    Cancelled --> [*]
+    VoidedDraft --> [*]
 ```
 
 > Trả hàng được duyệt hoàn tiền ([17](../ecommerce/17-order-management/README.md) §4.10) → nháp **điều chỉnh giảm**; Quản lý kho sửa `Delivered` → `Delivery Failed` sau khi đã phát hành → nháp **điều chỉnh giảm toàn bộ** (⚠️ giả định — [open-questions G12, G13](../open-questions/README.md)). **Ngày lập hoá đơn = thời điểm hãng báo giao thành công** (✅ đã chốt 2026-11-06 — [G8](../open-questions/README.md)). Dòng phí nằm ở hoá đơn đầu tiên của đơn: ⚠️ giả định ([G9](../open-questions/README.md)).
