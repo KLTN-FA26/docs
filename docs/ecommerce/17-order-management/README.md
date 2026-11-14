@@ -225,10 +225,12 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
     - hãng không có webhook (hoặc sự kiện chưa về) → **Quản lý kho** ghi kết quả giao khi hãng báo lại;
     - hãng báo sai → Quản lý kho **sửa tay** kết quả giao, bắt buộc lý do (BR-27).
 20. **`Delivered`** — khi hãng báo giao thành công (qua webhook, hoặc Quản lý kho ghi tay). Đơn đã có shipment thì kết quả giao ghi **theo từng shipment** *(Quyết định 19/10/2026)*. Giao xong làm đợt `AFTER_DELIVERY` đến hạn — đợt gắn một đợt giao thì đến hạn khi **đợt giao đó** giao xong ([15](../15-payment/README.md) §4.1). Hãng hoàn hàng về (RTO) → đơn `Returned` (theo sự kiện hoàn hàng của hãng, hoặc Quản lý kho ghi nhận); hàng nhập lại kho xuất qua [03](../../warehouse/03-receipt/README.md) bằng **phiếu nhập Hàng hoàn** vào `QUARANTINE` (BR-18).
-21. **Tự hoàn tất** *(Quyết định 21/10/2026)* — mỗi đêm (00:30) hệ thống chuyển `Delivered` → `Completed` khi đủ ba điều kiện:
+21. **Tự hoàn tất** *(Quyết định 21/10/2026)* — mỗi đêm (00:30) hệ thống chuyển `Delivered` → `Completed` khi đủ bốn điều kiện:
     - hết **thời hạn đổi / trả 7 ngày** kể từ khi giao;
     - mọi đợt thanh toán của hợp đồng đã `Paid` (không còn tiền phải thu);
     - không có yêu cầu trả hàng đang mở.
+    - **mọi lần giao thành công (shipment `Delivered`) đã có hoá đơn điện tử phát hành**, kể cả hoá đơn phần phí vận chuyển còn lại ([21](../21-e-invoice/README.md)) *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*.
+
 22. **Tự đóng** — `Completed`, `Refunded` hoặc `Partially Refunded` → `Closed` sau **30 ngày**.
 
 ### 4.7. Sửa đơn (Order amendment)
@@ -394,7 +396,7 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | `Return Requested` | Khách yêu cầu trả | → `Returned`, → `Delivered` (từ chối) | Sale |
 | `Returned` | Hàng trả đã về kho (phiếu nhập Hàng hoàn, khu `QUARANTINE`), hoặc hãng báo hoàn hàng (RTO) — kho nhập lại qua phiếu Hàng hoàn | → `Refunded`, → `Partially Refunded` | 03 / 09 (webhook của hãng / Quản lý kho) / 15 |
 | `Refunded` / `Partially Refunded` | Đã hoàn tiền | → `Closed` (tự động sau 30 ngày) | 15 |
-| `Completed` | Hoàn tất, hết hạn đổi / trả, mọi đợt đã thu | → `Closed` (tự động sau 30 ngày) | Hệ thống |
+| `Completed` | Hoàn tất, hết hạn đổi / trả, mọi đợt đã thu, mọi lần giao đã có hoá đơn phát hành | → `Closed` (tự động sau 30 ngày) | Hệ thống |
 | `Cancelled` | Huỷ trước khi thùng đầu tiên của đơn được dán nhãn giao hàng | *(cuối)* | Sale / Kế toán (từ chối tín dụng) |
 | `Closed` | Đóng hoàn toàn | *(cuối)* | Hệ thống |
 
@@ -440,7 +442,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
-    Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
+    Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu, đủ hoá đơn
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối
     ReturnRequested --> Returned

@@ -23,7 +23,7 @@ Hoá đơn **không quyết định thanh toán**: các đợt thanh toán, côn
 |-------|---------|
 | **Kế toán (Accountant)** | Xem hoá đơn nháp, **phát hành** (hoặc phát hành lại khi lỗi), **tra lại** kết quả khi nhà cung cấp chưa xác nhận được; lập **hoá đơn điều chỉnh / thay thế**; xem lịch sử gửi email của nhà cung cấp và lượt phát hành còn lại |
 | **Quản trị hệ thống (System Admin)** | Cấu hình **kết nối nhà cung cấp hoá đơn điện tử**: môi trường (thử nghiệm / production), thông tin xác thực (client id, client secret — không hiển thị lại sau khi lưu), tài khoản nhà cung cấp, **mẫu số** và **ký hiệu hoá đơn**, ngưỡng cảnh báo lượt phát hành |
-| **Nhân viên Sale (Sales Staff)** | Xem hoá đơn của đơn mình phụ trách; gửi **thẻ hoá đơn** cho khách qua [chat](../16-sales-chat/README.md); bổ sung mã số thuế / email nhận hoá đơn của khách khi hoá đơn bị chặn vì thiếu ([18](../18-customer-information/README.md)) |
+| **Nhân viên Sale (Sales Staff)** | Xem hoá đơn của đơn mình phụ trách (⚠️ backend chưa cấp quyền `einvoices` cho Sales Staff — hiện chỉ **Sales Manager** xem được *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*); gửi **thẻ hoá đơn** cho khách qua [chat](../16-sales-chat/README.md); bổ sung mã số thuế / email nhận hoá đơn của khách khi hoá đơn bị chặn vì thiếu ([18](../18-customer-information/README.md)) |
 | **Khách hàng sỉ** | Xem và tải **XML / PDF** các hoá đơn đã phát hành trên trang đơn ở cổng ([17](../17-order-management/README.md) §5.2); nhận thông báo hoá đơn đã phát hành; nhận thẻ hoá đơn trong chat |
 | **Hệ thống** | Tạo hoá đơn nháp khi shipment `Delivered`; huỷ nháp khi kết quả giao bị sửa trước khi phát hành; gọi nhà cung cấp khi Kế toán phát hành; **hỏi lại kết quả** theo mã theo dõi; lưu số hoá đơn, ký hiệu, file XML / PDF; kiểm lượt phát hành còn lại; nhắc Kế toán nháp tồn đọng |
 | **Nhà cung cấp hoá đơn điện tử (ngoài hệ thống)** | Nhận dữ liệu hoá đơn, **ký số**, nộp cơ quan thuế, cấp số hoá đơn, trả kết quả và file; tự thử lại khi lỗi hạ tầng. Không gửi kết quả về qua webhook — hệ thống phải tự hỏi lại |
@@ -57,7 +57,7 @@ Hoá đơn **không quyết định thanh toán**: các đợt thanh toán, côn
 
 | Thực thể | Trường chính |
 |----------|--------------|
-| `EInvoice` | `id`, `code` (mã hoá đơn nội bộ — gửi nhà cung cấp làm mã tham chiếu), `type` (`ORIGINAL` / `ADJUST_INCREASE` / `ADJUST_DECREASE` / `ADJUST_INFO` / `REPLACEMENT`), `original_invoice_id?`, `order_id`, `shipment_id?`, `status`, `buyer_snapshot`, `issue_date`, `subtotal`, `tax_total`, `grand_total`, `reason?`, `tracking_code?`, `invoice_series?`, `template_code?`, `invoice_number?`, `xml_file?`, `pdf_file?`, `issued_by?`, `issued_at?` |
+| `EInvoice` | `id`, `code` (mã hoá đơn nội bộ — gửi nhà cung cấp làm mã tham chiếu), `type` (`ORIGINAL` / `ADJUSTMENT` / `REPLACEMENT`), `correction_basis?` (`ERROR` sai sót / `RETURN` trả hàng / `TRADE_DISCOUNT` chiết khấu — tăng / giảm theo dấu số lượng), `adjusted` (cờ đã có điều chỉnh), `original_invoice_id?`, `order_id`, `shipment_id?`, `status`, `buyer_snapshot`, `issue_date`, `subtotal`, `tax_total`, `grand_total`, `reason?`, `tracking_code?`, `invoice_series?`, `template_code?`, `invoice_number?`, `xml_file?`, `pdf_file?`, `issued_by?`, `issued_at?` |
 | `EInvoiceLine` | `einvoice_id`, `line_no`, `order_line_id?` / `fee_type?`, `item_name`, `unit`, `quantity` (số cái), `cartons?` (số thùng — ghi chú), `unit_price`, `amount`, `tax_rate`, `tax_amount` |
 | `EInvoiceProviderCall` (nhật ký) | `einvoice_id`, `action` (`CREATE` / `CHECK` / `ADJUST` / `REPLACE` / `GET`), `requested_at`, `tracking_code?`, `result` (`PENDING` / `SUCCESS` / `FAILED` / `UNKNOWN`), `message?` |
 | `EInvoiceConfig` | `environment`, `client_id`, `client_secret` (mã hoá), `provider_account_id`, `template_code`, `invoice_series`, `quota_warning_threshold` |
@@ -97,11 +97,11 @@ Hoá đơn **không quyết định thanh toán**: các đợt thanh toán, côn
    |-----------|----------|
    | `Pending` | Giữ `Submitting`, hỏi lại tiếp |
    | `Success` | → `Issued`: lưu số hoá đơn, ký hiệu, mẫu số, ngày lập; tải và lưu **XML / PDF** |
-   | `Failed` (thông điệp nêu lý do, ví dụ sai thông tin bên mua, sai ký hiệu) | → `Failed`: báo Kế toán kèm thông điệp |
-   | Thông điệp báo **chưa xác nhận được kết quả phát hành** | → `Unknown`: **chặn phát hành lại** (BR-05), báo Kế toán liên hệ nhà cung cấp |
+   | Từ chối (thông điệp nêu lý do, ví dụ sai thông tin bên mua, sai ký hiệu) | → `Rejected`: báo Kế toán kèm thông điệp |
+   | Nhà cung cấp báo **không nhận được giao dịch** và đã quá thời gian lưu mã giao dịch | Giữ `Submitting`, gắn cờ **"nhà cung cấp không biết giao dịch"**: **không tự gửi lại** (BR-05), báo Kế toán liên hệ nhà cung cấp *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)* |
 
-7. **`Failed`** → sửa nguyên nhân (thông tin bên mua ở [18](../18-customer-information/README.md) rồi làm mới trên nháp; cấu hình ký hiệu…) → Kế toán **phát hành lại**. Trước khi gửi lại, hệ thống tra nhà cung cấp theo mã hoá đơn nội bộ: chưa có hoá đơn → gửi lại cùng mã; đã có → lấy kết quả đó, không gửi trùng (BR-04).
-8. **`Unknown`** → sau khi nhà cung cấp xác nhận, Kế toán bấm **Tra lại**: hệ thống tra nhà cung cấp theo mã hoá đơn nội bộ → `Issued` hoặc `Failed`.
+7. **`Rejected`** → Kế toán **mở lại thành nháp** (`Draft`), sửa nguyên nhân (thông tin bên mua ở [18](../18-customer-information/README.md) rồi làm mới trên nháp; cấu hình ký hiệu…) → Kế toán **phát hành lại**. Trước khi gửi lại, hệ thống tra nhà cung cấp theo mã hoá đơn nội bộ: chưa có hoá đơn → gửi lại cùng mã; đã có → lấy kết quả đó, không gửi trùng (BR-04).
+8. **Cờ "nhà cung cấp không biết giao dịch"** → Kế toán bấm **Tra lại** bất cứ lúc nào (hệ thống hỏi theo mã giao dịch → `Issued` / `Rejected` nếu nhà cung cấp đã có kết quả); chỉ khi nhà cung cấp **xác nhận không giữ hoá đơn** mới bấm **Gửi lại như giao dịch mới** — hệ thống hỏi lại nhà cung cấp trước, còn giữ thì từ chối (BR-04, BR-05).
 
 ### 4.3. Giao hoá đơn cho khách
 
@@ -121,17 +121,17 @@ Hoá đơn **không quyết định thanh toán**: các đợt thanh toán, côn
     |------------|----------|
     | **Trả hàng được duyệt hoàn tiền** ([17](../17-order-management/README.md) §4.10) | **Điều chỉnh giảm** trên hoá đơn của shipment chứa các thùng bị trả: dòng hàng, số lượng, tiền hàng, tiền thuế giảm. Hệ thống tạo sẵn nháp khi trả hàng được duyệt hoàn tiền |
     | Kết quả giao bị **sửa tay `Delivered` → `Delivery Failed`** sau khi hoá đơn đã phát hành ([09](../../warehouse/09-shipping/README.md) §4.3 bước 5) | **Điều chỉnh giảm toàn bộ** hoá đơn của shipment; hệ thống tạo sẵn nháp và báo Kế toán |
-    | Sai **thông tin bên mua** không đổi tiền (tên, địa chỉ) | **Điều chỉnh thông tin** |
-    | Sai **số tiền / thuế suất / số lượng** | **Điều chỉnh tăng / giảm**, hoặc **thay thế** — Kế toán chọn |
+    | Sai **tên / địa chỉ bên mua**, mã số thuế đúng | **Thông báo sai sót** mẫu 04/SS-HDDT gửi cơ quan thuế — **không lập hoá đơn mới**, hoá đơn giữ nguyên (TT 91/2026/TT-BTC Điều 10 khoản 1 điểm a) *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)* |
+    | Sai **số tiền / thuế suất / số lượng** | **Điều chỉnh tăng / giảm**, hoặc **thay thế** — Kế toán chọn; cần **văn bản thoả thuận** với bên mua (tệp PDF đã ký, số, ngày) trước khi phát hành |
     | Sai nghiêm trọng cần lập lại toàn bộ (ví dụ sai mã số thuế) | **Thay thế** — hoá đơn mới ghi lại toàn bộ nội dung |
 
     > ⚠️ Giả định: trả hàng xử lý bằng **hoá đơn điều chỉnh giảm do bên bán lập**; kết quả giao sửa từ thành công sang thất bại sau khi đã phát hành xử lý bằng **điều chỉnh giảm toàn bộ**. Cách xử lý theo quy định hiện hành cần Kế toán xác nhận. Xem [open-questions G12, G13](../../open-questions/README.md).
 12. **Quy tắc của nhà cung cấp** (BR-08): điều chỉnh làm được **nhiều lần**; thay thế chỉ **một lần** cho mỗi hoá đơn gốc; hoá đơn đã điều chỉnh **không thay thế** được; hoá đơn đã bị thay thế **không điều chỉnh** được.
-13. Khi điều chỉnh / thay thế `Issued`: hoá đơn gốc → `Adjusted` (vẫn hiệu lực, có thể điều chỉnh tiếp) hoặc `Replaced` (hết hiệu lực, hoá đơn thay thế là hoá đơn hiệu lực của shipment). Khách thấy cả hoá đơn gốc và các hoá đơn điều chỉnh / thay thế trên trang đơn.
+13. Khi hoá đơn điều chỉnh / thay thế được phát hành: hoá đơn gốc **giữ `Issued` và gắn cờ "có điều chỉnh"** (vẫn hiệu lực, có thể điều chỉnh tiếp) hoặc → `Replaced` (hết hiệu lực, hoá đơn thay thế là hoá đơn hiệu lực của shipment). Khách thấy cả hoá đơn gốc và các hoá đơn điều chỉnh / thay thế trên trang đơn.
 
 ### 4.5. Huỷ nháp
 
-14. Hoá đơn **chưa gửi nhà cung cấp** (`Draft`, `Failed` chưa từng tạo được ở nhà cung cấp) bị **huỷ** (`Cancelled`) khi:
+14. Hoá đơn **chưa gửi nhà cung cấp** (`Draft`; hoá đơn `Rejected` mở lại thành `Draft`) bị **huỷ** (`Voided Draft`) khi:
     - kết quả giao của shipment bị sửa từ `Delivered` sang `Delivery Failed` ([09](../../warehouse/09-shipping/README.md)) — hệ thống tự huỷ, ghi lý do;
     - Kế toán huỷ nháp lập sai (nháp điều chỉnh / thay thế), bắt buộc lý do.
 
@@ -143,47 +143,41 @@ Hoá đơn **không quyết định thanh toán**: các đợt thanh toán, côn
 
 ### 5.1. Hoá đơn (E-invoice)
 
-Áp dụng cho mọi loại: hoá đơn gốc, hoá đơn điều chỉnh, hoá đơn thay thế. `Adjusted` / `Replaced` chỉ có ở hoá đơn đã `Issued` bị điều chỉnh / thay thế.
+Áp dụng cho mọi loại: hoá đơn gốc, hoá đơn điều chỉnh, hoá đơn thay thế. Cờ "có điều chỉnh" và trạng thái `Replaced` chỉ có ở hoá đơn đã `Issued` bị điều chỉnh / thay thế.
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Draft` | Nháp trong hệ thống, chưa gửi nhà cung cấp | → `Submitting`, → `Cancelled` | Hệ thống tạo; Kế toán phát hành / huỷ |
-| `Submitting` | Đã gửi nhà cung cấp, có mã theo dõi; đang chờ kết quả | → `Issued`, → `Failed`, → `Unknown` | Hệ thống (hỏi lại kết quả) |
-| `Failed` | Nhà cung cấp từ chối, kèm lý do | → `Submitting` (phát hành lại), → `Cancelled` | Kế toán |
-| `Unknown` | Nhà cung cấp chưa xác nhận được kết quả phát hành; **không được gửi lại** | → `Issued`, → `Failed` (tra lại sau khi nhà cung cấp xác nhận) | Kế toán |
-| `Issued` | Đã phát hành: có số hoá đơn, ký hiệu, XML / PDF; **bất biến** | → `Adjusted`, → `Replaced` | Hệ thống |
-| `Adjusted` | Đã có ít nhất một hoá đơn điều chỉnh `Issued`; vẫn hiệu lực | → `Adjusted` (điều chỉnh tiếp) | Hệ thống |
-| `Replaced` | Đã bị thay thế bởi hoá đơn thay thế `Issued`; hết hiệu lực | *(cuối)* | Hệ thống |
-| `Cancelled` | Nháp bị huỷ, chưa từng phát hành | *(cuối)* | Hệ thống / Kế toán |
+| `Draft` | Nháp trong hệ thống, chưa gửi nhà cung cấp | → `Submitting`, → `Voided Draft` | Hệ thống tạo; Kế toán phát hành / huỷ |
+| `Submitting` | Đã gửi nhà cung cấp, có mã giao dịch; đang chờ kết quả. Có thể kèm **cờ "nhà cung cấp không biết giao dịch"** — không tự gửi lại (BR-05) | → `Issued`, → `Rejected` | Hệ thống (hỏi lại kết quả); Kế toán tra lại / gửi như giao dịch mới |
+| `Rejected` | Nhà cung cấp hoặc cơ quan thuế từ chối, kèm lý do; chưa có hoá đơn ở nhà cung cấp | → `Draft` (mở lại để sửa) | Kế toán |
+| `Issued` | Đã phát hành: có số hoá đơn, ký hiệu, XML / PDF; **bất biến**. Có thể kèm **cờ "có điều chỉnh"** khi đã có hoá đơn điều chỉnh phát hành (vẫn hiệu lực, điều chỉnh tiếp được) | → `Replaced` | Hệ thống |
+| `Replaced` | Đã bị thay thế bởi hoá đơn thay thế đã phát hành; hết hiệu lực | *(cuối)* | Hệ thống |
+| `Voided Draft` | Nháp bị huỷ, chưa từng phát hành | *(cuối)* | Hệ thống / Kế toán |
+
+> Tên trạng thái theo code backend (`EInvoiceStatus`): `DRAFT`, `SUBMITTING`, `ISSUED`, `REJECTED`, `VOIDED_DRAFT`, `REPLACED`; "nhà cung cấp không biết giao dịch" và "có điều chỉnh" là **cờ**, không phải trạng thái. *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*
 
 ```mermaid
 stateDiagram-v2
+    state "Voided Draft" as VoidedDraft
     [*] --> Draft: Shipment Delivered / lập điều chỉnh, thay thế
     Draft --> Submitting: Kế toán phát hành
-    Draft --> Cancelled: Giao bị sửa thành thất bại / huỷ nháp
+    Draft --> VoidedDraft: Giao bị sửa thành thất bại / huỷ nháp
     Submitting --> Issued: Phát hành thành công
-    Submitting --> Failed: Phát hành thất bại
-    Submitting --> Unknown: Nhà cung cấp chưa xác nhận
-    Failed --> Submitting: Sửa lỗi, phát hành lại
-    Failed --> Cancelled: Huỷ
-    Unknown --> Issued: Tra lại
-    Unknown --> Failed: Tra lại
-    Issued --> Adjusted: Có hoá đơn điều chỉnh
-    Adjusted --> Adjusted: Điều chỉnh tiếp
-    Issued --> Replaced: Có hoá đơn thay thế
+    Submitting --> Rejected: Nhà cung cấp / cơ quan thuế từ chối
+    Rejected --> Draft: Mở lại, sửa nguyên nhân
+    Issued --> Replaced: Hoá đơn thay thế được phát hành
     Issued --> [*]
-    Adjusted --> [*]
     Replaced --> [*]
-    Cancelled --> [*]
+    VoidedDraft --> [*]
 ```
 
 ### 5.2. Trạng thái hoá đơn khách thấy
 
 | Trạng thái nội bộ | Khách thấy |
 |-------------------|-----------|
-| `Draft`, `Submitting`, `Failed`, `Unknown`, `Cancelled` | Không hiển thị |
+| `Draft`, `Submitting`, `Rejected`, `Voided Draft` | Không hiển thị |
 | `Issued` | "Đã phát hành" — tải XML / PDF |
-| `Adjusted` | "Đã phát hành — có điều chỉnh" — kèm các hoá đơn điều chỉnh |
+| `Issued` có cờ điều chỉnh | "Đã phát hành — có điều chỉnh" — kèm các hoá đơn điều chỉnh |
 | `Replaced` | "Đã bị thay thế" — kèm hoá đơn thay thế |
 
 ---
@@ -192,11 +186,11 @@ stateDiagram-v2
 
 ### Business rules
 
-- **BR-01:** **Mỗi shipment `Delivered` có đúng một hoá đơn gốc còn hiệu lực** (không `Cancelled`, không `Replaced` mà chưa có hoá đơn thay thế). Hoá đơn gom theo **lần giao**, không theo đợt thanh toán; một đơn giao nhiều lần có nhiều hoá đơn. Shipment chưa từng `Delivered` (thất bại, hoàn hàng) không có hoá đơn.
+- **BR-01:** **Mỗi shipment `Delivered` có đúng một hoá đơn gốc còn hiệu lực** (không `Voided Draft`, không `Replaced` mà chưa có hoá đơn thay thế). Hoá đơn gom theo **lần giao**, không theo đợt thanh toán; một đơn giao nhiều lần có nhiều hoá đơn. Shipment chưa từng `Delivered` (thất bại, hoàn hàng) không có hoá đơn.
 - **BR-02:** **Kế toán phát hành**; hệ thống chỉ tạo nháp, không tự phát hành *(✅ Đã chốt 2026-11-06)*. Quyền phát hành, tra lại, lập điều chỉnh / thay thế gán mặc định cho Kế toán ([00 §2.3](../../00-system-overview/README.md)).
 - **BR-03:** Hoá đơn `Issued` **bất biến** — không sửa, không xoá. Mọi thay đổi bằng **hoá đơn điều chỉnh** hoặc **hoá đơn thay thế** tham chiếu hoá đơn gốc (§4.4).
 - **BR-04:** **Chống phát hành trùng:** mỗi hoá đơn có **mã hoá đơn nội bộ** duy nhất, gửi nhà cung cấp làm **mã tham chiếu**; nhà cung cấp từ chối mã đã tồn tại. Trước khi phát hành lại, hệ thống **tra nhà cung cấp theo mã** — đã có hoá đơn thì lấy kết quả, không gửi lại.
-- **BR-05:** Hoá đơn `Unknown` **không được gửi lại** cho tới khi tra lại có kết quả `Issued` / `Failed` (theo hướng dẫn của nhà cung cấp).
+- **BR-05:** Hoá đơn gắn cờ **"nhà cung cấp không biết giao dịch"** **không được tự gửi lại**: chỉ gửi như giao dịch mới khi nhà cung cấp xác nhận không giữ hoá đơn, hệ thống hỏi lại trước khi gửi (theo hướng dẫn của nhà cung cấp) *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*.
 - **BR-06:** **Thông tin bên mua bắt buộc trước khi phát hành:** tên công ty, **mã số thuế** (10 số, 10-3, hoặc 12 số với hộ kinh doanh — [18](../18-customer-information/README.md) BR-01), địa chỉ trên hoá đơn, **email nhận hoá đơn**. Thiếu thì chặn phát hành. Thông tin bên mua **chụp lại** vào hoá đơn; đổi hồ sơ khách sau đó không đổi hoá đơn đã phát hành.
 
   > ⚠️ Giả định: mọi khách đều nhận hoá đơn có mã số thuế (khách là doanh nghiệp / hộ kinh doanh có mã số thuế hoặc CCCD 12 số); **địa chỉ trên hoá đơn** lấy **địa chỉ xuất hoá đơn mặc định**, không có thì lấy **địa chỉ đăng ký kinh doanh**. Xem [open-questions G14](../../open-questions/README.md).
@@ -206,7 +200,7 @@ stateDiagram-v2
 - **BR-08:** **Điều chỉnh / thay thế theo quy tắc nhà cung cấp:** điều chỉnh được nhiều lần; thay thế một lần cho mỗi hoá đơn gốc; hoá đơn đã điều chỉnh không thay thế được; hoá đơn đã bị thay thế không điều chỉnh được.
 - **BR-09:** **Lượt phát hành:** hệ thống kiểm lượt còn lại ở nhà cung cấp trước khi phát hành; dưới ngưỡng cấu hình → cảnh báo Kế toán; hết lượt → chặn phát hành. Nháp chưa gửi nhà cung cấp không tốn lượt.
 - **BR-10:** **Bảo mật kết nối:** thông tin xác thực nhà cung cấp chỉ lưu và dùng **phía server**, không hiển thị lại sau khi lưu; mọi lần gọi nhà cung cấp ghi nhật ký (§3 Output). Thử nghiệm dùng **môi trường thử nghiệm (sandbox)** của nhà cung cấp (tách biệt hoàn toàn với production, không nộp cơ quan thuế thật).
-- **BR-11:** **Hoá đơn không ảnh hưởng thanh toán:** phát hành, điều chỉnh, thay thế hoá đơn không đổi đợt thanh toán, công nợ hay trạng thái đơn ([15](../15-payment/README.md)). Hoàn tiền khi trả hàng vẫn đi theo [15](../15-payment/README.md) §4.5.
+- **BR-11:** **Hoá đơn không ảnh hưởng thanh toán:** phát hành, điều chỉnh, thay thế hoá đơn không đổi đợt thanh toán, công nợ hay trạng thái đơn ([15](../15-payment/README.md)) — **trừ một điều kiện**: đơn chỉ tự chuyển `Completed` khi mọi lần giao đã có hoá đơn phát hành ([17](../17-order-management/README.md) §4.6 bước 21) *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*. Hoàn tiền khi trả hàng vẫn đi theo [15](../15-payment/README.md) §4.5.
 - **BR-12:** **Phí huỷ** ([15](../15-payment/README.md) §4.6) **không xuất hoá đơn GTGT** trong module này.
 
   > ⚠️ Giả định: phí huỷ là tiền bồi thường / phạt vi phạm hợp đồng, thuộc diện **không phải kê khai, tính nộp thuế (KKKNT)**, nên không lập hoá đơn GTGT. Xem [open-questions G10](../../open-questions/README.md).
@@ -216,9 +210,9 @@ stateDiagram-v2
 | Tình huống | Hướng xử lý |
 |------------|-------------|
 | Khách thiếu mã số thuế hoặc email nhận hoá đơn khi phát hành | Chặn phát hành (BR-06); Sale bổ sung ở [18](../18-customer-information/README.md); Kế toán làm mới thông tin bên mua trên nháp rồi phát hành |
-| Nhà cung cấp trả `Failed` vì sai thông tin bên mua / ký hiệu | `Failed` kèm thông điệp; sửa nguồn (hồ sơ khách / cấu hình), làm mới nháp, phát hành lại cùng mã (BR-04) |
+| Nhà cung cấp từ chối vì sai thông tin bên mua / ký hiệu | `Rejected` kèm thông điệp; mở lại thành nháp, sửa nguồn (hồ sơ khách / cấu hình), làm mới nháp, phát hành lại cùng mã (BR-04) |
 | Nhà cung cấp không phản hồi / lỗi mạng khi gửi | Giữ `Draft`; Kế toán phát hành lại — hệ thống tra theo mã trước, không gửi trùng (BR-04) |
-| Nhà cung cấp báo "chưa xác nhận được kết quả phát hành" | `Unknown`, chặn gửi lại (BR-05); Kế toán liên hệ nhà cung cấp rồi bấm Tra lại |
+| Nhà cung cấp báo không nhận được giao dịch, quá thời gian lưu mã | Giữ `Submitting` kèm cờ, không tự gửi lại (BR-05); Kế toán liên hệ nhà cung cấp, tra lại hoặc gửi như giao dịch mới khi được xác nhận |
 | Hết lượt phát hành | Chặn phát hành, báo Kế toán (BR-09); nháp giữ nguyên, phát hành sau khi mua thêm lượt |
 | Một xe chở nhiều đơn | Mỗi shipment thuộc một đơn ([08](../../warehouse/08-packing/README.md) BR-03), mỗi shipment `Delivered` một hoá đơn |
 | Đơn giao nhiều lần (theo **lịch giao nhiều đợt** — [14](../14-cart-and-order/README.md) BR-23 — hoặc giao một phần) | Mỗi lần giao thành công (mỗi shipment) một hoá đơn; một đợt giao đi nhiều xe thì có nhiều hoá đơn; dòng phí nằm ở hoá đơn đầu tiên (⚠️ §4.1) |
