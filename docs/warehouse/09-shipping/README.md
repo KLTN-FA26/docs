@@ -65,7 +65,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | **File vận đơn** | PDF / ảnh / Excel của hãng, đính kèm chuyến | Không |
 | Thông tin bàn giao | Người đại diện hãng, biển số xe, điện thoại tài xế (tuỳ chọn), xác nhận đã ký | Có (khi bàn giao) |
 | **Sự kiện webhook của hãng** | Mã chuyến nội bộ, loại sự kiện, thời điểm hãng báo, chữ ký; tuỳ loại: mã vận đơn / biển số / tài xế, mã shipment, lý do thất bại, ảnh biên bản giao nhận (POD) (§4.5) | Không (chỉ hãng có webhook) |
-| **Biên bản giao nhận (Proof of Delivery – POD)** | Ảnh / file biên bản giao nhận khi giao thành công: từ webhook, hoặc Quản lý kho tải lên khi ghi tay | Không |
+| **Biên bản giao nhận (Proof of Delivery – POD)** | Ảnh / file biên bản giao nhận khi giao thành công — thường là bản chụp / scan **biên bản giao nhận** hệ thống in cho shipment (§4.2 bước 8), có chữ ký bên nhận: từ webhook, hoặc Quản lý kho tải lên khi ghi tay | Không |
 
 **Input cho kế hoạch xếp hàng (Load Planning):**
 
@@ -84,6 +84,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | **Phiếu đặt xe** — mã chuyến nội bộ, hãng, loại xe, kho xuất, sơ đồ xếp (PDF) của xe | Gửi hãng khi đặt xe |
 | **Đơn đặt xe ở hãng** *(hãng tích hợp API đặt xe)* — điểm lấy hàng (kho xuất), các điểm giao theo thứ tự (mỗi điểm một shipment: địa chỉ, người nhận, mã shipment), giờ hẹn lấy, mã dịch vụ theo loại xe; mã đơn hãng trả về | Đơn vị vận chuyển (qua API); mã đơn làm mã vận đơn của chuyến |
 | **Biên bản bàn giao (Manifest)** — danh sách kiện của chuyến; mã chuyến, mã vận đơn; người đại diện hãng, biển số, tài xế; xác nhận đã ký | Đối soát với hãng vận chuyển |
+| **Biên bản giao nhận (Delivery note)** *(✅ 2026-11-15)* — in theo **từng shipment** (PDF): mã shipment (kèm mã vạch và QR), mã đơn, số hợp đồng & đợt giao; kho xuất là **bên giao**; khách, địa chỉ giao, người nhận; xe (mã chuyến, hãng, biển số, tài xế, mã vận đơn); từng **SKU kèm tên sản phẩm** với số thùng, số cái, mã LPN; tổng cộng; ô ký **BÊN GIAO (KHO) / TÀI XẾ / BÊN NHẬN** (§4.2 bước 8). Bản đã ký tải lên làm **POD** | Dispatch Staff, Quản lý kho (in, đi theo hàng); tài xế; khách (bên nhận ký) |
 | **Cập nhật trạng thái đơn**: `Shipped` → `Delivered` / `Delivery Failed` / `Returned` | 17 Order Management, 15 Payment (mốc giao hàng của đợt `AFTER_DELIVERY`), [21 E-invoice](../../ecommerce/21-e-invoice/README.md) (shipment `Delivered` sinh hoá đơn nháp; **thời điểm hãng báo giao thành công** là ngày lập hoá đơn — ✅ đã chốt 2026-11-06) |
 | **Thông tin vận chuyển cho khách** — tên hãng, mã vận đơn, biển số, **mốc hành trình** (đã lấy hàng, đang giao, đã giao) kèm thời điểm, theo từng xe | 17 Order Management (trang đơn ở cổng khách), thông báo "đã bàn giao vận chuyển" |
 | **Mốc hành trình** — theo chuyến / shipment, kèm thời điểm hãng báo | 17 Order Management, Quản lý kho |
@@ -219,6 +220,15 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 
      > ⚠️ Giả định: thông báo này chỉ gửi vào **hộp thông báo** của khách, **không gửi email** ([00 §6](../../00-system-overview/README.md)). Xem [open-questions E23](../../open-questions/README.md).
    - Mọi xe đã bàn giao → kế hoạch `Dispatched`.
+
+   **Biên bản giao nhận** *(✅ Đã chốt 2026-11-15)* — Dispatch Staff / Quản lý kho của kho xuất in cho **mỗi shipment** một biên bản giao nhận (PDF), đi theo hàng tới khách:
+   - **mã shipment** (in cả mã vạch Code 128 và QR — mã hãng dùng khi báo kết quả giao, ⚠️ [open-questions E20](../../open-questions/README.md)), mã đơn, số hợp đồng và **đợt giao**;
+   - **bên giao** là kho xuất (tên, địa chỉ); **bên nhận** là khách (tên công ty theo thông tin pháp lý), địa chỉ giao và người nhận của đơn;
+   - mỗi **xe** chở shipment: mã chuyến, hãng, biển số, tài xế, điện thoại, mã vận đơn; thời điểm bàn giao;
+   - hàng giao theo **từng SKU kèm tên sản phẩm**: số thùng, số cái, danh sách mã LPN; dòng **tổng cộng**; dòng ghi tình trạng hàng khi nhận;
+   - ô ký **BÊN GIAO (KHO)**, **TÀI XẾ**, **BÊN NHẬN**.
+
+   In được trước hoặc sau khi đặt xe / ký bàn giao: thông tin chưa có (chưa đặt xe, chưa có tài xế, chưa bàn giao) in thành **dòng chấm để ghi tay**. Shipment `Cancelled` không in được. Khi giao, bên nhận ký; bản đã ký được chụp / scan và **tải lên làm POD** của shipment (§4.3 bước 2).
 9. **Đơn không huỷ được** khi đã có thùng dán nhãn giao hàng ([08](../08-packing/README.md) BR-04), nên kiện trong kế hoạch không bị gỡ vì huỷ đơn. Khi cần bỏ kiện khỏi kế hoạch (thùng hư hỏng, đơn chưa thu đợt `BEFORE_DELIVERY`):
    - chưa có xe nào bắt đầu xếp → mở lại kế hoạch về `Planned` (BR-14), gỡ kiện, các xe bị ảnh hưởng **chờ tính lại**;
    - kiện đã nằm trên xe đang xếp → Quản lý kho **huỷ có kiểm soát** xe đó (BR-14), **quét dỡ kiện** *(✅ Đã chốt 2026-11-05)*:
@@ -255,7 +265,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 1. **Nguồn kết quả giao:**
    - Hãng **có webhook** → hệ thống tự cập nhật theo sự kiện hãng đẩy về (§4.5).
    - Hãng **không có webhook**, hoặc webhook chưa về → **Quản lý kho** ghi tay khi hãng báo lại (điện thoại, email… ngoài hệ thống).
-2. **Giao thành công** — shipment → `Delivered`; ghi mốc hành trình "đã giao"; đơn cập nhật theo các shipment. **Biên bản giao nhận (POD)** đính kèm shipment: hãng gửi kèm sự kiện, hoặc Quản lý kho tải lên khi ghi tay. Hệ thống tạo **hoá đơn nháp** cho shipment để Kế toán phát hành; **ngày lập hoá đơn = thời điểm hãng báo giao thành công** (từ webhook), hoặc ngày giao Quản lý kho ghi theo hãng báo lại ([21](../../ecommerce/21-e-invoice/README.md) §4.1).
+2. **Giao thành công** — shipment → `Delivered`; ghi mốc hành trình "đã giao"; đơn cập nhật theo các shipment. **Biên bản giao nhận (POD)** đính kèm shipment: hãng gửi kèm sự kiện, hoặc Quản lý kho tải lên khi ghi tay — thường là bản chụp / scan biên bản giao nhận in ở §4.2 bước 8 có chữ ký bên nhận. Hệ thống tạo **hoá đơn nháp** cho shipment để Kế toán phát hành; **ngày lập hoá đơn = thời điểm hãng báo giao thành công** (từ webhook), hoặc ngày giao Quản lý kho ghi theo hãng báo lại ([21](../../ecommerce/21-e-invoice/README.md) §4.1).
 
    > ⚠️ Giả định: POD là **tuỳ chọn** — thiếu POD vẫn ghi nhận được giao thành công. Xem [open-questions E16](../../open-questions/README.md).
 3. **Giao thất bại** — shipment → `Delivery Failed`, **bắt buộc lý do**. Từ webhook: lý do của hãng ánh xạ sang mã nội bộ theo cấu hình hãng (§4.1), lưu kèm lý do gốc. Ghi tay: Quản lý kho chọn mã.
