@@ -1,6 +1,6 @@
 # 15 — Thanh toán theo hợp đồng & Công nợ (Contract Payment & Receivables)
 
-> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách thanh toán bằng **chuyển khoản**. Không có cổng thanh toán online (thẻ / ví / QR), không có COD, và không có trạng thái "thanh toán thất bại" (chuyển khoản không có lỗi để báo về).
+> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách thanh toán bằng **chuyển khoản**. Không có cổng thanh toán online (thẻ / ví điện tử), không có COD, và không có trạng thái "thanh toán thất bại" (chuyển khoản không có lỗi để báo về). *(✅ Cập nhật 2026-11-15)* Thẻ thông tin chuyển khoản có **mã VietQR** để khách **chuyển khoản**: quét bằng ứng dụng ngân hàng thì tài khoản nhận, số tiền và nội dung được điền sẵn (§4.2 bước 5). VietQR chỉ là mã QR của một lệnh chuyển khoản thường, **không phải cổng thanh toán**: tiền vẫn chỉ được ghi nhận khi Kế toán đối chiếu sao kê và lập phiếu thu (BR-02).
 >
 > Đã chốt 2026-11-04: khách thanh toán theo **lịch thanh toán của Hợp đồng mua bán** ([14](../14-cart-and-order/README.md)) — mỗi hợp đồng gồm một hoặc nhiều **đợt thanh toán (Payment Installment)**. Tiền khách trả được ghi nhận **theo đợt thanh toán**, không còn điều khoản thanh toán chọn theo đơn.
 >
@@ -57,7 +57,7 @@ Payment quyết định các mốc tiền của đơn:
 |---------|----------|
 | **Phiếu thu** (`Recorded` / `Voided`) và lịch sử huỷ (người, thời điểm, lý do) | Kế toán, đối soát |
 | **Trạng thái các đợt thanh toán** (§5.1) và trạng thái thanh toán của đơn (§5.2) | 14, 17, khách |
-| **Thông tin chuyển khoản theo đợt** (tài khoản nhận, số tiền còn phải trả của đợt, nội dung = mã hợp đồng + mã đợt) | Cổng khách hàng; thẻ trong [16 Sales Chat](../16-sales-chat/README.md) |
+| **Thông tin chuyển khoản theo đợt** (tài khoản nhận, số tiền còn phải trả của đợt, nội dung = mã hợp đồng + mã đợt; thẻ trong chat kèm **mã VietQR** để chuyển khoản) | Cổng khách hàng; thẻ trong [16 Sales Chat](../16-sales-chat/README.md) |
 | Tín hiệu **đủ đợt `ON_SIGNING`** (xác nhận đơn) và **đủ đợt `BEFORE_DELIVERY`** (mở chặn bàn giao) | 14, 17, 09 |
 | **Công nợ phải thu** và **vị thế tín dụng** của khách: dư nợ, hạn mức còn lại, quá hạn | Kế toán, Sale, 14 (gửi / ký hợp đồng), khách |
 | **Báo cáo công nợ theo khách và tuổi nợ (tính tại hôm nay)** — mỗi khách một dòng: công nợ phải thu chia **trong hạn / quá hạn 1–30 / 31–60 / 61–90 / trên 90 ngày** theo hạn trả, **đợt thanh toán khi ký quá hạn (ngoài công nợ)**, **đã ký chưa đến mốc**, hạn mức và hạn mức còn lại; xuất Excel (§4.7) | Kế toán, Quản lý kinh doanh, Sale |
@@ -90,7 +90,8 @@ Payment quyết định các mốc tiền của đơn:
 5. Khách chuyển khoản theo **thông tin chuyển khoản** của đợt — hiển thị trên cổng, và là dữ liệu cho **thẻ "thông tin chuyển khoản theo đợt"** Sale gửi trong [chat](../16-sales-chat/README.md):
    - **tài khoản nhận** của doanh nghiệp (cấu hình sẵn trong hệ thống);
    - **số tiền** còn phải trả của đợt;
-   - **nội dung chuyển khoản** = mã hợp đồng + mã đợt.
+   - **nội dung chuyển khoản** = mã hợp đồng + mã đợt;
+   - trên thẻ trong chat: **mã VietQR** chứa đủ ba thông tin trên, khách quét bằng ứng dụng ngân hàng để chuyển khoản mà không gõ tay *(✅ Cập nhật 2026-11-15)*.
 6. Kế toán đối chiếu sao kê, **lập phiếu thu**:
    - chọn khách, nhập **mã tham chiếu sao kê**, ngày nhận;
    - thêm **một hoặc nhiều dòng**: mỗi dòng là một **đợt** (kể cả đợt **chưa đến hạn** — khách trả sớm) hoặc một **khoản phí huỷ** của khách đó, kèm số tiền;
