@@ -62,9 +62,9 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 
 | Kết quả | Dùng bởi |
 |---------|----------|
-| **Báo giá** (mã, số bản sửa, dòng, bậc giá, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế suất & tiền thuế từng dòng, tổng có thuế, hiệu lực, ngày giao khách yêu cầu) | Khách, Sale |
+| **Báo giá** (mã, số bản sửa, dòng, bậc giá, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế suất & tiền thuế từng dòng, tổng có thuế, hiệu lực, ngày giao khách yêu cầu) và **bản PDF báo giá** dựng khi tải, không lưu (§4.1 bước 3) | Khách, Sale |
 | **Đơn hàng** (mã đơn; mỗi dòng: SKU, số thùng, số cái / thùng, số cái, đơn giá / cái, thành tiền, **thuế suất VAT, tiền thuế**, **ngày giao khách yêu cầu** — đã chốt; dòng phí khuôn / bản in, dòng phí vận chuyển — mỗi dòng phí có thuế suất & tiền thuế; địa chỉ; tổng chưa thuế, tổng tiền thuế, **tổng có thuế**) | [15 Payment](../15-payment/README.md), [17 Order Management](../17-order-management/README.md) |
-| **Hợp đồng mua bán** (mã hợp đồng, các bên, dòng hàng, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế VAT từng dòng, tổng có thuế, điều khoản giao gồm **lịch giao**, **số lần in mẫu miễn phí**, lịch thanh toán, bản PDF để ký, file hợp đồng đã ký) | Khách (xem trên cổng), Kế toán, Sale; [17](../17-order-management/README.md) (số lần in mẫu miễn phí khi duyệt mẫu in; **lịch giao** để giữ hàng, lập Đơn sản xuất và xuất kho theo đợt) |
+| **Hợp đồng mua bán** (mã hợp đồng, các bên, dòng hàng, dòng phí khuôn / bản in, dòng phí vận chuyển, thuế VAT từng dòng, tổng có thuế, điều khoản giao gồm **lịch giao**, **số lần in mẫu miễn phí**, lịch thanh toán, bản PDF để ký (tổng có thuế kèm dòng **Bằng chữ**), file hợp đồng đã ký) | Khách (xem trên cổng), Kế toán, Sale; [17](../17-order-management/README.md) (số lần in mẫu miễn phí khi duyệt mẫu in; **lịch giao** để giữ hàng, lập Đơn sản xuất và xuất kho theo đợt) |
 | **Các đợt thanh toán** sinh khi hợp đồng `Signed` | [15 Payment](../15-payment/README.md) |
 | Thông báo cho Sale (khách chấp nhận / yêu cầu sửa báo giá) | Sale |
 
@@ -90,6 +90,16 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
    - hiệu lực còn ở tương lai;
    - khách `Active`;
    - mọi SKU còn bán được, SKU theo mẫu thuộc đúng khách.
+
+   **Bản PDF báo giá** *(✅ Đã chốt 2026-11-15)* — Sale tải được báo giá dạng PDF; khách tải được báo giá của chính mình từ khi đã gửi — để trình duyệt nội bộ trước khi chấp nhận. Hệ thống **dựng bản PDF mỗi lần tải**, không lưu file. Bản PDF gồm:
+   - tiêu đề "BÁO GIÁ", mã báo giá, số bản sửa, ngày lập (ngày gửi; bản nháp ghi ngày in), hiệu lực đến, thời điểm khách chấp nhận (nếu đã chấp nhận);
+   - **bên bán** và **khách hàng** (thông tin pháp lý của khách nếu đã có, nếu chưa thì tên khách và mã số thuế);
+   - mỗi dòng: SKU, **số thùng × số cái / thùng = số cái**, đơn giá / cái, thành tiền, thuế suất & tiền thuế VAT; các **bậc giá** đề nghị;
+   - các dòng phí (khuôn / bản in, vận chuyển) kèm thuế;
+   - tiền hàng, các khoản phí, tổng chưa thuế, tiền thuế, **tổng có thuế** và dòng **Bằng chữ** (tổng có thuế viết bằng chữ tiếng Việt);
+   - ngày giao khách yêu cầu, cách tính giá (đơn giá theo cái, đặt theo thùng nguyên từ MOQ), điều kiện Sale ghi trên báo giá, chỗ ký của bên bán.
+
+   Báo giá đã chấp nhận in số thùng và giá khách đã chấp nhận; chưa chấp nhận thì in số đề nghị. Báo giá `Draft`, `Cancelled`, `Expired` in kèm **dòng đánh dấu** (bản nháp / đã huỷ / đã hết hiệu lực) để bản in không bị dùng như một chào giá còn hiệu lực; phần chưa có giá in "chưa xác định".
 4. **Khách phản hồi** trên sàn hoặc bằng thẻ hành động trong chat (chỉ khách được làm; nhân viên không làm thay):
    - **Chấp nhận** → `Accepted`. Khách chọn **số thùng** từng dòng. Hệ thống kiểm:
      - báo giá còn hiệu lực;
@@ -147,7 +157,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
     - Có đợt `AFTER_DELIVERY` thì khách phải có **hạn mức công nợ** do kế toán duyệt ([18](../18-customer-information/README.md)); N mặc định = kỳ hạn công nợ của khách.
 
     > ✅ Đã chốt 2026-11-05: số đợt và tỷ lệ mỗi đợt do Sale nhập theo từng hợp đồng, có mẫu mặc định theo khách ở [18](../18-customer-information/README.md). Xem [open-questions](../../open-questions/README.md).
-13. **Gửi hợp đồng** — Sale xuất bản hợp đồng (PDF) và gửi khách → hợp đồng `Sent`, đơn → `Pending Contract`. Khách xem hợp đồng trên cổng. Lúc gửi, hệ thống kiểm **vị thế tín dụng** trên phần `AFTER_DELIVERY` ([15](../15-payment/README.md) §4.3); vượt hạn mức hoặc khách có khoản quá hạn thì **cảnh báo** Sale (sửa lịch thanh toán, hoặc vẫn gửi và chấp nhận đơn sẽ bị treo chờ kế toán khi ký).
+13. **Gửi hợp đồng** — Sale xuất bản hợp đồng (PDF; sau dòng **tổng giá trị có thuế** có dòng **Bằng chữ** — tổng có thuế viết bằng chữ tiếng Việt, *✅ Đã chốt 2026-11-15*) và gửi khách → hợp đồng `Sent`, đơn → `Pending Contract`. Khách xem hợp đồng trên cổng. Lúc gửi, hệ thống kiểm **vị thế tín dụng** trên phần `AFTER_DELIVERY` ([15](../15-payment/README.md) §4.3); vượt hạn mức hoặc khách có khoản quá hạn thì **cảnh báo** Sale (sửa lịch thanh toán, hoặc vẫn gửi và chấp nhận đơn sẽ bị treo chờ kế toán khi ký).
 14. **Ký hợp đồng** — hai bên ký **ngoài hệ thống** (giấy hoặc chữ ký số bên ngoài); khách có thể gửi lại file hợp đồng đã ký qua chat. Sale tải **file hợp đồng đã ký** (bản scan hợp đồng giấy hoặc PDF có chữ ký số) lên hợp đồng, nhập ngày ký → hợp đồng `Signed`; nội dung hợp đồng từ đây **bất biến** — riêng **cửa sổ giao** của đợt chưa bàn giao được dời theo [17](../17-order-management/README.md) §4.5 (kèm bằng chứng khách đồng ý), bản hợp đồng đã ký giữ nguyên.
 
     > ✅ Đã chốt 2026-11-05: hợp đồng ký ngoài hệ thống, Sale tải file hợp đồng đã ký lên; phụ lục / sửa hợp đồng sau khi ký là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
@@ -294,6 +304,7 @@ stateDiagram-v2
 | Ngày giao mong muốn khách nêu đã qua khi Sale lập báo giá | Không dùng được ngày ở quá khứ (BR-19); Sale thoả thuận ngày mới với khách rồi nhập |
 | Khách nêu số thùng dưới MOQ dự kiến | Số thùng khách nêu chỉ là gợi ý (BR-22); Sale đặt bậc giá / MOQ theo thoả thuận, khách chọn số thùng ≥ MOQ khi chấp nhận (BR-07) |
 | Báo giá hết hiệu lực rồi khách mới đồng ý | Sale lập báo giá mới, giá gợi ý theo bảng giá hiện hành |
+| Khách cần bản báo giá (PDF) để trình duyệt nội bộ | Sale hoặc khách tải bản PDF của báo giá đã gửi (§4.1 bước 3); bản PDF dựng lại mỗi lần tải, báo giá đã huỷ / hết hiệu lực in kèm dòng đánh dấu |
 | Khách hỏi giá trên sàn | Sàn không hiện giá (BR-01); khách mở chat / yêu cầu báo giá, Sale lập báo giá |
 | Khách đặt lại SKU đã từng sản xuất | Không có dòng phí khuôn / bản in (BR-17); Sale lập báo giá mới như bình thường |
 | Báo giá có SKU mẫu mới thì khách sửa thiết kế trước khi chấp nhận | Khách tạo bản sửa trên app, bản sửa được duyệt sinh SKU mới ([12](../12-product-design/README.md)); Sale mở bản sửa mới của báo giá với SKU mới và dòng phí khuôn / bản in cho SKU mới |
