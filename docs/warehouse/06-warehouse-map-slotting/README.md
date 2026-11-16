@@ -196,7 +196,7 @@ Chi tiết vận hành ở [05 §4.2](../05-putaway/README.md); tóm tắt quy t
    | Cột | Cách tính |
    |-----|-----------|
    | **Sức chứa** | Tổng thể tích tự tính của các bin **đang dùng được** (trạng thái hiệu lực `Active`) của kho **× hệ số sử dụng** |
-   | **Đang chiếm** | Tổng thể tích các thùng đang nằm trong kho (thùng `In Stock` ở mọi vị trí của kho, mọi trạng thái tồn) |
+   | **Đang chiếm** | Tổng thể tích các thùng đang chiếm hoặc sắp cần chỗ trên bin: thùng ở **bin** (mọi trạng thái của bin, mọi trạng thái tồn) và ở khu **`RECEIVING`**, **`OVERFLOW`**, **`QUARANTINE`**. **Không tính** khu **`STAGING`** (thùng đã lấy, chờ xuất, không quay lại bin) và **`DISPATCH`** (thùng đã trừ tồn khi quét lấy hàng) — vẫn hiện ở dòng của khu đó (✅ chốt lại 2026-11-16, SCRUM-669) |
    | **Sắp về** | Phần **chưa nhận** (số thùng còn mở × thể tích thùng) của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có **kho nhận** là kho này ([17](../../ecommerce/17-order-management/README.md)) |
    | **Còn trống dự kiến** | = Sức chứa − Đang chiếm − Sắp về (có thể âm) |
    | **Chờ duyệt** | Thể tích các Đơn sản xuất **chưa gửi đi** (`Draft` / `Pending Approval`) có kho nhận là kho này — tách riêng, **không** trừ vào còn trống dự kiến vì đơn chưa chắc được gửi |
@@ -215,7 +215,7 @@ Chi tiết vận hành ở [05 §4.2](../05-putaway/README.md); tóm tắt quy t
    - khi lần gửi đó làm **còn trống dự kiến** của kho **chuyển từ ≥ 0 sang âm**: `WARN` — số m³ thiếu (✅ đã chốt 2026-11-05: chỉ báo ở lần chuyển sang âm, không báo lặp khi kho vẫn âm; xem [open-questions C42](../../open-questions/README.md)).
 9. **Quản lý kho** theo dõi bảng (cả theo zone / kệ / khu) để mở thêm bin, dọn chỗ, chỉnh hệ số sử dụng hoặc báo Điều phối sản xuất trước khi hàng về.
 
-> ✅ Đã chốt 2026-11-05: vị trí **chưa tính được thể tích** — bin trên tầng thiếu chiều cao lọt (dữ liệu cũ, vì trường này nay bắt buộc) — không được cộng vào Sức chứa; bảng hiện **số vị trí còn thiếu** để Quản lý kho bổ sung. Thùng nằm ở mọi vị trí của kho — kể cả `RECEIVING`, `QUARANTINE`, `STAGING`, `DISPATCH`, `OVERFLOW` — đều tính vào Đang chiếm. Xem [open-questions C40](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: vị trí **chưa tính được thể tích** — bin trên tầng thiếu chiều cao lọt (dữ liệu cũ, vì trường này nay bắt buộc) — không được cộng vào Sức chứa; bảng hiện **số vị trí còn thiếu** để Quản lý kho bổ sung. ~~Thùng nằm ở mọi vị trí của kho đều tính vào Đang chiếm~~ — **chốt lại 2026-11-16 (SCRUM-669):** Sức chứa chỉ tính từ bin, nên Đang chiếm chỉ tính thùng đang chiếm hoặc sắp cần chỗ trên bin: thùng ở bin và ở khu `RECEIVING`, `OVERFLOW`, `QUARANTINE`; thùng ở khu `STAGING` (chờ xuất) và `DISPATCH` (đã trừ tồn khi lấy) không tính. Xem [open-questions C40](../../open-questions/README.md).
 >
 > ✅ Đã chốt 2026-11-05: **một hệ số sử dụng cho cả kho**, mặc định **100%**, nhận giá trị trong khoảng (0%, 100%], áp cho bin (khu vực không có sức chứa — ✅ 2026-11-13), cho mọi cấp xem (kho / zone / kệ / khu); hệ số **chỉ dùng cho Bảng sức chứa** — kiểm còn chỗ khi cất hàng ([05](../05-putaway/README.md)) dùng thể tích tự tính đầy đủ. Ở cấp zone / kệ / khu chỉ có Sức chứa, Đang chiếm, Còn trống hiện tại và %. Xem [open-questions C43](../../open-questions/README.md).
 
