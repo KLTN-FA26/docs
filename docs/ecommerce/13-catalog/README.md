@@ -101,7 +101,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
 
 1. **Giá nội bộ (bảng giá riêng) của khách** — Quản lý kinh doanh khai báo 1–20 bậc cho (khách, SKU riêng); mỗi bậc gồm **số thùng tối thiểu** và **đơn giá theo cái**. Bậc có số thùng nhỏ nhất là **MOQ gợi ý** (số thùng) của khách cho SKU đó. SKU riêng chỉ đặt được giá cho **chính khách sở hữu**.
 2. Đây là **nguồn giá gợi ý duy nhất**: quy cách không có giá; không có giá gốc, không có giá nhóm.
-3. Sửa giá gửi kèm phiên bản (khoá lạc quan). Không có thời hạn hiệu lực, không cần duyệt; mọi thay đổi được ghi nhật ký kiểm toán.
+3. Sửa giá gửi kèm phiên bản (khoá lạc quan). Không có thời hạn hiệu lực, không cần duyệt; mọi thay đổi được ghi nhật ký kiểm toán, kèm **SKU và các bậc giá mới** — System Admin xem ở màn nhật ký hệ thống ([00 §2.5.4](../../00-system-overview/README.md)).
 4. **Chỉ nhân viên xem**; giá nội bộ **không bao giờ hiện trên sàn** (BR-04). Sale dùng làm **giá gợi ý** — điền sẵn bậc giá khi lập báo giá ([14](../14-cart-and-order/README.md)); giá thật được thoả thuận với khách và chốt trên báo giá / đơn / hợp đồng.
 5. SKU riêng **chưa có giá nội bộ** (ví dụ vừa sinh) thì Sale tự nhập bậc giá trên báo giá ([14](../14-cart-and-order/README.md)); khách không thấy khác biệt vì sàn không hiện giá.
 

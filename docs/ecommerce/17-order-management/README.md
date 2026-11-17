@@ -88,7 +88,7 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
 | **Yêu cầu huỷ** và quyết định | Khách, Sale |
 | **Tiền hoàn / phí huỷ** khi huỷ, đóng phần còn lại hoặc trả hàng | [15 Payment](../15-payment/README.md) |
 | **Trả hàng được duyệt hoàn tiền** (thùng bị trả, shipment chứa các thùng đó) — để lập hoá đơn điều chỉnh giảm | [21 E-invoice](../21-e-invoice/README.md) |
-| **Dashboard bán hàng** — đơn & doanh thu theo ngày, SKU bán chạy, đơn theo trạng thái (§4.11) | Sales Manager, Kế toán, Quản lý kho, System Admin |
+| **Dashboard bán hàng** — đơn & **doanh số (đơn đã ký)** theo ngày, SKU bán chạy, đơn theo trạng thái (§4.11) | Sales Manager, Kế toán, Quản lý kho, System Admin |
 | **Lịch sản xuất** — mọi Đơn sản xuất đang mở theo ngày cần hàng, kèm đơn / đợt giao, ngày hoàn thành dự kiến, cờ trễ (§4.12) | Điều phối sản xuất, Sale, Sales Manager, Quản lý kho (kho của mình) |
 | **Cảnh báo trễ** — `AT_RISK`, `PRODUCTION_LATE`, `PO_NEEDED`, `DELIVERY_LATE` (§4.12) | Điều phối sản xuất (trừ `DELIVERY_LATE`), Sale, Sales Manager; Quản lý kho (đợt giao trễ) |
 | **Lịch sử dời cửa sổ giao** — đợt, cửa sổ cũ / mới, mã lý do, bằng chứng khách đồng ý, người, thời điểm (BR-28) | Sale, Sales Manager, Kế toán; khách thấy lịch giao hiệu lực |
@@ -104,8 +104,11 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
 ### 4.2. Chọn kho xuất, kiểm tồn & release
 
 2. **Chọn kho xuất** — mỗi đơn có **đúng một kho xuất** (BR-22). Khi đơn `Confirmed`, hệ thống hiện cho Sale, theo từng kho: **tồn khả dụng** (số thùng) của từng SKU riêng trong đơn và **còn trống dự kiến** (m³) theo bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-slotting/README.md)); hệ thống **gợi ý** theo thứ tự ưu tiên *(✅ Đã chốt 2026-11-05 — [open-questions C3](../../open-questions/README.md))*:
-   1. kho **đang có đủ hàng** (tồn khả dụng đủ số thùng) cho các SKU riêng trong đơn;
-   2. rồi tới kho **còn chỗ** (còn trống dự kiến) cho phần phải sản xuất.
+   1. kho **đang có đủ hàng** (tồn khả dụng đủ số thùng) cho mọi dòng của đơn;
+   2. rồi tới kho **còn chỗ** (còn trống dự kiến) cho phần phải sản xuất — còn trống dự kiến không nhỏ hơn thể tích phần phải sản xuất; kho **còn trống dự kiến lớn hơn** trước. Kho chưa tính được thể tích phần phải sản xuất (thiếu kích thước thùng) hoặc chưa tính được bảng sức chứa coi như không còn chỗ;
+   3. rồi tới các kho còn lại. Trong mỗi nhóm, sau các tiêu chí trên: kho có **nhiều thùng khả dụng hơn** trước, rồi theo **mã kho**.
+
+   *(✅ Đã chốt 2026-11-15: thứ tự chi tiết của gợi ý.)*
 
    **Sale chọn kho xuất.** Chỉ báo còn hàng trên sàn tính theo **mọi kho** ([13](../13-catalog/README.md) BR-07), nên có thể khác hàng có sẵn ở kho xuất được chọn.
    - Thể tích phần phải sản xuất (số thùng thiếu × thể tích thùng) lớn hơn còn trống dự kiến của kho được chọn → **cảnh báo** Sale, không chặn (BR-25).
@@ -326,17 +329,17 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
 
     | Chỉ số | Cách tính |
     |--------|-----------|
-    | **Đơn & doanh thu theo ngày** | Mỗi ngày (kể cả ngày không có đơn): số đơn, doanh thu. **Doanh thu = tổng chưa thuế của đơn đã tạo − đơn đã huỷ** (dòng hàng + dòng phí, không gồm tiền thuế VAT — [14](../14-cart-and-order/README.md) BR-09, BR-21; ⚠️ giả định), ghi vào **ngày tạo đơn**. Đơn treo vẫn tính; đơn nháp không tính |
-    | **Tổng kỳ** | Số đơn, doanh thu, **giá trị đơn trung bình**, so sánh % với kỳ liền trước cùng độ dài |
-    | **SKU bán chạy** | Xếp theo doanh thu (thành tiền dòng, chưa thuế) rồi số thùng; mặc định 10, tối đa 100 |
+    | **Đơn & doanh số (đơn đã ký) theo ngày** | Mỗi ngày (kể cả ngày không có đơn): số đơn, doanh số. **Doanh số (đơn đã ký) = tổng chưa thuế của các đơn đã ký hợp đồng − đơn đã huỷ** (dòng hàng + dòng phí, không gồm tiền thuế VAT — [14](../14-cart-and-order/README.md) BR-09, BR-21), ghi vào **ngày ký hợp đồng**; đơn bị huỷ sau đó được trừ ở chính ngày ký. Đơn treo (kể cả treo tín dụng khi ký) vẫn tính; đơn chưa ký hợp đồng (`Draft`, `Pending Contract`) không tính |
+    | **Tổng kỳ** | Số đơn, doanh số, **giá trị đơn trung bình**, so sánh % với kỳ liền trước cùng độ dài |
+    | **SKU bán chạy** | Xếp theo doanh số (thành tiền dòng, chưa thuế) rồi số thùng; mặc định 10, tối đa 100 |
     | **Đơn theo trạng thái** | Số đơn hiện tại ở từng trạng thái (§5.1), không theo kỳ |
 
-    > ⚠️ Giả định: doanh thu trên dashboard tính **trước thuế** — tổng chưa thuế của đơn (dòng hàng + dòng phí khuôn / bản in, vận chuyển), không gồm tiền thuế VAT; SKU bán chạy xếp theo thành tiền dòng chưa thuế. Xem [open-questions D33](../../open-questions/README.md).
+    > ✅ Đã chốt 2026-11-15 ([open-questions D33](../../open-questions/README.md)): chỉ số trên dashboard là **doanh số (đơn đã ký)**, không gọi là doanh thu — một đơn được tính từ khi **hợp đồng được ký**, **trước thuế**, gồm dòng phí khuôn / bản in và vận chuyển; SKU bán chạy xếp theo thành tiền dòng chưa thuế. **Doanh thu** (theo hoá đơn đã phát hành cho từng lần giao) xem ở **sổ hoá đơn** của Kế toán ([21](../21-e-invoice/README.md)), không ở dashboard này.
 
 45. Chỉ tính đơn **VND**; chỉ nhóm **theo ngày** (theo tuần / tháng, khách hàng mua nhiều nhất, xuất file: phạm vi sau — [open-questions D18](../../open-questions/README.md)).
 46. Người có quyền xuất báo cáo có thể yêu cầu **tính lại** số liệu tổng hợp.
 
-Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-slotting/README.md)), công nợ phải thu ([15](../15-payment/README.md)), danh sách Đơn sản xuất theo trạng thái (§5.3), **lịch sản xuất** (§4.12).
+Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-slotting/README.md)), **báo cáo công nợ theo khách & tuổi nợ** ([15](../15-payment/README.md) §4.7), **báo cáo xuất – nhập – tồn** ([20](../../warehouse/20-inventory-control/README.md) §4.10), sổ hoá đơn ([21](../21-e-invoice/README.md)), danh sách Đơn sản xuất theo trạng thái (§5.3), **lịch sản xuất** (§4.12).
 
 ### 4.12. Lịch sản xuất & cảnh báo trễ
 
