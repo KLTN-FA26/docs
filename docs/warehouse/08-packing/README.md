@@ -72,7 +72,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 
 5. **Kích thước & khối lượng** — khi in nhãn, hệ thống ghi cho thùng `Checked` theo **quy cách thùng của SKU** ([01](../01-product-creation/README.md)): kích thước D × R × C, khối lượng thùng đầy, cờ cho phép xoay — giống nhau cho mọi thùng của SKU (§1). Tính **khối lượng quy đổi** = D × R × C / 6.000 (BR-09). SKU thiếu quy cách thùng → không in được nhãn (BR-07).
 6. **In nhãn giao hàng** — cho từng thùng hoặc cả loạt thùng `Checked`. Nhãn gồm: mã đơn, mã LPN (mã vạch), SKU, số cái trong thùng, khối lượng, người nhận, điện thoại, địa chỉ giao, kho gửi / địa chỉ hoàn hàng, ký hiệu dễ vỡ / không xoay. Nhân viên **dán nhãn lên thùng** → thùng `Labeled`. Nhãn LPN giữ nguyên; mã kiện ở các bước sau chính là mã LPN.
-   - Các **chú thích cố định** trên nhãn giao hàng (tên từng trường) ghi **song ngữ: tiếng Việt trước, tiếng Anh sau** *(✅ Đã chốt)*.
+   - Các **chú thích cố định** trên nhãn giao hàng (tên từng trường) ghi **song ngữ: tiếng Việt trước, tiếng Anh sau** *(✅ Đã chốt 2026-11-19)*.
 7. **Khoá đơn khi dán nhãn** — khi **thùng đầu tiên** của đơn được dán nhãn giao hàng, đơn **không huỷ được, không đổi địa chỉ giao** nữa ([17](../../ecommerce/17-order-management/README.md)); thông tin trên nhãn vì thế không thay đổi. Nhãn rách, mất → **in lại** theo mã LPN; nhãn cũ vô hiệu.
 
 ### 4.4. Hoàn tất
@@ -85,7 +85,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
    Các thùng `Labeled` của lần hoàn tất gom thành **một shipment** `Ready to Dispatch`:
    - đủ thùng → phiên `Completed`, đơn `Packed`;
    - một phần → phiên vẫn `In Progress`, đơn `Partially Fulfilled`. Phần còn lại kiểm tiếp khi thùng được lấy bổ sung ([07](../07-picking/README.md) §4.3).
-9. **Cảnh báo thanh toán** — nếu hợp đồng của đơn còn **đợt `BEFORE_DELIVERY` chưa thu đủ** ([15](../../ecommerce/15-payment/README.md)), kết quả hoàn tất kèm **cảnh báo số tiền** (không chặn). Đồng thời hệ thống gửi **thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) cho **Quản lý kho của kho xuất** và **Sale phụ trách đơn** *(✅ Đã chốt)*. Bàn giao sẽ bị chặn tới khi đợt đó đã thu ([09](../09-shipping/README.md)).
+9. **Cảnh báo thanh toán** — nếu hợp đồng của đơn còn **đợt `BEFORE_DELIVERY` chưa thu đủ** ([15](../../ecommerce/15-payment/README.md)), kết quả hoàn tất kèm **cảnh báo số tiền** (không chặn). Đồng thời hệ thống gửi **thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) cho **Quản lý kho của kho xuất** và **Sale phụ trách đơn** *(✅ Đã chốt 2026-11-19)*. Bàn giao sẽ bị chặn tới khi đợt đó đã thu ([09](../09-shipping/README.md)).
 10. Shipment nằm tại khu xuất hàng (`DISPATCH`), chờ bàn giao → [Shipping](../09-shipping/README.md). **Mọi đơn giao nguyên chuyến**, nên shipment đi tiếp vào kế hoạch xếp hàng lên xe (Load Planning) ở [09](../09-shipping/README.md) *(✅ Đã chốt 2026-11-05: bỏ gửi kiện qua hãng)*.
 
 ---
