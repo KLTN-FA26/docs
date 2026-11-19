@@ -384,7 +384,7 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | `Ready to Fulfill` | Đủ hàng tại kho xuất, chờ / đã được Quản lý kho release | → `Picking`, → `On Hold`, → `Cancelled` | Hệ thống / Quản lý kho → 07 |
 | `Picking` | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu xuất hàng) | → `Packed`, → `Partially Fulfilled`, → `On Hold`, → `Cancelled` | 07 |
 | `Packed` | Đã kiểm đủ thùng & dán nhãn giao hàng; **không huỷ được nữa**; bàn giao bị chặn nếu đợt `BEFORE_DELIVERY` chưa thu đủ | → `Shipped`, → `Partially Fulfilled`, → `On Hold` | 08 / 09 |
-| `Partially Fulfilled` | Đã giao một phần (từ kho xuất), phần còn lại chờ hoặc bị đóng | → `Packed`, → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `On Hold` | 07 / 08 / 09 |
+| `Partially Fulfilled` | Đã giao một phần (từ kho xuất), phần còn lại chờ hoặc bị đóng | → `Packed`, → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `Partially Refunded` (hoàn tiền của shipment hoàn về được ghi nhận khi các shipment khác đã giao — không qua `Returned`) *(✅ Đã chốt 2026-11-19)*, → `On Hold` | 07 / 08 / 09 / 15 |
 | `On Hold` | Tạm giữ (§4.9) | → trạng thái trước khi treo; → `Pending Payment` / `Confirmed` (kế toán duyệt tín dụng); → `Cancelled` | Hệ thống / Sale / Kế toán |
 | `Shipped` | Đã bàn giao đơn vị vận chuyển (xe đã có mã vận đơn); mốc hành trình từ webhook của hãng được ghi kèm thời điểm, không đổi trạng thái | → `Delivered`, → `Delivery Failed`, → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do) | → `Delivered`, → `Returned` (hàng hoàn nhập lại qua 03), → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
@@ -438,6 +438,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
+    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền shipment hoàn về, các shipment khác đã giao
     Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối
