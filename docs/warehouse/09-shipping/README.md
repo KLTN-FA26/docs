@@ -63,7 +63,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | **Mã vận đơn & thông tin xe** | Theo từng chuyến: **mã vận đơn** của hãng; biển số, tên tài xế, điện thoại tài xế. Từ webhook, **file nhập theo mẫu** hoặc nhập tay (§4.4) | Mã vận đơn: Có (trước khi ký bàn giao) |
 | File nhập mã vận đơn | File theo **mẫu của hệ thống** (§4.4) | Không |
 | **File vận đơn** | PDF / ảnh / Excel của hãng, đính kèm chuyến | Không |
-| Thông tin bàn giao | Người đại diện hãng, biển số xe, điện thoại tài xế (tuỳ chọn), xác nhận đã ký | Có (khi bàn giao) |
+| Thông tin bàn giao | Người đại diện hãng, **tên tài xế**, biển số xe, điện thoại tài xế (tuỳ chọn), xác nhận đã ký | Có (khi bàn giao) |
 | **Sự kiện webhook của hãng** | Mã chuyến nội bộ, loại sự kiện, thời điểm hãng báo, chữ ký; tuỳ loại: mã vận đơn / biển số / tài xế, mã shipment, lý do thất bại, ảnh biên bản giao nhận (POD) (§4.5) | Không (chỉ hãng có webhook) |
 | **Biên bản giao nhận (Proof of Delivery – POD)** | Ảnh / file biên bản giao nhận khi giao thành công: từ webhook, hoặc Quản lý kho tải lên khi ghi tay | Không |
 
@@ -74,7 +74,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | **Danh sách kiện cần xếp** | Các shipment `Ready to Dispatch`, **nguyên shipment** (không lấy một phần), cùng một kho. Danh sách kiện trong **file Excel theo mẫu** chỉ dùng để **ước tính thử** ([§4.0](#40-ước-tính-tải-trước-khi-kiểm-thùng), bước 6), **không** dùng để tạo kế hoạch *(Quyết định 02/11/2026, LP2-9)*. | Có |
 | **Danh mục loại xe (Vehicle Type)** | Mã, tên, loại (container / xe tải / bán tải), kích thước lòng thùng (mm), phần gia cố góc, kích thước cửa, tải trọng tối đa, **số chiếc sẵn có**, giá thuê (chỉ tham khảo), trạng thái. Cài sẵn container **20DC, 40DC, 40HC, 45HC**. | Có (cấu hình) |
 | **Chế độ chọn xe** | Một trong các chế độ ở [§4.2](#42-giao-nguyên-chuyến--lập-kế-hoạch-xếp-hàng-3d-load-planning) | Có (mặc định: *Một loại*) |
-| Phân nhóm kiện chính / phụ | Chỉ dùng với chế độ *Ưu tiên + hàng chèn* | Không |
+| Phân nhóm kiện chính / phụ | Chỉ dùng với chế độ *Ưu tiên + hàng chèn*; đánh dấu hàng chèn **theo từng dòng hàng của đơn** khi tạo kế hoạch (Dispatch Staff hoặc Quản lý kho), mặc định là hàng chính *(✅ Đã chốt 2026-11-19)* | Không |
 
 ### Output
 
@@ -190,7 +190,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - **Hãng tích hợp API đặt xe** *(✅ 2026-11-06)* — không đặt ngoài hệ thống. Dispatch Staff chọn hãng, nhập **giờ hẹn lấy hàng**, xác nhận thứ tự điểm giao → hệ thống **tạo đơn ở hãng**:
      - điểm 0 = kho xuất; điểm 1..n = địa chỉ giao của từng shipment trên xe (người nhận, điện thoại, **mã shipment** làm mã tham chiếu của điểm), theo thứ tự Dispatch Staff xác nhận;
      - mã dịch vụ theo loại xe của chuyến và thành phố của kho; mã chuyến nội bộ ghi vào ghi chú đơn; không thu hộ, doanh nghiệp trả cước;
-     - tạo thành công → mã đơn ở hãng là **mã vận đơn** của chuyến, chuyến `Vehicle Booked`; biển số, tài xế về qua webhook khi tài xế nhận đơn;
+     - tạo thành công → mã đơn ở hãng là **mã vận đơn** của chuyến, chuyến `Vehicle Booked`; **tài xế** (tên, điện thoại) về qua webhook khi tài xế nhận đơn — hãng hiện có (Ahamove) **không gửi biển số**, nên biển số nhập khi **ký bàn giao** (bước 8);
      - tạo lỗi (sai khu vực, sai dịch vụ, hãng không phản hồi…) → chuyến giữ `Planned`, báo lỗi kèm lý do để Dispatch Staff sửa hoặc chọn hãng khác (BR-29).
    - Huỷ đặt xe / mở lại kế hoạch / huỷ có kiểm soát chuyến đã đặt qua API → hệ thống **huỷ đơn ở hãng**; hãng chỉ cho huỷ khi tài xế **chưa lấy hàng**, huỷ lỗi thì báo Dispatch Staff xử lý trực tiếp với hãng (BR-29).
 
@@ -208,8 +208,10 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    Khi tài xế hãng đến, **ký bàn giao**. Điều kiện (BR-18):
    - **đã quét đủ mọi kiện** của xe (thiếu thì hệ thống liệt kê từng kiện chưa quét);
    - chuyến **đã có mã vận đơn** (BR-23);
-   - nhập người đại diện hãng, biển số (nếu chưa có), xác nhận **đã ký**; mã chữ ký / ảnh biên bản tuỳ chọn cho tới khi có chức năng tải ảnh *(Quyết định 21/10/2026)*;
+   - nhập người đại diện hãng, **tên tài xế**, biển số (nếu chưa có), xác nhận **đã ký**; mã chữ ký / ảnh biên bản tuỳ chọn cho tới khi có chức năng tải ảnh *(Quyết định 21/10/2026)*;
    - mọi shipment trên xe được phép đi: hợp đồng của đơn không còn **đợt `BEFORE_DELIVERY` chưa thu** áp cho shipment đó (BR-04), **đã tới ngày bắt đầu cửa sổ giao** của đợt giao chứa shipment (BR-04), đơn không đang treo, đơn không cho giao một phần thì không thiếu kiện.
+
+   **Tên tài xế là bắt buộc** để ký *(✅ Đã chốt 2026-11-12)*: do nhân viên **nhập tay**, hoặc **đã về từ webhook** của hãng (hãng tích hợp API đặt xe mà webhook không gửi thì nhập tay). Hệ thống **không tự điền** tên tài xế — kể cả từ tên người đại diện hãng. Thiếu tên tài xế thì không ký được.
 
    Bàn giao là **tất cả hoặc không**: chỉ một shipment không được phép đi thì **cả xe bị từ chối**, kèm danh sách đơn và số tiền đợt còn thiếu. Muốn cho xe đi mà không có shipment đó thì dỡ kiện qua **huỷ có kiểm soát** xe đó (bước 9, BR-14).
 
@@ -233,7 +235,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 | **Một loại** | Chọn loại xe xếp tốt nhất, rồi dùng nhiều chiếc cùng loại đó |
 | **Ít xe nhất** | Trộn nhiều loại xe để tổng số xe ít nhất |
 | **Giữ nguyên dòng** | Các kiện cùng một dòng hàng đi chung một xe |
-| **Ưu tiên + hàng chèn** | Hàng chính quyết định cần bao nhiêu xe; hàng phụ chỉ chèn vào chỗ trống còn lại |
+| **Ưu tiên + hàng chèn** | Hàng chính quyết định cần bao nhiêu xe; hàng phụ chỉ chèn vào chỗ trống còn lại. Hàng chèn đánh dấu **theo từng dòng hàng của đơn** khi tạo kế hoạch (Dispatch Staff hoặc Quản lý kho); mặc định là hàng chính |
 | **Vượt sức chứa** | Xếp tối đa những kiện vừa với số xe sẵn có và báo phần phải bỏ lại |
 | **Chỉnh tay** | Kéo thả kiện trên mô hình 3D, rồi tính lại một xe |
 
@@ -276,6 +278,10 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - **Quản lý kho** quyết định từng thùng: **gỡ cách ly** đưa lại tồn khả dụng (cất về bin qua [05](../05-putaway/README.md)), hoặc **ghi giảm** bằng điều chỉnh tồn có duyệt ([20](../20-inventory-control/README.md) §4.3).
 
    Thùng hoàn về là **SKU riêng của khách**, nên sau khi gỡ cách ly có thể dùng cho đơn sau của chính khách đó.
+
+   Sau hoàn hàng *(✅ Đã chốt 2026-11-19)*:
+   - Hàng của đơn đã hoàn về kho → đơn `Returned` và đi tới hoàn tiền ([15](../../ecommerce/15-payment/README.md) §4.5). Muốn gửi lại, Sale tạo **đơn mới**. **Giao lại** chỉ làm được khi đơn còn `Delivery Failed`.
+   - Đơn có **nhiều shipment** mà **chỉ một** shipment hoàn về: đơn vẫn `Partially Fulfilled`; shipment đó `Returned` và **phần của nó được hoàn tiền**; xong thì đơn → `Partially Refunded`.
 5. **Sửa tay kết quả giao** — khi hãng báo sai, **Quản lý kho** sửa kết quả của shipment, **bắt buộc lý do**; ghi người, thời điểm, kết quả cũ → mới. Sửa `Delivered` → `Delivery Failed`: hoá đơn nháp của shipment bị huỷ; hoá đơn đã phát hành thì hệ thống tạo nháp **điều chỉnh giảm toàn bộ** cho Kế toán ([21](../../ecommerce/21-e-invoice/README.md) §4.4, §4.5).
 
    > ⚠️ Giả định: sửa tay được `Delivered` → `Delivery Failed` (và ngược lại) khi đơn **chưa hoàn tất**; mốc giao hàng của đợt `AFTER_DELIVERY` ([15](../../ecommerce/15-payment/README.md)) tính lại theo kết quả mới. Sau khi Quản lý kho sửa tay, sự kiện webhook tiếp theo của shipment đó **không tự áp** mà vào danh sách lỗi (`NEEDS_REVIEW`) để Quản lý kho xem. Xem [open-questions E17](../../open-questions/README.md).
@@ -307,12 +313,14 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
    | Tên tài xế | Không |
    | Điện thoại tài xế | Không |
 
-2. Tải file lên → hệ thống hiện **xem trước**, **kiểm từng dòng**:
+   File là **.csv hoặc .xlsx** với **cùng các cột** trên; file .xlsx chỉ đọc **sheet đầu tiên** *(✅ Đã chốt 2026-11-18)*.
+
+2. Người nhập **chọn kho** rồi tải file lên *(✅ Đã chốt 2026-11-19)* → hệ thống hiện **xem trước**, **kiểm từng dòng**:
 
    | Kiểm tra | Kết quả nếu không đạt |
    |----------|-----------------------|
    | Mã chuyến tồn tại | Dòng lỗi |
-   | Chuyến thuộc kho người nhập được gán | Dòng lỗi |
+   | Chuyến thuộc **kho đã chọn** (và kho người nhập được gán); chuyến của kho khác không nhận | Dòng lỗi |
    | Chuyến đã ghi nhận đặt xe (đã có hãng), **chưa rời kho**, chưa `Cancelled` | Dòng lỗi |
    | Mã vận đơn **không trùng** với chuyến khác của cùng hãng, **kể cả giữa các dòng trong file** | Dòng lỗi |
    | Chuyến đã có mã vận đơn | Dòng hợp lệ, báo **"sẽ ghi đè"** |
@@ -332,7 +340,7 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
 - **Sửa:** trước khi chuyến rời kho, Dispatch Staff / Quản lý kho sửa được (nhập tay, file, hoặc webhook mới ghi đè). Sau khi rời kho, **chỉ Quản lý kho** sửa, **bắt buộc lý do**; webhook mang mã vận đơn khác với mã hiện có của chuyến đã rời kho không tự ghi đè mà vào danh sách lỗi. Mọi lần đổi lưu lịch sử (mã cũ → mới, nguồn, người, thời điểm, lý do).
 
   > ⚠️ Giả định: webhook mang mã vận đơn khác khi chuyến đã rời kho thì **không ghi đè**, vào danh sách lỗi để Quản lý kho kiểm với hãng. Xem [open-questions E22](../../open-questions/README.md).
-- **File vận đơn** (PDF / ảnh / Excel của hãng) đính kèm chuyến: **tuỳ chọn**. Khách không xem file vận đơn (xin Sale qua chat).
+- **File vận đơn** (PDF / ảnh / Excel của hãng) đính kèm chuyến: **tuỳ chọn**. Khách không xem file vận đơn (xin Sale qua chat). Chỉ đính kèm được cho chuyến **đã ghi nhận đặt xe** (từ `Vehicle Booked` trở đi); chuyến chưa đặt xe (`Planned`) hoặc đã `Cancelled` thì hệ thống **từ chối** *(✅ Đã chốt 2026-11-19)*.
 
 ### 4.5. Nhận trạng thái giao qua webhook
 
@@ -342,6 +350,7 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
    - Webhook theo chuyến: mỗi sự kiện mang **mã chuyến nội bộ**, loại sự kiện, thời điểm hãng báo, chữ ký; tuỳ loại có thêm mã vận đơn / biển số / tài xế, mã shipment, lý do thất bại, POD.
    - Hãng tích hợp API đặt xe: sự kiện mức **đơn** (mã đơn ở hãng, trạng thái, trạng thái phụ, thời điểm nhận / lấy hàng / hoàn tất, thông tin tài xế) hoặc mức **điểm giao** (mã đơn kèm số thứ tự điểm, mã shipment của điểm, trạng thái điểm, **thời điểm hoàn tất / thất bại của điểm**, lý do thất bại, POD nếu có).
 2. **Lưu nhật ký** — **mọi** sự kiện đều được lưu: thời điểm hãng báo, thời điểm hệ thống nhận, nội dung, kết quả xử lý.
+   - Ngoại lệ **vì an toàn**: sự kiện **bị từ chối xác thực** chỉ lưu **bản tóm tắt** (kích thước, mã băm, vài ký tự đầu), không lưu nguyên nội dung; sự kiện mang **mã hãng không tồn tại** thì **không lưu gì**. Nhờ vậy người gọi ẩn danh không thể làm đầy nhật ký bằng nội dung tuỳ ý hay bằng cách gửi mã hãng bịa.
 3. **Xác thực** — webhook theo chuyến: **chữ ký** bằng khoá bí mật của hãng; hãng tích hợp API đặt xe: **thông tin xác thực trong header** đã cấu hình. Sai → **danh sách lỗi**, không áp dụng.
 4. **Ghép chuyến** — webhook theo chuyến: theo **mã chuyến** (chuyến của đúng hãng đó); hãng tích hợp API đặt xe: theo **mã đơn ở hãng** = mã vận đơn của chuyến. Không ghép được (mã không tồn tại, chuyến của hãng khác, chuyến đã `Cancelled`) → **danh sách lỗi**.
 5. **Ghép shipment** — một xe chở nhiều đơn:
@@ -369,13 +378,13 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
 
    | Hãng báo | Hệ thống |
    |-------------|----------|
-   | Đơn: tài xế nhận đơn (kèm thông tin tài xế) | Điền biển số, tài xế vào chuyến (§4.4) |
+   | Đơn: tài xế nhận đơn (kèm thông tin tài xế) | Điền **tài xế (tên, điện thoại)** vào chuyến (§4.4). Ahamove **không gửi biển số** khi tài xế nhận đơn, nên biển số nhập khi **ký bàn giao** (§4.2 bước 8) |
    | Tài xế huỷ sau khi nhận → đơn quay lại tìm tài xế | Xoá biển số / tài xế cũ khỏi chuyến (giữ lịch sử), chờ tài xế mới |
    | Đơn: tài xế tới kho / đang chạy | Mốc hành trình **đã lấy hàng** / **đang giao** (chuyến phải đã ký bàn giao — `Dispatched`) |
    | Điểm giao hoàn tất | Shipment của điểm → `Delivered`; **thời điểm hoàn tất của điểm** là thời điểm hãng báo giao thành công (ngày lập hoá đơn — [21](../../ecommerce/21-e-invoice/README.md) §4.1) |
    | Điểm giao thất bại (kèm lý do) | Shipment của điểm → `Delivery Failed`; lý do ánh xạ theo bảng của hãng |
    | Đơn hoàn tất, đang hoàn / đã hoàn hàng | Mốc hành trình hoàn hàng; khi **đã hoàn** → các shipment `Delivery Failed` của chuyến → `Returned`, kho nhập lại qua phiếu Hàng hoàn |
-   | Đơn bị huỷ (trước khi lấy hàng) | Chuyến chưa ký bàn giao → về `Planned`, xoá thông tin đặt xe (giữ lịch sử), báo Dispatch Staff đặt lại; chuyến đã ký bàn giao → danh sách lỗi |
+   | Đơn bị huỷ (trước khi lấy hàng) | Chuyến chưa ký bàn giao → về `Planned`, xoá thông tin đặt xe (giữ lịch sử), báo Dispatch Staff đặt lại; chuyến đã ký bàn giao → danh sách lỗi. Chuyến đang `Loading` đã quét kiện: về `Planned` **giữ nguyên sơ đồ xếp**, số kiện đã xếp về 0; các kiện đã quét phải **quét dỡ về `DISPATCH`** trước khi đặt lại xe *(✅ Đã chốt 2026-11-19)* |
 
    > ✅ Đã chốt 2026-11-06 (đã thử trên môi trường thử nghiệm của hãng): trạng thái **hoàn tất** của điểm giao nghĩa là **giao thành công** cho người nhận; thời điểm hoàn tất của điểm là thời điểm hãng báo giao thành công. Xem [open-questions E25](../../open-questions/README.md).
 
@@ -396,7 +405,7 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
 | `Delivered` | Hãng báo giao thành công (kèm POD nếu có) | *(cuối)*; → `Delivery Failed` chỉ khi **Quản lý kho sửa tay** kèm lý do vì hãng báo sai, đơn chưa hoàn tất (⚠️ §4.3 bước 5) | Hệ thống (webhook) / Quản lý kho |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do); hoặc hệ thống tự ghi (lý do `OTHER`) ngay trước `Returned` khi hãng báo hoàn hàng cho shipment còn `Handed Over` (⚠️ §4.5) | → `Delivered` (giao lại thành công, hoặc sửa tay), → `Returned` | Hệ thống (webhook) / Quản lý kho |
 | `Returned` | Kiện đã hoàn về kho; thùng nhập lại qua phiếu Hàng hoàn ([03](../03-receipt/README.md)) vào khu `QUARANTINE` | *(cuối)* | Hệ thống (webhook) / Quản lý kho |
-| `Cancelled` | Huỷ trước khi bàn giao, có lý do (ví dụ mọi thùng của shipment hư hỏng phải loại); thùng vào hàng chờ cất lại ([07](../07-picking/README.md) §4.5); thùng hư hỏng được cất vào khu `QUARANTINE` như ở [08](../08-packing/README.md). Không phát sinh do huỷ đơn: đơn đã có thùng dán nhãn thì không huỷ được ([08](../08-packing/README.md) BR-04) | *(cuối)* | Quản lý kho |
+| `Cancelled` | Huỷ trước khi bàn giao, có lý do (ví dụ mọi thùng của shipment hư hỏng phải loại); thùng vào hàng chờ cất lại ([07](../07-picking/README.md) §4.5); thùng hư hỏng được cất vào khu `QUARANTINE` như ở [08](../08-packing/README.md). Không phát sinh do huỷ đơn: đơn đã có thùng dán nhãn thì không huỷ được ([08](../08-packing/README.md) BR-04). Quản lý kho huỷ shipment thì đơn đi theo đường **thiếu hàng** *(✅ Đã chốt 2026-11-19)*: (1) đơn → `On Hold`, lý do `INVENTORY` (thiếu hàng); (2) Quản lý kho phân bổ lại thùng khác ([07](../07-picking/README.md) §4.4); (3) task có thêm dòng lấy bổ sung ([07](../07-picking/README.md) §4.3 bước 7); (4) phần kiểm thùng được **mở lại** cho các thùng thay thế của đơn (dù phiên đang `Completed` hay `In Progress` — ngoại lệ của [07](../07-picking/README.md) §4.3 bước 7), thùng mới được kiểm ([08](../08-packing/README.md)); (5) gỡ treo, đơn về `Packed`. Quản lý kho **đánh dấu thùng hư hỏng** → khu `QUARANTINE`, thùng tốt → hàng chờ cất lại | *(cuối)* | Quản lý kho |
 
 ```mermaid
 stateDiagram-v2
@@ -419,7 +428,7 @@ stateDiagram-v2
 |------------|---------|----------------------|--------------|
 | `Planned` | Một xe của kế hoạch đã chốt; đã có **mã chuyến nội bộ**; chưa đặt xe | → `Vehicle Booked`, → `Cancelled` (theo kế hoạch; hoặc **bỏ xe khỏi kế hoạch** khi mọi xe khác đã rời kho — BR-14) | Hệ thống (khi chốt kế hoạch, hoặc khi một xe bị huỷ có kiểm soát) |
 | `Vehicle Booked` | Đã đặt xe với một hãng (`Active`), đã gửi hãng mã chuyến; mã vận đơn, biển số, tài xế điền dần (webhook / file / tay — §4.4) | → `Loading`, → `Planned` (huỷ đặt xe, có lý do), → `Cancelled` (theo kế hoạch) | Dispatch Staff |
-| `Loading` | Đang quét kiện lên xe | → `Dispatched` (quét đủ, có mã vận đơn, ký bàn giao), → `Cancelled` (chỉ **huỷ có kiểm soát**, sinh chuyến `Planned` mới — mã chuyến mới — cùng sơ đồ, hoặc sơ đồ tính lại nếu có kiện bị gỡ — BR-14) | Dispatch Staff |
+| `Loading` | Đang quét kiện lên xe | → `Dispatched` (quét đủ, có mã vận đơn, ký bàn giao), → `Planned` (hãng tích hợp API đặt xe **huỷ đơn trước khi ký bàn giao** — §4.5: xoá thông tin đặt xe, giữ lịch sử, báo Dispatch Staff đặt lại; chuyến đã quét kiện giữ nguyên sơ đồ, kiện phải quét dỡ về `DISPATCH` trước khi đặt lại — §4.5) *(✅ Đã chốt 2026-11-19)*, → `Cancelled` (chỉ **huỷ có kiểm soát**, sinh chuyến `Planned` mới — mã chuyến mới — cùng sơ đồ, hoặc sơ đồ tính lại nếu có kiện bị gỡ — BR-14) | Dispatch Staff; Hệ thống (webhook / API hãng huỷ đơn) |
 | `Dispatched` | Đã ký bàn giao, xe rời kho; sau đó nhận mốc hành trình & kết quả giao của các shipment (không đổi trạng thái chuyến) | *(cuối)* | Dispatch Staff |
 | `Cancelled` | Huỷ, có lý do; shipment & kiện trở lại khu `DISPATCH`. Xe đã xếp bị huỷ có kiểm soát: kiện còn trên xe bị **khoá tới khi quét dỡ** *(Quyết định 02/11/2026)*. Sự kiện webhook mang mã chuyến này không còn được áp dụng | *(cuối)* | Theo kế hoạch (Dispatch Staff / Quản lý kho); Quản lý kho / System Admin (huỷ có kiểm soát; bỏ xe `Planned` khỏi kế hoạch) |
 
@@ -432,6 +441,7 @@ stateDiagram-v2
     VehicleBooked --> Planned: Huỷ đặt xe
     VehicleBooked --> Loading: Bắt đầu xếp xe
     Loading --> Dispatched: Quét đủ + có mã vận đơn + ký bàn giao
+    Loading --> Planned: Hãng huỷ đơn qua API (trước khi ký bàn giao)
     Planned --> Cancelled: Theo kế hoạch / bỏ xe khỏi kế hoạch
     VehicleBooked --> Cancelled: Theo kế hoạch
     Loading --> Cancelled: Huỷ có kiểm soát
@@ -488,6 +498,8 @@ stateDiagram-v2
   - `Delivered` / `Delivery Failed` / `Returned` cập nhật **tự động từ webhook** của hãng (§4.5); hoặc do **Quản lý kho** của kho xuất **ghi tay** khi hãng không có webhook / webhook chưa về, và **sửa tay kèm lý do** khi hãng báo sai (§4.3).
   - Mỗi lần cập nhật ghi nguồn (webhook / tay), người hoặc sự kiện, thời điểm; cập nhật lại cùng trạng thái không đổi gì.
   - Hệ thống **không chủ động gọi API** hãng để hỏi trạng thái — phạm vi sau. Ngoại lệ *(✅ 2026-11-06)*: với hãng **tích hợp API đặt xe** hệ thống gọi API để **tạo / huỷ đơn đặt xe** (BR-29).
+  - Ngoại lệ **chống callback giả**: callback của Ahamove (hãng tích hợp API đặt xe hiện có) **không có chữ ký**, chỉ có giá trị header cấu hình sẵn. Vì vậy kết quả khó hoàn tác (điểm giao `Delivered` / `Delivery Failed`, đơn bị huỷ / hoàn tất / hoàn hàng) chỉ được áp dụng sau khi hệ thống **gọi API hãng hỏi lại** và API trả đúng như callback; không khớp thì không áp dụng.
+  - Ngoại lệ thứ hai: khi hãng **từ chối huỷ** đơn đặt xe (BR-29), tác vụ quét nền của hệ thống **gọi API hãng hỏi lại** xem hãng còn giữ đơn không. Đơn hãng đã bỏ hoặc đã huỷ thì coi là huỷ xong; hãng vẫn giữ đơn thì tính là huỷ bị từ chối, thử lại vài lần rồi báo Dispatch Staff xử lý trực tiếp với hãng. Không hỏi lại được thì coi như hãng vẫn giữ đơn. Nhờ vậy một lần huỷ bị từ chối mà đơn thực ra đã không còn ở hãng không bị coi là lỗi.
 - **BR-03:** Đơn chỉ chuyển `Shipped` khi **tất cả kiện** của đơn (mọi đợt giao) đã `Handed Over`. Còn phần chưa giao thì đơn ở `Partially Fulfilled`; điều này xảy ra khi đơn có **lịch giao nhiều đợt** ([14](../../ecommerce/14-cart-and-order/README.md) BR-23), hoặc khi đơn được Sale cho phép giao một phần.
 - **BR-04:** **Chặn bàn giao theo hợp đồng.** Shipment của đơn chỉ được bàn giao khi:
   - **đợt thanh toán mốc `BEFORE_DELIVERY`** áp cho shipment đã `Paid` ([15](../../ecommerce/15-payment/README.md)): đợt **không gắn đợt giao** áp cho mọi shipment của đơn; đợt **gắn đợt giao *k*** chỉ áp cho shipment của đợt *k*. Đợt `Partially Paid` vẫn bị chặn. Đợt `AFTER_DELIVERY` không chặn bàn giao. Hệ thống **không thu tiền khi giao** (không có thu hộ). *(Đã chốt 2026-11-04.)*
@@ -535,7 +547,7 @@ stateDiagram-v2
 - **BR-18:** Bàn giao là **tất cả hoặc không**:
   - phải quét đủ mọi kiện của chuyến;
   - chuyến phải **có mã vận đơn** (BR-23);
-  - phải xác nhận đã ký, có người đại diện hãng và biển số;
+  - phải xác nhận đã ký, có người đại diện hãng, **tên tài xế** (nhập tay hoặc từ webhook, không tự điền — §4.2 bước 8) và biển số;
   - mọi shipment phải được đơn cho phép đi: đợt `BEFORE_DELIVERY` áp cho shipment đã thu và đã tới ngày bắt đầu cửa sổ giao (BR-04), không đang treo, không thiếu phần khi đơn không cho giao một phần.
 - **BR-19:** Chuyến chỉ thay đổi qua kế hoạch (chốt, mở lại, huỷ), ghi nhận / huỷ đặt xe, hoặc qua huỷ có kiểm soát / bỏ xe khỏi kế hoạch (BR-14). Không có huỷ chuyến riêng lẻ ngoài các đường này.
 - **BR-20:** Ước tính tải **chỉ để tham khảo**; không chốt kế hoạch, không chặn kiểm thùng.
@@ -554,7 +566,7 @@ stateDiagram-v2
   - **Mỗi chuyến = một đơn ở hãng**: điểm lấy hàng là kho xuất; **mỗi shipment trên xe là một điểm giao** (mã shipment làm mã tham chiếu của điểm); mã đơn hãng là mã vận đơn của chuyến (BR-23 vẫn áp dụng).
   - Hệ thống **tạo đơn khi ghi nhận đặt xe**; tạo lỗi thì chuyến giữ `Planned`, không có mã vận đơn, Dispatch Staff sửa hoặc chọn hãng khác.
   - Huỷ đặt xe, mở lại kế hoạch, huỷ có kiểm soát hoặc gỡ shipment khỏi xe đã đặt → hệ thống **huỷ đơn ở hãng** rồi (nếu cần) tạo đơn mới cho chuyến mới; hãng không cho huỷ (tài xế đã lấy hàng) hoặc huỷ lỗi → báo Dispatch Staff xử lý trực tiếp với hãng.
-  - Kho xuất và mọi điểm giao phải thuộc **khu vực phục vụ** của mã dịch vụ (ví dụ cùng thành phố — ⚠️ giả định E24); điểm giao ngoài khu vực thì chọn hãng khác cho chuyến.
+  - Kho xuất và mọi điểm giao phải thuộc **khu vực phục vụ** của mã dịch vụ (ví dụ cùng thành phố — ⚠️ giả định E24); điểm giao ngoài khu vực thì chọn hãng khác cho chuyến. Hệ thống **không tự kiểm** khu vực phục vụ của điểm giao (mã dịch vụ chọn theo tỉnh của điểm lấy hàng); điểm giao ngoài khu vực do **hãng từ chối** khi tạo đơn → tạo lỗi, chuyến giữ `Planned`.
   - Mọi lần gọi API hãng (tạo, huỷ) lưu nhật ký (yêu cầu, kết quả, lỗi).
 
 ### Edge case
@@ -598,7 +610,7 @@ stateDiagram-v2
 | Hãng tích hợp API: tài xế huỷ sau khi đã nhận đơn | Đơn quay lại tìm tài xế; hệ thống xoá biển số / tài xế cũ khỏi chuyến (giữ lịch sử), chờ tài xế mới (§4.5) |
 | Hãng tích hợp API: không tìm được tài xế / hãng huỷ đơn trước khi lấy hàng | Chuyến chưa ký bàn giao → về `Planned`, Dispatch Staff đặt lại (cùng hãng hoặc hãng khác) |
 | Hãng tích hợp API: cần gỡ một shipment khỏi xe đã đặt | Huỷ có kiểm soát / mở lại kế hoạch như thường; hệ thống huỷ đơn cũ ở hãng và tạo đơn mới với các điểm giao còn lại khi đặt lại (BR-29) |
-| Hãng tích hợp API: kho và khách khác thành phố | Không dùng hãng đó cho chuyến; chọn hãng nguyên chuyến khác (⚠️ E24) |
+| Hãng tích hợp API: kho và khách khác thành phố | Không dùng hãng đó cho chuyến; chọn hãng nguyên chuyến khác (⚠️ E24). Hệ thống không tự kiểm khu vực; hãng từ chối khi tạo đơn → chuyến giữ `Planned` |
 | Quản lý kho sửa `Delivered` → `Delivery Failed` khi hoá đơn của shipment đã phát hành | Hoá đơn đã phát hành không sửa được; hệ thống tạo nháp điều chỉnh giảm toàn bộ, Kế toán phát hành ([21](../../ecommerce/21-e-invoice/README.md) §4.4 — ⚠️ giả định) |
 
 ---
