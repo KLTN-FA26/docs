@@ -98,7 +98,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 |------------|---------|----------------------|--------------|
 | `Pending` | Chờ lấy hàng xong / chờ bắt đầu | → `In Progress`, → `Cancelled` | Nhân viên kho |
 | `In Progress` | Đang quét kiểm & dán nhãn; chỉ người bắt đầu (hoặc Quản lý kho) thao tác | → `Completed` (hoàn tất đủ), → `In Progress` (hoàn tất một phần), → `Cancelled` | Nhân viên kho |
-| `Completed` | Đã kiểm đủ thùng & dán nhãn; mọi thùng đã có shipment | *(cuối)* | Nhân viên kho |
+| `Completed` | Đã kiểm đủ thùng & dán nhãn; mọi thùng đã có shipment | *(cuối)*; → `In Progress` **chỉ khi** một shipment `Ready to Dispatch` của đơn bị huỷ ([09](../09-shipping/README.md) §5.1), để kiểm các thùng thay thế *(✅ Đã chốt 2026-11-19)* | Nhân viên kho |
 | `Cancelled` | Đơn bị huỷ khi **chưa có thùng nào được dán nhãn**; thùng vào hàng chờ cất lại | *(cuối)* | Hệ thống |
 
 ```mermaid
@@ -110,6 +110,7 @@ stateDiagram-v2
     InProgress --> Completed: Hoàn tất đủ
     Pending --> Cancelled: Đơn huỷ
     InProgress --> Cancelled: Đơn huỷ (chưa thùng nào dán nhãn)
+    Completed --> InProgress: Huỷ shipment Ready to Dispatch (kiểm thùng thay thế)
     Completed --> [*]
     Cancelled --> [*]
 ```
