@@ -313,6 +313,8 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
    | Tên tài xế | Không |
    | Điện thoại tài xế | Không |
 
+   File là **.csv hoặc .xlsx** với **cùng các cột** trên; file .xlsx chỉ đọc **sheet đầu tiên** *(✅ Đã chốt 2026-11-18)*.
+
 2. Người nhập **chọn kho** rồi tải file lên *(✅ Đã chốt 2026-11-19)* → hệ thống hiện **xem trước**, **kiểm từng dòng**:
 
    | Kiểm tra | Kết quả nếu không đạt |
