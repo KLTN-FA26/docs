@@ -189,7 +189,7 @@ stateDiagram-v2
 
 ### Business rules
 
-- **BR-01:** Phiếu theo Đơn sản xuất chỉ tạo cho Đơn sản xuất **nhận được hàng** (BR-15), **chỉ tại đúng kho nhận** của Đơn sản xuất. **Một phiếu nhập = một Đơn sản xuất.** Đơn sản xuất `Draft`, `Pending Approval`, `Received`, `Closed`, `Cancelled` không nhận được.
+- **BR-01:** Phiếu theo Đơn sản xuất chỉ tạo cho Đơn sản xuất **nhận được hàng** (BR-15), **chỉ tại đúng kho nhận** của Đơn sản xuất. **Một phiếu nhập = một Đơn sản xuất.** Đơn sản xuất `Draft`, `Pending Approval` (chỉ còn trong lịch sử — *✅ Chốt lại 2026-11-20*), `Received`, `Closed`, `Cancelled` không nhận được.
 - **BR-02:** Tổng **số thùng** nhận luỹ kế của một dòng Đơn sản xuất ≤ **số thùng trên dòng**. Tổng tính trên **mọi phiếu nhập chưa huỷ** của Đơn sản xuất, kể cả phiếu nháp. Kiểm khi đếm và khi xác nhận. Vượt → **chặn**; thùng làm vượt không được nhận (không mở thùng để nhận một phần). ✅ Đã chốt 2026-11-05: không có dung sai nhận vượt (tính theo số thùng); dung sai cấu hình được là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
 - **BR-03:** **Lô bắt buộc, tự gán** *(✅ Đã chốt 2026-11-05)*: mọi SKU riêng theo dõi theo lô ([01](../01-product-creation/README.md) BR-17). Lô của thùng nhập theo Đơn sản xuất = **mã Đơn sản xuất** của phiếu, hệ thống tự gán; người dùng không nhập, không sửa. Mọi thùng của một Đơn sản xuất — kể cả nhận qua nhiều phiếu — cùng một lô. Thùng hàng hoàn **giữ lô gốc**, không gán lô mới.
 - **BR-04:** Hàng chưa qua Putaway (`Inbound` ở khu nhận hàng) và hàng hoàn ở khu cách ly (`Quarantine`) **không** được tính vào tồn khả dụng bán.
