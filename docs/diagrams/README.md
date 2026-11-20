@@ -9,7 +9,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 > **Đã chốt 2026-11-05:** khách sỉ **đặt theo số thùng** (báo giá, đơn, hợp đồng, Đơn sản xuất ghi **số thùng**, kèm số cái); **giá vẫn theo cái**, MOQ và bậc giá theo số thùng ([01](../warehouse/01-product-creation/README.md) BR-11, [14](../ecommerce/14-cart-and-order/README.md) BR-08). **Mọi thùng đúng số cái chuẩn** của SKU: kho đếm số thùng, **thùng lệch số chuẩn không nhận** ([03](../warehouse/03-receipt/README.md) BR-13); không còn thùng lẻ. Giữ hàng / phân bổ một dòng = **chọn đủ N thùng** theo **FIFO** (ngày nhập); thiếu thùng thì phần thiếu (tính theo thùng) đi Đơn sản xuất ([07](../warehouse/07-picking/README.md) BR-03).
 >
 > **Đã chốt 2026-11-05 (bổ sung):**
-> - **Vai trò:** **Nhân viên Sale** chọn kho xuất, treo / gỡ treo đơn, cho phép giao một phần, gửi thẻ duyệt mẫu in và báo tiến độ cho khách. *(✅ Cập nhật 2026-11-07:)* **Điều phối sản xuất** lập và theo dõi Đơn sản xuất (ghi nhận `Accepted`, tiến độ, mẫu in, đóng thiếu / huỷ, Đơn sản xuất bù). **Quản lý kinh doanh (Sales Manager)** duyệt và gửi Đơn sản xuất. **Quản lý kho** của kho xuất release đơn, tạo task và giao người, quyết định khu chờ xuất, chuyển task sang khu xuất hàng (`DISPATCH`), ghi nhận kết quả giao. Không còn role Điều phối đơn hàng hay Inventory Planner.
+> - **Vai trò:** **Nhân viên Sale** chọn kho xuất, treo / gỡ treo đơn, cho phép giao một phần, gửi thẻ duyệt mẫu in và báo tiến độ cho khách. *(✅ Cập nhật 2026-11-07:)* **Điều phối sản xuất** lập và theo dõi Đơn sản xuất (ghi nhận `Accepted`, tiến độ, mẫu in, đóng thiếu / huỷ, Đơn sản xuất bù). **Quản lý kinh doanh (Sales Manager)** duyệt và gửi Đơn sản xuất *(✅ Chốt lại 2026-11-20: Điều phối sản xuất gửi, không duyệt; Sales Manager được báo khi Đơn sản xuất được gửi)*. **Quản lý kho** của kho xuất release đơn, tạo task và giao người, quyết định khu chờ xuất, chuyển task sang khu xuất hàng (`DISPATCH`), ghi nhận kết quả giao. Không còn role Điều phối đơn hàng hay Inventory Planner.
 > - **Đơn sản xuất** (tên cũ "Yêu cầu sản xuất") là **một chứng từ chung** cho xưởng của công ty và đối tác ngoài, gửi qua **kênh kết nối** của đơn vị sản xuất; Đơn sản xuất bật cờ **cần duyệt mẫu in** phải được khách duyệt mẫu trước khi in hàng loạt ([17](../ecommerce/17-order-management/README.md) §4.3).
 > - **Mỗi đơn bán có đúng một kho xuất**; mọi Đơn sản xuất của đơn có kho nhận = kho xuất; không tách giao từ hai kho, **không có chuyển kho** (module chuyển kho giữa các kho đã bỏ) ([17](../ecommerce/17-order-management/README.md) BR-22, [20](../warehouse/20-inventory-control/README.md) BR-17).
 > - Ly / bao bì **không có hạn dùng**: không FEFO, không cảnh báo cận hạn; **lô bắt buộc** — hệ thống tự gán lô = mã Đơn sản xuất khi nhập kho, hàng hoàn giữ lô gốc.
@@ -18,7 +18,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 > - **Hàng hoàn** (RTO, hàng khách trả) nhập lại qua **phiếu nhập loại Hàng hoàn** vào khu `QUARANTINE` ([03](../warehouse/03-receipt/README.md)).
 > - **Không còn khu kiểm thùng riêng:** kiểm thùng & dán nhãn giao hàng làm tại **khu xuất hàng (`DISPATCH`)** — thùng lấy xong đưa thẳng về đây, kiểm, dán nhãn tại chỗ, gom shipment, chờ xe. Đích lấy hàng là `DISPATCH` (mặc định) hoặc `STAGING` ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-22, [07](../warehouse/07-picking/README.md)).
 >
-> **Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế** trên app — trên **khuôn 2D** của quy cách (cấu hình in do Quản lý kinh doanh khai báo — [01](../warehouse/01-product-creation/README.md) §4.10), có **xem trước 3D**; bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ. Gửi duyệt → hệ thống **preflight** → **Quản lý kinh doanh** duyệt kỹ thuật & kiểm duyệt nội dung → hệ thống **xuất file in PDF/X**, chốt snapshot, sinh SKU riêng. Vòng đời bản thiết kế `Draft` / `Pending Review` / `Approved` / `Archived`. Đặt hàng từ bản thiết kế = **yêu cầu báo giá** gửi Sale ([12](../ecommerce/12-product-design/README.md), §3.1).
+> **Đã chốt 2026-11-05 (khách tự thiết kế):** **chỉ khách tự thiết kế** trên app — trên **khuôn 2D** của quy cách (cấu hình in do Quản lý kinh doanh khai báo — [01](../warehouse/01-product-creation/README.md) §4.10), có **xem trước 3D**; bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ. Gửi duyệt → hệ thống **preflight** → **Quản lý kinh doanh** *(✅ Chốt lại 2026-11-20: nay Điều phối sản xuất)* duyệt kỹ thuật & kiểm duyệt nội dung → hệ thống **xuất file in PDF/X**, chốt snapshot, sinh SKU riêng. Vòng đời bản thiết kế `Draft` / `Pending Review` / `Approved` / `Archived`. Đặt hàng từ bản thiết kế = **yêu cầu báo giá** gửi Sale ([12](../ecommerce/12-product-design/README.md), §3.1).
 >
 > **✅ Đã chốt 2026-11-05 (giao hàng):** **bỏ gửi kiện qua hãng** — **mọi đơn giao nguyên chuyến**, đi qua kế hoạch xếp hàng 3D; bỏ bước Sale chọn cách giao. Mỗi xe / chuyến có **mã chuyến nội bộ** (gửi hãng khi đặt xe) và **mã vận đơn** của hãng — từ **webhook** của hãng, **nhập hàng loạt từ file** hoặc **nhập tay**; **bắt buộc có mã vận đơn trước khi ký bàn giao**. Hãng có webhook thì **mốc hành trình** và kết quả giao tự cập nhật; không có webhook / sự kiện chưa về thì **Quản lý kho ghi tay**; hãng báo sai thì Quản lý kho sửa tay kèm lý do ([09](../warehouse/09-shipping/README.md) §4.1, §4.4, §4.5). Hệ thống không chủ động gọi API hãng (phạm vi sau).
 >
@@ -28,7 +28,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 
 Mục lục:
 
-1. [Luồng nhập kho thành phẩm: Đơn sản xuất (duyệt & gửi, duyệt mẫu in) → Nhập kho theo thùng LPN → Putaway](#1-luồng-nhập-kho-thành-phẩm) — kèm nhập hàng hoàn vào khu `QUARANTINE` (§1.3)
+1. [Luồng nhập kho thành phẩm: Đơn sản xuất (gửi, duyệt mẫu in) → Nhập kho theo thùng LPN → Putaway](#1-luồng-nhập-kho-thành-phẩm) — kèm nhập hàng hoàn vào khu `QUARANTINE` (§1.3)
 2. [Luồng Fulfillment: Order → chọn kho xuất, kiểm tồn (Đơn sản xuất) → Picking nguyên thùng → (Khu chờ xuất) → Kiểm thùng & Dán nhãn giao hàng → Shipping](#2-luồng-fulfillment) — kèm vòng đời Đơn sản xuất (§2.3), phiên kiểm thùng & thùng giao (§2.4) và kế hoạch chuyến xe (§2.5)
 3. [Phụ lục: Luồng bán sỉ theo hợp đồng, vòng đời đơn hàng, hợp đồng & đợt thanh toán, di chuyển nguyên thùng trong một kho, hoá đơn điện tử (§3.5)](#3-phụ-lục)
 4. [Ghi chú về sơ đồ](#4-ghi-chú-về-sơ-đồ)
@@ -37,7 +37,7 @@ Mục lục:
 
 ## 1. Luồng nhập kho thành phẩm
 
-Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/README.md) (Đơn sản xuất), [03 · Nhập kho thành phẩm](../warehouse/03-receipt/README.md), [05 · Putaway](../warehouse/05-putaway/README.md), [06 · Bảng sức chứa kho §4.6](../warehouse/06-warehouse-map-slotting/README.md). Nhập kho theo Đơn sản xuất đi **2 bước**: WH/Input (khu `RECEIVING`) → WH/Stock (bin). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Điều phối sản xuất lập** *(2026-11-07; trước đó Sale)* cho phần thiếu sau khi đã kiểm tồn SKU riêng tại kho xuất, **Sales Manager duyệt và gửi** (người duyệt ≠ người lập — [17](../ecommerce/17-order-management/README.md) BR-23). **Kho nhận = kho xuất** của đơn bán; đơn vị sản xuất phải giao đúng kho nhận. Kho chỉ nhập **theo thùng LPN** do đơn vị sản xuất đóng sẵn ([03](../warehouse/03-receipt/README.md) BR-12), đếm **số thùng**; thùng có số cái khác **số cái chuẩn / thùng** không được nhận ([03](../warehouse/03-receipt/README.md) BR-13).
+Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/README.md) (Đơn sản xuất), [03 · Nhập kho thành phẩm](../warehouse/03-receipt/README.md), [05 · Putaway](../warehouse/05-putaway/README.md), [06 · Bảng sức chứa kho §4.6](../warehouse/06-warehouse-map-slotting/README.md). Nhập kho theo Đơn sản xuất đi **2 bước**: WH/Input (khu `RECEIVING`) → WH/Stock (bin). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Điều phối sản xuất lập** *(2026-11-07; trước đó Sale)* cho phần thiếu sau khi đã kiểm tồn SKU riêng tại kho xuất, **Điều phối sản xuất gửi**, không qua duyệt — Sales Manager được báo khi gửi ([17](../ecommerce/17-order-management/README.md) BR-23, *✅ Chốt lại 2026-11-20*; trước đây Sales Manager duyệt và gửi, người duyệt ≠ người lập). **Kho nhận = kho xuất** của đơn bán; đơn vị sản xuất phải giao đúng kho nhận. Kho chỉ nhập **theo thùng LPN** do đơn vị sản xuất đóng sẵn ([03](../warehouse/03-receipt/README.md) BR-12), đếm **số thùng**; thùng có số cái khác **số cái chuẩn / thùng** không được nhận ([03](../warehouse/03-receipt/README.md) BR-13).
 
 ### 1.1. Flowchart tổng thể
 
@@ -45,14 +45,15 @@ Chi tiết: [17 · Order Management §4.3](../ecommerce/17-order-management/READ
 flowchart TD
     START_ORDER(["Đơn Confirmed, Sale đã chọn kho xuất<br/>kiểm tồn SKU riêng tại kho xuất, tính cho đợt giao sớm nhất trước<br/>một đợt giao còn thiếu thùng — cảnh báo PO_NEEDED nếu sắp tới hạn"]) --> PO_DRAFT["Điều phối sản xuất lập Đơn sản xuất cho phần thiếu của một đợt giao — Draft<br/>ngày cần hàng = ngày bắt đầu cửa sổ giao của đợt<br/>đơn vị sản xuất chọn từ danh mục, kho nhận = kho xuất của đơn<br/>dòng: SKU riêng, số thùng thiếu, số cái / thùng, bộ file thiết kế đã chốt<br/>cờ cần duyệt mẫu in: mặc định bật khi SKU sản xuất lần đầu"]
     PO_DRAFT --> CAP{"Thể tích Đơn sản xuất lớn hơn còn trống dự kiến<br/>hoặc còn trống nếu duyệt hết của kho nhận?"}
-    CAP -->|"Có — cảnh báo Điều phối sản xuất, không chặn"| PO_SUBMIT
-    CAP -->|Không| PO_SUBMIT["Điều phối sản xuất gửi duyệt<br/>Đơn sản xuất: Pending Approval"]
-    PO_SUBMIT --> PO_APPROVE{"Sales Manager duyệt — người duyệt khác người lập<br/>bảng sức chứa tính lại lúc duyệt, vượt thì cảnh báo, không chặn"}
-    PO_APPROVE -->|"Trả lại, có lý do"| PO_DRAFT
-    PO_APPROVE -->|Duyệt| PO_SENT["Hệ thống xuất phiếu PDF kèm bộ file<br/>gửi qua kênh kết nối của đơn vị sản xuất<br/>Đơn sản xuất: Sent — đơn bán: Awaiting Stock"]
+    CAP -->|"Có — cảnh báo Điều phối sản xuất, không chặn"| PO_SEND
+    CAP -->|Không| PO_SEND["Điều phối sản xuất thoả thuận với đơn vị sản xuất rồi gửi — không qua duyệt<br/>bảng sức chứa tính lại lúc gửi, vượt thì cảnh báo, không chặn"]
+    PO_SEND --> PO_FILES{"File in còn khớp<br/>bản thiết kế đã chốt?"}
+    PO_FILES -->|"Không — chặn, không gửi gì"| PO_DRAFT
+    PO_FILES -->|Khớp| PO_SENT["Hệ thống xuất phiếu PDF kèm bộ file<br/>gửi qua kênh kết nối của đơn vị sản xuất<br/>Đơn sản xuất: Sent — đơn bán: Awaiting Stock"]
+    PO_SENT -.->|"thông báo INFO"| SM_NOTE["Sales Manager<br/>được báo Đơn sản xuất đã gửi, xem lại sau"]
     PO_SENT --> EXT[["Đơn vị sản xuất — ngoài hệ thống<br/>xưởng của công ty hoặc đối tác ngoài"]]
     PO_SENT -.->|"thông báo INFO; WARN nếu còn trống dự kiến chuyển sang âm"| WHM_NOTE["Quản lý kho của kho nhận<br/>biết hàng sắp về, chuẩn bị chỗ"]
-    EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Điều phối sản xuất ghi nhận tay<br/>Đơn sản xuất: Accepted<br/>ngày dự kiến muộn hơn ngày cần hàng: cảnh báo AT_RISK<br/>quá ngày cần hàng chưa nhận đủ: PRODUCTION_LATE"]
+    EXT -.->|"xác nhận nhận đơn, ngày hoàn thành dự kiến"| PO_ACC["Điều phối sản xuất ghi nhận tay, ghi chú tuỳ chọn<br/>Đơn sản xuất: Accepted<br/>ngày dự kiến muộn hơn ngày cần hàng: cảnh báo AT_RISK<br/>quá ngày cần hàng chưa nhận đủ: PRODUCTION_LATE"]
     PO_ACC --> FLAG{"Cờ cần duyệt mẫu in?"}
     FLAG -->|Có| SAMPLE["Đơn vị sản xuất in mẫu thử theo bộ file đã chốt<br/>Điều phối sản xuất tải ảnh / video của vòng mẫu, ghi ngày gửi mẫu vật nếu có<br/>Sale gửi thẻ duyệt mẫu in cho khách<br/>Đơn sản xuất: Sample Pending"]
     SAMPLE --> CUST_SAMPLE{"Khách xem mẫu in chờ duyệt<br/>trên sàn — mẫu thiết kế của tôi<br/>hoặc thẻ duyệt mẫu in trong chat"}
@@ -102,7 +103,7 @@ flowchart TD
 
 > **Duyệt mẫu in** *(Đã chốt 2026-11-05)*: cờ do Điều phối sản xuất bật / tắt theo từng Đơn sản xuất, mặc định bật khi SKU sản xuất lần đầu, tắt khi mặc định bật thì bắt buộc lý do. Mỗi vòng mẫu ghi số vòng, ảnh / video, ngày gửi mẫu vật, kết quả, lý do in lại. Vòng in lại `PRINT_DEFECT` (lỗi in của đơn vị sản xuất) không tính vào **số lần in mẫu miễn phí** của hợp đồng ([14](../ecommerce/14-cart-and-order/README.md) BR-18); vượt số lần miễn phí chỉ cảnh báo, phí phát sinh xử lý bằng phụ lục ngoài hệ thống (phạm vi sau). ✅ Đã chốt 2026-11-05: số lần in mẫu tính trên từng Đơn sản xuất, gồm cả vòng đầu; Điều phối sản xuất phân loại lý do in lại (cập nhật 2026-11-07). Xem [open-questions](../open-questions/README.md).
 
-> **Sức chứa** *(Đã chốt 2026-11-05)*: cảnh báo dựa trên **còn trống dự kiến** = Sức chứa − Đang chiếm − Sắp về; Sắp về là phần chưa nhận của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-20, BR-21). Kho đầy không chặn nhận. ✅ Đã chốt 2026-11-05: chỉ cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available`, giữ cho đơn được ngay ([05](../warehouse/05-putaway/README.md) BR-13). Xem [open-questions](../open-questions/README.md). **Chờ duyệt** (Đơn sản xuất `Draft` / `Pending Approval`) hiện riêng và chỉ trừ ở **còn trống nếu duyệt hết**; Sales Manager xem lại khi duyệt; Đơn sản xuất được gửi thì báo Quản lý kho kho nhận ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6).
+> **Sức chứa** *(Đã chốt 2026-11-05)*: cảnh báo dựa trên **còn trống dự kiến** = Sức chứa − Đang chiếm − Sắp về; Sắp về là phần chưa nhận của các Đơn sản xuất `Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received` có kho nhận là kho đó ([06](../warehouse/06-warehouse-map-slotting/README.md) BR-20, BR-21). Kho đầy không chặn nhận. ✅ Đã chốt 2026-11-05: chỉ cất vào `OVERFLOW` khi gợi ý bin rỗng; thùng ở `OVERFLOW` là tồn `Available`, giữ cho đơn được ngay ([05](../warehouse/05-putaway/README.md) BR-13). Xem [open-questions](../open-questions/README.md). **Chờ duyệt** (Đơn sản xuất **chưa gửi** — `Draft`; tên cột giữ từ khi còn bước duyệt, *✅ Chốt lại 2026-11-20*) hiện riêng và chỉ trừ ở **còn trống nếu duyệt hết**; Điều phối sản xuất xem lại khi gửi; Đơn sản xuất được gửi thì báo Quản lý kho kho nhận ([06](../warehouse/06-warehouse-map-slotting/README.md) §4.6).
 
 > **Đã chốt 2026-11-05:** đơn vị sản xuất đóng **mọi thùng đúng số cái chuẩn / thùng** của SKU; kho đếm **số thùng**, thùng lệch số chuẩn không nhận và phần đó vẫn mở trên Đơn sản xuất ([03](../warehouse/03-receipt/README.md) BR-13, [open-questions B24](../open-questions/README.md)). ✅ Đã chốt 2026-11-05: thùng phát hiện lệch số chuẩn **sau khi xác nhận nhập** không được phân bổ, chuyển sang khu `QUARANTINE` rồi ghi giảm cả thùng bằng điều chỉnh có duyệt — xem [open-questions C34](../open-questions/README.md).
 
@@ -128,19 +129,16 @@ sequenceDiagram
     PC->>PO: Lập Đơn sản xuất cho phần thiếu của đơn (Draft), kho nhận = kho xuất
     PO->>CAPB: Lấy còn trống dự kiến của kho nhận
     CAPB-->>PC: Cảnh báo nếu thể tích Đơn sản xuất vượt còn trống (không chặn)
-    PC->>PO: Gửi duyệt → Pending Approval
-    opt Sales Manager trả lại
-        SM->>PO: Trả lại kèm lý do → Draft
-        PC->>PO: Sửa và gửi duyệt lại → Pending Approval
-    end
-    SM->>CAPB: Xem lại bảng sức chứa tính tại thời điểm duyệt
-    CAPB-->>SM: Cảnh báo nếu vượt còn trống (không chặn)
-    SM->>PO: Duyệt (người duyệt khác người lập) → Sent
+    PC->>PRODEXT: Thoả thuận trước (điện thoại / Zalo / email, ngoài hệ thống)
+    PC->>CAPB: Xem lại bảng sức chứa tính tại thời điểm gửi
+    CAPB-->>PC: Cảnh báo nếu vượt còn trống (không chặn)
+    PC->>PO: Gửi, không qua duyệt → Sent (file in kiểm lại, không khớp thì chặn)
     PO->>PRODEXT: Gửi phiếu PDF kèm bộ file thiết kế qua kênh kết nối
     PO->>OM: Đơn bán → Awaiting Stock
     PO-->>WHM: Thông báo hàng sắp về (WARN nếu còn trống dự kiến chuyển sang âm)
+    PO-->>SM: Thông báo Đơn sản xuất đã gửi (giám sát sau khi gửi)
     PRODEXT-->>PC: Xác nhận nhận đơn, ngày hoàn thành dự kiến
-    PC->>PO: Ghi nhận tay → Accepted
+    PC->>PO: Ghi nhận tay, ghi chú tuỳ chọn → Accepted
     alt Cần duyệt mẫu in
         loop Mỗi vòng mẫu
             PRODEXT-->>PC: In mẫu thử theo bộ file đã chốt
@@ -232,7 +230,7 @@ flowchart TD
     WH_SELECT --> CHECK["Hệ thống kiểm tồn SKU riêng khả dụng tại kho xuất, theo số thùng<br/>hàng dư từ đơn trước, hàng trả đã gỡ cách ly<br/>giữ đủ N thùng của dòng, hoặc số thùng có sẵn<br/>thùng đã giữ tính cho đợt giao sớm nhất trước"]
     CHECK --> ENOUGH{"Đủ hàng tại kho xuất<br/>cho đợt giao kế tiếp?"}
 
-    ENOUGH -->|"Thiếu thùng"| PO_SEND["Điều phối sản xuất lập Đơn sản xuất cho phần thiếu, tính theo số thùng<br/>kho nhận = kho xuất, cảnh báo nếu vượt còn trống dự kiến<br/>Sales Manager duyệt và gửi — luồng §1"]
+    ENOUGH -->|"Thiếu thùng"| PO_SEND["Điều phối sản xuất lập Đơn sản xuất cho phần thiếu, tính theo số thùng<br/>kho nhận = kho xuất, cảnh báo nếu vượt còn trống dự kiến<br/>Điều phối sản xuất gửi, không qua duyệt — luồng §1"]
     PO_SEND --> AWAIT["Đơn: Awaiting Stock — khi Đơn sản xuất Sent<br/>trễ so với lịch giao: Sale báo khách, dời cửa sổ giao nếu khách đồng ý"]
     AWAIT --> AW_CHOICE{"Phần có sẵn<br/>xử lý thế nào?"}
     AW_CHOICE -->|"Chờ đủ hàng"| AW_BIN["Thùng nằm tại bin, đã giữ cho đơn"]
@@ -321,7 +319,7 @@ sequenceDiagram
     SALE->>OM: Đơn Confirmed — chọn kho xuất (hệ thống gợi ý)
     OM->>INVSYS: Kiểm tồn SKU riêng tại kho xuất theo số thùng, giữ đủ N thùng mỗi dòng (hoặc số thùng có sẵn)
     alt Thiếu thùng
-        PC->>PO: Lập Đơn sản xuất cho phần thiếu của một đợt giao (kho nhận = kho xuất), Sales Manager duyệt và gửi (luồng §1)
+        PC->>PO: Lập Đơn sản xuất cho phần thiếu của một đợt giao (kho nhận = kho xuất) và gửi, không qua duyệt (luồng §1)
         OM->>OM: Awaiting Stock
         SALE-->>CUST: Nếu trễ so với lịch giao: báo khách, dời cửa sổ giao khi khách đồng ý
         opt Quản lý kho dùng khu chờ xuất
@@ -415,19 +413,16 @@ sequenceDiagram
 
 ### 2.3. Vòng đời Đơn sản xuất (Production Order)
 
-Chi tiết trạng thái & điều kiện chuyển xem [17 · Order Management §5.3](../ecommerce/17-order-management/README.md). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Điều phối sản xuất lập** *(2026-11-07; trước đó Sale)* cho phần thiếu của đơn `Confirmed` sau khi đã kiểm tồn SKU riêng tại kho xuất — hoặc **Đơn sản xuất bù** khi thùng của một Đơn sản xuất bị ghi giảm vì lỗi sau nhập kho (cùng vòng đời); không có Đơn sản xuất bổ sung tồn. **Sales Manager duyệt** (→ `Sent`, hệ thống xuất phiếu và gửi qua kênh kết nối) hoặc **trả lại** (→ `Draft`, bắt buộc lý do). `Sample Pending` chỉ có khi bật cờ **cần duyệt mẫu in**; mỗi lần khách yêu cầu in lại là một **vòng mẫu** mới. `Sent` / `Accepted` → `In Production` do hệ thống chuyển khi hàng về mà Đơn sản xuất không bật cờ duyệt mẫu in ([03](../warehouse/03-receipt/README.md) BR-15). `Partially Received` / `Received` do hệ thống chuyển khi nhập kho theo thùng ([03](../warehouse/03-receipt/README.md)).
+Chi tiết trạng thái & điều kiện chuyển xem [17 · Order Management §5.3](../ecommerce/17-order-management/README.md). Đơn sản xuất **chỉ phát sinh từ đơn bán**: **Điều phối sản xuất lập** *(2026-11-07; trước đó Sale)* cho phần thiếu của đơn `Confirmed` sau khi đã kiểm tồn SKU riêng tại kho xuất — hoặc **Đơn sản xuất bù** khi thùng của một Đơn sản xuất bị ghi giảm vì lỗi sau nhập kho (cùng vòng đời); không có Đơn sản xuất bổ sung tồn. **Điều phối sản xuất gửi** (→ `Sent`, hệ thống kiểm file in, xuất phiếu và gửi qua kênh kết nối), không qua duyệt *(✅ Chốt lại 2026-11-20 — trước đây Sales Manager duyệt hoặc trả lại; `Pending Approval` chỉ còn trong lịch sử, [17](../ecommerce/17-order-management/README.md) BR-23)*. `Sample Pending` chỉ có khi bật cờ **cần duyệt mẫu in**; mỗi lần khách yêu cầu in lại là một **vòng mẫu** mới. `Sent` / `Accepted` → `In Production` do hệ thống chuyển khi hàng về mà Đơn sản xuất không bật cờ duyệt mẫu in ([03](../warehouse/03-receipt/README.md) BR-15). `Partially Received` / `Received` do hệ thống chuyển khi nhập kho theo thùng ([03](../warehouse/03-receipt/README.md)).
 
 ```mermaid
 stateDiagram-v2
-    state "Pending Approval" as PendingApproval
     state "Sample Pending" as SamplePending
     state "In Production" as InProduction
     state "Partially Received" as PartiallyReceived
 
     [*] --> Draft: Điều phối sản xuất lập cho phần thiếu / bù hàng lỗi
-    Draft --> PendingApproval: Gửi duyệt
-    PendingApproval --> Draft: Sales Manager trả lại (lý do)
-    PendingApproval --> Sent: Sales Manager duyệt, hệ thống gửi phiếu
+    Draft --> Sent: Điều phối sản xuất gửi, hệ thống gửi phiếu
     Sent --> Accepted: Đơn vị sản xuất xác nhận, ngày dự kiến
     Accepted --> SamplePending: Cần duyệt mẫu in, tải mẫu vòng 1
     SamplePending --> SamplePending: Khách yêu cầu in lại, vòng mới
@@ -440,7 +435,6 @@ stateDiagram-v2
     PartiallyReceived --> Closed: Đóng thiếu (lý do)
     InProduction --> Closed: Dừng sản xuất, chưa nhận gì (lý do)
     Draft --> Cancelled
-    PendingApproval --> Cancelled
     Sent --> Cancelled: Chưa in hàng loạt (lý do)
     Accepted --> Cancelled: Chưa in hàng loạt (lý do)
     SamplePending --> Cancelled: Chưa in hàng loạt (lý do)
@@ -449,7 +443,7 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-> **Đã chốt 2026-11-05:** Đơn sản xuất `In Production` không huỷ được; đơn vị sản xuất dừng hẳn khi chưa giao gì thì Điều phối sản xuất **đóng** (`Closed`, bắt buộc lý do). Huỷ (`Cancelled`, bắt buộc lý do) chỉ khi chưa in hàng loạt: `Draft` / `Pending Approval` / `Sent` / `Accepted` / `Sample Pending` ([17](../ecommerce/17-order-management/README.md) BR-06). Phản hồi `Accepted`, tiến độ và mẫu in do Điều phối sản xuất ghi nhận tay (cập nhật 2026-11-07); kênh API là phạm vi sau.
+> **Đã chốt 2026-11-05:** Đơn sản xuất `In Production` không huỷ được; đơn vị sản xuất dừng hẳn khi chưa giao gì thì Điều phối sản xuất **đóng** (`Closed`, bắt buộc lý do). Huỷ (`Cancelled`, bắt buộc lý do) chỉ khi chưa in hàng loạt: `Draft` / `Sent` / `Accepted` / `Sample Pending` ([17](../ecommerce/17-order-management/README.md) BR-06; *✅ Chốt lại 2026-11-20: bỏ `Pending Approval`*). Phản hồi `Accepted`, tiến độ và mẫu in do Điều phối sản xuất ghi nhận tay (cập nhật 2026-11-07); kênh API là phạm vi sau.
 
 ### 2.4. Vòng đời phiên kiểm thùng & thùng giao (Outbound Check & Labeling)
 
@@ -523,7 +517,7 @@ flowchart TD
     SUBMIT --> PREFLIGHT{"Hệ thống preflight từng bản<br/>độ phân giải ở kích thước in, vùng in / lề an toàn<br/>định dạng, dung lượng, quy cách đã có quy cách thùng"}
     PREFLIGHT -->|"Không đạt: báo lỗi cụ thể, vẫn Draft"| DESIGN
     PREFLIGHT -->|Đạt| PENDING["Bản thiết kế: Pending Review — khoá sửa"]
-    PENDING --> REVIEW{"Sales Manager duyệt kỹ thuật<br/>và kiểm duyệt nội dung<br/>lượt duyệt dự án: xem cả bộ, quyết định từng bản"}
+    PENDING --> REVIEW{"Điều phối sản xuất duyệt kỹ thuật<br/>và kiểm duyệt nội dung<br/>lượt duyệt dự án: xem cả bộ, quyết định từng bản"}
     REVIEW -->|"Trả lại, kèm lý do: về Draft"| DESIGN
     REVIEW -->|Duyệt| SNAP["Hệ thống xuất bộ file: file in PDF/X, xem trước 2D / 3D, đặc tả<br/>chốt design snapshot bất biến, checksum<br/>sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
     SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>hoặc Yêu cầu báo giá cả dự án: các bản Approved, số thùng từng bản, một ngày giao chung<br/>mở chat với Sale kèm thẻ yêu cầu báo giá — nhiều dòng khi cả dự án (16)"]
@@ -572,7 +566,7 @@ stateDiagram-v2
     [*] --> Draft: Khách bấm Thiết kế / tạo bản sửa
     Draft --> Draft: Lưu / preflight không đạt
     Draft --> PendingReview: Gửi duyệt lẻ hoặc cả bộ, preflight đạt
-    PendingReview --> Draft: Sales Manager trả lại, có lý do
+    PendingReview --> Draft: Điều phối sản xuất trả lại, có lý do
     PendingReview --> Approved: Duyệt, xuất file PDF/X, chốt snapshot, sinh SKU riêng
     Draft --> Archived: Khách xoá bản nháp
     Approved --> [*]
@@ -798,7 +792,7 @@ stateDiagram-v2
 - Các trạng thái viết hoa kiểu `Confirmed`, `Sample Pending`… là trạng thái chứng từ / nhiệm vụ, khớp với bảng vòng đời trong từng module; khi lệch, **bảng vòng đời trong module là chuẩn**. Trong `stateDiagram-v2`, trạng thái nhiều từ được khai báo bằng mã không dấu cách kèm nhãn hiển thị (ví dụ `state "Pending Contract" as PendingContract`).
 - Sơ đồ mô tả **happy path + các nhánh ngoại lệ chính**; edge case chi tiết xem phần "Ràng buộc nghiệp vụ & Edge case" của module tương ứng.
 - **Sản xuất nằm ngoài hệ thống** *(Đã chốt 2026-11-04)*: bước của **đơn vị sản xuất** (xưởng của công ty hoặc đối tác ngoài) vẽ dạng khối "ngoài hệ thống"; hệ thống chỉ quản lý **Đơn sản xuất** ([17](../ecommerce/17-order-management/README.md) §4.3, §5.3) và **nhập kho thành phẩm** ([03](../warehouse/03-receipt/README.md)). Kho không kiểm tra chất lượng khi nhập.
-- **Vai trò** *(Đã chốt 2026-11-05; cập nhật 2026-11-07)*: việc phía khách là của **Sale**; Đơn sản xuất do **Điều phối sản xuất** lập và theo dõi, **Sales Manager** duyệt và gửi; việc trong kho xuất (release, task, khu chờ xuất, kết quả giao) là của **Quản lý kho**.
+- **Vai trò** *(Đã chốt 2026-11-05; cập nhật 2026-11-07)*: việc phía khách là của **Sale**; Đơn sản xuất do **Điều phối sản xuất** lập, gửi và theo dõi, **Sales Manager** được báo khi gửi *(✅ Chốt lại 2026-11-20; trước đây Sales Manager duyệt và gửi)*; việc trong kho xuất (release, task, khu chờ xuất, kết quả giao) là của **Quản lý kho**.
 - **Thùng LPN** *(Đã chốt 2026-11-04)*: mọi tồn nằm trong thùng do đơn vị sản xuất đóng sẵn; nhập, cất, di chuyển, lấy và kiểm kê đều **nguyên thùng**, xác nhận bằng quét LPN. Thùng LPN là **kiện giao** — "kiện" trong các sơ đồ giao hàng là thùng LPN, kích thước / khối lượng theo quy cách thùng của SKU ([01](../warehouse/01-product-creation/README.md), [08](../warehouse/08-packing/README.md) BR-02, BR-07).
 - **Số thùng** *(Đã chốt 2026-11-05)*: "số lượng" của dòng báo giá, đơn, Đơn sản xuất, phiếu nhập trong các sơ đồ là **số thùng**; mọi thùng đúng số cái chuẩn của SKU (không có thùng lẻ), giá vẫn theo cái; phân bổ = chọn đủ N thùng theo **FIFO** (ngày nhập) ([01](../warehouse/01-product-creation/README.md) BR-11, [07](../warehouse/07-picking/README.md) BR-03).
 - **Một kho xuất** *(Đã chốt 2026-11-05)*: mọi bước giữ hàng, lấy hàng, kiểm thùng, giao hàng của một đơn diễn ra tại kho xuất của đơn; Đơn sản xuất giao về kho đó. Không có chuyển kho.

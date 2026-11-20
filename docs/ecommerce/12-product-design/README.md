@@ -1,10 +1,10 @@
 # 12 — Quản lý mẫu & thiết kế (Design Management)
 
-> ✅ Đã chốt 2026-11-05 (khách tự thiết kế — thay quyết định 2026-11-04 "khách đưa mẫu, nhân viên thiết kế"): **chỉ khách tự thiết kế** trên app, trên **khuôn 2D** của quy cách, có **xem trước 3D**. Bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ, phân công người thiết kế. Khi khách gửi duyệt, hệ thống **tự kiểm (preflight)**; **Quản lý kinh doanh (Sales Manager)** duyệt kỹ thuật và kiểm duyệt nội dung. Duyệt xong, hệ thống **tự xuất file in PDF/X**, chốt **design snapshot** và sinh **SKU thành phẩm riêng của khách**. **Đặt hàng từ bản thiết kế = yêu cầu báo giá** gửi Sale: khách vẫn không tự đặt, sàn vẫn ẩn giá ([13](../13-catalog/README.md), [14](../14-cart-and-order/README.md), [16](../16-sales-chat/README.md)). Xem [open-questions B18, B7, B8](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05 (khách tự thiết kế — thay quyết định 2026-11-04 "khách đưa mẫu, nhân viên thiết kế"): **chỉ khách tự thiết kế** trên app, trên **khuôn 2D** của quy cách, có **xem trước 3D**. Bỏ luồng khách đưa mẫu cho Sale, nhân viên thiết kế hộ, phân công người thiết kế. Khi khách gửi duyệt, hệ thống **tự kiểm (preflight)**; **Quản lý kinh doanh (Sales Manager)** duyệt kỹ thuật và kiểm duyệt nội dung *(✅ Chốt lại 2026-11-20: nay Điều phối sản xuất — §1 bước 3)*. Duyệt xong, hệ thống **tự xuất file in PDF/X**, chốt **design snapshot** và sinh **SKU thành phẩm riêng của khách**. **Đặt hàng từ bản thiết kế = yêu cầu báo giá** gửi Sale: khách vẫn không tự đặt, sàn vẫn ẩn giá ([13](../13-catalog/README.md), [14](../14-cart-and-order/README.md), [16](../16-sales-chat/README.md)). Xem [open-questions B18, B7, B8](../../open-questions/README.md).
 >
 > Đã chốt 2026-11-05: chứng từ gửi sản xuất là **Đơn sản xuất (Production Order)**, gửi cho **đơn vị sản xuất** (xưởng của công ty hoặc đối tác ngoài, ngoài hệ thống). Đơn sản xuất có bước **duyệt mẫu in** ([17](../17-order-management/README.md)): khách duyệt mẫu in thử theo file đã chốt; nếu khách cần **sửa file thiết kế** (không phải lỗi in) thì quay về module này tạo **bản sửa** và sinh **SKU riêng mới** (§4.7).
 >
-> ✅ Đã chốt 2026-11-06 (góp ý hội đồng): thêm **Dự án thiết kế (Design Project)**. Khách gom nhiều bản thiết kế của **một bộ nhận diện** (ví dụ ly 500ml, ly 700ml, túi giấy cho một chi nhánh mới) vào một dự án. Dự án có **thư viện tài nguyên dùng chung**, cho **gửi duyệt cả bộ** (Quản lý kinh doanh xem cả bộ, quyết định từng bản) và **yêu cầu báo giá cả dự án** (một báo giá nhiều dòng). Mỗi bản thiết kế vẫn thuộc một quy cách và đi theo vòng đời hiện có; dự án **không bắt buộc** (§4.9–§4.11, §5.4). Xem [open-questions B41](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-06 (góp ý hội đồng): thêm **Dự án thiết kế (Design Project)**. Khách gom nhiều bản thiết kế của **một bộ nhận diện** (ví dụ ly 500ml, ly 700ml, túi giấy cho một chi nhánh mới) vào một dự án. Dự án có **thư viện tài nguyên dùng chung**, cho **gửi duyệt cả bộ** (Quản lý kinh doanh xem cả bộ, quyết định từng bản — *✅ Chốt lại 2026-11-20: nay Điều phối sản xuất*) và **yêu cầu báo giá cả dự án** (một báo giá nhiều dòng). Mỗi bản thiết kế vẫn thuộc một quy cách và đi theo vòng đời hiện có; dự án **không bắt buộc** (§4.9–§4.11, §5.4). Xem [open-questions B41](../../open-questions/README.md).
 
 ## 1. Mục đích (Purpose)
 
@@ -12,11 +12,13 @@ Cho **khách sỉ tự thiết kế** bản in (logo, nhận diện thương hi�
 
 1. **Thiết kế** — Trên sàn ([13](../13-catalog/README.md)), khách chọn một **quy cách** đã có khuôn in ([01 §4.10](../../warehouse/01-product-creation/README.md)), tải ảnh / logo lên, đặt lên **khuôn 2D**, **xem trước 3D**, lưu và xem lại trong **mẫu thiết kế của tôi**.
 2. **Gửi duyệt & kiểm tự động** — Hệ thống **preflight**: độ phân giải ở kích thước in, nội dung trong vùng in / lề an toàn, định dạng và dung lượng file.
-3. **Duyệt** — **Quản lý kinh doanh** duyệt kỹ thuật và **kiểm duyệt nội dung** (bản quyền, nội dung không phù hợp): **Duyệt** hoặc **Trả lại** kèm lý do.
+3. **Duyệt** — **Điều phối sản xuất** duyệt kỹ thuật và **kiểm duyệt nội dung** (bản quyền, nội dung không phù hợp): **Duyệt** hoặc **Trả lại** kèm lý do.
+
+> ✅ Chốt lại 2026-11-20 *(thay "Quản lý kinh doanh duyệt")*: **Điều phối sản xuất duyệt bản thiết kế** của khách (cả bản lẻ lẫn lượt duyệt dự án, gồm kiểm duyệt nội dung). Điều phối sản xuất là người đứng giữa doanh nghiệp và đơn vị sản xuất — người chịu trách nhiệm file in có in được không — nên duyệt luôn file khách gửi; Quản lý kinh doanh chỉ còn khai báo **cấu hình in** của quy cách ([01 §4.10](../../warehouse/01-product-creation/README.md)). Xem [open-questions B46](../../open-questions/README.md).
 4. **Chốt thiết kế** — Hệ thống **xuất bộ file** (file in **PDF/X** theo khuôn, ảnh xem trước, đặc tả kỹ thuật, hướng dẫn sản xuất), chốt **design snapshot** và sinh **SKU thành phẩm riêng** của khách ([01](../../warehouse/01-product-creation/README.md)).
 5. **Yêu cầu báo giá** — Từ bản đã duyệt, khách gửi **yêu cầu báo giá** cho Sale qua [chat](../16-sales-chat/README.md); Sale lập báo giá, đơn, hợp đồng ([14](../14-cart-and-order/README.md)).
 
-Khi cần **nhiều sản phẩm in cùng một bộ nhận diện**, khách gom các bản thiết kế vào một **dự án thiết kế (Design Project)**: tải logo / ảnh **một lần** vào thư viện của dự án và dùng lại cho mọi bản, **gửi duyệt cả bộ** để Quản lý kinh doanh kiểm sự đồng bộ, và **yêu cầu báo giá cả dự án** để Sale lập một báo giá nhiều dòng (§4.9–§4.11).
+Khi cần **nhiều sản phẩm in cùng một bộ nhận diện**, khách gom các bản thiết kế vào một **dự án thiết kế (Design Project)**: tải logo / ảnh **một lần** vào thư viện của dự án và dùng lại cho mọi bản, **gửi duyệt cả bộ** để Điều phối sản xuất kiểm sự đồng bộ, và **yêu cầu báo giá cả dự án** để Sale lập một báo giá nhiều dòng (§4.9–§4.11).
 
 Đầu ra:
 
@@ -39,13 +41,13 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ (B2B Customer)** — chủ sở hữu | Trên sàn: bấm **"Thiết kế"** ở một quy cách để tạo bản thiết kế; tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D; **lưu**, xem lại trong **mẫu thiết kế của tôi** ([13](../13-catalog/README.md)); xoá bản nháp; **gửi duyệt** (có thể kèm yêu cầu báo giá); **tạo bản sửa** từ bản đã duyệt; **yêu cầu báo giá** từ bản đã duyệt. Tạo và đóng **dự án thiết kế**, thêm / gỡ bản, quản lý **thư viện tài nguyên** của dự án; **gửi duyệt cả bộ**; **yêu cầu báo giá cả dự án**. Duyệt **mẫu in** của Đơn sản xuất ([17](../17-order-management/README.md)). |
-| **Quản lý kinh doanh (Sales Manager)** | Khai báo **cấu hình in** (khuôn 2D, vùng in, lề, model 3D, ràng buộc file) cho quy cách ([01 §4.10](../../warehouse/01-product-creation/README.md)). **Duyệt kỹ thuật + kiểm duyệt nội dung** bản thiết kế khách gửi: **Duyệt** hoặc **Trả lại** kèm lý do (quyền **Duyệt kỹ thuật thiết kế**); với **lượt duyệt dự án**, xem cả bộ cạnh nhau và kiểm thêm sự đồng bộ giữa các bản (§4.10). Duyệt và gửi Đơn sản xuất ([17](../17-order-management/README.md)). |
+| **Quản lý kinh doanh (Sales Manager)** | Khai báo **cấu hình in** (khuôn 2D, vùng in, lề, model 3D, ràng buộc file) cho quy cách ([01 §4.10](../../warehouse/01-product-creation/README.md)). Không duyệt bản thiết kế, không thấy hàng chờ duyệt; bản đang chờ duyệt chỉ xem được qua yêu cầu báo giá đang mở (BR-03) *(✅ Chốt lại 2026-11-20: chuyển việc duyệt thiết kế sang Điều phối sản xuất; bỏ "duyệt và gửi Đơn sản xuất" — [17](../17-order-management/README.md) BR-23)*. |
 | **Nhân viên Sale (Sales Staff)** | **Nhận yêu cầu báo giá** từ bản thiết kế hoặc **cả dự án** qua [chat](../16-sales-chat/README.md); tra thiết kế đã duyệt và SKU riêng của khách để báo giá ([14](../14-cart-and-order/README.md)). Không thiết kế, không sửa bản thiết kế của khách. |
-| **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | Lập **Đơn sản xuất** cho SKU riêng ([17](../17-order-management/README.md)) — snapshot của SKU được đính kèm; tải file theo quyền (chỉ xem thiết kế đã duyệt). |
+| **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | **Duyệt kỹ thuật + kiểm duyệt nội dung** bản thiết kế khách gửi: **Duyệt** hoặc **Trả lại** kèm lý do (quyền **Duyệt kỹ thuật thiết kế**); với **lượt duyệt dự án**, xem cả bộ cạnh nhau và kiểm thêm sự đồng bộ giữa các bản (§4.10) *(✅ Chốt lại 2026-11-20; trước đây Quản lý kinh doanh)*. Lập và gửi **Đơn sản xuất** cho SKU riêng ([17](../17-order-management/README.md)) — snapshot của SKU được đính kèm; tải file theo quyền. |
 | **Đơn vị sản xuất** *(ngoài hệ thống — xưởng của công ty hoặc đối tác ngoài)* | Nhận bộ file chốt kèm Đơn sản xuất; in **mẫu in thử** theo bộ file khi Đơn sản xuất cần duyệt mẫu in ([17](../17-order-management/README.md)); không thao tác trong module này. |
 | **Hệ thống** | Quét mã độc file tải lên; dựng xem trước 2D / 3D; **preflight** khi gửi duyệt; khi duyệt: **xuất bộ file** (file in PDF/X), tính checksum, chốt snapshot, **sinh SKU thành phẩm riêng**. Kiểm lại checksum khi gắn báo giá / đơn / Đơn sản xuất và khi cấp link tải. Mở chat kèm thẻ yêu cầu báo giá (nhiều dòng khi yêu cầu cả dự án — [16](../16-sales-chat/README.md)). Chạy preflight từng bản khi gửi duyệt cả bộ, mở và tự đóng **lượt duyệt dự án**. Ghi lịch sử quyết định. |
 
-- Khách là **người tạo duy nhất** của bản thiết kế; người duyệt luôn là Quản lý kinh doanh, nên người duyệt không bao giờ là người tạo.
+- Khách là **người tạo duy nhất** của bản thiết kế; người duyệt luôn là nhân viên Điều phối sản xuất *(✅ Chốt lại 2026-11-20; trước đây Quản lý kinh doanh)*, nên người duyệt không bao giờ là người tạo.
 - Khả năng nhìn thấy theo trạng thái: xem BR-03.
 
 ---
@@ -74,25 +76,25 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 
 | Kết quả | Mô tả | Dùng bởi |
 |---------|-------|----------|
-| **Bản thiết kế (design)** | Trạng thái, quy cách, bố cục, ảnh tải lên, ảnh xem trước, kết quả preflight gần nhất, quyết định duyệt, phiên bản | Khách (chủ sở hữu), Quản lý kinh doanh; Sale (theo BR-03) |
+| **Bản thiết kế (design)** | Trạng thái, quy cách, bố cục, ảnh tải lên, ảnh xem trước, kết quả preflight gần nhất, quyết định duyệt, phiên bản | Khách (chủ sở hữu), Điều phối sản xuất (người duyệt); Sale, Quản lý kinh doanh (theo BR-03 — bản đang chờ duyệt chỉ qua yêu cầu báo giá đang mở) *(✅ Chốt lại 2026-11-20: Quản lý kinh doanh không còn đọc bản đang chờ duyệt)* |
 | **Kết quả preflight** | Đạt / Không đạt, kèm **danh sách lỗi cụ thể** (phần tử nào, lỗi gì) | Khách |
 | **Bộ file xuất** | Sinh tự động khi duyệt; mỗi file một **vai trò** (bảng dưới) | [17](../17-order-management/README.md), khách, Sale |
 | **Design snapshot** | Bộ file xuất + nội dung thiết kế (bố cục, ảnh gốc khách tải lên) lúc duyệt, checksum từng file và checksum cả bộ, người và thời điểm duyệt. Bất biến. | [14](../14-cart-and-order/README.md), [17](../17-order-management/README.md) |
 | **SKU thành phẩm riêng của khách** | SKU mới thuộc sản phẩm và quy cách của bản thiết kế, gắn khách sở hữu và snapshot; chỉ khách đó thấy và được báo giá / đặt | [01](../../warehouse/01-product-creation/README.md), [13](../13-catalog/README.md), [14](../14-cart-and-order/README.md), [17](../17-order-management/README.md), [03](../../warehouse/03-receipt/README.md), [20](../../warehouse/20-inventory-control/README.md) |
 | **Yêu cầu báo giá** | Số thùng, ngày giao mong muốn, gắn bản thiết kế / SKU riêng; hiện thành **thẻ yêu cầu báo giá** trong chat | [16](../16-sales-chat/README.md), [14](../14-cart-and-order/README.md) |
-| **Dự án thiết kế** | Tên, mô tả, trạng thái (`Active` / `Archived`), danh sách bản thiết kế kèm trạng thái và ảnh xem trước, thư viện tài nguyên | Khách (chủ sở hữu); Quản lý kinh doanh, Sale thấy **tên dự án** làm ngữ cảnh (BR-17) |
-| **Lượt duyệt dự án** | Các bản gửi duyệt cùng lúc từ một dự án; hiện thành **một mục** trong hàng chờ duyệt; tự đóng khi mọi bản đã có quyết định (§4.10) | Quản lý kinh doanh |
+| **Dự án thiết kế** | Tên, mô tả, trạng thái (`Active` / `Archived`), danh sách bản thiết kế kèm trạng thái và ảnh xem trước, thư viện tài nguyên | Khách (chủ sở hữu); Điều phối sản xuất (người duyệt), Sale thấy **tên dự án** làm ngữ cảnh (BR-17) |
+| **Lượt duyệt dự án** | Các bản gửi duyệt cùng lúc từ một dự án; hiện thành **một mục** trong hàng chờ duyệt; tự đóng khi mọi bản đã có quyết định (§4.10) | Điều phối sản xuất |
 | **Yêu cầu báo giá cả dự án** | Dự án, các bản / SKU riêng, số thùng từng bản, ngày giao mong muốn chung; hiện thành **thẻ yêu cầu báo giá nhiều dòng** trong chat | [16](../16-sales-chat/README.md), [14](../14-cart-and-order/README.md) |
-| **Lịch sử quyết định** | Mọi bước của bản thiết kế (BR-13, §5.3) và của dự án (§5.4) | Quản lý kinh doanh, Sale, kiểm toán |
-| **Link tải file** | Link ngắn hạn, cấp theo quyền; file trong snapshot chỉ cấp khi checksum còn khớp | Khách, Sale, Quản lý kinh doanh, Điều phối sản xuất, đơn vị sản xuất (qua Đơn sản xuất) |
+| **Lịch sử quyết định** | Mọi bước của bản thiết kế (BR-13, §5.3) và của dự án (§5.4) | Điều phối sản xuất, Sale, kiểm toán |
+| **Link tải file** | Link ngắn hạn, cấp theo quyền; file trong snapshot chỉ cấp khi checksum còn khớp | Khách, Sale, Quản lý kinh doanh, Điều phối sản xuất, đơn vị sản xuất (qua Đơn sản xuất) — mỗi người trong phạm vi BR-03 |
 
 **Vai trò của file trong bộ file xuất:**
 
 | Vai trò | Nội dung | Người dùng chính |
 |---------|----------|------------------|
 | `PRINT_READY` | File in **PDF/X** theo khuôn: đúng kích thước thật, có lề tràn | Đơn vị sản xuất (qua Đơn sản xuất) |
-| `CUSTOMER_PREVIEW` | Ảnh xem trước 2D (và 3D nếu quy cách có model 3D) | Khách, Quản lý kinh doanh, Sale |
-| `TECHNICAL_SPEC` | Đặc tả kỹ thuật sinh từ cấu hình in và bố cục: quy cách, kích thước khuôn và vùng in, vị trí / kích thước từng phần tử, độ phân giải hiệu dụng của từng ảnh, phông và mã màu chữ | Quản lý kinh doanh, đơn vị sản xuất |
+| `CUSTOMER_PREVIEW` | Ảnh xem trước 2D (và 3D nếu quy cách có model 3D) | Khách, Điều phối sản xuất, Sale |
+| `TECHNICAL_SPEC` | Đặc tả kỹ thuật sinh từ cấu hình in và bố cục: quy cách, kích thước khuôn và vùng in, vị trí / kích thước từng phần tử, độ phân giải hiệu dụng của từng ảnh, phông và mã màu chữ | Điều phối sản xuất, đơn vị sản xuất |
 | `PRODUCTION_INSTRUCTION` | Hướng dẫn sản xuất **sinh mặc định từ quy cách thùng** (số cái / thùng, kích thước, khối lượng thùng — [01](../../warehouse/01-product-creation/README.md)) và yêu cầu đóng thùng (đơn vị sản xuất đóng thùng trước khi giao về kho) | Đơn vị sản xuất |
 
 > ⚠️ Giả định: file in xuất theo chuẩn **PDF/X-4**. Xem [open-questions B35](../../open-questions/README.md).
@@ -129,35 +131,37 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
     - mọi file đúng **định dạng**, **dung lượng**;
     - quy cách và sản phẩm **còn dùng được** (quy cách `Active`, sản phẩm `Approved` / `Published`) và quy cách **đã có quy cách thùng** ([01](../../warehouse/01-product-creation/README.md)) — ✅ đã chốt 2026-11-05, xem [open-questions B25](../../open-questions/README.md).
 11. **Không đạt** → hệ thống báo **lỗi cụ thể** (phần tử nào, lỗi gì, ví dụ "logo.png chỉ đạt 180 DPI ở kích thước in, cần ≥ 300"); bản thiết kế **vẫn `Draft`**, khách sửa rồi gửi lại.
-12. **Đạt** → `Pending Review`. Bản thiết kế **khoá sửa** (BR-07); hệ thống báo cho Quản lý kinh doanh (hàng chờ duyệt).
+12. **Đạt** → `Pending Review`. Bản thiết kế **khoá sửa** (BR-07); hệ thống báo cho Điều phối sản xuất (hàng chờ duyệt).
 
 ### 4.4. Duyệt kỹ thuật & kiểm duyệt nội dung
 
-13. Quản lý kinh doanh mở bản `Pending Review`: xem bố cục trên khuôn 2D, xem trước 3D, kết quả preflight, ảnh gốc khách tải lên. Kiểm:
+> ✅ Chốt lại 2026-11-20: người duyệt là **Điều phối sản xuất** (trước đây Quản lý kinh doanh) — §1 bước 3, [open-questions B46](../../open-questions/README.md).
+
+13. Điều phối sản xuất mở bản `Pending Review`: xem bố cục trên khuôn 2D, xem trước 3D, kết quả preflight, ảnh gốc khách tải lên. Kiểm:
     - **kỹ thuật** — khả năng in: vị trí, kích thước so với khuôn, độ rõ của ảnh, chữ quá nhỏ / quá sát mép;
     - **nội dung** — bản quyền, nhãn hiệu của bên thứ ba, nội dung không phù hợp ([open-questions B6](../../open-questions/README.md)).
-14. Quản lý kinh doanh chọn (BR-06):
+14. Điều phối sản xuất chọn (BR-06):
     - **Duyệt** (nhận xét không bắt buộc) → §4.5;
     - **Trả lại** kèm **lý do** (bắt buộc, ≤ 2.000 ký tự) → bản thiết kế về `Draft`; khách thấy lý do ở mẫu thiết kế của tôi, sửa rồi gửi duyệt lại (preflight chạy lại).
 15. Quyết định gắn với **đúng phiên bản** đang chờ duyệt (BR-11).
 
 ### 4.5. Chốt thiết kế: xuất bộ file, snapshot & SKU riêng
 
-16. Khi Quản lý kinh doanh **Duyệt**, hệ thống làm trong **cùng một bước** (BR-09):
+16. Khi Điều phối sản xuất **Duyệt**, hệ thống làm trong **cùng một bước** (BR-09):
     - **xuất bộ file** từ bố cục và cấu hình in: `PRINT_READY` (file in PDF/X theo khuôn, kích thước thật, lề tràn), `CUSTOMER_PREVIEW` (ảnh xem trước 2D / 3D), `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION` (sinh mặc định từ quy cách thùng) — §3;
     - chốt **design snapshot**: bộ file xuất + nội dung thiết kế, tính checksum từng file và cả bộ, kiểm file lưu trữ khớp;
     - **sinh SKU thành phẩm riêng** thuộc sản phẩm và quy cách của bản thiết kế, gắn khách sở hữu và snapshot ([01 §4.8](../../warehouse/01-product-creation/README.md)); **quy cách thùng** (số cái chuẩn / thùng — cơ sở để khách đặt theo số thùng ở [14](../14-cart-and-order/README.md); kích thước, khối lượng) của SKU lấy theo quy cách, chỉnh được ở [01](../../warehouse/01-product-creation/README.md);
     - chuyển bản thiết kế → `Approved`. Bản thiết kế từ đây **không sửa được nữa** (BR-08).
 17. Hệ thống báo khách: bản thiết kế đã duyệt, SKU riêng đã sinh; khách tải được file xem trước. Nếu khách đã gửi kèm yêu cầu báo giá (§4.8), Sale được báo là đã lập báo giá được.
 
-> ✅ Đã chốt 2026-11-05: SKU riêng được sinh **mã tự động** (theo mã sản phẩm + mã khách + số thứ tự), ở trạng thái `Active` ngay (preflight và Quản lý kinh doanh duyệt thay cho bước kích hoạt biến thể ở [01](../../warehouse/01-product-creation/README.md)). Xem [open-questions B20](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: SKU riêng được sinh **mã tự động** (theo mã sản phẩm + mã khách + số thứ tự), ở trạng thái `Active` ngay (preflight và Quản lý kinh doanh duyệt — *✅ Chốt lại 2026-11-20: nay Điều phối sản xuất* — thay cho bước kích hoạt biến thể ở [01](../../warehouse/01-product-creation/README.md)). Xem [open-questions B20](../../open-questions/README.md).
 
 SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-catalog/README.md)). Giá có trên báo giá / đơn / hợp đồng do Sale lập ([14](../14-cart-and-order/README.md)); Sale tham khảo **giá nội bộ** do Quản lý kinh doanh khai báo ([13](../13-catalog/README.md) §4.2), nếu có. Lần sản xuất đầu của một SKU riêng (mẫu mới) có **dòng phí khuôn / bản in** trên báo giá và hợp đồng ([14](../14-cart-and-order/README.md)).
 
 ### 4.6. Dùng thiết kế đã duyệt
 
 18. Sale tra **danh sách thiết kế đã duyệt và SKU riêng** của khách (lọc theo sản phẩm hoặc SKU) và xem trước, để chọn SKU riêng vào **dòng báo giá / đơn hàng** ([14](../14-cart-and-order/README.md)).
-19. Khi đơn thiếu hàng của SKU riêng, Điều phối sản xuất lập **Đơn sản xuất** ([17](../17-order-management/README.md)), Quản lý kinh doanh duyệt và gửi; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) qua link tải có kiểm checksum.
+19. Khi đơn thiếu hàng của SKU riêng, Điều phối sản xuất lập và gửi **Đơn sản xuất** ([17](../17-order-management/README.md)) — không qua duyệt *(✅ Chốt lại 2026-11-20, 17 BR-23)*; lúc gửi hệ thống kiểm lại checksum file in; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) qua link tải có kiểm checksum.
     - **Duyệt mẫu in** ([17](../17-order-management/README.md)) — khi Đơn sản xuất bật cờ "cần duyệt mẫu in" (mặc định bật cho lần sản xuất đầu của SKU), đơn vị sản xuất in mẫu thử **theo đúng bộ file của snapshot**; khách xem ảnh / video mẫu ở mẫu thiết kế của tôi ([13](../13-catalog/README.md)) hoặc thẻ trong [chat](../16-sales-chat/README.md), rồi **Duyệt** hoặc **Yêu cầu in lại**.
     - Duyệt mẫu in **không sửa snapshot** (BR-14). Mẫu lỗi in hoặc khách muốn in lại cùng file → in lại vòng mới ở 17. Khách cần **sửa file thiết kế** → tạo bản sửa (§4.7), sinh SKU riêng mới, đổi SKU dòng đơn theo quy trình ở [17](../17-order-management/README.md).
 20. Mỗi lần gắn (báo giá, đơn, Đơn sản xuất) và mỗi lần cấp link tải, hệ thống kiểm (BR-10):
@@ -205,10 +209,12 @@ Ràng buộc tương ứng ở module khác: [13](../13-catalog/README.md) BR-16
 
 ### 4.10. Gửi duyệt cả bộ (lượt duyệt dự án)
 
+> ✅ Chốt lại 2026-11-20: lượt duyệt dự án do **Điều phối sản xuất** duyệt (trước đây Quản lý kinh doanh), như §4.4.
+
 31. Khách chọn **từ 2 bản `Draft` trở lên** trong dự án và bấm **"Gửi duyệt cả bộ"**. Hệ thống chạy **preflight từng bản** (BR-05, BR-19):
     - **có bản không đạt** → **không gửi bản nào**; hệ thống báo lỗi cụ thể theo từng bản; mọi bản vẫn `Draft`;
-    - **tất cả đạt** → mọi bản sang `Pending Review` cùng lúc (khoá sửa — BR-07), gắn vào một **lượt duyệt dự án**; hệ thống báo Quản lý kinh doanh (lượt duyệt hiện là **một mục** trong hàng chờ duyệt).
-32. Quản lý kinh doanh mở lượt duyệt, xem các bản **cạnh nhau**. Với từng bản, kiểm như §4.4; với cả bộ, kiểm thêm **sự đồng bộ** (logo, màu, chữ giữa các bản). Quản lý kinh doanh **quyết định từng bản** (BR-20):
+    - **tất cả đạt** → mọi bản sang `Pending Review` cùng lúc (khoá sửa — BR-07), gắn vào một **lượt duyệt dự án**; hệ thống báo Điều phối sản xuất (lượt duyệt hiện là **một mục** trong hàng chờ duyệt).
+32. Điều phối sản xuất mở lượt duyệt, xem các bản **cạnh nhau**. Với từng bản, kiểm như §4.4; với cả bộ, kiểm thêm **sự đồng bộ** (logo, màu, chữ giữa các bản). Điều phối sản xuất **quyết định từng bản** (BR-20):
     - **Duyệt** → §4.5 cho bản đó (xuất bộ file, snapshot, SKU riêng);
     - **Trả lại** kèm lý do → bản đó về `Draft`;
     - **"Duyệt tất cả"** → hệ thống duyệt **lần lượt** từng bản còn chờ; bản nào không duyệt được (BR-09) thì ở lại `Pending Review`, các bản khác vẫn được duyệt.
@@ -229,7 +235,7 @@ Ràng buộc tương ứng ở module khác: [13](../13-catalog/README.md) BR-16
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
 | `Draft` | Khách đang thiết kế: tải ảnh, đặt bố cục, xem trước, lưu; sửa tự do | → `Pending Review` (gửi duyệt lẻ hoặc **gửi duyệt cả bộ** từ dự án, **preflight đạt**); → `Archived` (khách xoá bản nháp) | Chủ sở hữu; Hệ thống (preflight) |
-| `Pending Review` | Đã qua preflight, chờ Quản lý kinh doanh duyệt kỹ thuật và kiểm duyệt nội dung; khoá sửa | → `Approved` (Duyệt — xuất bộ file, chốt snapshot, sinh SKU riêng); → `Draft` (Trả lại, kèm lý do) | Quản lý kinh doanh; Hệ thống (xuất file, snapshot, SKU) |
+| `Pending Review` | Đã qua preflight, chờ Điều phối sản xuất duyệt kỹ thuật và kiểm duyệt nội dung; khoá sửa | → `Approved` (Duyệt — xuất bộ file, chốt snapshot, sinh SKU riêng); → `Draft` (Trả lại, kèm lý do) | Điều phối sản xuất; Hệ thống (xuất file, snapshot, SKU) |
 | `Approved` | Đã duyệt; bộ file, snapshot và SKU riêng đã sinh; bất biến | *(cuối)* — đổi nội dung = tạo bản sửa (bản thiết kế mới); yêu cầu báo giá được | Chủ sở hữu (tạo bản sửa, yêu cầu báo giá) |
 | `Archived` | Bản nháp khách đã xoá; không còn hiện ở mẫu thiết kế của tôi; giữ lịch sử | *(cuối)* | Chủ sở hữu |
 
@@ -239,7 +245,7 @@ stateDiagram-v2
     [*] --> Draft: Khách bấm Thiết kế / tạo bản sửa
     Draft --> Draft: Lưu / preflight không đạt
     Draft --> PendingReview: Gửi duyệt lẻ hoặc cả bộ, preflight đạt
-    PendingReview --> Draft: Quản lý kinh doanh trả lại, có lý do
+    PendingReview --> Draft: Điều phối sản xuất trả lại, có lý do
     PendingReview --> Approved: Duyệt, xuất file PDF/X, chốt snapshot, sinh SKU riêng
     Draft --> Archived: Khách xoá bản nháp
     Approved --> [*]
@@ -262,8 +268,8 @@ Vòng đời của SKU riêng (`Active` → `Obsolete`) theo trạng thái biế
 | `DERIVED_FROM_SNAPSHOT` | Bản sửa được tạo từ snapshot cũ |
 | `PREFLIGHT_FAILED` | Gửi duyệt nhưng preflight không đạt (ghi danh sách lỗi) |
 | `SUBMITTED_FOR_REVIEW` | Preflight đạt, bản thiết kế sang `Pending Review` (ghi mã **lượt duyệt dự án** nếu gửi cả bộ) |
-| `RETURNED` | Quản lý kinh doanh trả lại (ghi lý do) |
-| `APPROVED` | Quản lý kinh doanh duyệt (ghi mã snapshot, SKU riêng đã sinh và checksum bộ file) |
+| `RETURNED` | Người duyệt trả lại (ghi lý do) |
+| `APPROVED` | Người duyệt duyệt (ghi mã snapshot, SKU riêng đã sinh và checksum bộ file) |
 | `ARCHIVED` | Khách xoá bản nháp |
 | `QUOTE_REQUESTED` | Khách gửi yêu cầu báo giá (ghi số thùng, ngày giao mong muốn; ghi dự án nếu yêu cầu cả dự án) |
 | `ADDED_TO_PROJECT` / `REMOVED_FROM_PROJECT` | Bản thiết kế được thêm vào / gỡ khỏi một dự án (ghi dự án) |
@@ -305,12 +311,12 @@ Lịch sử của dự án (BR-13):
 
 - **BR-01:** Mỗi bản thiết kế thuộc **đúng một khách**, **một sản phẩm `CUSTOMIZABLE`** và **một quy cách**. Chủ sở hữu là tài khoản khách hàng đang hoạt động **của chính khách đó** (mỗi khách một tài khoản đăng nhập) và là **người tạo duy nhất**; nhân viên không tạo, không sửa bản thiết kế của khách.
 - **BR-02:** Chỉ bắt đầu thiết kế được trên quy cách `Active` của sản phẩm `Approved` / `Published` **đã có khuôn in** (khuôn 2D + vùng in — [01 §4.10](../../warehouse/01-product-creation/README.md)).
-- **BR-03:** **Phạm vi nhìn thấy.** Bản `Draft` chỉ chủ sở hữu thấy. Bản `Pending Review` thêm Quản lý kinh doanh (hàng chờ duyệt) và Sale nhận yêu cầu báo giá gắn bản đó (chỉ xem). Thiết kế **đã duyệt** và SKU riêng thì Sale, Quản lý kinh doanh và Điều phối sản xuất tra được theo khách (để báo giá, lập đơn, lập Đơn sản xuất). Khách chỉ thấy thiết kế và SKU của chính mình; với người khác coi như không tồn tại.
+- **BR-03:** **Phạm vi nhìn thấy.** Bản `Draft` chỉ chủ sở hữu thấy. Bản `Pending Review` thêm Điều phối sản xuất (hàng chờ duyệt) và nhân viên xem qua **yêu cầu báo giá đang mở** gắn bản đó — Sale, Quản lý kinh doanh (chỉ xem) *(✅ Chốt lại 2026-11-20: Quản lý kinh doanh không còn thấy hàng chờ duyệt, chỉ còn đường yêu cầu báo giá)*. Thiết kế **đã duyệt** và SKU riêng thì Sale, Quản lý kinh doanh và Điều phối sản xuất tra được theo khách (để báo giá, lập đơn, lập Đơn sản xuất). Khách chỉ thấy thiết kế và SKU của chính mình; với người khác coi như không tồn tại.
 
   > ⚠️ Giả định: nhân viên **không xem** bản `Draft` của khách (khách cần hỗ trợ thì gửi ảnh chụp / mô tả qua chat). Xem [open-questions B38](../../open-questions/README.md).
 - **BR-04:** File tải lên phải đúng **định dạng**, **dung lượng** theo ràng buộc file của quy cách và qua **quét mã độc**; sai thì từ chối ngay, không lưu. Chỉ bản `Draft` nhận file và sửa bố cục.
 - **BR-05:** **Preflight bắt buộc** trước `Pending Review`: có phần tử; độ phân giải tối thiểu ở kích thước in thật; chữ / logo trong vùng in và lề an toàn, không vượt vùng in + lề tràn; định dạng, dung lượng; quy cách / sản phẩm còn dùng được và **quy cách đã có quy cách thùng** (✅ đã chốt 2026-11-05 — [open-questions B25](../../open-questions/README.md)). Không đạt thì báo lỗi cụ thể và bản thiết kế ở lại `Draft`.
-- **BR-06:** **Preflight không thay cho duyệt người.** Chỉ Quản lý kinh doanh đang hoạt động (quyền **Duyệt kỹ thuật thiết kế**) được Duyệt / Trả lại; mỗi lần duyệt gồm **duyệt kỹ thuật** và **kiểm duyệt nội dung**. Trả lại bắt buộc lý do.
+- **BR-06:** **Preflight không thay cho duyệt người.** Chỉ Điều phối sản xuất đang hoạt động (quyền **Duyệt kỹ thuật thiết kế**, mặc định gán Điều phối sản xuất — *✅ Chốt lại 2026-11-20; trước đây Quản lý kinh doanh*) được Duyệt / Trả lại; mỗi lần duyệt gồm **duyệt kỹ thuật** và **kiểm duyệt nội dung**. Trả lại bắt buộc lý do.
 - **BR-07:** Bản `Pending Review` **khoá sửa**: không nhận file, không đổi bố cục, không xoá. Muốn sửa thì chờ kết quả duyệt.
 - **BR-08:** **Snapshot bất biến từ lúc duyệt.** Snapshot gồm bộ file xuất, nội dung thiết kế, checksum SHA-256 của từng file và của cả bộ. Bản `Approved` không nhận file, không sửa bố cục, không xoá.
 - **BR-09:** **Duyệt = xuất bộ file + snapshot + SKU riêng, trong cùng một bước.** Không xuất được bộ file hoặc không sinh được SKU riêng (ví dụ trùng mã, sản phẩm / quy cách đã ngừng) thì việc duyệt bị từ chối, bản thiết kế ở lại `Pending Review`.
@@ -324,7 +330,7 @@ Lịch sử của dự án (BR-13):
 - **BR-14:** **Duyệt mẫu in không thay cho duyệt thiết kế và không sửa snapshot.** Mẫu in thử của Đơn sản xuất ([17](../17-order-management/README.md)) được in theo bộ file của snapshot đã chốt; khách chỉ **Duyệt** hoặc **Yêu cầu in lại** (cùng file). Mọi thay đổi file thiết kế đi qua bản sửa (§4.7) → snapshot mới + SKU riêng mới.
 - **BR-15:** **Yêu cầu báo giá không phải đơn hàng.** Khách gửi yêu cầu báo giá từ bản `Approved`, hoặc kèm khi gửi duyệt; Sale chỉ **lập báo giá** khi bản đã `Approved` (SKU riêng đã sinh). Khách không tự đặt; sàn không hiện giá.
 - **BR-16:** Chỉ bản `Draft` xoá được (→ `Archived`); `Archived` không khôi phục, không dùng lại. Bản `Pending Review` / `Approved` không xoá được.
-- **BR-17:** **Dự án thiết kế thuộc đúng một khách**; chỉ chủ sở hữu tạo, đổi tên, thêm / gỡ bản, quản lý thư viện và đóng dự án. Dự án **không bắt buộc**: bản thiết kế lẻ vẫn đi đủ luồng §4.1–§4.8. Một bản thiết kế thuộc **tối đa một dự án**, và chỉ bản **của cùng khách** mới thêm vào được; bản `Archived` không thêm được; bản `Pending Review` không gỡ / chuyển dự án được. Thêm / gỡ không đổi trạng thái bản thiết kế. **Phạm vi nhìn thấy** như BR-03: dự án chỉ chủ sở hữu thấy; Quản lý kinh doanh và Sale chỉ thấy **tên dự án** làm ngữ cảnh trên lượt duyệt và thẻ yêu cầu báo giá.
+- **BR-17:** **Dự án thiết kế thuộc đúng một khách**; chỉ chủ sở hữu tạo, đổi tên, thêm / gỡ bản, quản lý thư viện và đóng dự án. Dự án **không bắt buộc**: bản thiết kế lẻ vẫn đi đủ luồng §4.1–§4.8. Một bản thiết kế thuộc **tối đa một dự án**, và chỉ bản **của cùng khách** mới thêm vào được; bản `Archived` không thêm được; bản `Pending Review` không gỡ / chuyển dự án được. Thêm / gỡ không đổi trạng thái bản thiết kế. **Phạm vi nhìn thấy** như BR-03: dự án chỉ chủ sở hữu thấy; Điều phối sản xuất (người duyệt) và Sale chỉ thấy **tên dự án** làm ngữ cảnh trên lượt duyệt và thẻ yêu cầu báo giá.
 - **BR-18:** **Thư viện tài nguyên.** File tải vào thư viện qua quét mã độc, kiểm định dạng và dung lượng như BR-04. Đặt tài nguyên lên một bản = **sao chép** file vào bản đó và kiểm lại theo ràng buộc file của quy cách bản đó; sai thì không đặt được. Xoá tài nguyên khỏi thư viện **không ảnh hưởng** bản đã dùng nó (kể cả snapshot — BR-08).
 - **BR-19:** **Gửi duyệt cả bộ là tất cả hoặc không.** Chỉ gửi được từ **2 bản `Draft` trở lên** của một dự án `Active`. Preflight chạy từng bản; có bản không đạt thì **không bản nào** sang `Pending Review`. Tất cả đạt thì mọi bản sang `Pending Review` cùng lúc trong một **lượt duyệt dự án**.
 - **BR-20:** **Duyệt chung nhưng quyết định từng bản.** Trong lượt duyệt dự án, mỗi bản vẫn được Duyệt / Trả lại riêng theo BR-06, BR-09, BR-11; "Duyệt tất cả" là duyệt lần lượt từng bản còn chờ. Bản không duyệt được ở lại `Pending Review`, không chặn các bản khác. Lượt duyệt tự đóng khi mọi bản đã có quyết định.
@@ -341,11 +347,11 @@ Lịch sử của dự án (BR-13):
 | Ảnh khách tải lên độ phân giải thấp | Lưu nháp được; khi gửi duyệt preflight báo lỗi phần tử đó (DPI thực tế ở kích thước in so với ngưỡng); bản thiết kế ở lại `Draft`. |
 | Logo / chữ lấn ra ngoài lề an toàn | Preflight không đạt, chỉ rõ phần tử; khách kéo vào trong rồi gửi lại. |
 | Quy cách chưa có quy cách thùng khi khách gửi duyệt | Preflight không đạt (BR-05); khách liên hệ Sale, Quản lý kho khai báo quy cách thùng ([01](../../warehouse/01-product-creation/README.md)). |
-| Quản lý kinh doanh trả lại (vi phạm bản quyền, chữ quá nhỏ…) | Về `Draft` kèm lý do; khách sửa, gửi duyệt lại (preflight chạy lại). |
+| Điều phối sản xuất trả lại (vi phạm bản quyền, chữ quá nhỏ…) | Về `Draft` kèm lý do; khách sửa, gửi duyệt lại (preflight chạy lại). |
 | Khách muốn sửa khi bản đang `Pending Review` | Không sửa được (BR-07); chờ kết quả duyệt, hoặc tạo bản thiết kế mới. |
-| Hai người cùng thao tác trên một bản thiết kế (khách mở hai tab; hai Quản lý kinh doanh cùng duyệt) | Người sau bị từ chối vì phiên bản đã đổi (BR-11); tải lại rồi làm tiếp. |
-| Quy cách / sản phẩm bị khoá hoặc ngừng khi bản đang `Pending Review` | Không sinh được SKU riêng → duyệt bị từ chối (BR-09); Quản lý kinh doanh trả lại kèm lý do, khách chọn quy cách khác bằng bản thiết kế mới. |
-| Xuất bộ file PDF/X lỗi khi duyệt | Duyệt bị từ chối, bản thiết kế ở lại `Pending Review` (BR-09); Quản lý kinh doanh duyệt lại sau. |
+| Hai người cùng thao tác trên một bản thiết kế (khách mở hai tab; hai Điều phối sản xuất cùng duyệt) | Người sau bị từ chối vì phiên bản đã đổi (BR-11); tải lại rồi làm tiếp. |
+| Quy cách / sản phẩm bị khoá hoặc ngừng khi bản đang `Pending Review` | Không sinh được SKU riêng → duyệt bị từ chối (BR-09); Điều phối sản xuất trả lại kèm lý do, khách chọn quy cách khác bằng bản thiết kế mới. |
+| Xuất bộ file PDF/X lỗi khi duyệt | Duyệt bị từ chối, bản thiết kế ở lại `Pending Review` (BR-09); Điều phối sản xuất duyệt lại sau. |
 | Khách đã đạt số bản nháp tối đa | Không tạo bản mới; khách xoá bớt bản nháp (⚠️ giả định §4.1). |
 | "Gửi duyệt và yêu cầu báo giá" nhưng bản bị trả lại | Thẻ yêu cầu báo giá vẫn ở chat; Sale chờ tới khi bản đó được gửi lại và duyệt mới lập báo giá (BR-15). ⚠️ Giả định — xem [open-questions B40](../../open-questions/README.md). |
 | Khách muốn đổi thiết kế sau khi đã duyệt | Tạo bản sửa từ snapshot (§4.7) → gửi duyệt → duyệt → SKU riêng mới. |
@@ -355,7 +361,7 @@ Lịch sử của dự án (BR-13):
 | File trong kho lưu trữ bị thay / hỏng sau khi duyệt | Kiểm checksum thất bại: không gắn báo giá / đơn / Đơn sản xuất, không cấp link tải. Khách tạo bản sửa (Sale hướng dẫn qua chat), gửi duyệt lại → SKU mới. |
 | File tải lên nhiễm mã độc / sai định dạng / quá dung lượng | Từ chối ngay, không lưu (BR-04). |
 | "Gửi duyệt cả bộ" nhưng một bản không đạt preflight | Không gửi bản nào (BR-19); hệ thống báo lỗi theo từng bản. Khách sửa bản lỗi, hoặc bỏ chọn bản đó rồi gửi các bản còn lại. |
-| "Duyệt tất cả" nhưng một bản không sinh được SKU riêng (quy cách vừa ngừng) | Bản đó ở lại `Pending Review` (BR-09), các bản khác vẫn được duyệt (BR-20); Quản lý kinh doanh trả lại bản đó kèm lý do để lượt duyệt đóng. |
+| "Duyệt tất cả" nhưng một bản không sinh được SKU riêng (quy cách vừa ngừng) | Bản đó ở lại `Pending Review` (BR-09), các bản khác vẫn được duyệt (BR-20); Điều phối sản xuất trả lại bản đó kèm lý do để lượt duyệt đóng. |
 | Khách muốn gỡ bản đang `Pending Review` khỏi dự án, hoặc đóng dự án còn bản `Pending Review` | Không được (BR-17, BR-22); chờ kết quả duyệt. |
 | Khách xoá logo khỏi thư viện khi logo đã dùng trên các bản | Các bản giữ bản sao của file; snapshot đã chốt không đổi (BR-18). |
 | Logo trong thư viện hợp lệ nhưng sai định dạng / quá dung lượng theo ràng buộc của một quy cách | Không đặt được lên bản thuộc quy cách đó; hệ thống báo lỗi (BR-18). |
