@@ -62,6 +62,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | Địa chỉ gửi & địa chỉ hoàn hàng | Địa chỉ kho xuất, cũng dùng làm địa chỉ hoàn hàng trên nhãn. ⚠️ Địa chỉ hoàn hàng riêng khai báo ở [06](../06-warehouse-map-slotting/README.md) chưa được dùng | Có |
 | **Mã vận đơn & thông tin xe** | Theo từng chuyến: **mã vận đơn** của hãng; biển số, tên tài xế, điện thoại tài xế. Từ webhook, **file nhập theo mẫu** hoặc nhập tay (§4.4) | Mã vận đơn: Có (trước khi ký bàn giao) |
 | File nhập mã vận đơn | File theo **mẫu của hệ thống** (§4.4) | Không |
+| **File nhập kết quả giao** | File CSV theo **mẫu của hệ thống**: mã vận đơn, kết quả giao, lý do thất bại, thời điểm, người nhận, ghi chú, mã shipment, mã hãng (§4.3 bước 1) | Không |
 | **File vận đơn** | PDF / ảnh / Excel của hãng, đính kèm chuyến | Không |
 | Thông tin bàn giao | Người đại diện hãng, **tên tài xế**, biển số xe, điện thoại tài xế (tuỳ chọn), xác nhận đã ký | Có (khi bàn giao) |
 | **Sự kiện webhook của hãng** | Mã chuyến nội bộ, loại sự kiện, thời điểm hãng báo, chữ ký; tuỳ loại: mã vận đơn / biển số / tài xế, mã shipment, lý do thất bại, ảnh biên bản giao nhận (POD) (§4.5) | Không (chỉ hãng có webhook) |
@@ -89,6 +90,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | **Mốc hành trình** — theo chuyến / shipment, kèm thời điểm hãng báo | 17 Order Management, Quản lý kho |
 | **Nhật ký sự kiện webhook** & **danh sách lỗi** (chữ ký sai, không ghép được chuyến, cần xem xét) | Quản lý kho |
 | **Kết quả nhập file mã vận đơn** — từng dòng hợp lệ / lỗi kèm lý do / "sẽ ghi đè"; file lưu làm file vận đơn của các chuyến được áp dụng | Dispatch Staff, Quản lý kho |
+| **Kết quả nhập file kết quả giao** — từng dòng hợp lệ / lỗi kèm lý do; dòng hợp lệ kèm kết quả xử lý của sự kiện (`APPLIED` / `DUPLICATE` / `STALE`…) | Quản lý kho |
 | **Sự kiện hoàn hàng (RTO – Return To Origin)** | 17 Order Management; nhập lại kho qua [03](../03-receipt/README.md) phiếu loại **Hàng hoàn**, vào khu `QUARANTINE` ([20](../20-inventory-control/README.md)) |
 | **Ước tính tải** — số thùng, thể tích, khối lượng, số xe dự kiến; dòng thiếu quy cách thùng | Sale, Quản lý kho (tham khảo trước khi kiểm thùng / release) |
 | **Kế hoạch chuyến xe (Load Plan)** — số xe từng loại; toạ độ (x, y, z) & hướng đặt từng kiện; % lấp đầy thể tích & tải trọng từng xe; kiện không xếp được kèm lý do | Dispatch Staff, Quản lý kho |
@@ -109,9 +111,10 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 | `Load` | `id`, `code` (mã chuyến nội bộ), `warehouse_id`, `load_plan_vehicle_id`, `carrier_id?` (khi đặt xe), `status`, `waybill_no?`, `vehicle_plate?`, `driver_name?`, `driver_phone?`, `carrier_representative?`, `waybill_files[]`, `dispatched_at?` |
 | `WaybillChange` | `load_id`, `old_waybill_no?`, `new_waybill_no`, `source` (`WEBHOOK` / `FILE` / `MANUAL`), `changed_by?`, `changed_at`, `reason?` |
 | `WaybillImport` | `id`, `warehouse_id`, `file`, `uploaded_by`, `uploaded_at`, `rows_total`, `rows_applied`, `rows_rejected` |
-| `ShipmentDelivery` | `shipment_id`, `status`, `failure_reason?`, `failure_note?`, `carrier_reason_raw?`, `pod_files[]`, `source` (`WEBHOOK` / `MANUAL`), `updated_by?`, `updated_at`, `correction_reason?` |
+| `ShipmentDelivery` | `shipment_id`, `status`, `failure_reason?`, `failure_note?`, `carrier_reason_raw?`, `pod_files[]`, `source` (`WEBHOOK` / `FILE` / `MANUAL`), `updated_by?`, `updated_at`, `correction_reason?` |
+| `DeliveryOutcomeImport` | `id`, `file`, `uploaded_by`, `uploaded_at`, `rows_total`, `rows_accepted`, `rows_rejected`; mỗi dòng: số dòng, các cột của file, chuyến ghép được, kết quả kiểm (`ACCEPTED` / `ERROR`), lý do lỗi, sự kiện sinh ra |
 | `TrackingMilestone` | `load_id`, `shipment_id?`, `type` (`PICKED_UP` / `IN_TRANSIT` / `DELIVERED`), `carrier_reported_at`, `source` |
-| `CarrierEvent` (nhật ký) | `id`, `carrier_id?`, `load_code?`, `shipment_code?`, `event_type`, `carrier_reported_at`, `received_at`, `payload`, `signature_valid`, `result` (`APPLIED` / `DUPLICATE` / `STALE` / `UNMATCHED` / `INVALID_SIGNATURE` / `NEEDS_REVIEW`), `resolved_by?`, `resolved_at?`, `resolution_note?` |
+| `CarrierEvent` (nhật ký) | `id`, `carrier_id?`, `load_code?`, `shipment_code?`, `source` (`WEBHOOK` / `FILE`), `event_type`, `carrier_reported_at`, `received_at`, `payload`, `signature_valid`, `result` (`APPLIED` / `DUPLICATE` / `STALE` / `UNMATCHED` / `INVALID_SIGNATURE` / `NEEDS_REVIEW`), `resolved_by?`, `resolved_at?`, `resolution_note?` |
 
 ---
 
@@ -128,7 +131,7 @@ Doanh nghiệp **không có đội xe riêng**: mọi lần giao đều do đơn
 3. Dòng có SKU thiếu quy cách thùng được **liệt kê** và ước tính bị đánh dấu **chưa đủ**. Không dòng nào quy được thì báo lỗi.
 4. Ước tính mới **thay thế** ước tính cũ của cùng chứng từ. Tối đa 3.000 thùng mỗi lần ước tính.
 5. Ước tính **chỉ để tham khảo** (dự kiến loại xe, số xe); không bao giờ chốt kế hoạch.
-6. **Ước tính thử từ file Excel** *(Quyết định 02/11/2026, LP2-9)*: màn hình "Ước tính thử" đọc danh sách kiện từ **file Excel theo mẫu** (đọc ngay trên trình duyệt), chọn loại xe và chế độ chọn xe, rồi chạy thử xếp xe để xem số xe dự kiến và sơ đồ 3D (ghi rõ "Chạy thử — không lưu").
+6. **Ước tính thử từ file Excel** *(Quyết định 02/11/2026, LP2-9)*: màn hình "Ước tính thử" đọc danh sách kiện từ **file Excel theo mẫu** (đọc ngay trên trình duyệt), gồm cả **cột khối lượng** của kiện (cùng kích thước) để tính tải trọng; chọn loại xe và **một trong 6 chế độ chọn xe** ở §4.2, rồi chạy thử xếp xe để xem số xe dự kiến và sơ đồ 3D (ghi rõ "Chạy thử — không lưu").
    - **Không lưu gì**: không tạo ước tính, không gắn với đơn nào, không tạo kế hoạch chuyến xe.
    - Dùng quyền tạo ước tính tải hiện có; cùng giới hạn tối đa 3.000 thùng.
 
@@ -257,6 +260,39 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 1. **Nguồn kết quả giao:**
    - Hãng **có webhook** → hệ thống tự cập nhật theo sự kiện hãng đẩy về (§4.5).
    - Hãng **không có webhook**, hoặc webhook chưa về → **Quản lý kho** ghi tay khi hãng báo lại (điện thoại, email… ngoài hệ thống).
+   - Hãng gửi kết quả giao **dạng danh sách** (file) → **Quản lý kho** nhập hàng loạt từ **file CSV theo mẫu của hệ thống** (xem dưới).
+
+   **Nhập kết quả giao từ file CSV** (giống cách nhập mã vận đơn ở §4.4):
+
+   1. Tải **file mẫu** của hệ thống (CSV UTF-8). Dòng đầu là tiêu đề; cột đọc **theo thứ tự**, không theo tên cột:
+
+      | Cột | Bắt buộc |
+      |-----|----------|
+      | Mã vận đơn (của chuyến) | Có |
+      | Kết quả: `DELIVERED` / `DELIVERY_FAILED` | Có |
+      | Lý do giao thất bại — một trong 6 mã nội bộ ở bước 3, hoặc lời của hãng (ánh xạ theo bảng của hãng, §4.1) | Có, khi giao thất bại |
+      | Thời điểm hãng báo (ví dụ `2026-11-09 10:15`, `9/11/2026 10:15`, hoặc ISO-8601) | Có |
+      | Người nhận | Không |
+      | Ghi chú (bắt buộc khi lý do là `OTHER`) | Không |
+      | Mã shipment — để trống: áp cho **mọi shipment** của chuyến; có: chỉ shipment đó | Không |
+      | Mã hãng — chỉ cần khi hai hãng trùng mã vận đơn | Không |
+
+      File tối đa **1.000 dòng dữ liệu** và 1 MB.
+   2. Tải file lên → hệ thống hiện **xem trước**, **kiểm từng dòng** (chưa ghi gì):
+
+      | Kiểm tra | Kết quả nếu không đạt |
+      |----------|-----------------------|
+      | Có mã vận đơn, kết quả, thời điểm; kết quả đúng `DELIVERED` / `DELIVERY_FAILED`; thời điểm đọc được và **không ở tương lai**; giao thất bại có lý do | Dòng lỗi |
+      | Có chuyến mang mã vận đơn đó thuộc kho người nhập được gán (không thấy thì báo như "không có chuyến") | Dòng lỗi |
+      | Hai hãng trùng mã vận đơn mà dòng không ghi mã hãng | Dòng lỗi |
+      | Chuyến **đã `Dispatched`** (đã rời kho) | Dòng lỗi |
+      | Thời điểm **không trước** lúc chuyến rời kho | Dòng lỗi |
+      | Mã shipment (nếu có) thuộc chuyến đó | Dòng lỗi |
+      | Không có dòng khác của file nói về cùng shipment (hoặc cùng chuyến) | Dòng lỗi |
+      | Shipment nhận được kết quả đó theo vòng đời (§5.1) — ví dụ đã `Delivered` thì không thành `Delivery Failed` bằng file | Dòng lỗi |
+
+   3. Xác nhận → hệ thống **áp dụng các dòng hợp lệ**; dòng lỗi giữ trong kết quả nhập kèm lý do, sửa file rồi nhập lại. Mỗi dòng hợp lệ thành **một sự kiện** (nguồn `FILE`) đi qua **cùng quy tắc** như sự kiện webhook (§4.5 bước 6, 7): dòng trùng → `DUPLICATE`, dòng cũ hơn trạng thái hiện tại → `STALE`, nên nhập lại cùng một file **không đổi gì thêm**. Dòng lỗi không làm hỏng các dòng khác.
+   4. Thời điểm trong file là **thời điểm hãng báo** (ngày lập hoá đơn khi giao thành công — §4.3 bước 2). File **không mang POD**; muốn đính POD thì Quản lý kho tải lên ở shipment.
 2. **Giao thành công** — shipment → `Delivered`; ghi mốc hành trình "đã giao"; đơn cập nhật theo các shipment. **Biên bản giao nhận (POD)** đính kèm shipment: hãng gửi kèm sự kiện, hoặc Quản lý kho tải lên khi ghi tay. Hệ thống tạo **hoá đơn nháp** cho shipment để Kế toán phát hành; **ngày lập hoá đơn = thời điểm hãng báo giao thành công** (từ webhook), hoặc ngày giao Quản lý kho ghi theo hãng báo lại ([21](../../ecommerce/21-e-invoice/README.md) §4.1).
 
    > ⚠️ Giả định: POD là **tuỳ chọn** — thiếu POD vẫn ghi nhận được giao thành công. Xem [open-questions E16](../../open-questions/README.md).
