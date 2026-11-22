@@ -90,12 +90,23 @@ Snapshot (qua SKU riêng) được dùng ở các bước sau:
 
 | Vai trò | Nội dung | Người dùng chính |
 |---------|----------|------------------|
-| `PRINT_READY` | File in **PDF/X** theo khuôn: đúng kích thước thật, có lề tràn | Đơn vị sản xuất (qua Đơn sản xuất) |
+| `PRINT_READY` | File in **PDF/X-4** theo khuôn: đúng kích thước thật, có lề tràn. Nội dung **vector**, **mỗi phần tử một lớp** (lớp in) và một lớp **hướng dẫn kỹ thuật không in**. Ly: **một trang mỗi vùng in**; ly giấy có **đường bế**. **Ly nhựa PET trong**: **không có đường bế** (in lên ly đã thành hình), thêm lớp **lót trắng (mực White)** nằm dưới hình. **Túi giấy**: **một trang tấm trải phẳng** (bế, gấp ống, dán mép, gấp đáy — kích thước theo [01 §4.10](../../warehouse/01-product-creation/README.md)), có đường bế | Đơn vị sản xuất (qua Đơn sản xuất) |
 | `CUSTOMER_PREVIEW` | Ảnh xem trước 2D (và 3D nếu quy cách có model 3D) | Khách, Quản lý kinh doanh, Sale |
-| `TECHNICAL_SPEC` | Đặc tả kỹ thuật sinh từ cấu hình in và bố cục: quy cách, kích thước khuôn và vùng in, vị trí / kích thước từng phần tử, độ phân giải hiệu dụng của từng ảnh, phông và mã màu chữ | Quản lý kinh doanh, đơn vị sản xuất |
-| `PRODUCTION_INSTRUCTION` | Hướng dẫn sản xuất **sinh mặc định từ quy cách thùng** (số cái / thùng, kích thước, khối lượng thùng — [01](../../warehouse/01-product-creation/README.md)) và yêu cầu đóng thùng (đơn vị sản xuất đóng thùng trước khi giao về kho) | Đơn vị sản xuất |
+| `TECHNICAL_SPEC` | **File mô tả thiết kế** sinh từ cấu hình in và bố cục, nhiều trang **A4 ngang**: quy cách, kích thước khuôn và vùng in, vị trí / kích thước / màu từng phần tử, độ phân giải hiệu dụng của từng ảnh, phông và mã màu chữ, **ô xác nhận bản in thử**; túi giấy có thêm trang **tấm trải phẳng** | Quản lý kinh doanh, đơn vị sản xuất |
+| `PRODUCTION_INSTRUCTION` | Hướng dẫn sản xuất **sinh mặc định từ quy cách thùng** (số cái / thùng, kích thước, khối lượng thùng — [01](../../warehouse/01-product-creation/README.md)) và yêu cầu đóng thùng (đơn vị sản xuất đóng thùng trước khi giao về kho); túi giấy ghi thêm kích thước tấm `Wt × Ht`, mép dán, gấp miệng, gấp đáy | Đơn vị sản xuất |
 
-> ⚠️ Giả định: file in xuất theo chuẩn **PDF/X-4**. Xem [open-questions B35](../../open-questions/README.md).
+**Tệp gốc của khách** — ảnh, logo khách tải lên mà bố cục đã duyệt dùng (nằm trong design snapshot) được **gửi kèm bộ file** cho đơn vị sản xuất qua Đơn sản xuất ([17](../17-order-management/README.md)), cùng cơ chế link tải có kiểm checksum (BR-10): nhà in cần logo gốc để tách màu khi in màu pha (flexo, in khô).
+
+> ⚠️ Giả định *(cập nhật 2026-11-18)*: file in theo chuẩn **PDF/X-4**, nội dung vector, OutputIntent **ISO Coated v2 (FOGRA39)**; quanh vùng lề tràn có **lề trắng 5 mm** (trái, phải, trên) và **dải thông tin (slug) 14 mm** phía dưới. Xem [open-questions B35](../../open-questions/README.md).
+
+Hộp trang của file `PRINT_READY` (gốc toạ độ ở góc dưới-trái vùng lề tràn; `W × H` = khung lề tràn của vùng in, với túi giấy là tấm kèm lề tràn — [01 §4.10](../../warehouse/01-product-creation/README.md)):
+
+| Hộp | Giá trị | Ví dụ ly 12oz | Ví dụ túi ([01 §4.10](../../warehouse/01-product-creation/README.md)) |
+|-----|---------|---------------|------|
+| MediaBox | `[−5 mm, −14 mm, W + 5 mm, H + 5 mm]` — lề trắng trái / phải / trên, slug dưới | 296,54 × 144,53 mm | 796 × 417 mm |
+| BleedBox | `[0, 0, W, H]` — đúng khung lề tràn | 286,54 × 125,53 mm | 786 × 398 mm |
+| TrimBox | Khung bao đường cắt, cùng gốc với BleedBox | 279,67 × 120,85 mm | 780 × 392 mm |
+| CropBox | Không đặt (bằng MediaBox) | — | — |
 
 ---
 
@@ -157,7 +168,7 @@ SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-cata
 ### 4.6. Dùng thiết kế đã duyệt
 
 18. Sale tra **danh sách thiết kế đã duyệt và SKU riêng** của khách (lọc theo sản phẩm hoặc SKU) và xem trước, để chọn SKU riêng vào **dòng báo giá / đơn hàng** ([14](../14-cart-and-order/README.md)).
-19. Khi đơn thiếu hàng của SKU riêng, Điều phối sản xuất lập **Đơn sản xuất** ([17](../17-order-management/README.md)), Quản lý kinh doanh duyệt và gửi; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) qua link tải có kiểm checksum.
+19. Khi đơn thiếu hàng của SKU riêng, Điều phối sản xuất lập **Đơn sản xuất** ([17](../17-order-management/README.md)), Quản lý kinh doanh duyệt và gửi; snapshot của SKU được **đính kèm** Đơn sản xuất, đơn vị sản xuất nhận bộ file chốt (`PRINT_READY`, `TECHNICAL_SPEC`, `PRODUCTION_INSTRUCTION`) và **tệp gốc của khách** (ảnh, logo bố cục đã dùng — §3) qua link tải có kiểm checksum.
     - **Duyệt mẫu in** ([17](../17-order-management/README.md)) — khi Đơn sản xuất bật cờ "cần duyệt mẫu in" (mặc định bật cho lần sản xuất đầu của SKU), đơn vị sản xuất in mẫu thử **theo đúng bộ file của snapshot**; khách xem ảnh / video mẫu ở mẫu thiết kế của tôi ([13](../13-catalog/README.md)) hoặc thẻ trong [chat](../16-sales-chat/README.md), rồi **Duyệt** hoặc **Yêu cầu in lại**.
     - Duyệt mẫu in **không sửa snapshot** (BR-14). Mẫu lỗi in hoặc khách muốn in lại cùng file → in lại vòng mới ở 17. Khách cần **sửa file thiết kế** → tạo bản sửa (§4.7), sinh SKU riêng mới, đổi SKU dòng đơn theo quy trình ở [17](../17-order-management/README.md).
 20. Mỗi lần gắn (báo giá, đơn, Đơn sản xuất) và mỗi lần cấp link tải, hệ thống kiểm (BR-10):
