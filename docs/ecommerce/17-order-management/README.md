@@ -384,7 +384,7 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | `Ready to Fulfill` | Đủ hàng tại kho xuất, chờ / đã được Quản lý kho release | → `Picking`, → `On Hold`, → `Cancelled` | Hệ thống / Quản lý kho → 07 |
 | `Picking` | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu xuất hàng) | → `Packed`, → `Partially Fulfilled`, → `On Hold`, → `Cancelled` | 07 |
 | `Packed` | Đã kiểm đủ thùng & dán nhãn giao hàng; **không huỷ được nữa**; bàn giao bị chặn nếu đợt `BEFORE_DELIVERY` chưa thu đủ | → `Shipped`, → `Partially Fulfilled`, → `On Hold` | 08 / 09 |
-| `Partially Fulfilled` | Đã giao một phần (từ kho xuất), phần còn lại chờ hoặc bị đóng | → `Packed`, → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `On Hold` | 07 / 08 / 09 |
+| `Partially Fulfilled` | Đã giao một phần (từ kho xuất), phần còn lại chờ hoặc bị đóng | → `Packed`, → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `Partially Refunded` (hoàn tiền của shipment hoàn về được ghi nhận khi các shipment khác đã giao — không qua `Returned`) *(✅ Đã chốt 2026-11-19)*, → `On Hold` | 07 / 08 / 09 / 15 |
 | `On Hold` | Tạm giữ (§4.9) | → trạng thái trước khi treo; → `Pending Payment` / `Confirmed` (kế toán duyệt tín dụng); → `Cancelled` | Hệ thống / Sale / Kế toán |
 | `Shipped` | Đã bàn giao đơn vị vận chuyển (xe đã có mã vận đơn); mốc hành trình từ webhook của hãng được ghi kèm thời điểm, không đổi trạng thái | → `Delivered`, → `Delivery Failed`, → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do) | → `Delivered`, → `Returned` (hàng hoàn nhập lại qua 03), → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
@@ -438,6 +438,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
+    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền shipment hoàn về, các shipment khác đã giao
     Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối
@@ -644,7 +645,7 @@ Cờ **Trễ** (`DELIVERY_LATE` — §4.12) gắn thêm cho đợt chưa bàn gi
 | Khách huỷ khi đơn vị sản xuất đã in hàng loạt | Sale từ chối, hoặc duyệt có phí; hàng làm xong nhập về xử lý theo BR-07 |
 | Đơn đủ hàng nhưng đợt `BEFORE_DELIVERY` chưa trả | Lấy hàng về `STAGING` chờ, hoặc kiểm thùng & dán nhãn rồi chờ; bàn giao bị chặn tới khi đợt `Paid` |
 | Khách đổi địa chỉ khi đơn đã `Shipped` | CSKH liên hệ hãng (ngoài hệ thống) nhờ chuyển hướng nếu hãng hỗ trợ; nếu không → chờ giao thất bại / RTO rồi gửi lại |
-| Hãng hoàn hàng (RTO) | Đơn `Returned` theo sự kiện hoàn hàng của hãng (webhook) hoặc Quản lý kho ghi nhận; nhập lại kho xuất bằng phiếu Hàng hoàn vào `QUARANTINE`; Quản lý kho gỡ cách ly hoặc ghi giảm có duyệt |
+| Hãng hoàn hàng (RTO) | Đơn `Returned` theo sự kiện hoàn hàng của hãng (webhook) hoặc Quản lý kho ghi nhận; nhập lại kho xuất bằng phiếu Hàng hoàn vào `QUARANTINE`; Quản lý kho gỡ cách ly hoặc ghi giảm có duyệt. Hàng đã về kho → đơn `Returned`, đi tới hoàn tiền; muốn gửi lại thì Sale tạo đơn mới; giao lại chỉ khi đơn còn `Delivery Failed`. Đơn nhiều shipment mà chỉ một shipment hoàn về → đơn giữ `Partially Fulfilled`, phần của shipment đó được hoàn tiền, xong thì đơn → `Partially Refunded` ([09](../../warehouse/09-shipping/README.md) §4.3 bước 4) *(✅ Đã chốt 2026-11-19)* |
 | Webhook của hãng báo sai kết quả giao (ví dụ báo giao thành công nhưng khách chưa nhận) | Quản lý kho sửa tay kết quả giao, bắt buộc lý do (BR-27); CSKH xác minh với hãng |
 | Hãng không có webhook / sự kiện của hãng chưa về | Trang đơn chỉ hiện hãng, mã vận đơn, biển số (nhập tay hoặc từ file ở [09](../../warehouse/09-shipping/README.md)); Quản lý kho ghi kết quả giao khi hãng báo lại |
 | Đơn đi nhiều xe (giao một phần, hoặc một đợt chia nhiều xe) | Trang đơn hiện riêng từng xe: hãng, mã vận đơn, biển số, mốc hành trình; kết quả giao ghi theo từng shipment |
