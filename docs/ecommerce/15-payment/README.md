@@ -81,7 +81,7 @@ Payment quyết định các mốc tiền của đơn:
 
    > ✅ Đã chốt 2026-11-05: đợt `BEFORE_DELIVERY` đến hạn khi đơn `Ready to Fulfill` và không có ngày quá hạn; với đơn giao nhiều lần, đợt `BEFORE_DELIVERY` **không gắn đợt giao** phải trả đủ trước **lần bàn giao đầu tiên**, đợt `AFTER_DELIVERY` **không gắn đợt giao** tính từ **lần giao cuối cùng** (hoặc ngày đóng phần còn lại). Xem [open-questions D23](../../open-questions/README.md).
    >
-   > ✅ Đã chốt 2026-11-07 (lịch giao nhiều đợt): đợt `BEFORE_DELIVERY` / `AFTER_DELIVERY` **gắn được một đợt giao** của lịch giao ([14](../14-cart-and-order/README.md) BR-13, BR-23) — cách thanh toán phổ biến "trả theo giá trị từng đợt nhận hàng"; số tiền gợi ý = giá trị hàng của đợt giao (có thuế). Xem [open-questions D37](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-07 (lịch giao nhiều đợt): đợt `BEFORE_DELIVERY` / `AFTER_DELIVERY` **gắn được một đợt giao** của lịch giao ([14](../14-cart-and-order/README.md) BR-13, BR-23) — cách thanh toán phổ biến "trả theo giá trị từng đợt nhận hàng"; số tiền gợi ý chia phần còn lại của tổng đơn sau các đợt không gắn theo tỷ lệ giá trị hàng (có thuế) của các đợt giao, nên tổng các đợt không vượt tổng đơn (*✅ Đã chốt 2026-11-25*, [14](../14-cart-and-order/README.md) §4.3 bước 12). Xem [open-questions D37](../../open-questions/README.md).
 3. Đợt đã được trả trước (`Partially Paid` / `Paid` từ khi còn chưa đến hạn — §4.2 bước 6) **giữ trạng thái** khi tới mốc; đợt `Partially Paid` từ đây có hạn trả để tính quá hạn.
 4. **Quá hạn là cờ, không phải trạng thái** — đợt `Due` / `Partially Paid` đã tới mốc, đã qua hạn trả (theo lịch ngày Việt Nam) mà chưa trả đủ được hệ thống **đánh dấu quá hạn mỗi khi đọc**; không có job quét đêm, không có trạng thái `Overdue`. Danh sách đợt lọc "chỉ đợt quá hạn" theo cờ này. *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*
 
@@ -103,7 +103,7 @@ Payment quyết định các mốc tiền của đơn:
    > ✅ Đã chốt 2026-11-06: khoản tiền **không gắn được với đợt nào** (nội dung chuyển khoản sai, khách chuyển thừa, tiền về sau khi đơn đã huỷ) **không ghi vào hệ thống**: Kế toán chỉ lập phiếu thu cho phần đã xác định được đợt; phần còn lại xử lý ở phần mềm kế toán (hoàn cho khách hoặc trừ vào đơn sau theo thoả thuận). Xem [open-questions D36](../../open-questions/README.md).
 7. **Kết quả** — hệ thống tính lại các đợt có trong phiếu:
    - Đợt trả một phần → `Partially Paid`; trả đủ → `Paid`.
-   - Mọi đợt `ON_SIGNING` của hợp đồng `Paid` → đơn `Pending Payment` tự chuyển `Confirmed`.
+   - Mọi đợt `ON_SIGNING` của hợp đồng `Paid` → đơn `Pending Payment` tự chuyển `Confirmed`. Ngoài ra hệ thống **đối soát mỗi giờ**: đơn `Pending Payment` có hợp đồng `Signed` đã thu đủ mọi đợt `ON_SIGNING` mà chưa được xác nhận (lần chuyển tự động bị lỗi) thì được xác nhận *(✅ Đã chốt 2026-11-25)*.
    - Mọi đợt `BEFORE_DELIVERY` `Paid` → mở chặn bàn giao ([09](../../warehouse/09-shipping/README.md)); đợt gắn đợt giao *k* `Paid` → mở chặn cho **đợt k** (các đợt `BEFORE_DELIVERY` không gắn vẫn phải `Paid` trước lần bàn giao đầu tiên).
    - Đơn đã hoàn tất và mọi đợt `Paid` → hợp đồng `Completed` ([14](../14-cart-and-order/README.md)).
 
@@ -116,9 +116,13 @@ Payment quyết định các mốc tiền của đơn:
    - Còn lại → `WITHIN_LIMIT`.
 
    Kiểm **hai lần**: lúc Sale **gửi hợp đồng** (chỉ cảnh báo) và lúc hợp đồng **`Signed`** (`OVERDUE` / `OVER_LIMIT` → đơn **`On Hold` lý do tín dụng**). Hợp đồng không có đợt `AFTER_DELIVERY` thì không kiểm.
+
+   Đơn treo vì tín dụng *(✅ Đã chốt 2026-11-25)*: Kế toán (người giữ quyền duyệt đơn treo tín dụng) nhận **thông báo trong ứng dụng** một lần cho mỗi lần treo và thấy ô **"Đơn chờ duyệt tín dụng"** trên dashboard; **khách được báo** trên trang đơn: đơn đang chờ xác nhận công nợ, nếu không được xác nhận thì khoản đã trả được hoàn toàn bộ.
 10. **Đơn treo vì tín dụng** — kế toán quyết định:
     - **Duyệt** (bắt buộc ghi chú) → đơn tiếp tục: `Pending Payment` nếu còn đợt `ON_SIGNING` chưa đủ, nếu không thì `Confirmed`.
-    - **Từ chối** (bắt buộc ghi chú) → đơn bị huỷ với lý do `CREDIT_REJECTED`; tiền đã thu (nếu có) thành số tiền phải hoàn (§4.5).
+    - **Từ chối** (bắt buộc ghi chú) → hợp đồng **bị huỷ bỏ theo điều kiện tín dụng** in trong hợp đồng (BLDS Điều 120; điều khoản chỉ in khi lịch có đợt `AFTER_DELIVERY` — [14](../14-cart-and-order/README.md) §4.3 bước 13, BR-14), đơn bị huỷ với lý do `CREDIT_REJECTED`; tiền đã thu (nếu có) **hoàn toàn bộ** — thành số tiền phải hoàn (§4.5). Đơn treo trước `Confirmed` nên chưa có Đơn sản xuất nào in hàng loạt, không có phí huỷ *(✅ Đã chốt 2026-11-25)*.
+
+    Duyệt hay từ chối thì **Sale phụ trách** đơn nhận thông báo ngay (duyệt: thông tin; từ chối: cảnh báo) — [00](../../00-system-overview/README.md) §6.
 
     Mọi kết quả kiểm và quyết định được ghi lịch sử: `WITHIN_LIMIT` / `OVER_LIMIT` / `OVERDUE` / `APPROVED` / `REJECTED`.
 11. **Khách phát sinh quá hạn sau khi đơn đã xác nhận** — hệ thống cảnh báo Sale; Sale có thể treo tay các đơn đang chạy của khách ([17](../17-order-management/README.md) §4.9).
@@ -135,6 +139,8 @@ Payment quyết định các mốc tiền của đơn:
     - đơn → `On Hold` lý do **thanh toán**;
     - Sale chỉ gỡ treo được khi tiền đã đủ lại ([17](../17-order-management/README.md)).
 
+    Sale phụ trách nhận thông báo khi đơn bị treo vì thanh toán, và nhận thêm một thông báo khi các đợt `ON_SIGNING` đã đủ tiền lại; hệ thống **không tự gỡ treo** *(✅ Đã chốt 2026-11-25)*.
+
     Huỷ làm đợt `BEFORE_DELIVERY` thiếu tiền (khi chưa bàn giao) → bàn giao lại bị chặn tự động.
 
 ### 4.5. Hoàn tiền
@@ -150,7 +156,7 @@ Payment quyết định các mốc tiền của đơn:
 
 ### 4.6. Huỷ đơn, đóng phần còn lại & phí huỷ
 
-18. **Huỷ đơn** ([17](../17-order-management/README.md) §4.8):
+18. **Huỷ đơn** ([17](../17-order-management/README.md) §4.8). Tiền khách trả trước khi nhận hàng (kể cả đợt `ON_SIGNING`) là **khoản thanh toán trước**, không phải tiền đặt cọc; điều khoản huỷ in trong hợp đồng: huỷ trước khi đưa vào in hàng loạt thì hoàn toàn bộ, không phí; sau đó chỉ huỷ khi bên bán đồng ý, kèm phí huỷ theo thoả thuận ([14](../14-cart-and-order/README.md) §4.3 bước 13; [17](../17-order-management/README.md) BR-11; *✅ Đã chốt 2026-11-25*):
     - Các đợt chưa `Paid` của đơn → `Cancelled`.
     - Tổng tiền đã thu của các đợt của đơn **trả phí huỷ trước** (nếu có phí).
     - Phần thừa → **số tiền phải hoàn** (§4.5). Phần phí còn thiếu → **khoản phí huỷ**, đến hạn ngay ngày huỷ, do khách trả (vòng đời như đợt, bắt đầu từ `Due`; thu bằng phiếu thu).
@@ -296,7 +302,7 @@ stateDiagram-v2
 | Ghi nhầm khách / đợt / số tiền | Huỷ phiếu thu (§4.4), rồi lập phiếu đúng |
 | Tiền về sau khi đơn đã huỷ | Không ghi được cho đợt `Cancelled`; xử lý ngoài hệ thống (hoàn hoặc dùng cho đơn sau — BR-06) |
 | Hoàn tiền cho khách bị lỗi (sai tài khoản) | Chưa ghi nhận đã hoàn; Kế toán hoàn lại rồi mới ghi nhận (§4.5) |
-| Khách đang quá hạn ký hợp đồng mới có đợt trả sau | Đơn `On Hold` lý do tín dụng khi ký; kế toán duyệt hoặc từ chối (huỷ đơn) |
+| Khách đang quá hạn ký hợp đồng mới có đợt trả sau | Đơn `On Hold` lý do tín dụng khi ký; kế toán duyệt hoặc từ chối (hợp đồng huỷ bỏ theo điều kiện tín dụng, huỷ đơn, hoàn toàn bộ tiền đã thu — §4.3 bước 10) |
 | Đơn đã `Packed` (đã kiểm đủ thùng & dán nhãn giao hàng) nhưng đợt `BEFORE_DELIVERY` chưa trả | Chặn bàn giao; hàng chờ tại kho (khu xuất hàng `DISPATCH`); Sale nhắc khách |
 | Khách huỷ đơn trước khi gửi Đơn sản xuất | Hoàn toàn bộ tiền đã thu, không phí ([17](../17-order-management/README.md) BR-11) |
 | Khách huỷ đơn khi đơn vị sản xuất đã làm hàng theo mẫu (Đơn sản xuất đã `In Production`) | Nhân viên huỷ có phí: tiền đã thu trả phí trước, phần thừa thành số tiền phải hoàn, phần thiếu thành khoản phí huỷ |
