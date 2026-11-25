@@ -206,7 +206,7 @@ Ràng buộc tương ứng ở module khác: [13](../13-catalog/README.md) BR-16
     - bản đang nằm trong một **yêu cầu báo giá dự án đang mở** — khách bỏ dòng đó khỏi yêu cầu trước (§4.11);
     - bản thuộc dự án đã đóng.
 
-    Chuyển **không đổi trạng thái** bản thiết kế; lịch sử ghi ở cả hai dự án (§5.3).
+    Chuyển **không đổi trạng thái** bản thiết kế; lịch sử bản thiết kế ghi cả dự án cũ lẫn dự án mới (§5.3).
 29. **Thư viện tài nguyên** — khách tải logo / ảnh vào thư viện của dự án **một lần** (quét mã độc, kiểm định dạng và dung lượng — BR-18). Trong trình thiết kế của một bản thuộc dự án, khách chọn tài nguyên từ thư viện để đặt lên khuôn 2D; hệ thống **sao chép** file vào bản thiết kế đó.
     - **Bố cục vẫn làm riêng từng bản** (mỗi quy cách một khuôn 2D).
     - **Preflight vẫn chạy riêng từng bản**: cùng một logo có thể đủ độ phân giải trên ly nhỏ nhưng không đủ trên túi giấy lớn.
@@ -294,7 +294,7 @@ Vòng đời của SKU riêng (`Active` → `Obsolete`) theo trạng thái biế
 | `APPROVED` | Người duyệt duyệt (ghi mã snapshot, SKU riêng đã sinh và checksum bộ file) |
 | `ARCHIVED` | Khách xoá bản nháp |
 | `QUOTE_REQUESTED` | Khách gửi yêu cầu báo giá (ghi số thùng, ngày giao mong muốn; ghi dự án nếu yêu cầu cả dự án) |
-| `ADDED_TO_PROJECT` / `REMOVED_FROM_PROJECT` | Bản thiết kế được thêm vào / chuyển khỏi một dự án (ghi dự án); chuyển dự án ghi `REMOVED_FROM_PROJECT` ở dự án cũ và `ADDED_TO_PROJECT` ở dự án mới |
+| `ADDED_TO_PROJECT` / `REMOVED_FROM_PROJECT` | Bản thiết kế vào / rời một dự án (ghi dự án). Tạo bản mới, bản sửa, bản nhân bản ghi `ADDED_TO_PROJECT`; chuyển dự án ghi `REMOVED_FROM_PROJECT` (nêu dự án cũ) rồi `ADDED_TO_PROJECT` (nêu dự án mới) |
 
 ### 5.4. Dự án thiết kế (Design Project)
 
