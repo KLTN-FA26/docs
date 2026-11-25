@@ -174,7 +174,7 @@ Catalog là **lớp hiển thị tiêu thụ dữ liệu** từ [Product Creatio
    - xem các bản **cạnh nhau** (ảnh xem trước, trạng thái);
    - chọn từ 2 bản `Draft` trở lên → **"Gửi duyệt cả bộ"**, có thể **kèm yêu cầu báo giá** cho các bản trong lô: một bản không qua tự kiểm, hoặc yêu cầu sai, thì không bản nào được gửi; dự án chỉ có một bản `Draft` thì gửi duyệt lẻ;
    - chọn các bản `Pending Review`, bị trả lại hoặc `Approved` → **"Yêu cầu báo giá cả dự án"** (§4.6);
-   - **đóng dự án** khi không còn bản chờ duyệt; các bản bên trong giữ nguyên và vẫn thuộc dự án.
+   - **đóng dự án** khi không còn bản chờ duyệt và yêu cầu báo giá dự án đang mở (nếu có) chỉ còn dòng đã duyệt; các bản bên trong giữ nguyên và vẫn thuộc dự án.
 
 ### 4.6. Liên hệ Sale từ catalog
 

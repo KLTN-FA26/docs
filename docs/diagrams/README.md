@@ -579,7 +579,7 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> Active: Khách tạo dự án
     Active --> Active: Thêm / chuyển bản, thư viện, gửi duyệt cả bộ, yêu cầu báo giá cả dự án
-    Active --> Archived: Khách đóng dự án, không còn bản Pending Review
+    Active --> Archived: Khách đóng dự án, không còn bản Pending Review, yêu cầu báo giá dự án đang mở chỉ còn dòng Approved
     Archived --> [*]
 ```
 

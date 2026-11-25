@@ -179,6 +179,8 @@ SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-cata
     - **thuộc cùng dự án** với bản gốc nếu dự án đó `Active` và còn chỗ; khách cũng chọn được một dự án `Active` khác của mình. Dự án của bản gốc đã đóng hoặc đã đủ bản thì khách **phải chọn** một dự án `Active` khác; chưa chọn thì hệ thống từ chối, không tạo bản sửa. Bản sửa không bao giờ đứng lẻ (BR-22, BR-23.3).
 22. Bản sửa đi lại từ §4.2. Khi bản sửa được duyệt, hệ thống xuất bộ file mới, sinh **snapshot mới và SKU riêng mới**. Snapshot và SKU cũ giữ nguyên, nên báo giá, đơn, Đơn sản xuất và tồn kho đã dùng SKU cũ không bị ảnh hưởng (BR-12).
 
+    **Nhân bản sang quy cách khác** *(✅ Đã chốt 2026-11-25)* — từ một bản thiết kế của mình (trừ bản đã xoá), khách bấm **"Nhân bản"** và chọn **một quy cách khác của cùng sản phẩm** (đã có khuôn in). Hệ thống tạo **bản thiết kế mới** ở `Draft`: sao chép ảnh, bố cục đã khớp vào vùng in của quy cách đích, ghi nguồn là bản gốc; bản gốc không đổi. Bản nhân bản theo **cùng quy tắc dự án như bản sửa** (bước 21): vào dự án của bản nguồn nếu `Active` và còn chỗ, không thì khách phải chọn một dự án `Active` khác (BR-23.3). Bản nhân bản đi lại từ §4.2 và được duyệt riêng.
+
 > ⚠️ Giả định: SKU riêng cũ **vẫn `Active`** sau khi có bản sửa (còn tồn, còn đơn đang mở); khách chọn SKU nào khi yêu cầu báo giá. Quản lý kinh doanh ngừng SKU cũ theo quy trình ngừng biến thể ở [01](../../warehouse/01-product-creation/README.md). Đổi SKU của một đơn đã chốt sang SKU mới đi theo quy trình thay đổi đơn ở [17](../17-order-management/README.md), chỉ khi Đơn sản xuất liên quan chưa sang `In Production`. Xem [open-questions B5](../../open-questions/README.md).
 
 ### 4.8. Yêu cầu báo giá từ bản thiết kế
@@ -298,14 +300,14 @@ Vòng đời của SKU riêng (`Active` → `Obsolete`) theo trạng thái biế
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Active` | Dự án đang dùng: thêm / chuyển bản, quản lý thư viện tài nguyên, gửi duyệt cả bộ (có thể kèm yêu cầu báo giá), yêu cầu báo giá cả dự án | → `Archived` (khách đóng dự án; không còn bản `Pending Review` trong dự án) | Chủ sở hữu |
+| `Active` | Dự án đang dùng: thêm / chuyển bản, quản lý thư viện tài nguyên, gửi duyệt cả bộ (có thể kèm yêu cầu báo giá), yêu cầu báo giá cả dự án | → `Archived` (khách đóng dự án; không còn bản `Pending Review` trong dự án, và mọi yêu cầu báo giá dự án đang mở chỉ còn dòng `Approved` — BR-22) | Chủ sở hữu |
 | `Archived` | Dự án đã đóng: không thêm bản, không chuyển bản vào hay ra, không gửi duyệt cả bộ, không yêu cầu báo giá cả dự án; các bản thiết kế bên trong **giữ nguyên trạng thái**, vẫn thuộc dự án, xem / xoá bản nháp / yêu cầu báo giá từng bản được (BR-23.5); giữ lịch sử | *(cuối)* — không mở lại (⚠️ giả định B42) | Chủ sở hữu |
 
 ```mermaid
 stateDiagram-v2
     [*] --> Active: Khách tạo dự án
     Active --> Active: Thêm / chuyển bản, thư viện, gửi duyệt cả bộ, yêu cầu báo giá cả dự án
-    Active --> Archived: Khách đóng dự án, không còn bản Pending Review
+    Active --> Archived: Khách đóng dự án, không còn bản Pending Review, yêu cầu báo giá dự án đang mở chỉ còn dòng Approved
     Archived --> [*]
 ```
 
@@ -355,7 +357,7 @@ Lịch sử của dự án (BR-13):
 - **BR-19:** **Gửi duyệt cả bộ là tất cả hoặc không.** Chỉ gửi được từ **2 bản `Draft` trở lên** của một dự án `Active`. Preflight chạy từng bản; có bản không đạt thì **không bản nào** sang `Pending Review`. Tất cả đạt thì mọi bản sang `Pending Review` cùng lúc trong một **lượt duyệt dự án**.
 - **BR-20:** **Duyệt chung nhưng quyết định từng bản.** Trong lượt duyệt dự án, mỗi bản vẫn được Duyệt / Trả lại riêng theo BR-06, BR-09, BR-11; "Duyệt tất cả" là duyệt lần lượt từng bản còn chờ. Bản không duyệt được ở lại `Pending Review`, không chặn các bản khác. Lượt duyệt tự đóng khi mọi bản đã có quyết định.
 - **BR-21:** **Yêu cầu báo giá cả dự án** gồm các bản của một dự án `Active` (ít nhất một bản) theo BR-25 *(✅ Chốt lại 2026-11-25: trước đây chỉ gồm bản `Approved` và ở mức dự án không có "Gửi duyệt và yêu cầu báo giá")*; số thùng từng bản là **gợi ý**; **một ngày giao mong muốn chung** thành ngày giao khách yêu cầu của báo giá. Sale lập **một báo giá nhiều dòng** khi mọi dòng đã `Approved` (bỏ / thêm dòng theo thoả thuận với khách — [14](../14-cart-and-order/README.md) BR-22). Như BR-15: không phải đơn hàng, không giữ hàng, không có giá.
-- **BR-22:** **Đóng dự án** (`Active` → `Archived`) chỉ khi không còn bản `Pending Review` trong dự án. Dự án `Archived` không nhận bản mới, không cho chuyển bản vào hay ra, không gửi duyệt cả bộ, không yêu cầu báo giá cả dự án; các bản bên trong giữ trạng thái, vẫn thuộc dự án và yêu cầu báo giá từng bản được (BR-23.5). Bản sửa tạo từ bản thuộc dự án đã đóng phải vào **một dự án `Active` khác** của khách (BR-23.3) *(✅ Chốt lại 2026-11-25; trước đây bản sửa không thuộc dự án nào)*.
+- **BR-22:** **Đóng dự án** (`Active` → `Archived`) chỉ khi không còn bản `Pending Review` trong dự án. Dự án có **yêu cầu báo giá dự án đang mở** thì chỉ đóng được khi **mọi dòng** của yêu cầu đã `Approved`; yêu cầu đó vẫn đi tiếp tới báo giá. Còn dòng chưa duyệt (chờ duyệt hoặc bị trả lại) thì hệ thống từ chối; khách bỏ dòng (BR-25.4) hoặc đóng yêu cầu (BR-25.3) trước *(✅ Đã chốt 2026-11-25)*. Dự án `Archived` không nhận bản mới, không cho chuyển bản vào hay ra, không gửi duyệt cả bộ, không yêu cầu báo giá cả dự án; các bản bên trong giữ trạng thái, vẫn thuộc dự án và yêu cầu báo giá từng bản được (BR-23.5). Bản sửa tạo từ bản thuộc dự án đã đóng phải vào **một dự án `Active` khác** của khách (BR-23.3) *(✅ Chốt lại 2026-11-25; trước đây bản sửa không thuộc dự án nào)*.
 - **BR-23:** **Mọi bản thiết kế thuộc một dự án** *(✅ Đã chốt 2026-11-25)*.
   - **BR-23.1:** Mọi bản thiết kế luôn thuộc **đúng một** dự án của chính khách đó, ở mọi trạng thái; không có thiết kế lẻ.
   - **BR-23.2:** Tạo bản thiết kế bắt buộc chỉ định một dự án `Active` của khách đang đăng nhập, **còn chỗ** (dưới 20 bản — ⚠️ giả định B42).
@@ -399,6 +401,8 @@ Lịch sử của dự án (BR-13):
 | "Gửi duyệt cả bộ" nhưng một bản không đạt preflight | Không gửi bản nào (BR-19); hệ thống báo lỗi theo từng bản. Khách sửa bản lỗi, hoặc bỏ chọn bản đó rồi gửi các bản còn lại. |
 | "Duyệt tất cả" nhưng một bản không sinh được SKU riêng (quy cách vừa ngừng) | Bản đó ở lại `Pending Review` (BR-09), các bản khác vẫn được duyệt (BR-20); Điều phối sản xuất trả lại bản đó kèm lý do để lượt duyệt đóng. |
 | Khách muốn chuyển bản đang `Pending Review` sang dự án khác, hoặc đóng dự án còn bản `Pending Review` | Không được (BR-17, BR-22, BR-23.4); chờ kết quả duyệt. |
+| Khách đóng dự án khi còn yêu cầu báo giá dự án đang mở | Mọi dòng đã `Approved` → đóng được, yêu cầu vẫn đi tiếp tới báo giá. Còn dòng chờ duyệt hoặc bị trả lại → từ chối; khách bỏ dòng đó hoặc đóng yêu cầu trước (BR-22). |
+| Khách nhân bản một bản thuộc dự án đã đóng hoặc đã đủ bản | Như bản sửa: khách phải chọn một dự án `Active` khác còn chỗ; chưa chọn thì từ chối (BR-23.3). |
 | Khách muốn đưa một bản ra khỏi dự án thành bản lẻ | Không có thao tác này (BR-23.4); khách chuyển bản sang một dự án `Active` khác, hoặc xoá bản nháp. |
 | Khách muốn chuyển một bản đang nằm trong yêu cầu báo giá dự án đang mở | Không được (BR-23.4); khách bỏ dòng đó khỏi yêu cầu (BR-25.4) rồi chuyển. |
 | Khách muốn chuyển một bản thuộc dự án đã đóng | Không được (BR-22); bản vẫn thuộc dự án cũ (BR-23.5). Muốn sửa tiếp thì tạo bản sửa vào một dự án `Active`. |
