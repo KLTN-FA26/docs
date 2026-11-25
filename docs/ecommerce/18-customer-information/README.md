@@ -126,7 +126,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 12. **Gắn lịch sử** — mỗi đơn và hợp đồng ([14](../14-cart-and-order/README.md), [17](../17-order-management/README.md)), mỗi hội thoại ([16](../16-sales-chat/README.md)), mỗi thiết kế và SKU theo mẫu ([12](../12-product-design/README.md)) liên kết với hồ sơ.
 13. **Nhóm khách** — Quản lý kinh doanh tạo nhóm và gán khách vào nhóm (mỗi khách tối đa một nhóm).
     - **Mã nhóm** viết hoa, **không đổi** sau khi tạo; chỉ sửa tên và mô tả.
-    - Giá gợi ý chỉ lấy từ **bảng giá riêng (giá nội bộ) của khách** cho SKU riêng của khách đó ([13](../13-catalog/README.md)); nhóm khách không quyết định giá.
+    - Giá gợi ý lấy từ **bảng giá riêng (giá nội bộ) của khách** cho SKU riêng của khách đó, không có thì từ **giá chuẩn của quy cách** ([13](../13-catalog/README.md) §4.2, *✅ Chốt lại 2026-11-26*); nhóm khách không quyết định giá.
 
     > ⚠️ Giả định: sau khi bỏ hàng trơn (chốt 2026-11-04), nhóm khách **không còn dùng để định giá**; vẫn giữ làm phân loại khách (lọc, tra cứu). Cần xác nhận giữ hay bỏ hẳn nhóm khách. Xem [open-questions D14](../../open-questions/README.md).
 14. **Dư nợ & vị thế tín dụng** — cập nhật từ [Payment](../15-payment/README.md). Khách tự xem trên cổng: hạn mức, dư nợ, hạn mức còn lại, các đợt quá hạn.

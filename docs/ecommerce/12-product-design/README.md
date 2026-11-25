@@ -169,7 +169,7 @@ Hộp trang của file `PRINT_READY` (gốc toạ độ ở góc dưới-trái v
 
 > ✅ Đã chốt 2026-11-05: SKU riêng được sinh **mã tự động** (theo mã sản phẩm + mã khách + số thứ tự), ở trạng thái `Active` ngay (preflight và Quản lý kinh doanh duyệt — *✅ Chốt lại 2026-11-20: nay Điều phối sản xuất* — thay cho bước kích hoạt biến thể ở [01](../../warehouse/01-product-creation/README.md)). Xem [open-questions B20](../../open-questions/README.md).
 
-SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-catalog/README.md)). Giá có trên báo giá / đơn / hợp đồng do Sale lập ([14](../14-cart-and-order/README.md)); Sale tham khảo **giá nội bộ** do Quản lý kinh doanh khai báo ([13](../13-catalog/README.md) §4.2), nếu có. Lần sản xuất đầu của một SKU riêng (mẫu mới) có **dòng phí khuôn / bản in** trên báo giá và hợp đồng ([14](../14-cart-and-order/README.md)).
+SKU riêng **không hiện giá trên sàn** (sàn ẩn giá — [13](../13-catalog/README.md)). Giá có trên báo giá / đơn / hợp đồng do Sale lập ([14](../14-cart-and-order/README.md)); Sale tham khảo **giá nội bộ** do Quản lý kinh doanh khai báo — bảng giá riêng của khách cho SKU, không có thì **giá chuẩn của quy cách** mà bản thiết kế dùng ([13](../13-catalog/README.md) §4.2); báo giá giảm quá ngưỡng so với giá tham chiếu, hoặc không có giá tham chiếu, cần Quản lý kinh doanh duyệt giá ([14](../14-cart-and-order/README.md) BR-10) *(✅ Chốt lại 2026-11-26)*. Lần sản xuất đầu của một SKU riêng (mẫu mới) có **dòng phí khuôn / bản in** trên báo giá và hợp đồng ([14](../14-cart-and-order/README.md)).
 
 ### 4.6. Dùng thiết kế đã duyệt
 
