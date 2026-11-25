@@ -170,6 +170,7 @@ stateDiagram-v2
 | Kích thước thực của thùng khác quy cách khai báo | Quản lý kho sửa quy cách thùng ở [01](../01-product-creation/README.md); thùng đã kiểm dùng quy cách mới khi in lại nhãn / lập kế hoạch xe |
 | Đơn còn chờ hàng từ Đơn sản xuất (`Awaiting Stock`) | Chỉ kiểm & giao trước phần đã có khi Sale cho phép giao một phần; nếu không, Quản lý kho giữ thùng ở khu chờ xuất hoặc chờ đủ hàng ([07](../07-picking/README.md)) |
 | Địa chỉ giao không hợp lệ | Phát hiện trước khi dán nhãn: Sale treo đơn lý do `ADDRESS` ([17](../../ecommerce/17-order-management/README.md)), liên hệ khách sửa rồi gỡ treo. Đã dán nhãn: không đổi được; xử lý theo kết quả giao ([09](../09-shipping/README.md)) |
+| Đơn đang treo (On Hold, mọi lý do) khi kiểm thùng | Vẫn **bắt đầu phiên và quét kiểm** được; chỉ **chặn dán nhãn giao hàng và hoàn tất kiểm thùng** cho tới khi Sale gỡ treo ([17](../../ecommerce/17-order-management/README.md) §4.9). Hàng chờ kiểm thùng vẫn hiện đơn treo, kèm **lý do treo** và người gỡ treo (Sale) — không ẩn đơn *(Quyết định 25/11/2026, WF4-K2)* |
 | Hợp đồng còn đợt `BEFORE_DELIVERY` chưa thu | Hoàn tất vẫn được, kèm cảnh báo; bàn giao bị chặn tới khi đợt đó đã thu |
 
 ---

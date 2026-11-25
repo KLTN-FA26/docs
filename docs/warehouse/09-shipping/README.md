@@ -176,6 +176,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - chưa có ước tính / ước tính chưa đủ / ước tính có thùng không xếp được;
    - nhiều / ít xe hơn, nhiều / ít kiện hơn;
    - thể tích hoặc khối lượng **vượt ước tính trên 10%**.
+   - Kế hoạch gồm **nhiều đơn**: không so trực tiếp số xe (mỗi ước tính chỉ tính cho một đơn) và không gắn cờ nhiều / ít xe; màn đối chiếu hiện **số xe ước tính của từng đơn** và dòng tổng "chở riêng N xe — kế hoạch gộp M xe" *(Quyết định 25/11/2026, WF4-K3)*.
 5. **Chốt kế hoạch (`Confirmed`)** — cần:
    - ít nhất một kiện đã xếp;
    - không xe nào đang chờ tính lại;
