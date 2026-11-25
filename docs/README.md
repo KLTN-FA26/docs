@@ -17,7 +17,7 @@
 >
 > **✅ Đã chốt 2026-11-06 (dự án thiết kế — góp ý hội đồng):** khách gom nhiều bản thiết kế của một bộ nhận diện vào **dự án thiết kế**: **thư viện logo / ảnh dùng chung**, **gửi duyệt cả bộ** (Quản lý kinh doanh xem cả bộ, quyết định từng bản — *chốt lại 2026-11-20: nay Điều phối sản xuất — xem [12](ecommerce/12-product-design/README.md) §4.10*), **yêu cầu báo giá cả dự án** → một báo giá nhiều dòng. Dự án không bắt buộc, không thêm trạng thái cho bản thiết kế ([12](ecommerce/12-product-design/README.md) §4.9–§4.11).
 >
-> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** — mỗi lần giao thành công một hoá đơn, Kế toán bấm phát hành; khách tải XML / PDF trên trang đơn ([21](ecommerce/21-e-invoice/README.md)).
+> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** — mỗi lần giao thành công một hoá đơn, **tự phát hành trong ngày giao** (Kế toán phát hành tay khi máy giữ nháp — ✅ chốt lại 2026-11-24, Q-1); hệ thống gửi e-mail hoá đơn cho khách (Q-14); khách tải XML / PDF trên trang đơn ([21](ecommerce/21-e-invoice/README.md)).
 
 Dải mặt hàng gồm hai nhóm:
 

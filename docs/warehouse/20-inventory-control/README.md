@@ -146,8 +146,8 @@ Các module khác **ghi** tồn: nhận thành phẩm theo Đơn sản xuất v�
 > **Đã chốt 2026-11-05:** hàng hoàn (hãng hoàn về — RTO, hoặc khách trả theo yêu cầu trả của [17](../../ecommerce/17-order-management/README.md)) **nhập lại kho qua [03](../03-receipt/README.md) bằng phiếu nhập loại Hàng hoàn**, vào thẳng khu `QUARANTINE`.
 
 1. Phiếu Hàng hoàn tham chiếu shipment / yêu cầu trả của đơn; quét LPN từng thùng, chỉ nhận thùng thuộc shipment / đơn đó ([03](../03-receipt/README.md), [09](../09-shipping/README.md) §4.3).
-2. Khi phiếu được xác nhận, mỗi thùng **quay lại tồn ở khu `QUARANTINE`**: trạng thái tồn `Quarantine`, thùng `In Stock`, **giữ lô gốc** (BR-22), ghi một dòng sổ `RECEIPT`. Hàng hoàn **không cộng thẳng vào tồn khả dụng**, không thuộc ATP.
-3. **Quản lý kho** quyết định từng thùng như §4.8 bước 3: gỡ cách ly → mở nhiệm vụ cất về bin ([05](../05-putaway/README.md)), thùng vẫn `Quarantine` tới khi cất xong mới thành `Available`; hoặc ghi giảm cả thùng bằng điều chỉnh có duyệt (§4.3).
+2. Khi phiếu được xác nhận, mỗi **thùng nguyên niêm** **quay lại tồn ở khu `QUARANTINE`**: trạng thái tồn `Quarantine`, thùng `In Stock`, **giữ lô gốc** (BR-22), ghi một dòng sổ `RECEIPT`. Hàng hoàn **không cộng thẳng vào tồn khả dụng**, không thuộc ATP. *(✅ Chốt 2026-11-24, Q-18)* Thùng **đã mở / rỗng** và **hàng lẻ** **không nhập tồn**: thùng giữ `Consumed` (đánh dấu đã mở), không ghi dòng sổ; số đếm thật chỉ ghi trên phiếu nhập, hàng bị huỷ ([03](../03-receipt/README.md) BR-16).
+3. **Quản lý kho** quyết định từng thùng như §4.8 bước 3 — thùng của yêu cầu trả chỉ sau khi tiền hoàn được duyệt có hoàn SKU đó; thùng tiền hoàn không nhận lại thì huỷ dòng sổ nhập, thành **hàng giữ hộ** của khách (không phải tồn, không quyết định như dưới đây — [03](../03-receipt/README.md) §4.3): gỡ cách ly → mở nhiệm vụ cất về bin ([05](../05-putaway/README.md)), thùng vẫn `Quarantine` tới khi cất xong mới thành `Available`; hoặc ghi giảm cả thùng bằng điều chỉnh có duyệt (§4.3).
 4. Thùng hoàn về là **SKU riêng của khách**: sau khi gỡ cách ly, nó là tồn khả dụng của kho đó và được phân bổ cho đơn sau của chính khách theo FIFO như mọi thùng khác.
 
 > ✅ Đã chốt 2026-11-05: thùng hàng hoàn **giữ nguyên mã LPN** đã giao; thùng đang `Consumed` quay về `In Stock` khi phiếu Hàng hoàn được xác nhận (§5.5); ngày nhập dùng cho FIFO là ngày nhập lại. Xem [open-questions](../../open-questions/README.md).
@@ -404,7 +404,7 @@ Giữ hàng có hai tầng, đều **chỉ trên tồn của kho xuất** của 
   - không cảnh báo tồn thấp: SKU thành phẩm theo mẫu của khách sản xuất theo đơn, phần thiếu do Điều phối sản xuất lập Đơn sản xuất ([17](../../ecommerce/17-order-management/README.md));
   - không theo dõi hạn dùng: ly / bao bì không có hạn dùng.
 - **BR-14 — Nguyên thùng.** Mọi tồn nằm trong thùng LPN. Cất, di chuyển, lấy, cách ly, kiểm kê và điều chỉnh đều theo **nguyên thùng**; kho không mở thùng, không lấy hoặc điều chỉnh một phần thùng, không có hàng nằm ngoài thùng.
-- **BR-15 — Hàng hoàn vào cách ly.** Hàng hoàn (RTO hoặc khách trả) chỉ nhập lại kho qua phiếu loại **Hàng hoàn** của [03](../03-receipt/README.md), chỉ nhận thùng thuộc shipment / đơn được tham chiếu, và **luôn vào `Quarantine`**; không cộng thẳng vào tồn khả dụng. Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt (§4.4).
+- **BR-15 — Hàng hoàn vào cách ly.** Hàng hoàn (RTO hoặc khách trả) chỉ nhập lại kho qua phiếu loại **Hàng hoàn** của [03](../03-receipt/README.md), chỉ nhận thùng thuộc shipment / đơn được tham chiếu, và thùng nguyên niêm **luôn vào `Quarantine`**; không cộng thẳng vào tồn khả dụng. Thùng đã mở / rỗng và hàng lẻ **không nhập tồn** (Q-18); hàng giữ hộ khách không phải tồn ([03](../03-receipt/README.md) BR-16, BR-17). Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt (§4.4).
 - **BR-16 — Loại biến động.**
 
   | Loại | Ý nghĩa |
