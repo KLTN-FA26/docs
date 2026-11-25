@@ -629,6 +629,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
+    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền shipment hoàn về, các shipment khác đã giao
     Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối

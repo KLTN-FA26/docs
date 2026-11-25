@@ -141,17 +141,19 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
    | Phần | Nội dung |
    |------|----------|
    | **Đầu đơn** | Mã; **loại** — thường / **bù** (§4.13; Đơn sản xuất bù kèm tham chiếu Đơn sản xuất gốc và phiếu điều chỉnh ghi giảm); **đơn bán liên quan**; **đợt giao** (đúng một đợt của lịch giao); khách; **đơn vị sản xuất** (chọn từ danh mục); **kho nhận = kho xuất của đơn bán** (không sửa riêng); **ngày cần hàng** — mặc định = **ngày bắt đầu cửa sổ giao** của đợt giao (BR-26); người lập; **người gửi** *(✅ Chốt lại 2026-11-20; Đơn sản xuất gửi trước ngày này còn ghi người duyệt)* |
-   | **Dòng** | **SKU riêng của khách**; **số thùng** = phần thiếu của dòng đơn trong đợt giao đó; số cái / thùng; **tổng số cái** = số thùng × số cái / thùng (để đơn vị sản xuất đóng đúng số chuẩn mỗi thùng); quy cách thùng; **file in PDF/X** và bộ file của design snapshot (hệ thống xuất khi bản thiết kế được duyệt) — link tải có kiểm checksum ([12](../12-product-design/README.md)); yêu cầu đóng thùng / dán nhãn |
+   | **Dòng** | **SKU riêng của khách**; **số thùng** = phần thiếu của dòng đơn trong đợt giao đó; số cái / thùng; **tổng số cái** = số thùng × số cái / thùng (để đơn vị sản xuất đóng đúng số chuẩn mỗi thùng); quy cách thùng; **file in PDF/X** và bộ file của design snapshot (hệ thống xuất khi bản thiết kế được duyệt), kèm **tệp gốc của khách** (ảnh, logo bố cục đã duyệt dùng) — link tải có kiểm checksum ([12 §3](../12-product-design/README.md)); yêu cầu đóng thùng / dán nhãn |
    | **Tuỳ chọn** | Ghi chú |
    | **Cờ "cần duyệt mẫu in"** | Điều phối sản xuất bật / tắt theo từng đơn khi lập. **Mặc định bật** khi Đơn sản xuất có SKU **sản xuất lần đầu** (SKU chưa có Đơn sản xuất nào tới `In Production`); tắt khi mặc định bật thì **bắt buộc lý do** |
    | **Vòng mẫu in** | Danh sách các vòng mẫu (bước 9) |
+
+   > ⚠️ Giả định: giữ quy tắc hiện hành ở bảng trên (mặc định bật chỉ khi có SKU sản xuất lần đầu). **Còn mở** (chờ chủ dự án chốt): với sản phẩm thiết kế riêng, có bật **mặc định** cờ "cần duyệt mẫu in" cho **mọi** Đơn sản xuất không — đơn vị sản xuất tự chế bản từ file in vector và file mô tả thiết kế ([12 §3](../12-product-design/README.md)), nên bản in thử là chốt chặn cuối. Xem [open-questions B47](../../open-questions/README.md).
 
    **Cảnh báo sức chứa** — khi lập, hệ thống hiện **còn trống dự kiến**, **chờ duyệt** và **còn trống nếu duyệt hết** của kho nhận ([06](../../warehouse/06-warehouse-map-slotting/README.md) §4.6); thể tích Đơn sản xuất (Σ số thùng × thể tích thùng D × R × C — [01](../../warehouse/01-product-creation/README.md)) lớn hơn còn trống dự kiến, hoặc lớn hơn còn trống nếu duyệt hết (các Đơn sản xuất khác **chưa gửi** — `Draft` — về cùng kho; tên cột giữ từ khi còn bước duyệt, ✅ Chốt lại 2026-11-20) → **cảnh báo**, không chặn (BR-25).
 
    > ✅ Đã chốt 2026-11-05, cập nhật 2026-11-07: **ngày cần hàng** của Đơn sản xuất lấy mặc định từ **ngày bắt đầu cửa sổ giao** của đợt giao (trước đây: ngày giao khách yêu cầu của dòng đơn); Điều phối sản xuất chỉnh được khi Đơn sản xuất còn `Draft` (kể cả sau khi bị trả lại — *✅ Chốt lại 2026-11-20: không còn trả lại*), lịch giao không đổi theo. Xem [open-questions B33](../../open-questions/README.md).
 7. **Gửi** — Điều phối sản xuất thoả thuận trước với đơn vị sản xuất ngoài hệ thống (điện thoại / Zalo / email), xem lại **bảng sức chứa tính tại thời điểm gửi** cùng cảnh báo nếu vượt (BR-25, không chặn), rồi **gửi** → `Sent` — không qua duyệt, người lập tự gửi được (BR-23):
    - hệ thống **kiểm lại file in PDF/X** của từng design snapshot (file không còn khớp bản khách đã chốt → **chặn**, không gửi gì) và kiểm đơn vị sản xuất còn dùng;
-   - hệ thống xuất **phiếu Đơn sản xuất (PDF)** kèm file in PDF/X của snapshot và **gửi qua kênh kết nối** của đơn vị sản xuất; ghi **người gửi** và thời điểm gửi;
+   - hệ thống xuất **phiếu Đơn sản xuất (PDF)** kèm file in PDF/X, bộ file của snapshot và **tệp gốc của khách**, rồi **gửi qua kênh kết nối** của đơn vị sản xuất; ghi **người gửi** và thời điểm gửi;
    - đơn bán → `Awaiting Stock`; **thông báo cho Quản lý kho của kho nhận** (số thùng, thể tích, ngày cần hàng), kèm `WARN` nếu lần gửi này làm còn trống dự kiến của kho chuyển sang âm ([06](../../warehouse/06-warehouse-map-slotting/README.md) §4.6); **thông báo cho Sales Manager** (mã Đơn sản xuất, số thùng, ngày cần hàng — trong app).
    - Gửi rồi không rút lại: đơn vị sản xuất rút lui thì Điều phối sản xuất **huỷ** (bước 13) và lập Đơn sản xuất mới cho đơn vị khác.
 
@@ -397,7 +399,7 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | `Ready to Fulfill` | Đủ hàng tại kho xuất, chờ / đã được Quản lý kho release | → `Picking`, → `On Hold`, → `Cancelled` | Hệ thống / Quản lý kho → 07 |
 | `Picking` | Kho đang lấy nguyên thùng (về khu chờ xuất hoặc khu xuất hàng) | → `Packed` (hoàn tất kiểm thùng đủ), → `Partially Fulfilled` (hoàn tất kiểm thùng một phần — 08 §4.4), → `On Hold`, → `Cancelled` | 07 / 08 |
 | `Packed` | Đã kiểm đủ thùng & dán nhãn giao hàng; **không huỷ được nữa**; bàn giao bị chặn nếu đợt `BEFORE_DELIVERY` chưa thu đủ | → `Shipped`, → `Partially Fulfilled`, → `On Hold` | 08 / 09 |
-| `Partially Fulfilled` | Giao một phần: đã **hoàn tất kiểm thùng một phần** (08 §4.4 — kể cả khi phần đã kiểm chưa bàn giao) hoặc đã bàn giao một phần (từ kho xuất); phần còn lại chờ hoặc bị đóng *(✅ Đã chốt 2026-11-12)* | → `Packed` (phần còn lại kiểm đủ khi **chưa có thùng nào bàn giao**), → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `On Hold` | 07 / 08 / 09 |
+| `Partially Fulfilled` | Giao một phần: đã **hoàn tất kiểm thùng một phần** (08 §4.4 — kể cả khi phần đã kiểm chưa bàn giao) hoặc đã bàn giao một phần (từ kho xuất); phần còn lại chờ hoặc bị đóng *(✅ Đã chốt 2026-11-12)* | → `Packed` (phần còn lại kiểm đủ khi **chưa có thùng nào bàn giao**), → `Shipped`, → `Delivery Failed`, → `Delivered`, → `Returned`, → `Partially Refunded` (hoàn tiền của shipment hoàn về được ghi nhận khi các shipment khác đã giao — không qua `Returned`) *(✅ Đã chốt 2026-11-19)*, → `On Hold` | 07 / 08 / 09 / 15 |
 | `On Hold` | Tạm giữ (§4.9) | → trạng thái trước khi treo; → `Pending Payment` / `Confirmed` (kế toán duyệt tín dụng); → `Cancelled` | Hệ thống / Sale / Kế toán |
 | `Shipped` | Đã bàn giao đơn vị vận chuyển (xe đã có mã vận đơn); mốc hành trình từ webhook của hãng được ghi kèm thời điểm, không đổi trạng thái | → `Delivered`, → `Delivery Failed`, → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
 | `Delivery Failed` | Hãng báo giao không thành công (kèm lý do) | → `Delivered`, → `Returned` (hàng hoàn nhập lại qua 03), → `Partially Fulfilled` | 09 (webhook của hãng / Quản lý kho) |
@@ -451,6 +453,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
+    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền shipment hoàn về, các shipment khác đã giao
     Delivered --> Completed: Tự động hết hạn đổi trả, mọi đợt đã thu, đủ hoá đơn
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối
@@ -661,7 +664,7 @@ Cờ **Trễ** (`DELIVERY_LATE` — §4.12) gắn thêm cho đợt chưa bàn gi
 | Khách huỷ khi đơn vị sản xuất đã in hàng loạt | Sale từ chối, hoặc duyệt có phí; hàng làm xong nhập về xử lý theo BR-07 |
 | Đơn đủ hàng nhưng đợt `BEFORE_DELIVERY` chưa trả | Lấy hàng về `STAGING` chờ, hoặc kiểm thùng & dán nhãn rồi chờ; bàn giao bị chặn tới khi đợt `Paid` |
 | Khách đổi địa chỉ khi đơn đã `Shipped` | CSKH liên hệ hãng (ngoài hệ thống) nhờ chuyển hướng nếu hãng hỗ trợ; nếu không → chờ giao thất bại / RTO rồi gửi lại |
-| Hãng hoàn hàng (RTO) | Đơn `Returned` theo sự kiện hoàn hàng của hãng (webhook) hoặc Quản lý kho ghi nhận; nhập lại kho xuất bằng phiếu Hàng hoàn vào `QUARANTINE`; Quản lý kho gỡ cách ly hoặc ghi giảm có duyệt |
+| Hãng hoàn hàng (RTO) | Đơn `Returned` theo sự kiện hoàn hàng của hãng (webhook) hoặc Quản lý kho ghi nhận; nhập lại kho xuất bằng phiếu Hàng hoàn vào `QUARANTINE`; Quản lý kho gỡ cách ly hoặc ghi giảm có duyệt. Hàng đã về kho → đơn `Returned`, đi tới hoàn tiền; muốn gửi lại thì Sale tạo đơn mới; giao lại chỉ khi đơn còn `Delivery Failed`. Đơn nhiều shipment mà chỉ một shipment hoàn về → đơn giữ `Partially Fulfilled`, phần của shipment đó được hoàn tiền, xong thì đơn → `Partially Refunded` ([09](../../warehouse/09-shipping/README.md) §4.3 bước 4) *(✅ Đã chốt 2026-11-19)* |
 | Webhook của hãng báo sai kết quả giao (ví dụ báo giao thành công nhưng khách chưa nhận) | Quản lý kho sửa tay kết quả giao, bắt buộc lý do (BR-27); CSKH xác minh với hãng |
 | Hãng không có webhook / sự kiện của hãng chưa về | Trang đơn chỉ hiện hãng, mã vận đơn, biển số (nhập tay hoặc từ file ở [09](../../warehouse/09-shipping/README.md)); Quản lý kho ghi kết quả giao khi hãng báo lại |
 | Đơn đi nhiều xe (giao một phần, hoặc một đợt chia nhiều xe) | Trang đơn hiện riêng từng xe: hãng, mã vận đơn, biển số, mốc hành trình; kết quả giao ghi theo từng shipment |

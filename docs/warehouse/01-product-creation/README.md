@@ -216,6 +216,36 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
    | **Ràng buộc file** | **Độ phân giải tối thiểu** ở kích thước in thật, **định dạng** ảnh tải lên, **dung lượng tối đa** mỗi file | Có (hệ thống điền mặc định, Quản lý kinh doanh chỉnh được) |
 
    > ⚠️ Giả định: mặc định **300 DPI** ở kích thước in thật; định dạng tải lên **PNG / JPG / SVG / PDF**; dung lượng tối đa **50 MB mỗi file**. Xem [open-questions B34](../../open-questions/README.md).
+
+   **Túi giấy** — khách vẫn thiết kế **từng mặt** (4 vùng in rời: trước, hông phải, sau, hông trái), nhưng file in là **một tấm trải phẳng** (bế, gấp ống, dán mép, gấp đáy) do hệ thống ghép 4 mặt khi xuất ([12 §3](../../ecommerce/12-product-design/README.md)). Vì vậy cấu hình in của quy cách túi giấy có thêm các thông số tạo hình (mm):
+
+   | Thông số | Ký hiệu | Mô tả | Ràng buộc |
+   |----------|---------|-------|-----------|
+   | Rộng mặt túi | `W` | Chiều rộng mặt trước / sau | — |
+   | Hông túi | `g` | Chiều rộng mặt hông | — |
+   | Cao túi | `H` | Chiều cao túi, **đã gồm** phần gấp miệng | — |
+   | Gấp miệng | `T` | Phần gấp vào ở miệng túi | — |
+   | **Mép dán** | `G` | Mép dán dọc để dán ống túi | `0 ≤ G ≤ 100`; sửa được |
+   | **Phần gấp đáy** | `B` | Độ sâu phần gấp đáy | `0 ≤ B ≤ g`; sửa được |
+
+   Mép dán và phần gấp đáy **không phụ thuộc model 3D**: sửa hai số này không cần tải lại model.
+
+   > ✅ Đã chốt 2026-11-18: túi giấy in **một tấm liền** (bế, gấp ống, dán mép, gấp đáy) như ngoài xưởng; vùng in vẫn là 4 mặt rời.
+
+   > ⚠️ Giả định: khi Quản lý kinh doanh chưa khai báo (kể cả quy cách túi đã có từ trước), hệ thống điền mặc định **mép dán 20 mm** và **phần gấp đáy = 0,6 × hông túi** (làm tròn 0,01 mm); chờ xưởng xác nhận. Xem [open-questions B48](../../open-questions/README.md).
+
+   **Kích thước tấm trải phẳng của túi** — `P = H − T` (chiều cao in được của một mặt), `b` = lề tràn lớn nhất của 4 vùng in; toạ độ tính từ góc trên-trái của tấm theo đường cắt, trục y hướng xuống:
+
+   | Đại lượng | Giá trị |
+   |-----------|---------|
+   | Tấm theo đường cắt (trim) | Rộng `Wt = G + 2W + 2g`; cao `Ht = T + P + B` |
+   | Tấm kèm lề tràn (bleed box) | `(Wt + 2b) × (Ht + 2b)`; đường cắt lùi vào `b` ở mỗi cạnh |
+   | Vị trí từng mặt (góc trên-trái) | Trước `(G, T)`; hông phải `(G + W, T)`; sau `(G + W + g, T)`; hông trái `(G + 2W + g, T)` — kích thước như vùng in (`W × P` hoặc `g × P`) |
+   | Đường bế | Chữ nhật theo đường cắt `(0, 0, Wt, Ht)` |
+   | Nếp gấp dọc | `G`; `G + W`; `G + W + g/2`; `G + W + g`; `G + 2W + g`; `G + 2W + 1,5g` |
+   | Nếp gấp ngang | `T` (gấp miệng); `T + P` (gấp đáy) |
+
+   Ví dụ: `W 260`, `g 120`, `H 320`, `T 40`, `G 20`, `B 72`, `b 3` → `P 280`; tấm **780 × 392 mm**, kèm lề tràn **786 × 398 mm**.
 2. File khuôn và model 3D tải lên phải qua **quét virus** như ảnh sản phẩm (BR-18).
 3. Quy cách **chưa có khuôn** (khuôn 2D + vùng in) thì khách **không bắt đầu thiết kế được** trên quy cách đó (không có nút "Thiết kế" — [13](../../ecommerce/13-catalog/README.md)). Quy cách vẫn hiện trên catalog; xuất bản sản phẩm **không kiểm** cấu hình in (§4.5).
 
@@ -331,6 +361,7 @@ stateDiagram-v2
 | Quy cách chưa có khuôn in (khuôn 2D + vùng in) | Khách không bắt đầu thiết kế được trên quy cách đó; Quản lý kinh doanh khai báo cấu hình in (§4.10, BR-21) |
 | Quy cách có khuôn nhưng chưa có model 3D | Khách chỉ xem trước 2D, vẫn thiết kế được (⚠️ giả định §4.10) |
 | Đổi khuôn / vùng in / ràng buộc file khi quy cách đã có bản thiết kế | Bản `Approved` và SKU riêng không ảnh hưởng (snapshot bất biến); bản chưa duyệt theo cấu hình mới (⚠️ giả định §4.10) |
+| Quy cách túi giấy chưa khai báo mép dán / phần gấp đáy (kể cả quy cách có từ trước) | Hệ thống dùng mặc định mép dán 20 mm, gấp đáy = 0,6 × hông túi; Quản lý kinh doanh sửa được. Mép dán > 100 mm hoặc gấp đáy > hông túi → từ chối lưu cấu hình in (⚠️ giả định §4.10) |
 | Ảnh nhiễm virus / máy quét không chạy | Ảnh bị từ chối, tải lại sau |
 | Người tải ảnh tự đăng ảnh của mình | Từ chối; người khác đăng |
 | Tạm ngưng rồi tiếp tục sản phẩm đang hiển thị | Về `Approved`, phải xuất bản lại mới hiện trên catalog |
