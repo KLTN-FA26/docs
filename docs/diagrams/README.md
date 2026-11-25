@@ -512,18 +512,18 @@ Chi tiết: [12 · Thiết kế của khách](../ecommerce/12-product-design/REA
 ```mermaid
 flowchart TD
     ENTRY(["Khách sỉ xem sản phẩm, quy cách trên sàn — sàn không hiện giá<br/>chat với Sale"]) --> PATH{"Hàng in theo<br/>mẫu mới?"}
-    PATH -->|Có| DESIGN["Khách bấm Thiết kế trên quy cách đã có khuôn in (13)<br/>tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D<br/>lưu — bản thiết kế Draft (12)<br/>có thể gom vào dự án thiết kế, dùng logo từ thư viện dự án"]
-    DESIGN --> SUBMIT["Khách bấm Gửi duyệt, Gửi duyệt và yêu cầu báo giá<br/>hoặc Gửi duyệt cả bộ từ dự án — từ 2 bản, tất cả hoặc không"]
+    PATH -->|Có| DESIGN["Khách bấm Thiết kế trên quy cách đã có khuôn in (13)<br/>tải ảnh / logo, đặt lên khuôn 2D, thêm chữ, xem trước 3D<br/>lưu — bản thiết kế Draft trong một dự án thiết kế (12)<br/>dùng logo từ thư viện dự án"]
+    DESIGN --> SUBMIT["Khách bấm Gửi duyệt, Gửi duyệt và yêu cầu báo giá<br/>hoặc Gửi duyệt cả bộ từ dự án — từ 2 bản, tất cả hoặc không<br/>có thể kèm yêu cầu báo giá dự án"]
     SUBMIT --> PREFLIGHT{"Hệ thống preflight từng bản<br/>độ phân giải ở kích thước in, vùng in / lề an toàn<br/>định dạng, dung lượng, quy cách đã có quy cách thùng"}
     PREFLIGHT -->|"Không đạt: báo lỗi cụ thể, vẫn Draft"| DESIGN
     PREFLIGHT -->|Đạt| PENDING["Bản thiết kế: Pending Review — khoá sửa"]
     PENDING --> REVIEW{"Điều phối sản xuất duyệt kỹ thuật<br/>và kiểm duyệt nội dung<br/>lượt duyệt dự án: xem cả bộ, quyết định từng bản"}
     REVIEW -->|"Trả lại, kèm lý do: về Draft"| DESIGN
     REVIEW -->|Duyệt| SNAP["Hệ thống xuất bộ file: file in PDF/X, xem trước 2D / 3D, đặc tả<br/>chốt design snapshot bất biến, checksum<br/>sinh SKU thành phẩm riêng của khách, quy cách thùng theo quy cách — Approved"]
-    SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>hoặc Yêu cầu báo giá cả dự án: các bản Approved, số thùng từng bản, một ngày giao chung<br/>mở chat với Sale kèm thẻ yêu cầu báo giá — nhiều dòng khi cả dự án (16)"]
+    SNAP --> RFQ["Khách bấm Yêu cầu báo giá: số thùng, ngày giao mong muốn<br/>hoặc Yêu cầu báo giá cả dự án: bản chờ duyệt / bị trả lại / Approved, số thùng từng bản, một ngày giao chung<br/>Sale được báo khi mọi dòng Approved<br/>mở chat với Sale kèm thẻ yêu cầu báo giá — nhiều dòng khi cả dự án (16)"]
     PENDING -.->|"Đã gửi kèm yêu cầu báo giá:<br/>Sale nhận ngay, chỉ lập báo giá khi Approved"| RFQ
     PATH -->|"Không — SKU riêng của khách đã có"| QUOTE
-    RFQ --> QUOTE["Sale lập báo giá (14) — một báo giá nhiều dòng khi yêu cầu cả dự án<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
+    RFQ --> QUOTE["Sale lập báo giá (14) — một báo giá nhiều dòng khi yêu cầu cả dự án, mọi dòng Approved<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
     QUOTE -->|"Sale tự quyết giá, không duyệt trước khi gửi (14 BR-10)"| Q_SENT["Gửi báo giá cho khách — Sent<br/>khách thấy giá trên báo giá / thẻ báo giá trong chat"]
     Q_SENT -.->|"Dòng thấp hơn giá gợi ý quá ngưỡng<br/>(cấu hình, mặc định 10%)"| DISC_ALERT["Hệ thống báo Quản lý kinh doanh trong ứng dụng<br/>mỗi bản sửa một lần — chỉ báo, không chặn gửi"]
 
@@ -573,12 +573,12 @@ stateDiagram-v2
 
 > ⚠️ Giả định: thẻ yêu cầu báo giá gửi kèm lúc gửi duyệt vẫn mở khi bản bị trả lại, đi tiếp theo bản đó; bản `Archived` thì thẻ đóng ([open-questions B40](../open-questions/README.md)). Ràng buộc file mặc định, chuẩn PDF/X-4, thiếu model 3D: [open-questions B34–B36](../open-questions/README.md).
 
-**Dự án thiết kế (Design Project)** *(✅ Đã chốt 2026-11-06 — [open-questions B41](../open-questions/README.md))* — gom nhiều bản thiết kế của một bộ nhận diện; không thêm trạng thái cho bản thiết kế. Vòng đời dự án: `Active` → `Archived` (khách đóng khi không còn bản `Pending Review`; không mở lại — ⚠️ giả định B42). Chi tiết [12](../ecommerce/12-product-design/README.md) §4.9–§4.11, §5.4.
+**Dự án thiết kế (Design Project)** *(✅ Đã chốt 2026-11-06 — [open-questions B41](../open-questions/README.md))* — gom nhiều bản thiết kế của một bộ nhận diện; mọi bản thuộc đúng một dự án (✅ chốt lại 2026-11-25 — [12](../ecommerce/12-product-design/README.md) BR-23); không thêm trạng thái cho bản thiết kế. Vòng đời dự án: `Active` → `Archived` (khách đóng khi không còn bản `Pending Review`; không mở lại — ⚠️ giả định B42). Chi tiết [12](../ecommerce/12-product-design/README.md) §4.9–§4.11, §5.4.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Active: Khách tạo dự án
-    Active --> Active: Thêm / gỡ bản, thư viện, gửi duyệt cả bộ, yêu cầu báo giá cả dự án
+    Active --> Active: Thêm / chuyển bản, thư viện, gửi duyệt cả bộ, yêu cầu báo giá cả dự án
     Active --> Archived: Khách đóng dự án, không còn bản Pending Review
     Archived --> [*]
 ```
