@@ -34,7 +34,7 @@ Payment quyết định các mốc tiền của đơn:
 | **Kế toán (Accountant)** | Đối chiếu sao kê, **lập phiếu thu** cho các đợt / khoản phí huỷ; **huỷ phiếu thu** ghi sai; chuyển khoản hoàn (ngoài hệ thống) rồi **ghi nhận đã hoàn**. **Duyệt / từ chối đơn treo vì tín dụng** (§4.3). Duyệt hạn mức và kỳ hạn công nợ của khách ([18](../18-customer-information/README.md)). Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ**; lọc danh sách phiếu thu theo ngày nhận, xem tổng và **xuất Excel** để nhập phần mềm kế toán (§4.7). |
 | **Nhân viên Sale (Sales Staff)** | Gửi thông tin chuyển khoản theo đợt và **nhắc công nợ** cho khách qua [chat](../16-sales-chat/README.md). Xem công nợ của khách, **báo cáo công nợ theo khách & tuổi nợ** (§4.7) và tình trạng các đợt của đơn. Treo tay đơn khi khách quá hạn; gỡ treo đơn lý do thanh toán khi tiền đã đủ trở lại ([17](../17-order-management/README.md)). |
 | **Quản lý kinh doanh (Sales Manager)** | Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ** (§4.7). |
-| **Hệ thống** | Sinh đợt khi hợp đồng `Signed`; chuyển đợt sang `Due` theo mốc; tính lại trạng thái đợt khi lập / huỷ phiếu thu; tính **cờ quá hạn** từ hạn trả mỗi khi đọc; tự xác nhận đơn khi đủ đợt `ON_SIGNING`; chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa đủ; tính **số tiền phải hoàn**; hoàn tất hợp đồng. |
+| **Hệ thống** | Sinh đợt khi hợp đồng `Signed`; chuyển đợt sang `Due` theo mốc; tính lại trạng thái đợt khi lập / huỷ phiếu thu; **tính quá hạn khi đọc** (không còn trạng thái `Overdue`, không có job đêm đặt trạng thái); **quét mỗi đêm** báo Sale đợt vừa quá hạn; tự xác nhận đơn khi đủ đợt `ON_SIGNING`; chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa đủ; tính **số tiền phải hoàn**; hoàn tất hợp đồng. |
 
 ---
 
@@ -83,7 +83,7 @@ Payment quyết định các mốc tiền của đơn:
    >
    > ✅ Đã chốt 2026-11-07 (lịch giao nhiều đợt): đợt `BEFORE_DELIVERY` / `AFTER_DELIVERY` **gắn được một đợt giao** của lịch giao ([14](../14-cart-and-order/README.md) BR-13, BR-23) — cách thanh toán phổ biến "trả theo giá trị từng đợt nhận hàng"; số tiền gợi ý chia phần còn lại của tổng đơn sau các đợt không gắn theo tỷ lệ giá trị hàng (có thuế) của các đợt giao, nên tổng các đợt không vượt tổng đơn (*✅ Đã chốt 2026-11-25*, [14](../14-cart-and-order/README.md) §4.3 bước 12). Xem [open-questions D37](../../open-questions/README.md).
 3. Đợt đã được trả trước (`Partially Paid` / `Paid` từ khi còn chưa đến hạn — §4.2 bước 6) **giữ trạng thái** khi tới mốc; đợt `Partially Paid` từ đây có hạn trả để tính quá hạn.
-4. **Quá hạn là cờ, không phải trạng thái** — đợt `Due` / `Partially Paid` đã tới mốc, đã qua hạn trả (theo lịch ngày Việt Nam) mà chưa trả đủ được hệ thống **đánh dấu quá hạn mỗi khi đọc**; không có job quét đêm, không có trạng thái `Overdue`. Danh sách đợt lọc "chỉ đợt quá hạn" theo cờ này. *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*
+4. **Quá hạn tính khi đọc** — đợt đã tới mốc, đã qua hạn trả mà chưa trả đủ là **quá hạn**: một cờ tính từ ngày hạn trả khi cần đọc, **không phải trạng thái** (đợt trả một phần quá hạn vẫn là `Partially Paid`), không có job đêm nào đặt `Overdue`. **Quét mỗi đêm 00:20** (giờ Việt Nam): mỗi đợt vừa quá hạn được báo trong ứng dụng cho những người có quyền treo tay đơn (Sale) **đúng một lần** cho mỗi đợt ([§4.3](#43-công-nợ-phải-thu--hạn-mức) bước 11). Danh sách đợt lọc "chỉ đợt quá hạn" theo cờ này.
 
 ### 4.2. Ghi nhận tiền về bằng phiếu thu
 
