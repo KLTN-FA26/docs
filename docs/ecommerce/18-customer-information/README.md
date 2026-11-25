@@ -35,7 +35,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời. Sửa tên công ty và số điện thoại. Quản lý sổ địa chỉ. Đổi mật khẩu, xem / thu hồi phiên đăng nhập. Xem công nợ và vị thế tín dụng: hạn mức, dư nợ, hạn mức còn lại, kỳ hạn, cờ quá hạn của chính mình *(Quyết định 21/10/2026; hồ sơ rủi ro vẫn là dữ liệu nội bộ)*. |
 | **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi / gửi lại lời mời kích hoạt. Nhập **thông tin pháp lý**. Đặt **lịch thanh toán mặc định** ban đầu (chỉ gồm đợt `ON_SIGNING` / `BEFORE_DELIVERY`). Xem hồ sơ, sửa thông tin thay khách, quản lý địa chỉ. |
 | **Quản lý kinh doanh (Sales Manager)** | Tạo hồ sơ khách. **Đổi trạng thái khách** (chặn / gỡ chặn / đóng / mở lại). Quản lý **nhóm khách** và gán khách vào nhóm. Quản lý địa chỉ. Khai báo **bảng giá riêng (giá nội bộ)** của khách ([13](../13-catalog/README.md)). |
-| **Kế toán (Accountant)** | **Duyệt hạn mức và kỳ hạn công nợ**; duyệt lịch thanh toán mặc định có đợt `AFTER_DELIVERY` ([15](../15-payment/README.md) BR-12) |
+| **Kế toán (Accountant)** | **Duyệt hạn mức và kỳ hạn công nợ** — sửa trên trang khách ở back office; duyệt lịch thanh toán mặc định có đợt `AFTER_DELIVERY` ([15](../15-payment/README.md) BR-12). Xem hồ sơ khách (chỉ đọc) |
 | **Hệ thống** | Chuẩn hoá & chống trùng mã số thuế. Gửi lời mời, quản lý hạn link. Đồng bộ trạng thái tài khoản đăng nhập theo trạng thái khách. Ghi lịch sử thay đổi. Gắn đơn / hợp đồng / tương tác vào hồ sơ. |
 
 ---
@@ -100,6 +100,8 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
    Sale xem được tình trạng lời mời: chờ kích hoạt / hết hạn / đã kích hoạt / chưa có tài khoản / không khả dụng (khách bị chặn hoặc đã đóng).
 4. **Kích hoạt** — người liên hệ mở link, đặt mật khẩu → hồ sơ `Active`. Đây là cách duy nhất đi từ `Pending Activation` sang `Active`.
 5. **Hạn mức & kỳ hạn công nợ** — muốn cho khách trả sau giao, **kế toán** đặt **hạn mức** (> 0) và **kỳ hạn** (N ngày mặc định cho đợt `AFTER_DELIVERY`); khi đó lịch thanh toán mặc định mới được có đợt `AFTER_DELIVERY`. Mỗi lần duyệt ghi người và thời điểm. Hợp đồng đã ký giữ lịch thanh toán của nó.
+
+   Kế toán cấp và sửa hạn mức, kỳ hạn bằng form **"Sửa hạn mức & kỳ hạn"** trên **trang khách** ở back office — mở được với mọi khách, không chỉ khách có đơn treo; Kế toán được xem hồ sơ khách (chỉ đọc) để mở trang này. Đơn treo vì tín dụng có **lối tắt** tới form này ([15](../15-payment/README.md) §4.3) *(✅ Đã chốt 2026-11-25)*.
 
 ### 4.2. Quản lý dữ liệu hồ sơ
 

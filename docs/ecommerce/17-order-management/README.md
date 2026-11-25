@@ -235,7 +235,7 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
     - hãng báo sai → Quản lý kho **sửa tay** kết quả giao, bắt buộc lý do (BR-27).
 20. **`Delivered`** — khi hãng báo giao thành công (qua webhook, hoặc Quản lý kho ghi tay). Đơn đã có shipment thì kết quả giao ghi **theo từng shipment** *(Quyết định 19/10/2026)*. Giao xong làm đợt `AFTER_DELIVERY` đến hạn — đợt gắn một đợt giao thì đến hạn khi **đợt giao đó** giao xong ([15](../15-payment/README.md) §4.1). Hãng hoàn hàng về (RTO) → đơn `Returned` (theo sự kiện hoàn hàng của hãng, hoặc Quản lý kho ghi nhận); hàng nhập lại kho xuất qua [03](../../warehouse/03-receipt/README.md) bằng **phiếu nhập Hàng hoàn** vào `QUARANTINE` (BR-18).
 21. **Tự hoàn tất** *(Quyết định 21/10/2026)* — mỗi đêm (00:30) hệ thống chuyển `Delivered` → `Completed` khi đủ bốn điều kiện:
-    - hết **thời hạn đổi / trả 7 ngày** kể từ khi giao;
+    - hết **thời hạn đổi / trả** ghi trên hợp đồng (mặc định theo cấu hình, 7 ngày — BR-20) kể từ khi giao;
     - mọi đợt thanh toán của hợp đồng đã `Paid` (không còn tiền phải thu);
     - không có yêu cầu trả hàng đang mở.
     - **mọi lần giao thành công (shipment `Delivered`) đã có hoá đơn điện tử phát hành**, kể cả hoá đơn phần phí vận chuyển còn lại ([21](../21-e-invoice/README.md)) *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*.
@@ -318,7 +318,7 @@ Order Management là **lớp điều hành** (orchestration): nó không tự l�
 
 ### 4.10. Đổi / Trả hàng & Hoàn tiền (Returns & Refunds)
 
-37. Khách tạo **yêu cầu trả hàng** (trong hạn chính sách) qua cổng khách hàng / chat, nêu lý do → đơn `Return Requested`.
+37. Khách tạo **yêu cầu trả hàng** (trong thời hạn khiếu nại / đổi trả ghi trên hợp đồng — BR-20) qua cổng khách hàng / chat, nêu lý do → đơn `Return Requested`.
 38. Sale duyệt → phát hành **RMA**; hướng dẫn khách gửi hàng về **kho xuất của đơn** (hoặc hẹn lấy). Từ chối → đơn quay về `Delivered`.
 39. Kho **nhận hàng trả** qua [03 Receipt](../../warehouse/03-receipt/README.md) bằng **phiếu nhập loại Hàng hoàn**: phiếu tham chiếu yêu cầu trả của đơn; quét LPN từng thùng (chỉ nhận thùng thuộc đơn đó); nhập thẳng vào khu `QUARANTINE`. **Quản lý kho** quyết định ([20](../../warehouse/20-inventory-control/README.md)):
     - **gỡ cách ly**, đưa lại tồn khả dụng (cất về bin qua [05](../../warehouse/05-putaway/README.md)) — hàng này là SKU riêng, chỉ dùng cho đơn sau của chính khách;
@@ -451,7 +451,7 @@ stateDiagram-v2
     DeliveryFailed --> PartiallyFulfilled
     DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
     PartiallyFulfilled --> Returned
-    Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu, đủ hoá đơn
+    Delivered --> Completed: Tự động hết hạn đổi trả, mọi đợt đã thu, đủ hoá đơn
     Delivered --> ReturnRequested
     ReturnRequested --> Delivered: Từ chối
     ReturnRequested --> Returned
@@ -595,7 +595,7 @@ Cờ **Trễ** (`DELIVERY_LATE` — §4.12) gắn thêm cho đợt chưa bàn gi
 - **BR-08:** Quản lý kho quyết định dùng **khu chờ xuất** cho đơn; tồn tại `STAGING` đã gắn đơn, không khả dụng cho đơn khác. Lấy về `STAGING` chưa trừ tồn (phân bổ vẫn `Held`); chỉ khi **chuyển cả tác vụ sang khu xuất hàng** mới trừ tồn (`Consumed`). Đơn `Awaiting Stock` chỉ tạo tác vụ lấy hàng đích `STAGING`, hoặc khi được giao một phần.
 - **BR-09:** Huỷ đơn sau khi đã có tác vụ kho phải **đảo ngược có kiểm soát** (put-back nguyên thùng kể cả ở `STAGING`, huỷ nhãn giao hàng, huỷ Đơn sản xuất chưa in hàng loạt, nhả giữ hàng), không để tồn / tiền "treo".
 - **BR-10:** Mọi thay đổi đơn ảnh hưởng tiền phải sinh dòng tương ứng ở [Payment](../15-payment/README.md); tổng thu − tổng hoàn = giá trị thực nhận của đơn.
-- **BR-11:** **Không tính phí huỷ khi đơn vị sản xuất chưa in hàng loạt** (chưa có Đơn sản xuất nào của đơn tới `In Production`): hoàn toàn bộ. Sau đó chỉ **nhân viên** huỷ được, có thể tính phí theo % tiền đã thu, hoặc số tiền thoả thuận ≤ tổng đơn kèm lý do và chi tiết.
+- **BR-11:** **Không tính phí huỷ khi đơn vị sản xuất chưa in hàng loạt** (chưa có Đơn sản xuất nào của đơn tới `In Production`): hoàn toàn bộ. Sau đó chỉ **nhân viên** huỷ được, có thể tính phí theo % tiền đã thu, hoặc số tiền thoả thuận ≤ tổng đơn kèm lý do và chi tiết. Tiền khách trả trước khi nhận hàng (kể cả đợt `ON_SIGNING`) là **khoản thanh toán trước**, không phải tiền đặt cọc; quy tắc này được in thành điều khoản huỷ trong hợp đồng — sau mốc in hàng loạt là thoả thuận chấm dứt khi bên bán đồng ý, không phải chế tài phạt ([14](../14-cart-and-order/README.md) §4.3 bước 13; *✅ Đã chốt 2026-11-25*).
 - **BR-12:** **Mốc huỷ là thùng đầu tiên dán nhãn giao hàng.** Khách gửi yêu cầu huỷ tới trước mốc này; từ khi một thùng của đơn đã được kiểm & dán nhãn giao hàng (hoặc đã bàn giao) thì không huỷ, chỉ trả hàng — khớp [08](../../warehouse/08-packing/README.md) BR-04, không có ngoại lệ.
 - **BR-13:** Huỷ luôn có **mã lý do**. Khách chỉ dùng `CUSTOMER_REQUEST` / `DUPLICATE_ORDER` / `OTHER`. `OTHER` bắt buộc ghi chú.
 - **BR-14:** Mỗi đơn chỉ có **một yêu cầu huỷ đang chờ**. Yêu cầu không còn quyết được thì tự `Expired`, không treo vô thời hạn.
@@ -604,7 +604,7 @@ Cờ **Trễ** (`DELIVERY_LATE` — §4.12) gắn thêm cho đợt chưa bàn gi
 - **BR-17:** Treo tay bắt buộc mã lý do (`OTHER` kèm ghi chú). Gỡ treo bắt buộc ghi chú. Treo vì tín dụng chỉ gỡ qua kế toán. Treo vì thanh toán chỉ gỡ khi tiền đã đủ lại.
 - **BR-18:** Hàng trả và hàng hãng hoàn về (RTO) **luôn** nhập lại kho xuất qua [Receipt](../../warehouse/03-receipt/README.md) bằng **phiếu nhập loại Hàng hoàn** (tham chiếu shipment / yêu cầu trả; chỉ nhận thùng thuộc đơn) vào khu `QUARANTINE` trước khi xử lý / hoàn tiền; Quản lý kho quyết định gỡ cách ly hoặc ghi giảm có duyệt ([20](../../warehouse/20-inventory-control/README.md)). Sản phẩm in theo thiết kế chỉ đổi / trả khi lỗi sản xuất.
 - **BR-19:** Đơn `Completed` / `Closed` là bất biến về nội dung; khiếu nại sau đó xử lý bằng chứng từ mới.
-- **BR-20:** Tự hoàn tất sau **7 ngày** kể từ giao, khi mọi đợt đã thu đủ và không có yêu cầu trả; tự đóng sau **30 ngày**. Chạy mỗi đêm.
+- **BR-20:** Tự hoàn tất khi hết **thời hạn khiếu nại / đổi trả** kể từ giao, khi mọi đợt đã thu đủ và không có yêu cầu trả. Thời hạn ghi trên **từng hợp đồng**, mặc định theo cấu hình (**7 ngày**), không để trống; PDF hợp đồng in đúng số ngày này, đổi trả và tự hoàn tất dùng cùng số đó ([14](../14-cart-and-order/README.md) §4.3 bước 13; *✅ Đã chốt 2026-11-25*); tự đóng sau **30 ngày**. Chạy mỗi đêm.
 - **BR-21:** **Chỉ xuất nguyên thùng, tính theo số thùng.** Giữ hàng, phân bổ, lấy hàng, put-back đều theo thùng (LPN); không mở thùng, không lấy lẻ. Mọi thùng đúng số cái chuẩn của SKU, nên phân bổ cho dòng đơn N thùng = **chọn đủ N thùng** của SKU tại kho xuất (ưu tiên **FIFO** theo ngày nhập); thiếu thùng thì phần thiếu đi Đơn sản xuất (§4.2).
 - **BR-22:** **Mỗi đơn bán có đúng một kho xuất**, Sale chọn khi `Confirmed`; hệ thống gợi ý, **ưu tiên kho đang có đủ hàng** của các SKU trong đơn, rồi tới kho còn chỗ cho phần phải sản xuất *(✅ Đã chốt 2026-11-05)*. Chỉ giữ hàng có sẵn **tại kho xuất**; hàng dư của khách ở kho khác không dùng cho đơn đó. **Mọi Đơn sản xuất của đơn có kho nhận = kho xuất**; đơn vị sản xuất phải giao đúng kho nhận. **Không bao giờ tách giao từ hai kho**; đơn vẫn giao nhiều đợt (giao một phần) từ cùng kho xuất. Kho xuất chỉ đổi được khi đơn chưa có hàng giữ và chưa có Đơn sản xuất từ `Sent` trở đi (✅ đã chốt 2026-11-05, §4.2).
 - **BR-23:** **Điều phối sản xuất gửi Đơn sản xuất, không có bước duyệt** *(✅ Chốt lại 2026-11-20 — thay "chỉ gửi sau khi được duyệt; người duyệt ≠ người lập; quyền Duyệt Đơn sản xuất mặc định gán Sales Manager; trả lại bắt buộc lý do")*. Điều phối sản xuất gửi Đơn sản xuất `Draft` thẳng cho đơn vị sản xuất → `Sent`, kể cả đơn mình lập. Khi gửi, hệ thống làm đủ những gì bước duyệt cũ làm: kiểm lại file in PDF/X (không khớp → chặn), xuất phiếu và gửi qua kênh kết nối, cảnh báo sức chứa (BR-25), đơn bán → `Awaiting Stock`, báo Quản lý kho của kho nhận; và **báo Sales Manager** mỗi lần gửi. Đơn vị sản xuất ở ngoài hệ thống, không duyệt / nhận / từ chối gì trong hệ thống: Điều phối sản xuất thoả thuận trước rồi gửi, ghi nhận nhận đơn bằng tay (§4.3 bước 8). Đơn vị sản xuất rút lui sau khi đã gửi → **huỷ** kèm lý do và lập Đơn sản xuất mới; không quay về `Draft` (phiếu đã gửi là duy nhất, mã Đơn sản xuất là mã lô in trên QR — một lô không thể mang hai đơn vị sản xuất).
