@@ -24,7 +24,7 @@ Tất cả sơ đồ vẽ bằng **Mermaid**. Trên GitHub/GitLab và hầu hế
 >
 > **✅ Đã chốt 2026-11-06 (đặt xe qua API hãng):** thêm kiểu kết nối **tích hợp API đặt xe** cho đơn vị vận chuyển xe tải / van nội thành. Ghi nhận đặt xe → **hệ thống tạo đơn ở hãng**: mỗi chuyến một đơn, điểm 0 là kho xuất, **mỗi shipment một điểm giao**; mã đơn ở hãng là mã vận đơn của chuyến; kết quả giao về **theo từng điểm giao** qua webhook (xác thực bằng header). Hãng khác giữ cách cũ ([09](../warehouse/09-shipping/README.md) §4.1, §4.2 bước 6, §4.5, BR-29; §2.2).
 >
-> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** ([21](../ecommerce/21-e-invoice/README.md)): mỗi **shipment `Delivered`** sinh một hoá đơn nháp, **Kế toán bấm phát hành**, hệ thống **hỏi lại kết quả** (nhà cung cấp không có webhook); hoá đơn đã phát hành chỉ thay đổi bằng **điều chỉnh / thay thế**. Hoá đơn **không theo đợt thanh toán** (§3.1, §3.5).
+> **✅ Đã chốt 2026-11-06 (hoá đơn điện tử):** hệ thống **tự phát hành hoá đơn VAT điện tử** qua **API của nhà cung cấp hoá đơn điện tử** ([21](../ecommerce/21-e-invoice/README.md)): mỗi **shipment `Delivered`** sinh một hoá đơn nháp, **hoá đơn gốc tự phát hành ngay trong ngày giao** (Kế toán phát hành nháp bị giữ lại — *✅ chốt 2026-11-24, Q-1, Q-22*), hệ thống **hỏi lại kết quả** (nhà cung cấp không có webhook) và **tự gửi e-mail hoá đơn** cho khách (Q-14); hoá đơn đã phát hành chỉ thay đổi bằng **điều chỉnh / thay thế**. Hoá đơn **không theo đợt thanh toán** (§3.1, §3.5).
 
 Mục lục:
 
@@ -195,20 +195,25 @@ Chi tiết: [03 · Nhập kho §4.2](../warehouse/03-receipt/README.md), [09 · 
 
 ```mermaid
 flowchart TD
-    RTO(["Shipment Delivery Failed, hãng hoàn kiện về kho xuất<br/>shipment Returned: webhook của hãng hoặc Quản lý kho ghi tay — 09"]) --> RT_CREATE
-    RMA(["Khách trả hàng, Sale duyệt yêu cầu trả<br/>phát hành RMA, khách gửi hàng về kho xuất — 17"]) --> RT_CREATE
-    RT_CREATE["NV kho tạo phiếu nhập Hàng hoàn — Draft<br/>tham chiếu một shipment hoàn về hoặc một RMA<br/>chọn khu QUARANTINE của kho"] --> RT_SCAN["Quét LPN từng thùng hoàn về<br/>giữ nguyên mã LPN, SKU, lô, số cái chuẩn / thùng<br/>ghi chú tình trạng bên ngoài nếu có"]
-    RT_SCAN --> RT_BELONG{"Thùng thuộc shipment / đơn<br/>được tham chiếu?"}
-    RT_BELONG -->|Không| RT_REJ["Từ chối thùng đó"]
+    RTO(["Shipment Delivery Failed, hãng hoàn kiện về kho xuất<br/>shipment Returned: webhook của hãng hoặc Quản lý kho ghi tay, cần quyền duyệt — 09<br/>đơn đổi trạng thái ngay, chưa tính tiền"]) --> RT_CREATE
+    RMA(["Khách trả hàng cho một chuyến đã giao, Sale duyệt yêu cầu trả<br/>phát hành RMA, khách gửi hàng về kho xuất — 17"]) --> RT_CREATE
+    RT_CREATE["NV kho tạo phiếu nhập Hàng hoàn — Draft<br/>tham chiếu một shipment hoàn về hoặc một RMA<br/>mỗi kiện về một phiếu, một chuyến có thể nhiều phiếu<br/>kiện tới muộn / sau hạn gửi vẫn lập được, tới khi tiền hoàn được duyệt<br/>chọn khu QUARANTINE của kho"] --> RT_SCAN["Quét LPN từng thùng hoàn về<br/>giữ nguyên mã LPN, SKU, lô, số cái chuẩn / thùng<br/>ghi chú tình trạng bên ngoài nếu có"]
+    RT_SCAN --> RT_BELONG{"Thùng thuộc shipment / đơn<br/>được tham chiếu?<br/>RMA: đúng SKU được duyệt, trong số duyệt?"}
+    RT_BELONG -->|"Không — shipment hoàn về"| RT_REJ["Từ chối thùng đó"]
     RT_REJ --> RT_SCAN
-    RT_BELONG -->|"Có — quét xong"| RT_CONFIRM["Xác nhận phiếu hàng hoàn — Closed, không mở nhiệm vụ cất<br/>thùng Consumed → In Stock tại khu QUARANTINE<br/>tồn Quarantine, không thuộc ATP<br/>báo 17 hàng đã về — căn cứ đơn Returned và hoàn tiền 15"]
+    RT_BELONG -->|"Không — RMA: vượt số duyệt / sai loại"| RT_CUSTODY(["Hàng giữ hộ của khách: không nhập tồn, không bán lại<br/>Sale ghi lựa chọn của khách: gửi trả / huỷ hộ có biên bản / yêu cầu trả bổ sung<br/>Quản lý kho thực hiện từng thùng — 17 §4.10"])
+    RT_BELONG -->|"Có — thùng đã mở / hàng lẻ"| RT_OPEN["Không nhập tồn: ghi số đếm thật, hàng huỷ<br/>hàng lẻ bắt buộc ảnh<br/>Quản lý kho xác nhận, khác người đếm"]
+    RT_OPEN --> RT_CONFIRM
+    RT_BELONG -->|"Có — thùng nguyên, quét xong"| RT_CONFIRM["Xác nhận phiếu hàng hoàn — Closed, không mở nhiệm vụ cất<br/>thùng nguyên: Consumed → In Stock tại khu QUARANTINE<br/>tồn Quarantine, không thuộc ATP<br/>báo 17 hàng đã về — lúc này mới tính số lượng và tiền:<br/>shipment hoàn về: trừ đợt của chuyến, rồi nợ cũ, thừa thì hoàn — 15<br/>RMA: Sale đề xuất hoàn ≤ min số đếm, số duyệt, Kế toán duyệt"]
     RT_CONFIRM --> RT_DECIDE{"Quản lý kho quyết định<br/>từng thùng"}
     RT_DECIDE -->|"Dùng được — gỡ cách ly"| RT_PA["Mở nhiệm vụ cất — 05<br/>tồn vẫn Quarantine tới khi cất xong"]
     RT_PA --> RT_AVAIL(["Cất lên bin → tồn Available<br/>dùng cho đơn sau của chính khách sở hữu SKU, FIFO"])
     RT_DECIDE -->|"Không dùng được"| RT_WO(["Ghi giảm cả thùng bằng điều chỉnh tồn có duyệt — 20<br/>lỗi sản xuất đổi trả với đơn vị sản xuất ngoài hệ thống"])
 ```
 
-> ✅ Đã chốt 2026-11-05: phiếu hàng hoàn lập tại **kho xuất của đơn**, đóng ngay khi xác nhận; thùng hoàn về thiếu so với shipment / RMA thì xác nhận các thùng thực có, phần thiếu xử lý ngoài hệ thống; thùng đã bị mở vẫn nhận vào cách ly; thùng giữ mã LPN gốc, ngày nhập dùng cho FIFO là ngày nhập lại; gỡ cách ly mở nhiệm vụ cất, tồn vẫn `Quarantine` tới khi cất xong. Xem [open-questions](../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: phiếu hàng hoàn lập tại **kho xuất của đơn**, đóng ngay khi xác nhận; thùng hoàn về thiếu so với shipment / RMA thì xác nhận các thùng thực có, phần thiếu xử lý ngoài hệ thống; thùng giữ mã LPN gốc, ngày nhập dùng cho FIFO là ngày nhập lại; gỡ cách ly mở nhiệm vụ cất, tồn vẫn `Quarantine` tới khi cất xong. Xem [open-questions](../open-questions/README.md).
+>
+> ✅ Chốt 2026-11-24 (Q-7, Q-11, Q-18 — thay "thùng đã bị mở vẫn nhận vào cách ly"): **thùng đã mở / hàng lẻ không nhập tồn** — phiếu ghi số đếm thật, hàng lẻ bắt buộc ảnh, chỉ Quản lý kho khác người đếm xác nhận; tiền hoàn ≤ min(số đếm, số duyệt). Một chuyến / RMA có thể **nhiều phiếu**; hàng vượt số duyệt / sai loại của RMA là **hàng giữ hộ**. Số lượng và tiền của shipment hãng chở về chỉ tính khi phiếu được **xác nhận**, một lần cho mỗi shipment ([17](../ecommerce/17-order-management/README.md) BR-18, BR-32).
 
 ---
 
@@ -289,11 +294,12 @@ flowchart TD
     MANUAL --> RESULT
     RESULT -->|"Thành công, POD nếu có"| DELIVERED["Đơn: Delivered<br/>đợt AFTER_DELIVERY đến hạn — công nợ phải thu"]
     RESULT -->|"Thất bại, có lý do"| FAILED["Đơn: Delivery Failed"]
-    FAILED -->|"Hãng giao lại thành công"| DELIVERED
+    FAILED -->|"Hãng tự giao lại thành công, cùng chuyến"| DELIVERED
     DELIVERED -.->|"Hãng báo sai: Quản lý kho sửa tay, có lý do"| FAILED
-    FAILED -->|"Hàng hoàn về kho xuất"| RTO(["Đơn: Returned — nhập lại qua phiếu Hàng hoàn vào QUARANTINE, §1.3<br/>xử lý hoàn tiền"])
-    DELIVERED --> AUTO["Mỗi đêm: sau 7 ngày, mọi đợt Paid,<br/>không có yêu cầu trả hàng, mọi lần giao có hoá đơn phát hành — Đơn: Completed"]
-    AUTO --> CLOSED(["Sau 30 ngày: Closed"])
+    FAILED -->|"Hàng hoàn về kho xuất"| RTO(["Shipment Returned — đơn đổi ngay: Returned, hoặc Partially Fulfilled nếu chuyến khác đã giao<br/>nhập lại qua phiếu Hàng hoàn vào QUARANTINE, §1.3<br/>xác nhận phiếu mới tính số lượng và tiền, thừa thì hoàn<br/>không có Giao lại: khách vẫn muốn nhận thì Sale tạo đơn mới"])
+    FAILED -->|"Thất lạc — LOST"| LOST(["Sale Đóng phần thất lạc: quyền duyệt, tệp xác nhận của hãng<br/>tiền tính lúc duyệt; gửi hàng mới là đơn mới, giá cũ, không phí vận chuyển"])
+    DELIVERED --> AUTO["Mỗi đêm: hết hạn đổi trả theo số ngày của hợp đồng, mọi đợt Paid,<br/>không có yêu cầu trả hàng, mọi lần giao có hoá đơn phát hành,<br/>không bị Sale giữ hoàn tất — Đơn: Completed"]
+    AUTO --> CLOSED(["Sau 30 ngày, hết nợ và tiền phải hoàn: Closed"])
 ```
 
 ### 2.2. Sequence diagram (trình tự tác nhân)
@@ -397,7 +403,7 @@ sequenceDiagram
         OM->>PAY: Đợt AFTER_DELIVERY đến hạn (công nợ phải thu)
         CUST->>ACC: Chuyển khoản theo kỳ hạn
         ACC->>PAY: Ghi nhận theo sao kê → đợt Paid
-        OM->>OM: Sau 7 ngày, mọi đợt Paid, mọi lần giao có hoá đơn phát hành → Completed, sau 30 ngày → Closed
+        OM->>OM: Hết hạn đổi trả (số ngày hợp đồng), mọi đợt Paid, mọi lần giao có hoá đơn phát hành, không giữ hoàn tất → Completed, sau 30 ngày → Closed
     else Giao thất bại
         alt Hãng có webhook
             CARRIER-->>SHIP: Sự kiện giao thất bại (lý do ánh xạ sang mã nội bộ) — hãng tích hợp API: điểm giao thất bại
@@ -406,8 +412,16 @@ sequenceDiagram
             WM->>SHIP: Ghi tay giao thất bại kèm lý do
         end
         SHIP->>OM: Delivery Failed (kèm lý do)
-        CARRIER->>DISP: Hoàn hàng về kho xuất (RTO)
-        SHIP->>OM: Returned (sự kiện hoàn hàng của hãng hoặc Quản lý kho ghi) — nhập lại qua phiếu Hàng hoàn vào QUARANTINE (§1.3), xử lý hoàn tiền (15)
+        alt Hãng chở hàng về (RTO)
+            CARRIER->>DISP: Hoàn hàng về kho xuất
+            SHIP->>OM: Returned (sự kiện hoàn hàng của hãng, hoặc Quản lý kho ghi tay có quyền duyệt) — đơn đổi trạng thái ngay, chưa tính tiền
+            WM->>OM: Xác nhận phiếu nhập Hàng hoàn vào QUARANTINE (§1.3)
+            OM->>PAY: Đóng số lượng của chuyến, tính tiền: trừ đợt của chuyến, rồi nợ cũ, thừa thì hoàn
+        else Kiện thất lạc (LOST)
+            SALE->>OM: Đóng phần thất lạc, kèm tệp xác nhận của hãng (quyền duyệt)
+            OM->>PAY: Tính tiền ngay lúc duyệt, như chuyến hãng chở về
+        end
+        SALE-->>CUST: Khách vẫn muốn nhận hàng → tạo đơn mới (không có Giao lại)
     end
 ```
 
@@ -551,7 +565,7 @@ flowchart TD
     ONSIGN -->|Rồi| CONFIRMED(["Đơn: Confirmed → Sale chọn kho xuất, kiểm tồn và Fulfillment — §2"])
     CONFIRMED -.-> SCHED["Giao theo lịch giao — §2, 17 §4.5<br/>xuất kho theo đợt, không bàn giao trước ngày bắt đầu cửa sổ giao<br/>dời cửa sổ giao: mã lý do và bằng chứng khách đồng ý"]
     CONFIRMED -.-> AFTER["Đợt BEFORE_DELIVERY chặn bàn giao tới khi Paid — gắn đợt giao thì chỉ chặn đợt đó<br/>sau giao: đợt AFTER_DELIVERY là công nợ phải thu<br/>phí khuôn / bản in nằm trong các đợt như hàng hoá<br/>mọi đợt Paid và đơn hoàn tất → hợp đồng Completed"]
-    CONFIRMED -.-> EINV["Song song: mỗi lần giao thành công — shipment Delivered<br/>hoá đơn nháp → Kế toán phát hành qua nhà cung cấp hoá đơn điện tử (21)<br/>hoá đơn theo lần giao, không theo đợt thanh toán — §3.5"]
+    CONFIRMED -.-> EINV["Song song: mỗi lần giao thành công — shipment Delivered<br/>hoá đơn nháp → tự phát hành trong ngày giao qua nhà cung cấp hoá đơn điện tử (21)<br/>hoá đơn theo lần giao, không theo đợt thanh toán — §3.5"]
 ```
 
 > ✅ Đã chốt 2026-11-05: báo giá không bắt buộc SKU đã có giá nội bộ — chưa có thì Sale nhập giá trực tiếp; số lần in mẫu miễn phí mặc định 2. ⚠️ Giả định: một dòng phí khuôn / bản in cho mỗi SKU mẫu mới, chi tiết khuôn / bản in theo kỹ thuật in là phạm vi sau (B28). Xem [open-questions](../open-questions/README.md).
@@ -624,21 +638,27 @@ stateDiagram-v2
     Shipped --> DeliveryFailed
     PartiallyFulfilled --> Delivered
     PartiallyFulfilled --> DeliveryFailed
-    DeliveryFailed --> Delivered: Giao lại thành công / sửa tay
+    DeliveryFailed --> Delivered: Hãng giao lại thành công cùng chuyến / sửa tay
     Delivered --> DeliveryFailed: Quản lý kho sửa tay (hãng báo sai, có lý do)
-    DeliveryFailed --> PartiallyFulfilled
-    DeliveryFailed --> Returned: Hàng hoàn nhập lại qua 03
+    DeliveryFailed --> PartiallyFulfilled: Hãng chở về / đóng phần thất lạc, chuyến khác đã giao
+    DeliveryFailed --> Returned: Hãng chở về / đóng phần thất lạc, không chuyến nào giao được
     PartiallyFulfilled --> Returned
-    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền shipment hoàn về, các shipment khác đã giao
-    Delivered --> Completed: Tự động sau 7 ngày, mọi đợt đã thu
-    Delivered --> ReturnRequested
-    ReturnRequested --> Delivered: Từ chối
-    ReturnRequested --> Returned
+    PartiallyFulfilled --> PartiallyRefunded: Hoàn tiền chuyến hãng chở về / thất lạc, chuyến khác đã giao
+    PartiallyFulfilled --> Closed: Không có tiền phải hoàn, đóng thẳng
+    Delivered --> Completed: Tự động hết hạn đổi trả, đủ tiền, đủ hoá đơn, không giữ hoàn tất
+    Delivered --> ReturnRequested: Yêu cầu trả một chuyến
+    Completed --> ReturnRequested: Sale nhận yêu cầu ngoài hạn
+    Refunded --> ReturnRequested: Trả chuyến khác
+    PartiallyRefunded --> ReturnRequested: Trả chuyến khác
+    ReturnRequested --> Delivered: Từ chối / rút / hết hạn (về trạng thái trước)
+    ReturnRequested --> Returned: Hàng trả đã về kho
     Returned --> Refunded
     Returned --> PartiallyRefunded
-    Completed --> Closed: Sau 30 ngày
-    Refunded --> Closed: Sau 30 ngày
-    PartiallyRefunded --> Closed: Sau 30 ngày
+    Returned --> Delivered: Yêu cầu trả kết thúc không hoàn tiền
+    Returned --> Closed: Hãng chở về / thất lạc, không có tiền phải hoàn
+    Completed --> Closed: Sau 30 ngày, hết nợ và tiền phải hoàn
+    Refunded --> Closed: Mọi chuyến hết hạn đổi trả, sau 30 ngày, đủ điều kiện
+    PartiallyRefunded --> Closed: Mọi chuyến hết hạn đổi trả, sau 30 ngày, đủ điều kiện
     Draft --> Cancelled
     PendingContract --> Cancelled
     PendingPayment --> Cancelled
@@ -651,7 +671,7 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-> **Sale** treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9); treo do tín dụng do Kế toán duyệt. Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`. `Returned` = hàng đã về kho qua phiếu nhập Hàng hoàn, nằm ở khu `QUARANTINE` (§1.3). `Shipped` / `Delivered` / `Delivery Failed` / `Returned` cập nhật từ **webhook của hãng** hoặc do **Quản lý kho ghi tay** ([09](../warehouse/09-shipping/README.md) §4.3, §4.5). `Delivered` → `Delivery Failed` chỉ khi Quản lý kho **sửa tay** kèm lý do vì hãng báo sai, đơn chưa hoàn tất.
+> **Sale** treo tay (`On Hold`) được từ `Confirmed`, `Awaiting Stock`, `Ready to Fulfill`, `Picking`, `Partially Fulfilled`, `Packed`; gỡ treo quay về đúng trạng thái trước đó ([17](../ecommerce/17-order-management/README.md) §4.9); treo do tín dụng do Kế toán duyệt. Sơ đồ chỉ vẽ nhánh treo tín dụng để dễ đọc. `Packed` = **đã kiểm đủ thùng & dán nhãn giao hàng** ([08](../warehouse/08-packing/README.md)). Mốc hết huỷ là khi **thùng đầu tiên của đơn được dán nhãn giao hàng** (08 BR-04): từ đó đơn không huỷ được, không đổi địa chỉ giao — kể cả khi đơn còn `Picking`. `Returned` = hàng của yêu cầu trả đã về kho qua phiếu nhập Hàng hoàn, nằm ở khu `QUARANTINE` (§1.3); hoặc không chuyến nào giao được — mọi chuyến hãng báo chở về (đơn đổi ngay, số lượng và tiền tính khi kho xác nhận phiếu nhập) hoặc Sale đã đóng phần thất lạc *(✅ Chốt 2026-11-24, Q-7, Q-12)*. Không có "Giao lại" trên đơn: gửi lại là đơn mới. `Return Requested` quay về đúng trạng thái trước khi có yêu cầu (`Delivered` / `Completed` / `Refunded` / `Partially Refunded`) — sơ đồ chỉ vẽ nhánh `Delivered`. **Giữ hoàn tất** (Sale, Q-17) không phải trạng thái: nó chặn chuyển sang `Completed`, `Closed`, `Refunded`, `Partially Refunded` tới khi gỡ giữ. Nhánh hoàn tiền chỉ đóng khi mọi chuyến đã giao hết hạn đổi trả (Q-16) ([17](../ecommerce/17-order-management/README.md) §4.6, BR-32–BR-36). `Shipped` / `Delivered` / `Delivery Failed` / `Returned` cập nhật từ **webhook của hãng** hoặc do **Quản lý kho ghi tay** ([09](../warehouse/09-shipping/README.md) §4.3, §4.5). `Delivered` → `Delivery Failed` chỉ khi Quản lý kho **sửa tay** kèm lý do vì hãng báo sai, đơn chưa hoàn tất.
 
 > ⚠️ Giả định: sửa tay `Delivered` ↔ `Delivery Failed` khi đơn chưa hoàn tất; đợt `AFTER_DELIVERY` tính lại theo kết quả mới ([17](../ecommerce/17-order-management/README.md) §5.1). Xem [open-questions E17](../open-questions/README.md).
 
@@ -663,7 +683,7 @@ Chi tiết: [14 · §5.2 Hợp đồng mua bán](../ecommerce/14-cart-and-order/
 |---------------------|------------------|-------------------|
 | `ON_SIGNING` | Hợp đồng `Signed` | Chưa thu đủ → đơn `Pending Payment` |
 | `BEFORE_DELIVERY` | Đơn `Ready to Fulfill` | Chưa `Paid` → chặn bàn giao vận chuyển ([09](../warehouse/09-shipping/README.md) BR-04) |
-| `AFTER_DELIVERY` | Đơn `Delivered` (+ N ngày là hạn trả) | Công nợ phải thu có kỳ hạn |
+| `AFTER_DELIVERY` | Đơn đã giao đủ — ngày muộn nhất giữa lần giao thành công cuối, ngày hàng hoàn về và ngày đóng phần còn lại (+ N ngày là hạn trả) *(Q-3)* | Công nợ phải thu có kỳ hạn |
 
 **Hợp đồng mua bán (Sales Contract):**
 
@@ -672,10 +692,12 @@ stateDiagram-v2
     [*] --> Draft: Sale lập cho đơn Draft
     Draft --> Sent: Gửi khách (đơn → Pending Contract)
     Sent --> Signed: Tải file hợp đồng đã ký
-    Signed --> Completed: Đơn hoàn tất, mọi đợt đã thu
+    Signed --> Completed: Đơn kết thúc, đã giao được hàng, xong tiền
+    Signed --> Liquidated: Không giao được gì / huỷ sau ký, xong tiền
     Draft --> Cancelled
     Sent --> Cancelled: Khách từ chối / cần sửa / huỷ đơn
     Completed --> [*]
+    Liquidated --> [*]
     Cancelled --> [*]
 ```
 
@@ -728,7 +750,7 @@ flowchart TD
 
 ### 3.5. Hoá đơn điện tử (E-invoice — tích hợp nhà cung cấp hoá đơn điện tử)
 
-Chi tiết: [21 · Hoá đơn điện tử](../ecommerce/21-e-invoice/README.md). *(✅ Đã chốt 2026-11-06)* Mỗi **shipment `Delivered`** ([09](../warehouse/09-shipping/README.md)) có đúng **một hoá đơn gốc**; hoá đơn gom theo **lần giao**, không theo đợt thanh toán, và **không ảnh hưởng** đợt thanh toán / công nợ ([15](../ecommerce/15-payment/README.md)). **Kế toán bấm phát hành**; nhà cung cấp xử lý **bất đồng bộ** và không có webhook, nên hệ thống hỏi lại kết quả theo mã theo dõi.
+Chi tiết: [21 · Hoá đơn điện tử](../ecommerce/21-e-invoice/README.md). *(✅ Đã chốt 2026-11-06)* Mỗi **shipment `Delivered`** ([09](../warehouse/09-shipping/README.md)) có đúng **một hoá đơn gốc**; hoá đơn gom theo **lần giao**, không theo đợt thanh toán, và **không ảnh hưởng** đợt thanh toán / công nợ ([15](../ecommerce/15-payment/README.md)). **Hoá đơn gốc tự phát hành ngay trong ngày giao** khi công tắc tự phát hành bật (mặc định bật cho SePay); nháp có cảnh báo bị giữ lại cho Kế toán phát hành tay; **ngày hoá đơn = ngày phát hành**, phát hành sau ngày giao gắn nhãn "Lập trễ N ngày" *(✅ Chốt 2026-11-24, Q-1, Q-10, Q-22)*. Nhà cung cấp xử lý **bất đồng bộ** và không có webhook, nên hệ thống hỏi lại kết quả theo mã giao dịch; **hệ thống tự gửi e-mail hoá đơn** kèm PDF / XML (Q-14).
 
 **Trình tự phát hành:**
 
@@ -741,27 +763,32 @@ sequenceDiagram
     participant EINVP as Nhà cung cấp hoá đơn điện tử (ngoài hệ thống)
     actor CUS as Khách sỉ
 
-    SHIP->>SYS: Shipment Delivered (thời điểm hãng báo giao thành công = ngày lập)
-    SYS->>SYS: Tạo hoá đơn nháp — dòng hàng theo thùng đã giao,<br/>thuế suất đã chốt, bên mua từ hồ sơ khách (18)
-    SYS-->>ACC: Thông báo hoá đơn nháp chờ phát hành
-    ACC->>SYS: Phát hành
-    SYS->>SYS: Kiểm mã số thuế, email nhận hoá đơn, lượt phát hành
-    SYS->>EINVP: Tạo và phát hành (mã tham chiếu = mã hoá đơn nội bộ)
-    EINVP-->>SYS: mã theo dõi — hoá đơn Submitting
+    SHIP->>SYS: Shipment Delivered (thời điểm hãng báo giao thành công = ngày giao, hạn phát hành = hết ngày giao)
+    SYS->>SYS: Tạo hoá đơn nháp — dòng hàng theo thùng đã giao,<br/>thuế suất tại ngày giao, bên mua từ hồ sơ khách (18)
+    alt Tự phát hành bật, nháp không có cảnh báo cần người xem
+        SYS->>SYS: Máy tự phát hành (thiếu e-mail không giữ lại)
+    else Nháp bị giữ (cảnh báo thuế, thiếu mã số thuế / tên / địa chỉ, hết lượt…)
+        SYS-->>ACC: Báo nháp bị giữ kèm lý do, sắp hết hạn / quá hạn thì nhắc
+        ACC->>SYS: Phát hành (sau ngày giao: nhập lý do lập trễ)
+    end
+    SYS->>SYS: Kiểm tên, mã số thuế, địa chỉ bên mua, lượt phát hành (hết lượt: chặn trước khi gửi) — hoá đơn Submitting
+    SYS->>EINVP: Tạo và phát hành (mã tham chiếu = mã hoá đơn nội bộ, không kèm e-mail bên mua)
+    EINVP-->>SYS: mã giao dịch (lỗi mạng: vẫn Submitting, hỏi lại)
     EINVP->>EINVP: Ký số, nộp cơ quan thuế
     loop Hỏi lại tới khi có kết quả
-        SYS->>EINVP: Kiểm tra theo mã theo dõi
-        EINVP-->>SYS: Đang xử lý / Thành công / Thất bại
+        SYS->>EINVP: Kiểm tra theo mã giao dịch
+        EINVP-->>SYS: Đang xử lý, đã phát hành chưa có số (chờ, không rút) / Thành công / Thất bại
     end
     alt Success
         SYS->>EINVP: Tải XML, PDF
-        SYS->>SYS: Lưu số hoá đơn, ký hiệu — Issued
-        SYS-->>CUS: Thông báo hoá đơn đã phát hành, tải XML / PDF trên trang đơn
-        EINVP-->>CUS: Email hoá đơn (⚠️ giả định — G11)
+        SYS->>SYS: Lưu số hoá đơn, ký hiệu, ngày hoá đơn = ngày phát hành — Issued, kiểm chữ ký số
+        SYS-->>CUS: Thông báo, e-mail hoá đơn kèm PDF / XML (thiếu e-mail: báo Sale bổ sung rồi gửi lại), tải trên trang đơn
     else Bị từ chối
         SYS-->>ACC: Rejected kèm lý do — mở lại thành nháp, sửa rồi phát hành lại cùng mã
     else Nhà cung cấp không biết giao dịch
-        SYS-->>ACC: Vẫn Submitting, có cờ — không tự gửi lại; gửi như giao dịch mới khi nhà cung cấp xác nhận không giữ hoá đơn
+        SYS-->>ACC: Vẫn Submitting, có cờ — không tự gửi lại, gửi như giao dịch mới khi nhà cung cấp xác nhận không giữ hoá đơn
+    else Kẹt, không tự ra kết quả
+        ACC->>SYS: Rút khi đủ điều kiện (Q-5) hoặc ghi kết quả từ cổng nhà cung cấp (Q-8)
     end
 ```
 
@@ -770,11 +797,11 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Draft: Shipment Delivered / lập điều chỉnh, thay thế
-    Draft --> Submitting: Kế toán phát hành
+    Draft --> Submitting: Máy tự phát hành / Kế toán phát hành (lỗi mạng vẫn ở Submitting)
     state "Voided Draft" as VoidedDraft
     Draft --> VoidedDraft: Giao bị sửa thành thất bại / huỷ nháp
-    Submitting --> Issued: Phát hành thành công
-    Submitting --> Rejected: Nhà cung cấp / cơ quan thuế từ chối
+    Submitting --> Issued: Phát hành thành công / ghi kết quả từ cổng nhà cung cấp
+    Submitting --> Rejected: Nhà cung cấp, cơ quan thuế từ chối / Kế toán rút (Q-5)
     Rejected --> Draft: Mở lại, sửa nguyên nhân
     Issued --> Replaced: Hoá đơn thay thế được phát hành
     Issued --> [*]
@@ -782,7 +809,7 @@ stateDiagram-v2
     VoidedDraft --> [*]
 ```
 
-> Trả hàng được duyệt hoàn tiền ([17](../ecommerce/17-order-management/README.md) §4.10) → nháp **điều chỉnh giảm**; Quản lý kho sửa `Delivered` → `Delivery Failed` sau khi đã phát hành → nháp **điều chỉnh giảm toàn bộ** (⚠️ giả định — [open-questions G12, G13](../open-questions/README.md)). **Ngày lập hoá đơn = thời điểm hãng báo giao thành công** (✅ đã chốt 2026-11-06 — [G8](../open-questions/README.md)). Dòng phí nằm ở hoá đơn đầu tiên của đơn: ⚠️ giả định ([G9](../open-questions/README.md)).
+> Trả hàng được duyệt hoàn tiền ([17](../ecommerce/17-order-management/README.md) §4.10) → nháp **điều chỉnh giảm**; Quản lý kho sửa `Delivered` → `Delivery Failed` sau khi đã phát hành → hệ thống tự lập nháp **bản giảm toàn bộ**; không lập được thì báo Kế toán, hết vướng Kế toán chạy "Lập bản giảm do giao thất bại"; đơn vẫn đóng được, khối điều kiện của đơn nhắc hoá đơn chưa giảm (Q-16) ([open-questions G12, G13](../open-questions/README.md)). Hoá đơn thay thế không điều chỉnh: sai sót → thay thế tiếp, trả hàng / giao thất bại → làm trên cổng nhà cung cấp rồi ghi số + XML vào hệ thống (Q-8, Q-9). **Ngày giao = thời điểm hãng báo giao thành công** — quyết định hạn phát hành và thuế suất; **ngày hoá đơn = ngày phát hành** (✅ chốt 2026-11-24, Q-1 — [G8](../open-questions/README.md)). Phí khuôn ở hoá đơn đầu tiên của đơn, phí vận chuyển chia theo từng lần giao, phần còn lại lập trên hoá đơn phần phí còn lại (21 §4.1 — [G9](../open-questions/README.md)).
 
 ---
 
@@ -796,5 +823,5 @@ stateDiagram-v2
 - **Số thùng** *(Đã chốt 2026-11-05)*: "số lượng" của dòng báo giá, đơn, Đơn sản xuất, phiếu nhập trong các sơ đồ là **số thùng**; mọi thùng đúng số cái chuẩn của SKU (không có thùng lẻ), giá vẫn theo cái; phân bổ = chọn đủ N thùng theo **FIFO** (ngày nhập) ([01](../warehouse/01-product-creation/README.md) BR-11, [07](../warehouse/07-picking/README.md) BR-03).
 - **Một kho xuất** *(Đã chốt 2026-11-05)*: mọi bước giữ hàng, lấy hàng, kiểm thùng, giao hàng của một đơn diễn ra tại kho xuất của đơn; Đơn sản xuất giao về kho đó. Không có chuyển kho.
 - **Đơn vị vận chuyển** cũng nằm ngoài hệ thống, không thu tiền khi giao *(✅ cập nhật 2026-11-05)*: mọi đơn **giao nguyên chuyến**; hãng có **webhook** đẩy về **mã vận đơn**, biển số, tài xế, **mốc hành trình** và kết quả giao (ghép chuyến theo **mã chuyến nội bộ**); hãng không có webhook thì kho nhập mã vận đơn (file / tay) và **Quản lý kho** ghi tay kết quả giao. Hệ thống **không chủ động gọi API** hãng (phạm vi sau) ([09](../warehouse/09-shipping/README.md)), **trừ** hãng tích hợp API đặt xe: hệ thống tạo / huỷ đơn đặt xe, mỗi shipment một điểm giao, kết quả giao theo từng điểm *(✅ 2026-11-06)*.
-- **Nhà cung cấp hoá đơn điện tử** nằm ngoài hệ thống *(✅ Đã chốt 2026-11-06)*: ký số, nộp cơ quan thuế, cấp số hoá đơn; hệ thống gọi API của nhà cung cấp và tự hỏi lại kết quả ([21](../ecommerce/21-e-invoice/README.md), §3.5).
+- **Nhà cung cấp hoá đơn điện tử** nằm ngoài hệ thống *(✅ Đã chốt 2026-11-06)*: ký số, nộp cơ quan thuế, cấp số hoá đơn; hệ thống gọi API của nhà cung cấp, tự hỏi lại kết quả và tự gửi e-mail hoá đơn cho khách — nhà cung cấp không gửi (Q-14) ([21](../ecommerce/21-e-invoice/README.md), §3.5).
 - Mũi tên **nét đứt** là nhánh phụ / sự kiện chờ (ví dụ đơn vị sản xuất phản hồi, hàng nhập kho về sau).

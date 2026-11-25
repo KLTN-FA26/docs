@@ -152,7 +152,8 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 
 ### 4.6. Bảo trì sau khi duyệt
 
-1. **Thông tin chính** (tên, nhóm thuế, danh mục, thương hiệu) **chỉ sửa được khi `Draft`**. Mã sản phẩm không bao giờ sửa được.
+1. **Thông tin chính** (tên, danh mục, thương hiệu) **chỉ sửa được khi `Draft`**. Mã sản phẩm không bao giờ sửa được.
+   **Nhóm thuế** là ngoại lệ *(✅ Chốt 2026-11-24, D-8, Q-21)*: **Kế toán**, **Quản lý kinh doanh** hoặc **System Admin** đổi được ở **mọi trạng thái**, bắt buộc lý do, có ghi lịch sử; đã có nhóm thuế thì không xoá về trống. Nhóm mới chỉ áp cho **báo giá** và **nháp hoá đơn lập sau**; báo giá, hợp đồng, hoá đơn đã lập giữ thuế suất cũ. Sản phẩm chưa có nhóm thuế thì không gửi được báo giá, và nháp hoá đơn tính 10% kèm cảnh báo ([14](../../ecommerce/14-cart-and-order/README.md) BR-21, [21](../../ecommerce/21-e-invoice/README.md) BR-07).
 2. **Biến thể, ảnh, thuộc tính mô tả, đơn vị quy đổi** sửa được ở mọi trạng thái **trừ `Pending Approval` và `Discontinued`**. Trục biến thể chỉ đổi khi `Draft`.
 3. **Thêm quy cách** cho sản phẩm đã duyệt → quy cách mới ở `Draft`; người có quyền duyệt biến thể **kích hoạt** riêng (sản phẩm phải `Approved` / `Published`). Không cần duyệt lại sản phẩm.
 4. **Ảnh** — tải lên (Sale / Quản lý kinh doanh) → hệ thống **quét virus** (máy quét không chạy được thì coi như chưa sạch) → **người khác** đăng ảnh (sản phẩm `Approved` / `Published`). Ảnh đầu tiên là ảnh bìa; chọn ảnh bìa khác thì ảnh cũ thôi làm bìa.
@@ -332,7 +333,7 @@ stateDiagram-v2
 - **BR-10:** Đơn vị quy đổi đã có chứng từ dùng thì **không sửa được hệ số**. Với quy cách (khuôn), đổi quy cách thùng = khai báo đơn vị mới, ngưng đơn vị cũ. ✅ Đã chốt 2026-11-05: **số cái / thùng của SKU riêng bị khoá** khi SKU đã có tồn hoặc chứng từ (báo giá, đơn, Đơn sản xuất — dòng báo giá / đơn chốt số cái / thùng lúc lập, [14](../../ecommerce/14-cart-and-order/README.md) BR-08); quy cách thùng mới chỉ áp dụng cho SKU riêng sinh sau (bản sửa thiết kế được duyệt). Xem [open-questions](../../open-questions/README.md).
 - **BR-11:** **Đơn vị bán là thùng, giá theo cái** *(Đã chốt 2026-11-05)*. Mỗi SKU riêng có **số cái chuẩn / thùng cố định** (hệ số của đơn vị thùng trong quy cách thùng). Số lượng trên báo giá, đơn, hợp đồng và Đơn sản xuất là **số thùng** (số nguyên ≥ 1); số cái của dòng = số thùng × số cái / thùng, hiển thị kèm. Đơn giá ghi **theo cái**; thành tiền dòng = số thùng × số cái / thùng × đơn giá cái; MOQ và bậc giá tính theo số thùng ([13](../../ecommerce/13-catalog/README.md), [14](../../ecommerce/14-cart-and-order/README.md)). Phân bổ một dòng = chọn **đủ N thùng** của SKU theo FIFO — ngày nhập ([07](../07-picking/README.md), [20](../20-inventory-control/README.md)). Xem [open-questions A9, C32](../../open-questions/README.md).
 - **BR-12:** **Bốn mắt:** người duyệt sản phẩm ≠ người gửi duyệt; người đăng ảnh ≠ người tải ảnh.
-- **BR-13:** Gửi duyệt đòi danh mục, thương hiệu, tên tiếng Anh và nhóm thuế. Thông tin chính chỉ sửa khi `Draft`; sản phẩm `Pending Approval` không sửa được gì.
+- **BR-13:** Gửi duyệt đòi danh mục, thương hiệu, tên tiếng Anh và nhóm thuế. Thông tin chính chỉ sửa khi `Draft`; sản phẩm `Pending Approval` không sửa được gì — trừ **nhóm thuế**, đổi được ở mọi trạng thái theo §4.6 bước 1 *(✅ Chốt 2026-11-24, D-8)*.
 - **BR-14:** Tạm ngưng và ngừng kinh doanh chỉ do **System Admin**, lý do bắt buộc. Ngừng kinh doanh **cảnh báo** chứng từ đang mở nhưng **không chặn**.
 - **BR-15:** Mọi sửa đổi gửi kèm phiên bản (khoá lạc quan); mọi thay đổi ghi lịch sử không sửa, không xoá.
 - **BR-16:** Cảnh báo trùng sản phẩm chỉ **cảnh báo**, không chặn.
