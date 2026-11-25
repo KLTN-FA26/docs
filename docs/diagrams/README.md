@@ -524,10 +524,8 @@ flowchart TD
     PENDING -.->|"Đã gửi kèm yêu cầu báo giá:<br/>Sale nhận ngay, chỉ lập báo giá khi Approved"| RFQ
     PATH -->|"Không — SKU riêng của khách đã có"| QUOTE
     RFQ --> QUOTE["Sale lập báo giá (14) — một báo giá nhiều dòng khi yêu cầu cả dự án<br/>số thùng khách nêu là gợi ý, ngày giao mong muốn → ngày giao khách yêu cầu<br/>số thùng từng dòng, đơn giá / cái do Sale nhập — gợi ý từ bảng giá riêng nội bộ<br/>bậc giá và MOQ theo số thùng, hiệu lực<br/>SKU sản xuất lần đầu: thêm dòng phí khuôn / bản in"]
-    QUOTE --> DISCOUNT{"Đơn giá thấp hơn giá gợi ý<br/>vượt hạn mức giảm giá của Sale?"}
-    DISCOUNT -->|Có| DISC_OK["Sales Manager duyệt trước khi gửi"]
-    DISC_OK --> Q_SENT
-    DISCOUNT -->|Không| Q_SENT["Gửi báo giá cho khách — Sent<br/>khách thấy giá trên báo giá / thẻ báo giá trong chat"]
+    QUOTE -->|"Sale tự quyết giá, không duyệt trước khi gửi (14 BR-10)"| Q_SENT["Gửi báo giá cho khách — Sent<br/>khách thấy giá trên báo giá / thẻ báo giá trong chat"]
+    Q_SENT -.->|"Dòng thấp hơn giá gợi ý quá ngưỡng<br/>(cấu hình, mặc định 10%)"| DISC_ALERT["Hệ thống báo Quản lý kinh doanh trong ứng dụng<br/>mỗi bản sửa một lần — chỉ báo, không chặn gửi"]
 
     Q_SENT --> Q_RESP{"Khách phản hồi trên sàn<br/>hoặc thẻ hành động trong chat"}
     Q_RESP -->|"Yêu cầu sửa"| Q_REV["Changes Requested → bản sửa mới"]
