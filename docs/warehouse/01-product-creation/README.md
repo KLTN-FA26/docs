@@ -66,7 +66,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 | **Cấu hình in (print config)** | Variant (quy cách) | **Khuôn 2D** (bản trải phẳng theo kích thước thật), **vùng in**, **lề an toàn**, **lề tràn**, **model 3D**, **ràng buộc file** (độ phân giải tối thiểu, định dạng, dung lượng) — §4.10 | Khuôn 2D + vùng in: có thì khách mới thiết kế được; model 3D không bắt buộc |
 | **Thiết kế đã duyệt** | Variant (SKU riêng) | Sự kiện bản thiết kế được Điều phối sản xuất duyệt ở [12](../../ecommerce/12-product-design/README.md): khách sở hữu, quy cách, design snapshot | Có (để sinh SKU riêng) |
 | **Đơn vị cơ sở (base UoM)** | Inventory Item | Đơn vị ghi tồn, mặc định `EACH` (cái) | Có (mặc định) |
-| **Đơn vị quy đổi (UoM conversion)** | Inventory Item | Đơn vị đóng gói kèm **hệ số nguyên ≥ 1** quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái); một **đơn vị giao mặc định** | Có đơn vị *thùng* (cho quy cách thùng) |
+| **Đơn vị quy đổi (UoM conversion)** | Inventory Item | Đơn vị đóng gói kèm **hệ số nguyên ≥ 1** quy về đơn vị cơ sở (ví dụ *thùng* = 1.000 cái). Mỗi SKU có **đúng một đơn vị đang dùng** — chính là đơn vị thùng (BR-03); hàng được nhập, bán và giao theo đơn vị đó, nên không còn chọn "đơn vị giao mặc định" (*✅ Chốt lại 2026-11-25*) | Có đơn vị *thùng* (cho quy cách thùng) |
 | **Quy cách thùng (carton spec)** | Inventory Item | **Đơn vị thùng** (một đơn vị quy đổi; hệ số = **số cái chuẩn / thùng**, cố định cho SKU), **kích thước thùng** (D×R×C — hệ thống tính **thể tích thùng** m³), **khối lượng thùng đầy** | **Có** với SKU riêng (kế thừa từ quy cách — §4.8, BR-03) |
 | **Đơn vị bán (sales unit)** | Variant | Với SKU riêng, đơn vị bán **luôn là đơn vị thùng** của quy cách thùng: khách đặt theo **số thùng**, giá ghi **theo cái** (BR-11) | Có với SKU riêng (hệ thống gán theo quy cách thùng) |
 | **Mã vạch** | Inventory Item | ≤ 64 ký tự, duy nhất. *(✅ Chốt lại 2026-11-22: Inventory Item **không có** khối lượng, kích thước một đơn vị cơ sở — mọi số đo là của **thùng** trong quy cách thùng, BR-03)* | Không |
@@ -170,7 +170,7 @@ Hai lớp dữ liệu liên kết **1:1** theo từng SKU (quy cách và SKU ri�
 3. **Chính sách tồn** — *(✅ Đã chốt 2026-11-05)* **mọi SKU riêng bắt buộc theo dõi theo lô**; chính sách cố định, không cấu hình. Không có chế độ không ghi lô, không theo dõi serial.
    - **Lô** là **lô sản xuất** = **mã Đơn sản xuất** của phiếu nhập; hệ thống **tự gán** khi nhập kho theo Đơn sản xuất ([03](../03-receipt/README.md) BR-03), người dùng không nhập / sửa. Thùng hàng hoàn **giữ lô gốc**. Lô dùng để truy vết ([20](../20-inventory-control/README.md)).
    - *(Đã chốt 2026-11-05)* Ly / bao bì **không có hạn dùng**: không theo dõi hạn dùng, không có cách xuất để chọn — phân bổ thùng luôn theo **FIFO** (ngày nhập).
-4. **Đơn vị quy đổi** — hệ số nguyên ≥ 1. Thôi dùng bằng cách ngưng; đơn vị cơ sở không ngưng được. Khi đã có chứng từ dùng đơn vị đó, **hệ số và tên của đơn vị bị khoá**.
+4. **Đơn vị quy đổi** — hệ số nguyên ≥ 1. Thôi dùng bằng cách ngưng. Đơn vị cơ sở (cái) là thuộc tính của Inventory Item, không phải một đơn vị quy đổi, nên không có gì để ngưng (*✅ Chốt lại 2026-11-25*). Khi đã có chứng từ dùng đơn vị đó, **hệ số và tên của đơn vị bị khoá**.
 
 ### 4.8. Sinh SKU thành phẩm theo mẫu của khách
 
