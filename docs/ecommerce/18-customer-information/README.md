@@ -32,10 +32,10 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 
 | Actor | Vai trò |
 |-------|---------|
-| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời. Sửa tên công ty và số điện thoại. Quản lý sổ địa chỉ. Đổi mật khẩu, xem / thu hồi phiên đăng nhập. Xem công nợ và vị thế tín dụng: hạn mức, dư nợ, hạn mức còn lại, kỳ hạn, cờ quá hạn của chính mình *(Quyết định 21/10/2026; hồ sơ rủi ro vẫn là dữ liệu nội bộ)*. |
-| **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi / gửi lại lời mời kích hoạt. Nhập **thông tin pháp lý**. Đặt **lịch thanh toán mặc định** ban đầu (chỉ gồm đợt `ON_SIGNING` / `BEFORE_DELIVERY`). Xem hồ sơ, sửa thông tin thay khách, quản lý địa chỉ. |
+| **Khách hàng sỉ** | Kích hoạt tài khoản từ lời mời. Sửa tên công ty và số điện thoại. Quản lý sổ địa chỉ. Đổi mật khẩu, xem / thu hồi phiên đăng nhập. Xem công nợ và vị thế tín dụng: hạn mức, dư nợ, hạn mức còn lại, kỳ hạn, cờ quá hạn của chính mình *(Quyết định 21/10/2026; hồ sơ rủi ro vẫn là dữ liệu nội bộ)*. Gửi **đề nghị cấp hạn mức** ([15](../15-payment/README.md) §4.3 bước 11a) *(✅ Đã chốt 2026-11-26)*. |
+| **Nhân viên Sale (Sales Staff)** | **Tạo hồ sơ khách sỉ** và gửi / gửi lại lời mời kích hoạt. Nhập **thông tin pháp lý**. Đặt **lịch thanh toán mặc định** ban đầu (chỉ gồm đợt `ON_SIGNING` / `BEFORE_DELIVERY`). Xem hồ sơ, sửa thông tin thay khách, quản lý địa chỉ. Ghi ý kiến cho đề nghị cấp hạn mức của khách, hoặc tạo đề nghị thay khách ([15](../15-payment/README.md) §4.3 bước 11a). |
 | **Quản lý kinh doanh (Sales Manager)** | Tạo hồ sơ khách. **Đổi trạng thái khách** (chặn / gỡ chặn / đóng / mở lại). Quản lý **nhóm khách** và gán khách vào nhóm. Quản lý địa chỉ. Khai báo **bảng giá riêng (giá nội bộ)** của khách ([13](../13-catalog/README.md)). |
-| **Kế toán (Accountant)** | **Duyệt hạn mức và kỳ hạn công nợ** — sửa trên trang khách ở back office; duyệt lịch thanh toán mặc định có đợt `AFTER_DELIVERY` ([15](../15-payment/README.md) BR-12). Xem hồ sơ khách (chỉ đọc) |
+| **Kế toán (Accountant)** | **Duyệt hạn mức và kỳ hạn công nợ** — duyệt **đề nghị cấp hạn mức** ([15](../15-payment/README.md) §4.3 bước 11a), hoặc sửa trên trang khách ở back office; duyệt lịch thanh toán mặc định có đợt `AFTER_DELIVERY` ([15](../15-payment/README.md) BR-12). Xem hồ sơ khách (chỉ đọc) |
 | **Hệ thống** | Chuẩn hoá & chống trùng mã số thuế. Gửi lời mời, quản lý hạn link. Đồng bộ trạng thái tài khoản đăng nhập theo trạng thái khách. Ghi lịch sử thay đổi. Gắn đơn / hợp đồng / tương tác vào hồ sơ. |
 
 ---
@@ -102,6 +102,8 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 5. **Hạn mức & kỳ hạn công nợ** — muốn cho khách trả sau giao, **kế toán** đặt **hạn mức** (> 0) và **kỳ hạn** (N ngày mặc định cho đợt `AFTER_DELIVERY`); khi đó lịch thanh toán mặc định mới được có đợt `AFTER_DELIVERY`. Mỗi lần duyệt ghi người và thời điểm. Hợp đồng đã ký giữ lịch thanh toán của nó.
 
    Kế toán cấp và sửa hạn mức, kỳ hạn bằng form **"Sửa hạn mức & kỳ hạn"** trên **trang khách** ở back office — mở được với mọi khách, không chỉ khách có đơn treo; Kế toán được xem hồ sơ khách (chỉ đọc) để mở trang này. Đơn treo vì tín dụng có **lối tắt** tới form này ([15](../15-payment/README.md) §4.3) *(✅ Đã chốt 2026-11-25)*.
+
+   **Đề nghị cấp hạn mức** *(✅ Đã chốt 2026-11-26)*: khách **xin** (hoặc xin nâng) hạn mức từ cổng, hoặc Sale tạo đề nghị thay khách; Sale ghi ý kiến, **Kế toán quyết** trên số liệu lịch sử trả do hệ thống tính. Duyệt thì hạn mức & kỳ hạn của khách được ghi ngay (như khi sửa tay, ghi người và thời điểm duyệt); hạn mức duyệt không cao hơn mức xin. Chi tiết luồng, trạng thái và số liệu ở [15](../15-payment/README.md) §4.3 bước 11a, §5.4, BR-21. Form "Sửa hạn mức & kỳ hạn" vẫn giữ cho thay đổi không qua đề nghị.
 
 ### 4.2. Quản lý dữ liệu hồ sơ
 
@@ -182,7 +184,7 @@ stateDiagram-v2
 
   Email là khoá đăng nhập; mỗi khách **một tài khoản đăng nhập**. Mã số thuế không bắt buộc khi tạo hồ sơ, nhưng **bắt buộc trước khi phát hành hoá đơn** (BR-12).
 - **BR-02:** Chỉ **Sale / Quản lý kinh doanh** tạo hồ sơ khách; không có đăng ký tự do và guest checkout. Chỉ hồ sơ `Active` mới xem tình trạng còn hàng, nhận báo giá và hợp đồng (sàn không hiển thị giá — [13](../13-catalog/README.md)).
-- **BR-03:** **Hạn mức và kỳ hạn công nợ** chỉ do **kế toán** duyệt; mọi thay đổi ghi người và thời điểm duyệt. Lịch thanh toán mặc định chỉ có đợt `AFTER_DELIVERY` khi khách có hạn mức > 0. Lúc tạo khách, Sale chỉ đặt được đợt `ON_SIGNING` / `BEFORE_DELIVERY`.
+- **BR-03:** **Hạn mức và kỳ hạn công nợ** chỉ do **kế toán** duyệt — sửa trực tiếp, hoặc duyệt **đề nghị cấp hạn mức** của khách / Sale ([15](../15-payment/README.md) BR-21; hạn mức duyệt không cao hơn mức xin) *(✅ Đã chốt 2026-11-26)*; mọi thay đổi ghi người và thời điểm duyệt. Lịch thanh toán mặc định chỉ có đợt `AFTER_DELIVERY` khi khách có hạn mức > 0. Lúc tạo khách, Sale chỉ đặt được đợt `ON_SIGNING` / `BEFORE_DELIVERY`.
 - **BR-04:** Lịch thanh toán mặc định: mỗi đợt có % > 0 và đúng một mốc; **tổng 100%**. Đây chỉ là mẫu — lịch ràng buộc nằm trong từng hợp đồng ([14](../14-cart-and-order/README.md)).
 - **BR-05:** **Thông tin pháp lý** (địa chỉ đăng ký kinh doanh, người đại diện, chức vụ) phải đủ trước khi Sale lập hợp đồng cho khách.
 - **BR-06:** Truy cập hồ sơ khách theo **quyền tối thiểu**; khách chỉ xem hồ sơ của chính mình.
@@ -219,7 +221,7 @@ stateDiagram-v2
 | Module | Quan hệ |
 |--------|---------|
 | [14 · Quote, Order & Contract](../14-cart-and-order/README.md) | Cung cấp thông tin pháp lý cho hợp đồng, sổ địa chỉ, người nhận, lịch thanh toán mặc định, hạn mức |
-| [15 · Payment](../15-payment/README.md) | Kế toán duyệt hạn mức & kỳ hạn; dư nợ, quá hạn, vị thế tín dụng; hạn đợt trả sau giao |
+| [15 · Payment](../15-payment/README.md) | Kế toán duyệt hạn mức & kỳ hạn (kể cả qua đề nghị cấp hạn mức — 15 BR-21); dư nợ, quá hạn, vị thế tín dụng; hạn đợt trả sau giao |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Hồ sơ & lịch sử tương tác hiển thị cho Sale |
 | [17 · Order Management](../17-order-management/README.md) | Lịch sử đơn gắn hồ sơ |
 | [21 · E-invoice](../21-e-invoice/README.md) | Thông tin bên mua trên hoá đơn: tên công ty, mã số thuế, địa chỉ xuất hoá đơn / đăng ký kinh doanh, email nhận hoá đơn (BR-12) |
