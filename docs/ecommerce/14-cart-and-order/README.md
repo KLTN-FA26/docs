@@ -31,8 +31,8 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ (B2B Customer)** | **Yêu cầu báo giá** từ bản thiết kế đã duyệt trên sàn — nêu số thùng mong muốn, ngày giao mong muốn ([13](../13-catalog/README.md)). Xem báo giá; **chấp nhận** (chọn số thùng) hoặc **yêu cầu sửa** — trên sàn hoặc bằng thẻ hành động trong [chat](../16-sales-chat/README.md). Xem đơn và hợp đồng trên cổng; ký hợp đồng (ngoài hệ thống) và có thể gửi lại file hợp đồng đã ký qua chat. Bấm "Đặt lại" một đơn cũ để mở chat với Sale. |
-| **Nhân viên Sale (Sales Staff)** | Nhận **yêu cầu báo giá từ bản thiết kế** ([16](../16-sales-chat/README.md)). Lập, sửa, gửi, huỷ báo giá (không chấp nhận / yêu cầu sửa thay khách); **nhập đơn giá** (tham khảo giá gợi ý); báo giá giảm quá ngưỡng hoặc không có giá tham chiếu thì **gửi duyệt giá**, **rút lại** khi đang chờ duyệt (BR-10, BR-24); **số tiền phí khuôn / bản in** và **số tiền phí vận chuyển** (nếu thu). **Tạo đơn từ báo giá đã chấp nhận.** Lập hợp đồng, **lịch giao**, lịch thanh toán và điều khoản **số lần in mẫu miễn phí**, gửi khách, tải file hợp đồng đã ký lên. Tiếp nhận đơn đã xác nhận để chọn kho xuất và lập Đơn sản xuất ([17](../17-order-management/README.md)). |
-| **Kế toán (Accountant)** | Duyệt / từ chối đơn bị treo vì **tín dụng** khi hợp đồng có đợt trả sau giao ([15](../15-payment/README.md) §4.3) |
+| **Nhân viên Sale (Sales Staff)** | Nhận **yêu cầu báo giá từ bản thiết kế** ([16](../16-sales-chat/README.md)). Lập, sửa, gửi, huỷ báo giá (không chấp nhận / yêu cầu sửa thay khách); **nhập đơn giá** (tham khảo giá gợi ý); báo giá giảm quá ngưỡng hoặc không có giá tham chiếu thì **gửi duyệt giá**, **rút lại** khi đang chờ duyệt (BR-10, BR-24); **số tiền phí khuôn / bản in** và **số tiền phí vận chuyển** (nếu thu). **Tạo đơn từ báo giá đã chấp nhận.** Lập hợp đồng, **lịch giao**, lịch thanh toán và điều khoản **số lần in mẫu miễn phí**, gửi khách (kiểm công nợ không đạt thì hợp đồng chờ Kế toán duyệt; **rút lại** được khi đang chờ — [15](../15-payment/README.md) §4.3), tải file hợp đồng đã ký lên. Tiếp nhận đơn đã xác nhận để chọn kho xuất và lập Đơn sản xuất ([17](../17-order-management/README.md)). |
+| **Kế toán (Accountant)** | Duyệt / từ chối **hợp đồng chờ duyệt công nợ trước khi gửi** và đơn bị treo vì **tín dụng** khi ký, khi hợp đồng có đợt trả sau giao ([15](../15-payment/README.md) §4.3) |
 | **Quản lý kinh doanh (Sales Manager)** | Khai báo **bảng giá riêng nội bộ** của khách cho SKU riêng (đơn giá / cái, bậc & MOQ theo số thùng) và **giá chuẩn của quy cách** — giá gợi ý / giá tham chiếu cho Sale, không hiện trên sàn ([13](../13-catalog/README.md) §4.2); **duyệt / từ chối giá báo giá** đang chờ duyệt giá, người duyệt khác người gửi duyệt (BR-24) *(✅ Chốt lại 2026-11-26: thay "nhận thông báo khi báo giá được gửi có dòng thấp hơn giá gợi ý quá ngưỡng")*; xem báo giá và đơn (ngoài duyệt giá, không sửa) |
 | **Hệ thống** | Điền sẵn giá theo bảng giá riêng nội bộ của khách, không có thì theo giá chuẩn của quy cách; khi Sale gửi, đo mức giảm từng bậc so với **giá tham chiếu**, giữ báo giá ở **chờ duyệt giá** và báo người giữ quyền duyệt giá; lưu giá tham chiếu của mỗi lượt gửi duyệt; kiểm lại như khi gửi lúc duyệt; thêm dòng phí khuôn / bản in cho SKU sản xuất lần đầu; tính thành tiền; lấy **thuế suất VAT** từng dòng theo nhóm thuế, tính tiền thuế và tổng có thuế; kiểm SKU còn bán được và thuộc đúng khách; tự đánh dấu báo giá hết hiệu lực; kiểm **lịch giao** khớp số thùng của đơn; quy lịch thanh toán ra số tiền, **gợi ý số tiền** của đợt thanh toán gắn với một đợt giao; chuyển trạng thái đơn theo hợp đồng và đợt thanh toán |
 
@@ -173,14 +173,14 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
     - Có đợt `AFTER_DELIVERY` thì khách phải có **hạn mức công nợ** do kế toán duyệt ([18](../18-customer-information/README.md)); N mặc định = kỳ hạn công nợ của khách.
 
     > ✅ Đã chốt 2026-11-05: số đợt và tỷ lệ mỗi đợt do Sale nhập theo từng hợp đồng, có mẫu mặc định theo khách ở [18](../18-customer-information/README.md). Xem [open-questions](../../open-questions/README.md).
-13. **Gửi hợp đồng** — Sale xuất bản hợp đồng (PDF; sau dòng **tổng giá trị có thuế** có dòng **Bằng chữ** — tổng có thuế viết bằng chữ tiếng Việt, *✅ Đã chốt 2026-11-15*) và gửi khách → hợp đồng `Sent`, đơn → `Pending Contract`. Khách xem hợp đồng trên cổng. Lúc gửi, hệ thống kiểm **vị thế tín dụng** trên phần `AFTER_DELIVERY` ([15](../15-payment/README.md) §4.3); vượt hạn mức hoặc khách có khoản quá hạn thì **cảnh báo** Sale (sửa lịch thanh toán, hoặc vẫn gửi và chấp nhận đơn sẽ bị treo chờ kế toán khi ký). Khách không còn `Active` thì **không gửi được hợp đồng mới** (BR-01); hợp đồng đã gửi trước đó vẫn ghi nhận ký và thu tiền được, hợp đồng đã ký thực hiện tới cùng *(✅ Đã chốt 2026-11-25)*.
+13. **Gửi hợp đồng** — Sale xuất bản hợp đồng (PDF; sau dòng **tổng giá trị có thuế** có dòng **Bằng chữ** — tổng có thuế viết bằng chữ tiếng Việt, *✅ Đã chốt 2026-11-15*) và gửi khách → hợp đồng `Sent`, đơn → `Pending Contract`. Khách xem hợp đồng trên cổng. Lúc gửi, hệ thống kiểm **vị thế tín dụng** trên phần `AFTER_DELIVERY` ([15](../15-payment/README.md) §4.3). Hợp đồng nháp hiện sẵn **cảnh báo** khi lịch thanh toán sẽ không đạt, để Sale sửa trước. Vượt hạn mức hoặc khách có khoản quá hạn thì hợp đồng **không gửi** mà **chờ Kế toán duyệt** — vẫn `Draft`, khoá sửa, đơn vẫn `Draft`: Kế toán duyệt (bắt buộc ghi chú) → gửi khách ngay, người gửi là Sale; từ chối (bắt buộc lý do) → về nháp để Sale sửa lịch thanh toán rồi gửi lại; Sale rút lại được khi đang chờ; người duyệt khác người gửi *(✅ Đã chốt 2026-11-26, QĐ-B — thay "chỉ cảnh báo, vẫn gửi được")*. Khách không còn `Active` thì **không gửi được hợp đồng mới** (BR-01); hợp đồng đã gửi trước đó vẫn ghi nhận ký và thu tiền được, hợp đồng đã ký thực hiện tới cùng *(✅ Đã chốt 2026-11-25)*.
 
     **Điều khoản PDF và quy tắc hệ thống** *(✅ Đã chốt 2026-11-25)* — chữ in trên hợp đồng là đặc tả của hệ thống:
 
     | Điều khoản in trên hợp đồng | Hệ thống làm gì |
     |-----------------------------|-----------------|
     | **Huỷ hợp đồng, tiền trả trước** (luôn in): các khoản Bên B trả trước khi nhận hàng là **khoản thanh toán trước, không phải tiền đặt cọc**; trước khi hàng được đưa vào in hàng loạt, Bên B huỷ được và được hoàn toàn bộ, không tính phí; sau đó chỉ huỷ khi Bên A đồng ý — hai Bên thoả thuận chấm dứt kèm **phí huỷ** (% số tiền đã nhận hoặc số tiền cụ thể, không vượt giá trị hợp đồng), trừ vào số đã trả, phần thừa hoàn lại | Hoàn / giữ tiền khi huỷ đơn theo [17](../17-order-management/README.md) BR-11 |
-    | **Điều kiện tín dụng** (BLDS Điều 120; chỉ in khi lịch có đợt `AFTER_DELIVERY`): phần thanh toán sau giao hàng có hiệu lực khi Bên A xác nhận hạn mức công nợ của Bên B; không xác nhận thì hợp đồng bị huỷ bỏ, Bên A hoàn toàn bộ số tiền đã nhận | Kế toán từ chối đơn treo tín dụng → đơn huỷ `CREDIT_REJECTED`, hoàn toàn bộ ([15](../15-payment/README.md) §4.3 bước 10; BR-14) |
+    | **Điều kiện tín dụng** (BLDS Điều 120; chỉ in khi lịch có đợt `AFTER_DELIVERY`): phần thanh toán sau giao hàng có hiệu lực khi Bên A xác nhận hạn mức công nợ của Bên B; không xác nhận thì hợp đồng bị huỷ bỏ, Bên A hoàn toàn bộ số tiền đã nhận | Kế toán từ chối đơn treo tín dụng → đơn huỷ `CREDIT_REJECTED`, hoàn toàn bộ; hợp đồng giữ `Signed` rồi `Liquidated` khi tiền đã xử lý xong ([15](../15-payment/README.md) §4.3 bước 10; BR-14) |
     | **Thuế VAT** theo thời điểm lập hoá đơn; phần chênh lệch tiền thuế được thanh toán thêm hoặc hoàn lại theo hoá đơn | Hoá đơn dùng thuế suất ngày lập hoá đơn, gắn cờ cho Kế toán khi khác hợp đồng; các đợt thanh toán không tự tính lại, Kế toán xử lý chênh lệch ngoài hệ thống (BR-21) |
     | **Thời hạn khiếu nại**: N ngày kể từ ngày giao mỗi đợt, N là thời hạn ghi trên hợp đồng (mặc định theo cấu hình, 7 ngày; không để trống) | Đổi trả và tự hoàn tất đơn dùng đúng N ngày này ([17](../17-order-management/README.md) BR-20) |
     | **Phạt vi phạm** (≤ 8%, Luật Thương mại Điều 301; cấu hình 0–8%) và **lãi chậm trả** (Điều 306) | Hệ thống không tự tính; đây là quyền yêu cầu, Kế toán xử lý ở phần mềm kế toán |
@@ -188,7 +188,7 @@ Module quản lý ba chứng từ nối tiếp nhau của mảng bán hàng:
 
     > ✅ Đã chốt 2026-11-05: hợp đồng ký ngoài hệ thống, Sale tải file hợp đồng đã ký lên; phụ lục / sửa hợp đồng sau khi ký là phạm vi sau. Xem [open-questions](../../open-questions/README.md).
 15. **Kết quả khi ký** — hệ thống sinh các **đợt thanh toán** ([15](../15-payment/README.md) §5.1), rồi chuyển đơn:
-    - khách quá hạn hoặc vượt hạn mức (kiểm lại lúc ký) → `On Hold` lý do tín dụng, chờ **kế toán** duyệt;
+    - khách quá hạn hoặc vượt hạn mức (kiểm lại lúc ký) → `On Hold` lý do tín dụng, chờ **kế toán** duyệt — trừ hợp đồng đã được Kế toán duyệt trước khi gửi mà tình hình **không xấu hơn lúc duyệt** ([15](../15-payment/README.md) §4.3 bước 9);
     - còn đợt `ON_SIGNING` chưa thu đủ → `Pending Payment`;
     - không có đợt `ON_SIGNING`, hoặc đã thu đủ → `Confirmed`; đơn sang [Order Management](../17-order-management/README.md): Sale chọn kho xuất, hệ thống kiểm tồn thành phẩm và giữ hàng.
 16. **Sửa / huỷ hợp đồng trước khi ký** — hợp đồng `Draft` sửa tự do. Hợp đồng `Sent` không sửa; cần đổi nội dung thì Sale **huỷ hợp đồng** (bắt buộc lý do), đơn quay về `Draft` và Sale lập hợp đồng thay thế, hoặc huỷ luôn đơn. Khách từ chối ký → Sale huỷ hợp đồng và đơn. Hợp đồng `Draft` / `Sent` bị huỷ — kể cả do huỷ đơn — thì **thẻ hợp đồng trong chat** chuyển sang "Đã huỷ" và không còn tải được bản cũ; khách nhận thẻ hợp đồng mới khi Sale gửi bản thay thế *(✅ Đã chốt 2026-11-25)*.
@@ -240,10 +240,11 @@ stateDiagram-v2
 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
-| `Draft` | Sale đang soạn hợp đồng và lịch thanh toán cho đơn `Draft` | → `Sent`, → `Cancelled` | Sale |
+| `Draft` | Sale đang soạn hợp đồng và lịch thanh toán cho đơn `Draft`; có thể đang **chờ Kế toán duyệt công nợ trước khi gửi** (khoá sửa, khách không thấy — [15](../15-payment/README.md) §4.3 bước 9) | → `Sent` (Sale gửi, hoặc Kế toán duyệt), → `Cancelled` | Sale / Kế toán |
 | `Sent` | Đã gửi khách, chờ ký; nội dung khoá | → `Signed`, → `Cancelled` | Sale |
-| `Signed` | Đã ký, file hợp đồng đã ký đã tải lên; đã sinh các đợt thanh toán; bất biến | → `Completed` | Sale (tải file đã ký) |
-| `Completed` | Đơn đã hoàn tất và mọi đợt đã thu đủ | *(cuối)* | Hệ thống |
+| `Signed` | Đã ký, file hợp đồng đã ký đã tải lên; đã sinh các đợt thanh toán; bất biến | → `Completed`, → `Liquidated` | Sale (tải file đã ký) |
+| `Completed` | Đơn đã hoàn tất và mọi đợt đã thu đủ; đã giao được hàng | *(cuối)* | Hệ thống |
+| `Liquidated` | Đơn kết thúc mà **không giao được hàng nào** (mọi chuyến bị trả về / thất lạc, hoặc đơn huỷ sau khi ký — kể cả kế toán từ chối đơn treo tín dụng) và tiền đã xử lý xong: hợp đồng được thanh lý, không phải `Completed` | *(cuối)* | Hệ thống |
 | `Cancelled` | Huỷ trước khi ký (khách từ chối, cần sửa nội dung, hoặc huỷ đơn) — bắt buộc lý do | *(cuối)* | Sale |
 
 ```mermaid
@@ -252,13 +253,17 @@ stateDiagram-v2
     Draft --> Sent: Gửi khách (đơn → Pending Contract)
     Sent --> Signed: Tải file hợp đồng đã ký
     Signed --> Completed: Đơn hoàn tất, mọi đợt đã thu
+    Signed --> Liquidated: Không giao được hàng nào, tiền đã xử lý xong
     Draft --> Cancelled
     Sent --> Cancelled: Khách từ chối / cần sửa / huỷ đơn
     Completed --> [*]
+    Liquidated --> [*]
     Cancelled --> [*]
 ```
 
-> ✅ Đã chốt 2026-11-05: đơn bị huỷ **sau khi** hợp đồng đã `Signed` (yêu cầu huỷ được duyệt — [17](../17-order-management/README.md) §4.8): hợp đồng giữ `Signed`, việc thanh lý hợp đồng làm ngoài hệ thống; hệ thống chuyển hợp đồng `Completed` khi phí huỷ đã thu đủ và tiền hoàn đã xử lý. Xem [open-questions](../../open-questions/README.md).
+> ✅ Đã chốt 2026-11-05: đơn bị huỷ **sau khi** hợp đồng đã `Signed` (yêu cầu huỷ được duyệt — [17](../17-order-management/README.md) §4.8): hợp đồng giữ `Signed`, việc thanh lý hợp đồng làm ngoài hệ thống. Xem [open-questions](../../open-questions/README.md).
+>
+> Đồng bộ theo code (WF-05 Q-6): khi phí huỷ đã thu đủ và tiền hoàn đã xử lý, hệ thống chuyển hợp đồng sang **`Liquidated`** (không giao được hàng nào), không phải `Completed` như ghi chú trên; `Completed` chỉ dành cho hợp đồng đã giao được hàng. Cùng cách cho đơn bị kế toán từ chối khi treo tín dụng.
 
 ### 5.3. Trạng thái đơn hàng ở giai đoạn bán (chi tiết đầy đủ ở [17 Order Management](../17-order-management/README.md) §5.1)
 
@@ -308,7 +313,7 @@ stateDiagram-v2
 - **BR-11:** Mọi thao tác trên báo giá và hợp đồng gửi kèm **số phiên bản** người dùng đang xem. Ai đó đã đổi trước thì thao tác bị từ chối. Mỗi lần mở lại báo giá sau yêu cầu sửa là một **bản sửa** mới.
 - **BR-12:** **Mỗi đơn có đúng một hợp đồng còn hiệu lực** (không `Cancelled`). Dòng hàng, giá, dòng phí và tổng tiền trên hợp đồng luôn bằng của đơn; **lịch giao** của hợp đồng là lịch giao của đơn.
 - **BR-13:** **Lịch thanh toán**: ít nhất một đợt; mỗi đợt có số tiền > 0 và đúng một mốc `ON_SIGNING` / `BEFORE_DELIVERY` / `AFTER_DELIVERY`; **tổng các đợt = tổng tiền đơn (tổng có thuế)**. Đợt `AFTER_DELIVERY` chỉ dùng được khi khách có hạn mức công nợ > 0 do kế toán duyệt ([18](../18-customer-information/README.md)). Đợt `BEFORE_DELIVERY` / `AFTER_DELIVERY` **gắn được tối đa một đợt giao** của lịch giao (tuỳ chọn); số tiền gợi ý chia phần còn lại sau các đợt không gắn theo tỷ lệ giá trị hàng (có thuế) của các đợt giao, nên tổng không vượt tổng tiền đơn (§4.3 bước 12; ✅ Đã chốt 2026-11-25), Sale sửa được; đợt `ON_SIGNING` không gắn đợt giao *(✅ Đã chốt 2026-11-07)*.
-- **BR-14:** Hợp đồng chỉ `Signed` khi đã có **file hợp đồng đã ký** (bản scan hợp đồng giấy hoặc PDF có chữ ký số) và ngày ký. Hợp đồng `Sent` / `Signed` không sửa nội dung; hợp đồng `Signed` không huỷ được trong hệ thống, **trừ khi điều kiện tín dụng in trong hợp đồng không đạt** — Kế toán từ chối đơn treo tín dụng thì hợp đồng bị huỷ bỏ theo điều kiện đó, hoàn toàn bộ ([15](../15-payment/README.md) §4.3 bước 10; ✅ Đã chốt 2026-11-25). Ngoại lệ duy nhất về sửa nội dung: **dời cửa sổ giao** của đợt chưa bàn giao theo [17](../17-order-management/README.md) §4.5 (BR-23).
+- **BR-14:** Hợp đồng chỉ `Signed` khi đã có **file hợp đồng đã ký** (bản scan hợp đồng giấy hoặc PDF có chữ ký số) và ngày ký. Hợp đồng `Sent` / `Signed` không sửa nội dung; hợp đồng `Signed` không huỷ được trong hệ thống. **Điều kiện tín dụng in trong hợp đồng không đạt** — Kế toán từ chối đơn treo tín dụng — thì hợp đồng chấm dứt theo điều kiện đó và hoàn toàn bộ; trong hệ thống hợp đồng giữ `Signed` rồi chuyển `Liquidated` khi tiền đã xử lý xong, không chuyển `Cancelled` ([15](../15-payment/README.md) §4.3 bước 10; ✅ Đã chốt 2026-11-25). Ngoại lệ duy nhất về sửa nội dung: **dời cửa sổ giao** của đợt chưa bàn giao theo [17](../17-order-management/README.md) §4.5 (BR-23).
 - **BR-15:** Đơn chỉ `Confirmed` khi hợp đồng `Signed` **và** đợt `ON_SIGNING` (nếu có) đã thu đủ **và** không bị treo tín dụng. Đơn chưa `Confirmed` thì chưa chọn kho xuất, chưa giữ hàng, chưa chuyển cho kho.
 - **BR-16:** Đơn từ `Pending Payment` trở đi không sửa dòng hàng / số thùng / giá (cần phụ lục hợp đồng — phạm vi sau); chỉ đổi địa chỉ giao, hoặc đổi SKU theo mẫu khi khách sửa thiết kế, theo quy tắc ở [Order Management](../17-order-management/README.md) §4.7.
 - **BR-17:** **Phí khuôn / bản in** là một **dòng phí** trên báo giá, đơn và hợp đồng cho mỗi SKU **sản xuất lần đầu** (mẫu mới — SKU **chưa có khuôn**: chưa có đơn đã xác nhận nào chưa huỷ và chưa có Đơn sản xuất nào tới `In Production`); SKU đã có khuôn (đặt lại SKU đã từng sản xuất) thì không có dòng này — gửi báo giá còn dòng phí khuôn cho SKU đã có khuôn bị **chặn**, để phí chỉ thu một lần *(✅ Đã chốt 2026-11-25)*. Dòng phí không có số thùng, không tính MOQ / bậc giá, không giữ hàng, không vào Đơn sản xuất; được cộng vào tổng tiền đơn (BR-09) và chốt giá cùng đơn (BR-06).
@@ -359,7 +364,9 @@ stateDiagram-v2
 | Khách gửi file hợp đồng đã ký qua chat (bản scan hoặc PDF có chữ ký số) | Sale tải file đó lên hợp đồng, nhập ngày ký → `Signed` |
 | Khách xin sửa hợp đồng đã gửi | Sale huỷ hợp đồng (lý do), đơn về `Draft`, lập hợp đồng thay thế và gửi lại |
 | Khách từ chối ký hợp đồng | Sale huỷ hợp đồng và huỷ đơn (`CUSTOMER_REQUEST`) |
-| Lịch thanh toán có đợt `AFTER_DELIVERY` vượt hạn mức | Cảnh báo lúc gửi; Sale tăng phần thu trước giao, hoặc gửi và đơn bị treo chờ kế toán khi ký |
+| Lịch thanh toán có đợt `AFTER_DELIVERY` vượt hạn mức | Hợp đồng nháp hiện cảnh báo; Sale tăng phần thu trước giao, hoặc gửi và hợp đồng **chờ Kế toán duyệt** trước khi tới khách ([15](../15-payment/README.md) §4.3 bước 9) |
+| Kế toán từ chối hợp đồng chờ duyệt công nợ | Hợp đồng về nháp (không huỷ, đơn vẫn `Draft`); Sale sửa lịch thanh toán rồi gửi lại |
+| Sale cần sửa hợp đồng đang chờ duyệt công nợ | Sale rút lại rồi sửa; huỷ hợp đồng hoặc huỷ đơn khi đang chờ thì lượt duyệt kết thúc |
 | Khách đã ký nhưng chậm thanh toán đợt `ON_SIGNING` | Đơn ở `Pending Payment`, chưa giữ hàng; Sale nhắc qua chat; quá lâu thì Sale huỷ đơn (`PAYMENT_NOT_RECEIVED`) |
 | Tổng các đợt lệch tổng tiền đơn (do làm tròn %) | Phần lẻ dồn vào đợt cuối; vẫn lệch thì chặn gửi hợp đồng |
 | Khách đề nghị miễn phí vận chuyển / tự đến lấy hàng | Sale không thêm dòng phí vận chuyển (BR-20) |

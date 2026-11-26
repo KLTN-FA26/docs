@@ -31,7 +31,7 @@ Payment quyết định các mốc tiền của đơn:
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ** | Chuyển khoản theo **thông tin chuyển khoản của từng đợt** trên cổng hoặc thẻ trong chat (tài khoản nhận, số tiền còn phải trả, nội dung = mã hợp đồng + mã đợt). Xem các đợt, công nợ của mình và vị thế tín dụng. Gửi **đề nghị cấp hạn mức** từ cổng, kèm giấy tờ; rút đề nghị của mình khi chưa được quyết (§4.3 bước 11a) *(✅ Đã chốt 2026-11-26)*. |
-| **Kế toán (Accountant)** | Đối chiếu sao kê, **lập phiếu thu** cho các đợt / khoản phí huỷ; **huỷ phiếu thu** ghi sai; chuyển khoản hoàn (ngoài hệ thống) rồi **ghi nhận đã hoàn**. **Duyệt / từ chối đơn treo vì tín dụng** (§4.3). Duyệt hạn mức và kỳ hạn công nợ của khách ([18](../18-customer-information/README.md)); **duyệt / từ chối đề nghị cấp hạn mức** — là người duy nhất quyết (§4.3 bước 11a, BR-21). Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ**; lọc danh sách phiếu thu theo ngày nhận, xem tổng và **xuất Excel** để nhập phần mềm kế toán (§4.7). |
+| **Kế toán (Accountant)** | Đối chiếu sao kê, **lập phiếu thu** cho các đợt / khoản phí huỷ; **huỷ phiếu thu** ghi sai; chuyển khoản hoàn (ngoài hệ thống) rồi **ghi nhận đã hoàn**. **Duyệt / từ chối hợp đồng chờ duyệt công nợ trước khi gửi** và **đơn treo vì tín dụng** (§4.3). Duyệt hạn mức và kỳ hạn công nợ của khách ([18](../18-customer-information/README.md)); **duyệt / từ chối đề nghị cấp hạn mức** — là người duy nhất quyết (§4.3 bước 11a, BR-21). Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ**; lọc danh sách phiếu thu theo ngày nhận, xem tổng và **xuất Excel** để nhập phần mềm kế toán (§4.7). |
 | **Nhân viên Sale (Sales Staff)** | Gửi thông tin chuyển khoản theo đợt và **nhắc công nợ** cho khách qua [chat](../16-sales-chat/README.md). Xem công nợ của khách, **báo cáo công nợ theo khách & tuổi nợ** (§4.7) và tình trạng các đợt của đơn. Treo tay đơn khi khách quá hạn; gỡ treo đơn lý do thanh toán khi tiền đã đủ trở lại ([17](../17-order-management/README.md)). **Ghi ý kiến** cho đề nghị cấp hạn mức khách gửi, hoặc **tạo đề nghị thay khách** kèm ý kiến; rút đề nghị mình đã tạo (§4.3 bước 11a). |
 | **Quản lý kinh doanh (Sales Manager)** | Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ** (§4.7). |
 | **Hệ thống** | Sinh đợt khi hợp đồng `Signed`; chuyển đợt sang `Due` theo mốc; tính lại trạng thái đợt khi lập / huỷ phiếu thu; **tính quá hạn khi đọc** (không còn trạng thái `Overdue`, không có job đêm đặt trạng thái); **quét mỗi đêm** báo Sale đợt vừa quá hạn; tự xác nhận đơn khi đủ đợt `ON_SIGNING`; chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa đủ; tính **số tiền phải hoàn**; hoàn tất hợp đồng; đưa **số liệu lịch sử trả** của khách cho Kế toán xét đề nghị cấp hạn mức (chỉ gợi ý, không tự quyết). |
@@ -118,16 +118,25 @@ Payment quyết định các mốc tiền của đơn:
    - Dư nợ + tổng các đợt `AFTER_DELIVERY` của hợp đồng mới > hạn mức → `OVER_LIMIT`.
    - Còn lại → `WITHIN_LIMIT`.
 
-   Kiểm **hai lần**: lúc Sale **gửi hợp đồng** (chỉ cảnh báo) và lúc hợp đồng **`Signed`** (`OVERDUE` / `OVER_LIMIT` → đơn **`On Hold` lý do tín dụng**). Hợp đồng không có đợt `AFTER_DELIVERY` thì không kiểm.
+   Kiểm **hai lần**: lúc Sale **gửi hợp đồng** và lúc hợp đồng **`Signed`**. Hợp đồng không có đợt `AFTER_DELIVERY` thì không kiểm.
+
+   **Duyệt công nợ trước khi gửi** *(✅ Đã chốt 2026-11-26, QĐ-B — thay "lúc gửi chỉ cảnh báo")*: lúc Sale bấm **Gửi**, kiểm ra `OVERDUE` / `OVER_LIMIT` thì hợp đồng **không tới khách** mà **chờ Kế toán duyệt** (BR-11):
+   - hợp đồng vẫn `Draft` (khách không thấy), không xuất bản PDF; hợp đồng **khoá sửa và khoá gửi**; hệ thống **lưu lại số liệu lúc gửi** — hạn mức, dư nợ, phần trả sau giao của hợp đồng, số tiền đang quá hạn — gắn với **phiên bản hợp đồng** Sale đã gửi, để sau này xem lại vì sao đã duyệt; Kế toán (người giữ quyền duyệt tín dụng) được **báo trong ứng dụng**, và được **nhắc lại** khi hợp đồng chờ quá **24 giờ**;
+   - **Kế toán duyệt** (bắt buộc ghi chú) → hệ thống kiểm lại như khi gửi (khách `Active`, cửa sổ giao chưa qua, khách còn hạn mức công nợ được duyệt — BR-12) rồi **gửi khách ngay** → hợp đồng `Sent`, người gửi là Sale đã gửi duyệt; Sale được báo;
+   - **Kế toán từ chối** (bắt buộc lý do) → hợp đồng **về nháp cho Sale sửa** (thường là tăng phần thu trước giao, bớt đợt `AFTER_DELIVERY`) rồi gửi lại; **không huỷ đơn, không huỷ hợp đồng**; Sale được báo, lý do xem trên hợp đồng;
+   - **Sale rút lại** khi đang chờ → về nháp; **huỷ hợp đồng / huỷ đơn** khi đang chờ → lượt duyệt kết thúc;
+   - người duyệt / từ chối phải **khác** người gửi duyệt (bốn mắt).
+
+   **Lúc ký** kiểm lại: không đạt → đơn **`On Hold` lý do tín dụng** (bước 10). Riêng hợp đồng **đã được Kế toán duyệt trước khi gửi**: kiểm lúc ký vẫn không đạt nhưng **không xấu hơn lúc duyệt** — không có khoản quá hạn mới, số quá hạn không tăng, dư nợ + phần trả sau giao không vượt con số đã duyệt — thì **cho qua**, không treo; kết quả kiểm được ghi kèm lượt duyệt trước khi gửi. Xấu hơn thì treo như mọi hợp đồng khác *(✅ Đã chốt 2026-11-26)*.
 
    Đơn treo vì tín dụng *(✅ Đã chốt 2026-11-25)*: Kế toán (người giữ quyền duyệt đơn treo tín dụng) nhận **thông báo trong ứng dụng** một lần cho mỗi lần treo và thấy ô **"Đơn chờ duyệt tín dụng"** trên dashboard; **khách được báo** trên trang đơn: đơn đang chờ xác nhận công nợ, nếu không được xác nhận thì khoản đã trả được hoàn toàn bộ.
 10. **Đơn treo vì tín dụng** — kế toán quyết định:
     - **Duyệt** (bắt buộc ghi chú) → đơn tiếp tục: `Pending Payment` nếu còn đợt `ON_SIGNING` chưa đủ, nếu không thì `Confirmed`.
-    - **Từ chối** (bắt buộc ghi chú) → hợp đồng **bị huỷ bỏ theo điều kiện tín dụng** in trong hợp đồng (BLDS Điều 120; điều khoản chỉ in khi lịch có đợt `AFTER_DELIVERY` — [14](../14-cart-and-order/README.md) §4.3 bước 13, BR-14), đơn bị huỷ với lý do `CREDIT_REJECTED`; tiền đã thu (nếu có) **hoàn toàn bộ** — thành số tiền phải hoàn (§4.5). Đơn treo trước `Confirmed` nên chưa có Đơn sản xuất nào in hàng loạt, không có phí huỷ *(✅ Đã chốt 2026-11-25)*.
+    - **Từ chối** (bắt buộc ghi chú) → hợp đồng **chấm dứt theo điều kiện tín dụng** in trong hợp đồng (BLDS Điều 120; điều khoản chỉ in khi lịch có đợt `AFTER_DELIVERY` — [14](../14-cart-and-order/README.md) §4.3 bước 13, BR-14), đơn bị huỷ với lý do `CREDIT_REJECTED`; tiền đã thu (nếu có) **hoàn toàn bộ** — thành số tiền phải hoàn (§4.5). Trong hệ thống hợp đồng **giữ `Signed`** (hợp đồng đã ký không chuyển `Cancelled`) và được **thanh lý** — `Liquidated` — khi tiền của đơn đã xử lý xong ([14](../14-cart-and-order/README.md) §5.2). Đơn treo trước `Confirmed` nên chưa có Đơn sản xuất nào in hàng loạt, không có phí huỷ *(✅ Đã chốt 2026-11-25)*.
 
     Duyệt hay từ chối thì **Sale phụ trách** đơn nhận thông báo ngay (duyệt: thông tin; từ chối: cảnh báo) — [00](../../00-system-overview/README.md) §6.
 
-    Mọi kết quả kiểm và quyết định được ghi lịch sử: `WITHIN_LIMIT` / `OVER_LIMIT` / `OVERDUE` / `APPROVED` / `REJECTED`.
+    Mọi kết quả kiểm và quyết định được ghi lịch sử: `WITHIN_LIMIT` / `OVER_LIMIT` / `OVERDUE` / `APPROVED` / `REJECTED`; kiểm lúc ký được cho qua nhờ lượt duyệt trước khi gửi thì ghi kèm lượt duyệt đó. Mỗi lượt duyệt trước khi gửi cũng được lưu (chờ / duyệt / từ chối / rút lại, số liệu lúc gửi, người và thời điểm quyết, ghi chú).
 11. **Khách phát sinh quá hạn sau khi đơn đã xác nhận** — hệ thống cảnh báo Sale; Sale có thể treo tay các đơn đang chạy của khách ([17](../17-order-management/README.md) §4.9).
 
     11a. **Đề nghị cấp hạn mức** *(✅ Đã chốt 2026-11-26 — QĐ-A)* — cách khách **xin** hạn mức hoặc **xin nâng** hạn mức (BR-21):
@@ -319,7 +328,7 @@ stateDiagram-v2
 - **BR-08:** Còn đợt `BEFORE_DELIVERY` chưa `Paid` → **chặn bàn giao** cho đơn vị vận chuyển (ký bàn giao chuyến xe — mọi đơn giao nguyên chuyến, [09](../../warehouse/09-shipping/README.md)). Đợt **gắn đợt giao *k*** chỉ chặn bàn giao của đợt *k*; đợt **không gắn** chặn từ lần bàn giao đầu tiên *(✅ Đã chốt 2026-11-07)*.
 - **BR-09:** Đợt `AFTER_DELIVERY` là **công nợ phải thu**: hạn trả = ngày giao thành công (của đơn — lần giao cuối; hoặc của **đợt giao gắn kèm** — lần giao cuối của đợt đó) + N ngày (ngày giao thành công đến từ webhook của hãng vận chuyển hoặc do Quản lý kho ghi — [09](../../warehouse/09-shipping/README.md)); đã qua hạn trả mà chưa trả đủ thì đợt được gắn **cờ quá hạn** (tính khi đọc, không phải trạng thái — §4.1 bước 4) tới khi trả đủ *(✅ Cập nhật 2026-11-14 — đồng bộ code backend, WF-05)*.
 - **BR-10:** **Dư nợ (exposure)** = phần chưa thu của mọi đợt `AFTER_DELIVERY` thuộc các hợp đồng `Signed` (kể cả `Not Due`) + khoản phí huỷ chưa trả. **Hạn mức còn lại** = hạn mức − dư nợ, không âm.
-- **BR-11:** Kiểm tín dụng lúc **gửi hợp đồng** chỉ cảnh báo; lúc **ký** thì `OVERDUE` / `OVER_LIMIT` → đơn `On Hold` lý do tín dụng. Chỉ **kế toán** duyệt / từ chối, bắt buộc ghi chú, ghi lịch sử.
+- **BR-11:** Kiểm tín dụng lúc **gửi hợp đồng**: `OVERDUE` / `OVER_LIMIT` → hợp đồng **không gửi**, chờ **Kế toán duyệt** (duyệt có ghi chú → gửi ngay; từ chối có lý do → về nháp cho Sale sửa; bốn mắt) *(✅ Đã chốt 2026-11-26 — thay "lúc gửi chỉ cảnh báo")*. Lúc **ký** kiểm lại: `OVERDUE` / `OVER_LIMIT` → đơn `On Hold` lý do tín dụng, trừ hợp đồng đã duyệt trước khi gửi mà không xấu hơn lúc duyệt (§4.3 bước 9). Chỉ **kế toán** duyệt / từ chối, bắt buộc ghi chú, ghi lịch sử.
 - **BR-12:** Hạn mức và kỳ hạn công nợ do **kế toán duyệt** (ghi người và thời điểm — [18](../18-customer-information/README.md)). Hợp đồng đã ký giữ lịch thanh toán của nó dù hạn mức / kỳ hạn của khách đổi sau đó.
 - **BR-13:** Huỷ phiếu thu làm đơn đã xác nhận thiếu đợt `ON_SIGNING` → bắt buộc **treo đơn** (lý do thanh toán); không âm thầm đưa đơn về chưa thanh toán.
 - **BR-14:** **Hoàn tiền:** số tiền phải hoàn do hệ thống tính, không vượt tổng đã thu của đơn; tổng **ghi nhận đã hoàn** không vượt số phải hoàn. Chuyển khoản hoàn làm **ngoài hệ thống** *(✅ Đã chốt 2026-11-06)*.
@@ -344,7 +353,13 @@ stateDiagram-v2
 | Ghi nhầm khách / đợt / số tiền | Huỷ phiếu thu (§4.4), rồi lập phiếu đúng |
 | Tiền về sau khi đơn đã huỷ | Không ghi được cho đợt `Cancelled`; xử lý ngoài hệ thống (hoàn hoặc dùng cho đơn sau — BR-06) |
 | Hoàn tiền cho khách bị lỗi (sai tài khoản) | Chưa ghi nhận đã hoàn; Kế toán hoàn lại rồi mới ghi nhận (§4.5) |
-| Khách đang quá hạn ký hợp đồng mới có đợt trả sau | Đơn `On Hold` lý do tín dụng khi ký; kế toán duyệt hoặc từ chối (hợp đồng huỷ bỏ theo điều kiện tín dụng, huỷ đơn, hoàn toàn bộ tiền đã thu — §4.3 bước 10) |
+| Khách đang quá hạn, Sale gửi hợp đồng mới có đợt trả sau | Hợp đồng không gửi, chờ Kế toán duyệt (§4.3 bước 9, BR-11) |
+| Kế toán từ chối hợp đồng chờ duyệt trước khi gửi | Hợp đồng về nháp, **không huỷ**; Sale sửa lịch thanh toán (thu trước nhiều hơn, bớt đợt `AFTER_DELIVERY`) rồi gửi lại — đạt thì gửi khách, không đạt thì chờ duyệt lần nữa |
+| Sale cần sửa hợp đồng đang chờ duyệt | Không sửa được; Sale **rút lại** rồi sửa và gửi lại |
+| Hợp đồng chờ duyệt quá 24 giờ | Kế toán được nhắc lại trong ứng dụng (mỗi lượt một lần) |
+| Đã duyệt trước khi gửi, tới lúc ký khách quá hạn thêm hoặc nợ thêm hợp đồng khác | Xấu hơn lúc duyệt → đơn `On Hold` lý do tín dụng khi ký; kế toán duyệt hoặc từ chối (§4.3 bước 10) |
+| Đã duyệt trước khi gửi, tới lúc ký tình hình như cũ hoặc tốt hơn | Không treo; kết quả kiểm ghi kèm lượt duyệt trước khi gửi |
+| Đơn treo tín dụng lúc ký bị kế toán từ chối | Hợp đồng chấm dứt theo điều kiện tín dụng (giữ `Signed`, thanh lý `Liquidated` khi tiền đã xử lý xong), huỷ đơn `CREDIT_REJECTED`, hoàn toàn bộ tiền đã thu (§4.3 bước 10) |
 | Đơn đã `Packed` (đã kiểm đủ thùng & dán nhãn giao hàng) nhưng đợt `BEFORE_DELIVERY` chưa trả | Chặn bàn giao; hàng chờ tại kho (khu xuất hàng `DISPATCH`); Sale nhắc khách |
 | Khách huỷ đơn trước khi gửi Đơn sản xuất | Hoàn toàn bộ tiền đã thu, không phí ([17](../17-order-management/README.md) BR-11) |
 | Khách huỷ đơn khi đơn vị sản xuất đã làm hàng theo mẫu (Đơn sản xuất đã `In Production`) | Nhân viên huỷ có phí: tiền đã thu trả phí trước, phần thừa thành số tiền phải hoàn, phần thiếu thành khoản phí huỷ |
