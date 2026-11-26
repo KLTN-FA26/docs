@@ -216,6 +216,8 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
 
    **Tên tài xế là bắt buộc** để ký *(✅ Đã chốt 2026-11-12)*: do nhân viên **nhập tay**, hoặc **đã về từ webhook** của hãng (hãng tích hợp API đặt xe mà webhook không gửi thì nhập tay). Hệ thống **không tự điền** tên tài xế — kể cả từ tên người đại diện hãng. Thiếu tên tài xế thì không ký được.
 
+   **Hộp kiểm "Người ký là tài xế"** *(Quyết định 26/11/2026)*: hộp thoại ký bàn giao có hộp kiểm **"Người ký là tài xế"**. **Chỉ khi hộp kiểm được tick** thì tên tài xế được **sao chép vào ô người ký của hãng**; tên đó vẫn **sửa được**. Không tick thì hệ thống không điền gì vào ô người ký. Quy tắc "không tự điền từ tên người đại diện hãng" ở trên **giữ nguyên** — hộp kiểm là thao tác chủ động của nhân viên, không phải hệ thống tự điền.
+
    Bàn giao là **tất cả hoặc không**: chỉ một shipment không được phép đi thì **cả xe bị từ chối**, kèm danh sách đơn và số tiền đợt còn thiếu. Muốn cho xe đi mà không có shipment đó thì dỡ kiện qua **huỷ có kiểm soát** xe đó (bước 9, BR-14).
 
    Ký xong → chuyến `Dispatched`.
@@ -583,7 +585,7 @@ stateDiagram-v2
 - **BR-18:** Bàn giao là **tất cả hoặc không**:
   - phải quét đủ mọi kiện của chuyến;
   - chuyến phải **có mã vận đơn** (BR-23);
-  - phải xác nhận đã ký, có người đại diện hãng, **tên tài xế** (nhập tay hoặc từ webhook, không tự điền — §4.2 bước 8) và biển số;
+  - phải xác nhận đã ký, có người đại diện hãng, **tên tài xế** (nhập tay hoặc từ webhook, không tự điền — §4.2 bước 8; ngoại lệ do nhân viên chủ động tick "Người ký là tài xế" thì tên tài xế được chép sang ô người ký của hãng, sửa được) và biển số;
   - mọi shipment phải được đơn cho phép đi: đợt `BEFORE_DELIVERY` áp cho shipment đã thu và đã tới ngày bắt đầu cửa sổ giao (BR-04), không đang treo, không thiếu phần khi đơn không cho giao một phần.
 - **BR-19:** Chuyến chỉ thay đổi qua kế hoạch (chốt, mở lại, huỷ), ghi nhận / huỷ đặt xe, hoặc qua huỷ có kiểm soát / bỏ xe khỏi kế hoạch (BR-14). Không có huỷ chuyến riêng lẻ ngoài các đường này.
 - **BR-20:** Ước tính tải **chỉ để tham khảo**; không chốt kế hoạch, không chặn kiểm thùng.
