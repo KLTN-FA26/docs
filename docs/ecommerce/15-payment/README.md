@@ -1,6 +1,8 @@
 # 15 — Thanh toán theo hợp đồng & Công nợ (Contract Payment & Receivables)
 
-> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách thanh toán bằng **chuyển khoản**. Không có cổng thanh toán online (thẻ / ví điện tử), không có COD, và không có trạng thái "thanh toán thất bại" (chuyển khoản không có lỗi để báo về). *(✅ Cập nhật 2026-11-15)* Thẻ thông tin chuyển khoản có **mã VietQR** để khách **chuyển khoản**: quét bằng ứng dụng ngân hàng thì tài khoản nhận, số tiền và nội dung được điền sẵn (§4.2 bước 5). VietQR chỉ là mã QR của một lệnh chuyển khoản thường, **không phải cổng thanh toán**: tiền vẫn chỉ được ghi nhận khi Kế toán đối chiếu sao kê và lập phiếu thu (BR-02).
+> Đã chốt 2026-10-06: hệ thống **chỉ bán sỉ (B2B)**. Khách thanh toán bằng **chuyển khoản**. Không có cổng thanh toán online (thẻ / ví điện tử), không có COD, và không có trạng thái "thanh toán thất bại" (chuyển khoản không có lỗi để báo về). *(✅ Cập nhật 2026-11-15)* Thẻ thông tin chuyển khoản có **mã VietQR** để khách **chuyển khoản**: quét bằng ứng dụng ngân hàng thì tài khoản nhận, số tiền và nội dung được điền sẵn (§4.2 bước 5). VietQR chỉ là mã QR của một lệnh chuyển khoản thường, **không phải cổng thanh toán**: tiền chỉ được ghi nhận bằng phiếu thu, theo giao dịch có thật trên tài khoản ngân hàng (BR-02).
+>
+> ✅ Đã chốt 2026-11-26 (kế hoạch tín dụng, phần C): hệ thống **đọc giao dịch tiền vào của tài khoản ngân hàng qua SePay**, cùng nguồn mà phần mềm kế toán đã đọc, nên Kế toán không phải nhập lại từng khoản. Giao dịch có nội dung khớp **đúng một đợt** và không vượt số còn phải thu thì hệ thống **tự lập phiếu thu**; giao dịch khác vào **hàng chờ của Kế toán** (§4.2 bước 6, BR-02).
 >
 > Đã chốt 2026-11-04: khách thanh toán theo **lịch thanh toán của Hợp đồng mua bán** ([14](../14-cart-and-order/README.md)) — mỗi hợp đồng gồm một hoặc nhiều **đợt thanh toán (Payment Installment)**. Tiền khách trả được ghi nhận **theo đợt thanh toán**, không còn điều khoản thanh toán chọn theo đơn.
 >
@@ -31,10 +33,10 @@ Payment quyết định các mốc tiền của đơn:
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ** | Chuyển khoản theo **thông tin chuyển khoản của từng đợt** trên cổng hoặc thẻ trong chat (tài khoản nhận, số tiền còn phải trả, nội dung = mã hợp đồng + mã đợt). Xem các đợt, công nợ của mình và vị thế tín dụng. |
-| **Kế toán (Accountant)** | Đối chiếu sao kê, **lập phiếu thu** cho các đợt / khoản phí huỷ; **huỷ phiếu thu** ghi sai; chuyển khoản hoàn (ngoài hệ thống) rồi **ghi nhận đã hoàn**. **Duyệt / từ chối đơn treo vì tín dụng** (§4.3). Duyệt hạn mức và kỳ hạn công nợ của khách ([18](../18-customer-information/README.md)). Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ**; lọc danh sách phiếu thu theo ngày nhận, xem tổng và **xuất Excel** để nhập phần mềm kế toán (§4.7). |
+| **Kế toán (Accountant)** | Đối chiếu sao kê, **lập phiếu thu** cho các đợt / khoản phí huỷ; xử lý **hàng chờ giao dịch ngân hàng**: gán giao dịch vào đợt (lập phiếu thu từ giao dịch) hoặc bỏ qua có lý do (§4.2 bước 6); **huỷ phiếu thu** ghi sai; chuyển khoản hoàn (ngoài hệ thống) rồi **ghi nhận đã hoàn**. **Duyệt / từ chối đơn treo vì tín dụng** (§4.3). Duyệt hạn mức và kỳ hạn công nợ của khách ([18](../18-customer-information/README.md)). Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ**; lọc danh sách phiếu thu theo ngày nhận, xem tổng và **xuất Excel** để nhập phần mềm kế toán (§4.7). |
 | **Nhân viên Sale (Sales Staff)** | Gửi thông tin chuyển khoản theo đợt và **nhắc công nợ** cho khách qua [chat](../16-sales-chat/README.md). Xem công nợ của khách, **báo cáo công nợ theo khách & tuổi nợ** (§4.7) và tình trạng các đợt của đơn. Treo tay đơn khi khách quá hạn; gỡ treo đơn lý do thanh toán khi tiền đã đủ trở lại ([17](../17-order-management/README.md)). |
 | **Quản lý kinh doanh (Sales Manager)** | Xem và **xuất Excel** **báo cáo công nợ theo khách & tuổi nợ** (§4.7). |
-| **Hệ thống** | Sinh đợt khi hợp đồng `Signed`; chuyển đợt sang `Due` theo mốc; tính lại trạng thái đợt khi lập / huỷ phiếu thu; **tính quá hạn khi đọc** (không còn trạng thái `Overdue`, không có job đêm đặt trạng thái); **quét mỗi đêm** báo Sale đợt vừa quá hạn; tự xác nhận đơn khi đủ đợt `ON_SIGNING`; chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa đủ; tính **số tiền phải hoàn**; hoàn tất hợp đồng. |
+| **Hệ thống** | Sinh đợt khi hợp đồng `Signed`; nhận giao dịch tiền vào từ SePay và **tự lập phiếu thu** khi nội dung khớp đúng một đợt (§4.2 bước 6); mỗi đêm hỏi lại SePay các giao dịch bị lỡ; chuyển đợt sang `Due` theo mốc; tính lại trạng thái đợt khi lập / huỷ phiếu thu; **tính quá hạn khi đọc** (không còn trạng thái `Overdue`, không có job đêm đặt trạng thái); **quét mỗi đêm** báo Sale đợt vừa quá hạn; tự xác nhận đơn khi đủ đợt `ON_SIGNING`; chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa đủ; tính **số tiền phải hoàn**; hoàn tất hợp đồng. |
 
 ---
 
@@ -92,7 +94,17 @@ Payment quyết định các mốc tiền của đơn:
    - **số tiền** còn phải trả của đợt;
    - **nội dung chuyển khoản** = mã hợp đồng + mã đợt;
    - trên thẻ trong chat: **mã VietQR** chứa đủ ba thông tin trên, khách quét bằng ứng dụng ngân hàng để chuyển khoản mà không gõ tay *(✅ Cập nhật 2026-11-15)*.
-6. Kế toán đối chiếu sao kê, **lập phiếu thu**:
+6. **Lập phiếu thu**, theo một trong hai đường. Cả hai cùng ra một phiếu thu và cùng các quy tắc dưới đây, nên đơn, kho và cổng bàn giao không phân biệt phiếu nào do ai lập.
+
+   **a. Tự động từ ngân hàng (SePay)** *(✅ Đã chốt 2026-11-26)*:
+   - SePay đọc tài khoản nhận của doanh nghiệp và gọi webhook của hệ thống cho **mỗi giao dịch tiền vào** (tiền ra bỏ qua). Hệ thống kiểm chữ ký (HMAC) hoặc API key của SePay, **lưu giao dịch trước** rồi mới xử lý; một giao dịch chỉ lưu một lần dù SePay gửi lại.
+   - Hệ thống đọc **mã hợp đồng + mã đợt** trong nội dung chuyển khoản (đúng nội dung thẻ chuyển khoản điền sẵn; chấp nhận ngân hàng đổi chữ hoa / thường, bỏ hoặc đổi dấu gạch, thêm chữ trước sau).
+   - Nội dung chỉ đúng **một đợt** của hợp đồng đã ký, đợt chưa `Paid` / `Cancelled`, đơn chưa huỷ, tiền vào đúng tài khoản nhận và **không vượt số còn phải thu** của đợt → hệ thống **tự lập phiếu thu**: mã tham chiếu sao kê là **mã giao dịch của ngân hàng** (BR-03 nên không ghi trùng), ngày nhận là ngày giao dịch, người lập là **tài khoản hệ thống "Bank feed (SePay)"**.
+   - Còn lại thì giao dịch vào **hàng chờ của Kế toán**, kèm lý do: nội dung không có mã đợt, có nhiều đợt, mã không tồn tại, đợt đã trả / đã huỷ hoặc đơn đã huỷ, chuyển thừa so với đợt, vào tài khoản khác, hoặc phiếu thu bị từ chối vì lý do khác.
+   - **Mỗi đêm** hệ thống hỏi lại SePay danh sách giao dịch mấy ngày gần nhất để lấy các giao dịch webhook bị lỡ, và xử lý lại giao dịch bị kẹt vì lỗi tạm thời.
+   - Trạng thái giao dịch: `Received` (vừa lưu) → `Applied` (đã có phiếu thu) / `Needs Review` (chờ Kế toán) → `Applied` (Kế toán gán) hoặc `Ignored` (Kế toán bỏ qua, có lý do). Phiếu thu lập từ giao dịch bị **huỷ** (§4.4) thì giao dịch quay lại `Needs Review`: tiền vẫn đã về, Kế toán gán lại hoặc bỏ qua.
+
+   **b. Kế toán lập**, từ hàng chờ (chọn khách, các đợt và số tiền của giao dịch; tổng không vượt số tiền giao dịch) hoặc lập tay khi đối chiếu sao kê:
    - chọn khách, nhập **mã tham chiếu sao kê**, ngày nhận;
    - thêm **một hoặc nhiều dòng**: mỗi dòng là một **đợt** (kể cả đợt **chưa đến hạn** — khách trả sớm) hoặc một **khoản phí huỷ** của khách đó, kèm số tiền;
    - mỗi dòng **không vượt số còn phải thu** của đợt / khoản; không ghi cho đợt `Paid` / `Cancelled`;
@@ -100,7 +112,7 @@ Payment quyết định các mốc tiền của đơn:
 
    Phiếu thu `Recorded` **không sửa được** (BR-04).
 
-   > ✅ Đã chốt 2026-11-06: khoản tiền **không gắn được với đợt nào** (nội dung chuyển khoản sai, khách chuyển thừa, tiền về sau khi đơn đã huỷ) **không ghi vào hệ thống**: Kế toán chỉ lập phiếu thu cho phần đã xác định được đợt; phần còn lại xử lý ở phần mềm kế toán (hoàn cho khách hoặc trừ vào đơn sau theo thoả thuận). Xem [open-questions D36](../../open-questions/README.md).
+   > ✅ Đã chốt 2026-11-06: khoản tiền **không gắn được với đợt nào** (nội dung chuyển khoản sai, khách chuyển thừa, tiền về sau khi đơn đã huỷ) **không ghi vào hệ thống**: Kế toán chỉ lập phiếu thu cho phần đã xác định được đợt; phần còn lại xử lý ở phần mềm kế toán (hoàn cho khách hoặc trừ vào đơn sau theo thoả thuận). Xem [open-questions D36](../../open-questions/README.md). *(Cập nhật 2026-11-26)* Giao dịch như vậy từ ngân hàng nằm ở hàng chờ: Kế toán gán phần xác định được, hoặc bỏ qua với lý do; phần thừa vẫn xử lý ở phần mềm kế toán.
 7. **Kết quả** — hệ thống tính lại các đợt có trong phiếu:
    - Đợt trả một phần → `Partially Paid`; trả đủ → `Paid`.
    - Mọi đợt `ON_SIGNING` của hợp đồng `Paid` → đơn `Pending Payment` tự chuyển `Confirmed`. Ngoài ra hệ thống **đối soát mỗi giờ**: đơn `Pending Payment` có hợp đồng `Signed` đã thu đủ mọi đợt `ON_SIGNING` mà chưa được xác nhận (lần chuyển tự động bị lỗi) thì được xác nhận *(✅ Đã chốt 2026-11-25)*.
@@ -269,7 +281,7 @@ stateDiagram-v2
 ### Business rules
 
 - **BR-01:** Khách chỉ thanh toán **theo lịch thanh toán của hợp đồng `Signed`**, bằng chuyển khoản. Không có điều khoản thanh toán theo đơn ngoài hợp đồng.
-- **BR-02:** Tiền chỉ được ghi nhận khi kế toán **đối chiếu sao kê** và lập **phiếu thu**; không ghi nhận theo lời khách báo.
+- **BR-02:** Tiền chỉ được ghi nhận bằng **phiếu thu**, theo một **giao dịch có thật trên tài khoản ngân hàng**: hệ thống tự lập khi giao dịch SePay gửi về khớp đúng một đợt và không vượt số còn phải thu; còn lại Kế toán gán từ hàng chờ hoặc lập khi đối chiếu sao kê (§4.2 bước 6). **Không ghi nhận theo lời khách báo** *(✅ Cập nhật 2026-11-26, kế hoạch tín dụng phần C)*.
 - **BR-03:** Một **mã tham chiếu sao kê** chỉ dùng cho **một phiếu thu còn hiệu lực** (`Recorded`).
 - **BR-04:** Phiếu thu **không sửa**: ghi sai thì **huỷ phiếu thu** (bắt buộc lý do, giữ lịch sử, không xoá) rồi lập phiếu mới *(✅ Đã chốt 2026-11-06)*.
 - **BR-05:** Phiếu thu chỉ ghi cho **đợt chưa `Paid` / `Cancelled`** (kể cả đợt `Not Due` — khách trả sớm) hoặc **khoản phí huỷ** của **cùng một khách**; mỗi dòng không vượt số còn phải thu. Một phiếu thu được có nhiều dòng (khách chuyển một lần trả nhiều đợt). Không có **tiền dư** trong hệ thống *(✅ Đã chốt 2026-11-06)*.
@@ -293,14 +305,17 @@ stateDiagram-v2
 
 | Tình huống | Hướng xử lý |
 |------------|-------------|
-| Khách chuyển thiếu so với đợt | Lập phiếu thu đúng số đã nhận; đợt `Partially Paid`; Sale nhắc khách chuyển nốt qua chat |
+| Khách chuyển thiếu so với đợt | Lập phiếu thu đúng số đã nhận (giao dịch từ ngân hàng đúng nội dung thì hệ thống tự lập); đợt `Partially Paid`; Sale nhắc khách chuyển nốt qua chat |
 | Khách chuyển một lần để trả nhiều đợt | Một phiếu thu nhiều dòng, mỗi đợt một số tiền (BR-05) |
-| Khách chuyển thừa | Chỉ ghi đúng số còn phải thu của các đợt; phần thừa hoàn hoặc trừ đơn sau theo thoả thuận, **ngoài hệ thống** (BR-06) |
+| Khách chuyển thừa | Giao dịch từ ngân hàng không tự ghi, vào hàng chờ (lý do chuyển thừa). Kế toán chỉ gán đúng số còn phải thu của các đợt; phần thừa hoàn hoặc trừ đơn sau theo thoả thuận, **ngoài hệ thống** (BR-06) |
 | Khách trả sớm đợt chưa đến hạn | Lập phiếu thu cho đợt `Not Due` → `Partially Paid` / `Paid`; tới mốc đợt giữ trạng thái đó |
-| Nội dung chuyển khoản sai / thiếu mã hợp đồng | Kế toán xác nhận với khách trước, rồi lập phiếu thu cho đúng đợt; trong lúc chưa xác định, khoản tiền chưa ghi vào hệ thống (BR-06) |
+| Nội dung chuyển khoản sai / thiếu mã hợp đồng | Giao dịch vào hàng chờ. Kế toán xác nhận với khách trước, rồi gán giao dịch cho đúng đợt; trong lúc chưa xác định, khoản tiền chưa ghi vào hệ thống (BR-06) |
 | Ghi trùng một dòng sao kê | Từ chối (BR-03) |
 | Ghi nhầm khách / đợt / số tiền | Huỷ phiếu thu (§4.4), rồi lập phiếu đúng |
-| Tiền về sau khi đơn đã huỷ | Không ghi được cho đợt `Cancelled`; xử lý ngoài hệ thống (hoàn hoặc dùng cho đơn sau — BR-06) |
+| Tiền về sau khi đơn đã huỷ | Giao dịch vào hàng chờ; không ghi được cho đợt `Cancelled`. Kế toán bỏ qua có lý do, xử lý ngoài hệ thống (hoàn hoặc dùng cho đơn sau — BR-06) |
+| Một lần chuyển cho nhiều đợt | Giao dịch vào hàng chờ; Kế toán gán một phiếu thu nhiều dòng (BR-05) |
+| SePay gửi một giao dịch nhiều lần, hoặc webhook bị lỡ | Mỗi giao dịch chỉ lưu một lần (theo mã của SePay và mã giao dịch ngân hàng); giao dịch bị lỡ được lấy lại khi hệ thống hỏi SePay mỗi đêm |
+| Kế toán đã lập tay phiếu thu trước khi giao dịch về | Giao dịch không tự ghi được (trùng mã tham chiếu, BR-03), vào hàng chờ; Kế toán bỏ qua với lý do "đã lập phiếu" |
 | Hoàn tiền cho khách bị lỗi (sai tài khoản) | Chưa ghi nhận đã hoàn; Kế toán hoàn lại rồi mới ghi nhận (§4.5) |
 | Khách đang quá hạn ký hợp đồng mới có đợt trả sau | Đơn `On Hold` lý do tín dụng khi ký; kế toán duyệt hoặc từ chối (hợp đồng huỷ bỏ theo điều kiện tín dụng, huỷ đơn, hoàn toàn bộ tiền đã thu — §4.3 bước 10) |
 | Đơn đã `Packed` (đã kiểm đủ thùng & dán nhãn giao hàng) nhưng đợt `BEFORE_DELIVERY` chưa trả | Chặn bàn giao; hàng chờ tại kho (khu xuất hàng `DISPATCH`); Sale nhắc khách |
@@ -325,5 +340,5 @@ stateDiagram-v2
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Chặn bàn giao khi đợt `BEFORE_DELIVERY` chưa thu đủ (theo đợt giao gắn kèm, nếu có); ngày giao thành công (của đơn hoặc của đợt giao gắn kèm) (từ webhook của hãng hoặc Quản lý kho ghi tay) làm đợt `AFTER_DELIVERY` đến hạn |
 | [16 · Sales Chat](../16-sales-chat/README.md) | Sale gửi thông tin chuyển khoản theo đợt, nhắc công nợ |
 | [18 · Customer Information](../18-customer-information/README.md) | Hạn mức, kỳ hạn công nợ, lịch thanh toán mặc định; vị thế tín dụng hiển thị cho khách |
-| Kế toán / Ngân hàng (ngoài hệ thống) | Đối soát sao kê; sổ sách tiền đầy đủ (kể cả khoản chưa xác định được đợt, tiền thừa) và đối chiếu công nợ theo kỳ; nhập phiếu thu từ file Excel xuất ở §4.7; chuyển khoản hoàn |
+| Kế toán / Ngân hàng (ngoài hệ thống) | **SePay** đọc tài khoản ngân hàng và gửi giao dịch tiền vào (webhook, mỗi đêm hỏi lại); đối soát sao kê; sổ sách tiền đầy đủ (kể cả khoản chưa xác định được đợt, tiền thừa) và đối chiếu công nợ theo kỳ; nhập phiếu thu từ file Excel xuất ở §4.7; chuyển khoản hoàn |
 | [21 · E-invoice](../21-e-invoice/README.md) | Hoá đơn VAT điện tử phát hành theo lần giao qua nhà cung cấp hoá đơn điện tử; không ảnh hưởng đợt thanh toán, công nợ; phí huỷ không xuất hoá đơn GTGT (BR-19); 15 xem danh sách hoá đơn của đơn để tham chiếu |
