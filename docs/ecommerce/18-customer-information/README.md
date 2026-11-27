@@ -84,6 +84,7 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 | **Nhóm khách** | Phân loại khách để lọc, tra cứu; không quyết định giá |
 | **Lịch sử trạng thái** (kèm lý do) và **lịch sử thay đổi** tên công ty / mã số thuế / thông tin pháp lý | Quản lý kinh doanh, Sale |
 | **Tình trạng lời mời** (chờ kích hoạt / hết hạn / đã kích hoạt…) | Sale |
+| Cờ **"Thiếu MST"** trên hồ sơ cũ chưa có mã số thuế (BR-01) *(✅ 2026-11-28)* | Sale (lọc danh sách khách, bổ sung dần) |
 | **Sale phụ trách hiện tại** (tên, từ ngày, trạng thái phụ trách, người đang lo thay nếu có) và **lịch sử phụ trách** (từ ai sang ai, lý do, ghi chú, người đổi, lúc nào, lô chuyển) *(✅ 2026-11-28)* | Nhân viên (trang khách, danh sách khách — lọc "Khách của tôi", "Cần giao người phụ trách", theo Sale); khách chỉ thấy tên người phụ trách và người thay |
 | **Người lo việc của khách hôm nay** — người phụ trách, người thay, hoặc (khi không có ai) các Sales Manager kèm nhãn "cần phân công" (§4.5 bước 15) *(✅ 2026-11-28)* | Định tuyến chat ([16](../16-sales-chat/README.md)), người nhận thông báo ([00 §6](../../00-system-overview/README.md)), quyền lập / gửi báo giá, hợp đồng ([14](../14-cart-and-order/README.md)) |
 | **Cảnh báo khách có thể trùng** — khách trùng điện thoại / email / tên, kèm Sale đang phụ trách *(✅ 2026-11-28)* | Người tạo hồ sơ |
@@ -169,11 +170,13 @@ Quản lý **hồ sơ khách sỉ (customer profile)** và dữ liệu đi kèm:
 18. **Người thay khi vắng (nghỉ phép)** — Sale lập lịch cho **lần vắng của chính mình**, Sales Manager lập cho **bất kỳ Sale nào**: "B lo thay A từ ngày X tới Y", kèm lý do (BR-17).
     - Người thay phải là Sale đang làm, khác A; mỗi Sale **không có hai lịch chồng nhau**; tối đa **60 ngày** (cấu hình).
     - Trong lịch thay, mọi việc của khách của A đi tới B (bước 15); B thấy nhãn **"Bạn đang lo thay cho A"**. **Người phụ trách không đổi.**
+    - Lịch thay bắt đầu hay kết thúc **không chuyển hội thoại đang mở**: lịch chỉ áp cho định tuyến hội thoại **mới** và người nhận thông báo; cần thì Sales Manager chuyển hội thoại đang mở bằng tay *(✅ Đã chốt 2026-11-28 — [open-questions F9](../../open-questions/README.md))*.
     - Hết lịch thì **tự trả về A**, không ai phải làm gì. Sale huỷ được lịch mình đã lập; Manager huỷ được mọi lịch và xem mọi lịch.
 19. **Sale nghỉ việc / bị khoá tài khoản** — System Admin khoá hoặc vô hiệu hoá tài khoản **ngay**, không bắt giao khách trước (an ninh — [00 §2.5.1](../../00-system-overview/README.md)). Hộp xác nhận khoá ghi rõ người đó đang phụ trách bao nhiêu khách, bao nhiêu hội thoại mở và khách tiềm năng đang giữ. Sau khi khoá, hệ thống (BR-18):
     - chuyển khách của người đó sang **"Cần giao người phụ trách"** (vẫn nhớ người cũ);
     - đưa **hội thoại đang mở** của người đó **về hàng chờ**, ưu tiên cao ([16](../16-sales-chat/README.md));
     - **huỷ các lịch thay** mà người đó là người thay; A đang được thay mà bị khoá thì khách của A cũng sang "Cần giao";
+    - đưa **khách tiềm năng đang mở** của người đó (`Assigned` / `Contacted`) **về hàng chờ của Sales Manager**, bỏ người được giao, ghi một dòng lịch sử trên lead (§4.6) *(✅ Đã chốt 2026-11-28 — [open-questions D44](../../open-questions/README.md))*;
     - báo **Sales Manager**, kèm số khách và số hội thoại cần giao.
 
     Trong lúc chờ giao, việc và thông báo về các khách này đi tới Sales Manager (bước 15); khách nhắn thì vào hàng chờ chat, một Sale **nhận** được hội thoại và thành người phụ trách ([16](../16-sales-chat/README.md) BR-13).
@@ -273,8 +276,8 @@ stateDiagram-v2
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
 | `New` | Vừa gửi từ website, nằm trong hàng chờ của Sales Manager | → `Assigned`, → `Disqualified` | Sales Manager |
-| `Assigned` | Đã giao cho một Sale | → `Contacted`, → `Disqualified` | Sale được giao; Sales Manager (loại) |
-| `Contacted` | Sale đã liên hệ, đang xác minh doanh nghiệp | → `Converted`, → `Disqualified` | Sale được giao; Sales Manager (loại) |
+| `Assigned` | Đã giao cho một Sale | → `Contacted`, → `Disqualified`, → `New` (Sale được giao bị khoá tài khoản) | Sale được giao; Sales Manager (loại); Hệ thống (khi khoá tài khoản) |
+| `Contacted` | Sale đã liên hệ, đang xác minh doanh nghiệp | → `Converted`, → `Disqualified`, → `New` (Sale được giao bị khoá tài khoản) | Sale được giao; Sales Manager (loại); Hệ thống (khi khoá tài khoản) |
 | `Converted` | Đã thành hồ sơ khách (người phụ trách = Sale được giao) | *(cuối)* | Sale được giao |
 | `Disqualified` | Đã loại, có lý do | *(cuối)* | Sales Manager hoặc Sale được giao |
 
@@ -283,6 +286,8 @@ stateDiagram-v2
     [*] --> New: Gửi form trên website
     New --> Assigned: Manager giao Sale
     Assigned --> Contacted: Sale liên hệ
+    Assigned --> New: Sale bị khoá tài khoản
+    Contacted --> New: Sale bị khoá tài khoản
     Contacted --> Converted: Chuyển thành khách
     New --> Disqualified: Loại (lý do)
     Assigned --> Disqualified: Loại (lý do)
@@ -326,7 +331,7 @@ stateDiagram-v2
 
   Email là khoá đăng nhập; mỗi khách **một tài khoản đăng nhập**. Mã số thuế cũng **bắt buộc trước khi phát hành hoá đơn** (BR-12), kể cả với hồ sơ được ngoại lệ.
 
-  > ⚠️ Giả định: luật bắt buộc chỉ áp cho hồ sơ **tạo mới** từ 2026-11-28; hồ sơ đã có mà chưa có mã số thuế vẫn dùng và sửa được như cũ, chỉ phải bổ sung trước khi phát hành hoá đơn (BR-12). Xem [open-questions D41](../../open-questions/README.md).
+  > ✅ Đã chốt 2026-11-28 ([open-questions D41](../../open-questions/README.md)): luật bắt buộc chỉ áp cho hồ sơ **tạo mới**. Hồ sơ **đã có** mà chưa có mã số thuế **không bị buộc** bổ sung — vẫn dùng và sửa được như cũ — nhưng mang cờ **"Thiếu MST"** (lọc được trong danh sách khách) để Sale bổ sung dần; mã số thuế vẫn phải có trước khi phát hành hoá đơn (BR-12).
 - **BR-02:** Chỉ **Sale / Quản lý kinh doanh** tạo hồ sơ khách; **không có đăng ký tự do** và guest checkout. Người chưa có tài khoản chỉ gửi được **yêu cầu mở tài khoản** — thành khách tiềm năng, Sales Manager giao Sale, Sale xác minh rồi tạo hồ sơ (§4.6, BR-23) *(✅ 2026-11-28)*. Chỉ hồ sơ `Active` mới xem tình trạng còn hàng, nhận báo giá và hợp đồng (sàn không hiển thị giá — [13](../13-catalog/README.md)).
 - **BR-03:** **Hạn mức và kỳ hạn công nợ** chỉ do **kế toán** duyệt — sửa trực tiếp, hoặc duyệt **đề nghị cấp hạn mức** của khách / Sale ([15](../15-payment/README.md) BR-21; hạn mức duyệt không cao hơn mức xin) *(✅ Đã chốt 2026-11-26)*; mọi thay đổi ghi người và thời điểm duyệt. Lịch thanh toán mặc định chỉ có đợt `AFTER_DELIVERY` khi khách có hạn mức > 0. Lúc tạo khách, Sale chỉ đặt được đợt `ON_SIGNING` / `BEFORE_DELIVERY`.
 - **BR-04:** Lịch thanh toán mặc định: mỗi đợt có % > 0 và đúng một mốc; **tổng 100%**. Đây chỉ là mẫu — lịch ràng buộc nằm trong từng hợp đồng ([14](../14-cart-and-order/README.md)).
@@ -345,10 +350,10 @@ stateDiagram-v2
 
 - **BR-13:** **Một khách, một người phụ trách.** Mỗi khách có **tối đa một** Sale phụ trách cho cả công ty, dù khách có nhiều người liên hệ (mua hàng, kế toán). Trạng thái phụ trách luôn khớp với người phụ trách (§5): `ASSIGNED` thì có người phụ trách đang làm; `NEEDS_ASSIGNMENT` thì nhớ người cũ; `UNASSIGNED` thì chưa từng có. Người phụ trách phải là **tài khoản nhân viên đang làm có quyền chat với khách** — không giao cho Kế toán, kho, hay tài khoản đã khoá. Khách `Blocked` / `Inactive` vẫn giữ người phụ trách để xem lịch sử.
 - **BR-14:** **Người phụ trách khi tạo hồ sơ:** Sale tạo → chính Sale đó; Sales Manager tạo → Manager chọn một Sale, hoặc để trống (`UNASSIGNED`); chuyển từ khách tiềm năng → Sale được giao lead. Người phụ trách được ghi vào lịch sử ngay khi tạo.
-- **BR-15:** **Chỉ Sales Manager / System Admin giao hoặc đổi người phụ trách** (quyền `customer-sales-owners:UPDATE`). Sale **không** tự đổi người phụ trách của khách, kể cả sang chính mình; chỉ có hai đường Sale thành người phụ trách mà không qua Manager: **tạo hồ sơ** (BR-14) và **nhận hội thoại** của khách chưa có người phụ trách từ hàng chờ chat ([16](../16-sales-chat/README.md) BR-13). Mỗi lần đổi **bắt buộc lý do** (*Sale nghỉ việc / Chia lại tải / Khách yêu cầu / Đổi khu vực / Khác*) kèm ghi chú. **Lịch sử phụ trách chỉ ghi thêm**: không ai sửa hay xoá được, kể cả System Admin. Hai người cùng đổi một khách → người sau bị từ chối, phải tải lại.
+- **BR-15:** **Chỉ Sales Manager / System Admin giao hoặc đổi người phụ trách** (quyền `customer-sales-owners:UPDATE`). Sale **không** tự đổi người phụ trách của khách, kể cả sang chính mình; chỉ có bốn đường làm một Sale thành người phụ trách: **Manager giao**, **nhận hội thoại** của khách chưa có người phụ trách từ hàng chờ chat ([16](../16-sales-chat/README.md) BR-13), **tạo hồ sơ** khách và **chuyển khách tiềm năng** được giao thành khách (BR-14). Lập báo giá, hợp đồng cho khách chưa có người phụ trách **không** làm người lập thành người phụ trách *(✅ Đã chốt 2026-11-28 — [open-questions D43](../../open-questions/README.md))*. Mỗi lần đổi **bắt buộc lý do** (*Sale nghỉ việc / Chia lại tải / Khách yêu cầu / Đổi khu vực / Khác*) kèm ghi chú. **Lịch sử phụ trách chỉ ghi thêm**: không ai sửa hay xoá được, kể cả System Admin. Hai người cùng đổi một khách → người sau bị từ chối, phải tải lại.
 - **BR-16:** **Đổi người phụ trách kéo theo** (§4.5 bước 17): hội thoại đang mở chuyển sang người mới kèm ghi chú nội bộ; khách nhận một tin hệ thống trong chat (tắt được khi đổi nội bộ); việc và thông báo về sau đi tới người mới. **Chứng từ đã lập không đổi**: người gửi và Sale phụ trách lúc lập của báo giá, hợp đồng giữ nguyên, nên doanh số đã chốt vẫn thuộc người cũ ([14](../14-cart-and-order/README.md) BR-26).
 - **BR-17:** **Người thay khi vắng:** người thay là Sale đang làm, khác người vắng; từ ngày ≤ đến ngày; tối đa **60 ngày** (cấu hình); một Sale không có hai lịch thay chồng nhau. Sale chỉ lập / huỷ lịch cho lần vắng của **chính mình**; Sales Manager lập / huỷ cho bất kỳ ai và xem mọi lịch. Lịch thay **không đổi người phụ trách**, có hạn và được ghi vết — không dùng được để lấy khách lâu dài. Hết lịch tự trả về người phụ trách.
-- **BR-18:** **Tài khoản Sale bị khoá / vô hiệu hoá:** khoá được ngay, không bắt giao khách trước. Hệ thống chuyển khách của người đó sang `NEEDS_ASSIGNMENT`, đưa hội thoại đang mở của họ về hàng chờ (ưu tiên cao), huỷ các lịch mà họ là người thay, và báo Sales Manager kèm số khách, số hội thoại cần giao. **Tài khoản được mở lại thì khách không tự quay về**: Manager quyết có giao lại không.
+- **BR-18:** **Tài khoản Sale bị khoá / vô hiệu hoá:** khoá được ngay, không bắt giao khách trước. Hệ thống chuyển khách của người đó sang `NEEDS_ASSIGNMENT`, đưa hội thoại đang mở của họ về hàng chờ (ưu tiên cao), huỷ các lịch mà họ là người thay, đưa khách tiềm năng đang mở (`Assigned` / `Contacted`) của họ về hàng chờ của Sales Manager (bỏ người được giao, ghi lịch sử trên lead), và báo Sales Manager kèm số khách, số hội thoại cần giao. **Tài khoản được mở lại thì khách không tự quay về**: Manager quyết có giao lại không.
 - **BR-19:** **Chuyển hàng loạt:** chỉ Sales Manager / System Admin; lý do bắt buộc; ghi lịch sử từng khách kèm mã lô; **chạy lại cùng một lô không chuyển hai lần**; chỉ chuyển khách **đang** thuộc Sale nguồn lúc chạy — khách đã bị đổi tay được bỏ qua và báo lại. Lô **chuyển tạm** trả lại được bằng một thao tác, và chỉ trả những khách **vẫn đang** thuộc người nhận của lô.
 - **BR-20:** **Một quy tắc chọn người lo việc** (§4.5 bước 15): người phụ trách → người thay (khi có lịch) → khi không có người phụ trách đang làm: các **Sales Manager đang làm**, không còn ai thì **System Admin**, kèm nhãn "cần phân công". Mọi thông báo về một khách đi theo quy tắc này ([00 §6](../../00-system-overview/README.md)); **không thông báo nào gửi cho mọi Sale**.
 - **BR-21:** **Xem thì rộng, làm thì theo người phụ trách:** mọi Sale vẫn **xem** được mọi khách, báo giá, đơn, hội thoại (phạm vi `ALL` — [00 §2.5.3](../../00-system-overview/README.md)), để hỗ trợ khi cần; có góc nhìn "Khách của tôi". Với khách **đã có người phụ trách đang làm**, chỉ **người phụ trách, người đang thay, Sales Manager và System Admin** được **lập, sửa, gửi, huỷ** báo giá, **lập, sửa, gửi, huỷ** hợp đồng ([14](../14-cart-and-order/README.md) BR-25) và **chủ động mở hội thoại** ([16](../16-sales-chat/README.md) BR-12); Sale khác bị chặn kèm thông báo "Khách này do [A] phụ trách. Nhờ A hoặc Sales Manager". Khách **chưa có** người phụ trách đang làm thì Sale nào cũng làm được. Việc vận hành sau khi ký **không bị chặn** nhưng được ghi vết và báo người phụ trách ([17](../17-order-management/README.md) BR-32).
@@ -358,7 +363,7 @@ stateDiagram-v2
 - **BR-25:** **Bảng tải, tạm dừng, sức chứa:** hệ thống chỉ **gợi ý** Sale còn trống nhất trong số Sale không tạm dừng nhận khách mới; Manager luôn là người chọn. Tạm dừng và sức chứa không chặn Manager giao.
 - **BR-26:** **Sales Manager làm Sale:** Manager có thể là người phụ trách khách. Bước duyệt giá báo giá vẫn theo luật bốn mắt: Manager không tự duyệt giá báo giá mình gửi duyệt ([14](../14-cart-and-order/README.md) BR-24).
 
-  > ⚠️ Giả định: luật chế độ chặt (BR-21) **không chặn** Sales Manager, nhưng Manager chỉ lập / gửi được báo giá, hợp đồng khi role có quyền tương ứng; mặc định Quản lý kinh doanh vẫn **chỉ đọc** báo giá, đơn (quyết định 2026-11-25, [00 §2.1](../../00-system-overview/README.md)) cho tới khi System Admin cấp thêm. Xem [open-questions D42](../../open-questions/README.md).
+  > ✅ Đã chốt 2026-11-28 ([open-questions D42](../../open-questions/README.md)): **ma trận quyền của Quản lý kinh doanh không đổi** — Manager **điều phối**, không lập báo giá; vẫn **chỉ đọc** báo giá, đơn (quyết định 2026-11-25, [00 §2.1](../../00-system-overview/README.md)). Luật chế độ chặt (BR-21) **không bao giờ chặn** Manager, nhưng ma trận quyền của role vẫn chặn.
 
 ### Edge case
 
@@ -370,6 +375,7 @@ stateDiagram-v2
 | Một người muốn tự đăng ký trên cổng mà chưa liên hệ Sale | Không có đăng ký tự do: người đó gửi **"Yêu cầu mở tài khoản doanh nghiệp"** trên website → khách tiềm năng trong hàng chờ của Sales Manager → Manager giao Sale → Sale liên hệ, xác minh, tạo hồ sơ (§4.6) *(✅ Chốt lại 2026-11-28)* |
 | Email lời mời gửi lỗi | Lời mời ghi `Failed`; Sale gửi lại |
 | Khách không kích hoạt trong 72 giờ | Link hết hạn; Sale gửi lại (không cần chờ 1 phút) |
+| Hồ sơ cũ (trước 2026-11-28) chưa có mã số thuế | Không bị buộc bổ sung, vẫn dùng và sửa được; mang cờ "Thiếu MST" để Sale bổ sung dần; bắt buộc trước khi phát hành hoá đơn (BR-01, BR-12) *(✅ Đã chốt 2026-11-28)* |
 | Tạo khách trùng mã số thuế với hồ sơ đã đóng | Chặn; mở lại hồ sơ cũ (kèm lý do) thay vì tạo mới |
 | Hộ kinh doanh không có mã số thuế doanh nghiệp | Nhập 12 số CCCD của chủ hộ; không có thì Sales Manager duyệt ngoại lệ kèm lý do (BR-01, *✅ Chốt lại 2026-11-28 — trước đây được để trống*); trước khi phát hành hoá đơn vẫn phải có (BR-12) |
 | Kế toán phát hành hoá đơn nhưng khách thiếu mã số thuế / email nhận hoá đơn | Hoá đơn bị chặn phát hành ([21](../21-e-invoice/README.md)); Sale bổ sung qua chat với khách rồi cập nhật hồ sơ |
@@ -407,7 +413,7 @@ stateDiagram-v2
 | Cùng một doanh nghiệp gửi form nhiều lần | Cùng mã số thuế hoặc email trong 24 giờ không tạo lead mới (BR-23) |
 | Bot điền form | Ô bẫy ẩn và giới hạn theo IP lọc đi; người gửi không biết bị lọc (BR-23) |
 | Lead không phải doanh nghiệp thật / không có nhu cầu | Manager hoặc Sale được giao loại, kèm lý do (BR-23) |
-| Sale đang giữ lead (`Assigned` / `Contacted`) bị khoá tài khoản | Hộp xác nhận khoá hiện số lead đang giữ (§4.5 bước 19). ⚠️ Giả định: lead giữ nguyên người được giao, Sales Manager giao lại bằng tay; hệ thống không tự đưa lead về hàng chờ. Xem [open-questions D44](../../open-questions/README.md) |
+| Sale đang giữ lead (`Assigned` / `Contacted`) bị khoá tài khoản | Hộp xác nhận khoá hiện số lead đang giữ (§4.5 bước 19). Sau khi khoá, các lead đó **về hàng chờ của Sales Manager**, bỏ người được giao, kèm một dòng lịch sử; Manager giao lại (BR-18) *(✅ Đã chốt 2026-11-28 — [open-questions D44](../../open-questions/README.md))* |
 | Khách xin đổi Sale khi đang có một yêu cầu chờ | Từ chối; chờ quyết định hoặc rút yêu cầu cũ (BR-24) |
 | Khách xin đổi Sale lần nữa ngay sau khi bị từ chối | Chưa được trong 30 ngày kể từ quyết định (BR-24) |
 | Khách nêu tên một Sale vừa nhắn riêng cho khách | Manager thấy cờ cảnh báo "Sale này đã liên hệ khách gần đây" khi xét (BR-24) |
