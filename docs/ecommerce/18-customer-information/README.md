@@ -407,6 +407,7 @@ stateDiagram-v2
 | Cùng một doanh nghiệp gửi form nhiều lần | Cùng mã số thuế hoặc email trong 24 giờ không tạo lead mới (BR-23) |
 | Bot điền form | Ô bẫy ẩn và giới hạn theo IP lọc đi; người gửi không biết bị lọc (BR-23) |
 | Lead không phải doanh nghiệp thật / không có nhu cầu | Manager hoặc Sale được giao loại, kèm lý do (BR-23) |
+| Sale đang giữ lead (`Assigned` / `Contacted`) bị khoá tài khoản | Hộp xác nhận khoá hiện số lead đang giữ (§4.5 bước 19). ⚠️ Giả định: lead giữ nguyên người được giao, Sales Manager giao lại bằng tay; hệ thống không tự đưa lead về hàng chờ. Xem [open-questions D44](../../open-questions/README.md) |
 | Khách xin đổi Sale khi đang có một yêu cầu chờ | Từ chối; chờ quyết định hoặc rút yêu cầu cũ (BR-24) |
 | Khách xin đổi Sale lần nữa ngay sau khi bị từ chối | Chưa được trong 30 ngày kể từ quyết định (BR-24) |
 | Khách nêu tên một Sale vừa nhắn riêng cho khách | Manager thấy cờ cảnh báo "Sale này đã liên hệ khách gần đây" khi xét (BR-24) |
