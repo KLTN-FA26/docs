@@ -7,10 +7,12 @@
 > ✅ Đã chốt 2026-11-05 (khách tự thiết kế): **khách tự thiết kế và tự gửi duyệt trên app** ([12](../12-product-design/README.md)) — chat **không** còn dùng để khách gửi mẫu cho Sale thiết kế hộ; bỏ việc Sale ghi nhận mẫu và thẻ "yêu cầu xác nhận thiết kế". Thêm **thẻ yêu cầu báo giá từ bản thiết kế**: hệ thống sinh khi khách bấm "Yêu cầu báo giá" trên bản đã duyệt, hoặc "Gửi duyệt và yêu cầu báo giá" trên bản nháp ([13](../13-catalog/README.md)); Sale nhận yêu cầu ngay nhưng **chỉ lập báo giá khi bản đã `Approved`** ([14](../14-cart-and-order/README.md)).
 >
 > ✅ Đã chốt 2026-11-25: **thẻ yêu cầu báo giá cả dự án** chứa được bản đang chờ duyệt, bị trả lại hoặc đã duyệt; **mỗi dòng hiện trạng thái** của bản (kèm lý do trả lại nếu có) và thẻ hiện **"đã duyệt x/y"**. Thẻ sinh cả khi khách **gửi duyệt cả bộ kèm yêu cầu báo giá**. Agent chỉ lập báo giá khi **mọi dòng đã `Approved`**; hệ thống **báo Sale** khi yêu cầu **đủ điều kiện báo giá**. Agent đóng được yêu cầu treo, kèm lý do ([12](../12-product-design/README.md) BR-25).
+>
+> ✅ Đã chốt 2026-11-28 (Sale phụ trách khách — chế độ chặt; đóng [open-questions F5](../../open-questions/README.md)): hội thoại định tuyến theo **Sale phụ trách khách** lưu trên hồ sơ ([18](../18-customer-information/README.md) §4.5) — người phụ trách, hoặc **người thay** khi người phụ trách nghỉ phép; khách chưa có người phụ trách thì vào **hàng chờ**. **Một khách, một đầu mối**: bỏ bước "Sale phụ trách chứng từ ngữ cảnh" (người gửi báo giá / hợp đồng) và bước "Sale đã chăm sóc khách gần nhất". Sale **nhận** hội thoại của khách chưa có người phụ trách thì thành người phụ trách; hội thoại của khách đã có chủ không nhận được. Chỉ người phụ trách, người thay, Sales Manager được **chủ động mở** hội thoại với khách đã có chủ. Đổi người phụ trách thì hội thoại đang mở đi theo; tài khoản Sale bị khoá thì hội thoại của họ về hàng chờ (§4.1, BR-12 – BR-14).
 
 ## 1. Mục đích (Purpose)
 
-Kênh **hội thoại trực tiếp giữa khách sỉ và nhân viên Sale phụ trách** trên cổng khách hàng, để:
+Kênh **hội thoại trực tiếp giữa khách sỉ và Sale phụ trách khách** ([18](../18-customer-information/README.md) §4.5) trên cổng khách hàng, để:
 
 - tư vấn quy cách sản phẩm, hỏi hàng, đặt lại ([13](../13-catalog/README.md));
 - nhận **yêu cầu báo giá từ bản thiết kế** khách tự làm trên app (thẻ yêu cầu báo giá) và trả lời câu hỏi về bản thiết kế (cách thiết kế, trạng thái duyệt, lý do bị trả lại) — việc thiết kế, gửi duyệt, duyệt nằm ở [12](../12-product-design/README.md), không làm qua chat;
@@ -28,10 +30,11 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | Actor | Vai trò |
 |-------|---------|
 | **Khách hàng sỉ (B2B Customer)** | Mở hội thoại trên cổng khách hàng (từ trang sản phẩm, mẫu thiết kế, báo giá, đơn, hợp đồng, hoặc nút "Chat với Sale"); **yêu cầu báo giá từ bản thiết kế** (hệ thống mở hội thoại kèm thẻ yêu cầu báo giá — [13](../13-catalog/README.md)); gửi câu hỏi, ảnh / file; nhận báo giá, hợp đồng, thông tin chuyển khoản, mẫu in thử; thao tác trên các thẻ hành động (chấp nhận báo giá, **duyệt mẫu in**) |
-| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn (kể cả hướng dẫn khách tự thiết kế); **nhận yêu cầu báo giá từ bản thiết kế** và lập báo giá khi bản đã duyệt (yêu cầu cả dự án: khi mọi dòng đã duyệt; đóng yêu cầu treo kèm lý do); gửi báo giá, hợp đồng, thông tin chuyển khoản theo đợt, nhắc công nợ, **thẻ duyệt mẫu in** (mẫu do Điều phối sản xuất tải lên); báo khách tiến độ Đơn sản xuất (Điều phối sản xuất ghi nhận ở 17); tạo yêu cầu đổi / huỷ / trả; chuyển tiếp nội bộ — trong module này gọi tắt là *agent* |
+| **Nhân viên Sale (Sales Staff)** | Trả lời, tư vấn (kể cả hướng dẫn khách tự thiết kế); **nhận yêu cầu báo giá từ bản thiết kế** và lập báo giá khi bản đã duyệt (yêu cầu cả dự án: khi mọi dòng đã duyệt; đóng yêu cầu treo kèm lý do); gửi báo giá, hợp đồng, thông tin chuyển khoản theo đợt, nhắc công nợ, **thẻ duyệt mẫu in** (mẫu do Điều phối sản xuất tải lên); báo khách tiến độ Đơn sản xuất (Điều phối sản xuất ghi nhận ở 17); tạo yêu cầu đổi / huỷ / trả; chuyển tiếp nội bộ — trong module này gọi tắt là *agent*. Chỉ **chủ động mở** hội thoại với khách mình phụ trách hoặc đang lo thay; **nhận** hội thoại trong hàng chờ của khách chưa có người phụ trách — nhận xong thì thành người phụ trách (BR-12, BR-13) *(✅ 2026-11-28)* |
 | **Người giữ quyền giám sát chat (Chat Supervision)** | Phân công hội thoại, giám sát SLA, tham gia khi cần escalate — là quyền gán cho Quản lý kinh doanh hoặc Sales Staff được chỉ định (xem [Role Registry](../../00-system-overview/README.md)) |
+| **Quản lý kinh doanh (Sales Manager)** *(✅ 2026-11-28)* | Được báo khi có hội thoại vào hàng chờ của khách chưa có người phụ trách và khi một Sale nhận khách từ hàng chờ; **giao / đổi người phụ trách** khách ([18](../18-customer-information/README.md) §4.5) — hội thoại đang mở đi theo; chủ động mở hội thoại với mọi khách |
 | **Kế toán (Accountant)**, **Quản lý kho (Warehouse Manager)**, **Quản lý kinh doanh (Sales Manager)**, **Điều phối sản xuất (Production Coordinator)** | Không chat trực tiếp với khách (trừ khi giữ quyền giám sát chat); agent chuyển câu hỏi nội bộ (đối soát tiền → Kế toán; nhập kho, xuất kho, kết quả giao → Quản lý kho; tiến độ sản xuất, mẫu in, ngày hoàn thành dự kiến, duyệt bản thiết kế của khách → Điều phối sản xuất; giá báo cho khách cần ý kiến → Quản lý kinh doanh (báo giá giảm quá ngưỡng so với giá tham chiếu thì Quản lý kinh doanh duyệt giá trong luồng báo giá, không qua chat — BR-04) — *✅ Chốt lại 2026-11-20: không còn duyệt Đơn sản xuất, duyệt thiết kế chuyển cho Điều phối sản xuất*) và chờ phản hồi |
-| **Hệ thống (định tuyến & nhắc SLA)** | Định tuyến hội thoại tới Sale phụ trách; sinh **thẻ ngữ cảnh / thẻ hành động** từ chứng từ, gồm **thẻ yêu cầu báo giá** khi khách yêu cầu báo giá và cập nhật trạng thái bản thiết kế trên thẻ (từng dòng với thẻ nhiều dòng); **báo Sale** khi yêu cầu cả dự án đủ điều kiện báo giá; nhắc SLA; lưu lịch sử |
+| **Hệ thống (định tuyến & nhắc SLA)** | Định tuyến hội thoại tới Sale phụ trách khách hoặc người thay, không có thì vào hàng chờ (§4.1); chuyển hội thoại khi đổi người phụ trách, đưa về hàng chờ khi tài khoản Sale bị khoá; sinh **thẻ ngữ cảnh / thẻ hành động** từ chứng từ, gồm **thẻ yêu cầu báo giá** khi khách yêu cầu báo giá và cập nhật trạng thái bản thiết kế trên thẻ (từng dòng với thẻ nhiều dòng); **báo Sale** khi yêu cầu cả dự án đủ điều kiện báo giá; nhắc SLA; lưu lịch sử |
 
 > ⚠️ Giả định: phạm vi là **chat 1–1 khách sỉ ↔ Sale trong cổng khách hàng**. Tích hợp kênh ngoài (Facebook Messenger, Zalo, email) và chatbot AI là phạm vi sau — xem [open-questions F1, F2](../../open-questions/README.md).
 
@@ -69,13 +72,23 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 ### 4.1. Mở hội thoại & định tuyến
 
 1. **Khởi tạo** — khách bấm "Chat với Sale" (hoặc "Yêu cầu báo giá", "Gửi duyệt và yêu cầu báo giá", "Đặt lại") từ một trang; hệ thống tạo hội thoại và đính **ngữ cảnh** của trang đó. Sale cũng có thể chủ động mở hội thoại với khách, gắn ngữ cảnh chứng từ.
-2. **Định tuyến (routing)** — hệ thống gán agent theo thứ tự:
-   1. Sale phụ trách chứng từ ngữ cảnh (người lập báo giá / đơn / hợp đồng; với Đơn sản xuất — Sale phụ trách **đơn bán liên quan**, vì Điều phối sản xuất không chat với khách — *cập nhật 2026-11-07*);
-   2. Sale đã chăm sóc khách gần nhất;
-   3. hàng đợi chung — người giám sát chat phân công.
-3. **Chờ & phản hồi** — ngoài giờ / Sale không trực tuyến: hiển thị thời gian phản hồi dự kiến; tin nhắn được giữ trong hội thoại, khách nhận thông báo khi Sale trả lời. Trong giờ: agent nhận thông báo, mở hội thoại thấy ngữ cảnh + hồ sơ khách + lịch sử.
+2. **Định tuyến (routing)** *(✅ Chốt lại 2026-11-28 — thay thứ tự "Sale phụ trách chứng từ ngữ cảnh → Sale đã chăm sóc khách gần nhất → hàng đợi chung")* — hệ thống gán agent theo quy tắc **"ai lo khách này hôm nay"** của hồ sơ khách ([18](../18-customer-information/README.md) §4.5 bước 15):
 
-> ⚠️ Giả định: thứ tự định tuyến như trên, giờ làm việc và mục tiêu FRT do người giám sát chat cấu hình. Xem [open-questions F3, F5](../../open-questions/README.md).
+   | Trường hợp | Giao cho |
+   |------------|----------|
+   | Khách **có** người phụ trách đang làm | **Người phụ trách**, hoặc **người thay** nếu người phụ trách đang trong lịch nghỉ phép. Kể cả khi khách hỏi về báo giá, hợp đồng, đơn hay Đơn sản xuất do người khác gửi (người thay gửi, hoặc Sale cũ gửi trước khi khách được chuyển): **một khách, một đầu mối**; người gửi vẫn được ghi trên chứng từ |
+   | Khách **chưa có** người phụ trách (khách mới Manager chưa giao, hoặc Sale cũ đã nghỉ mà chưa giao lại) | **Hàng chờ** (`Queued`): Sales Manager được báo và phân công, hoặc một Sale bấm **Nhận** — Sale nhận thành người phụ trách của khách (BR-13) |
+   | Người phụ trách / người thay / Sales Manager **chủ động mở** hội thoại | Mở được; người phụ trách hoặc người thay mở thì hội thoại giao cho chính họ |
+   | Sale **khác** chủ động mở hội thoại với khách **đã có chủ** | **Bị chặn**: "Khách này do [A] phụ trách. Nhờ A hoặc Sales Manager". Sale đó vẫn **xem** được hội thoại của khách (BR-12) |
+
+   Bước "Sale đã chăm sóc khách gần nhất" bỏ đi: người phụ trách đã thay vai trò đó và rõ ràng hơn. Với Đơn sản xuất, hội thoại cũng về người phụ trách khách (Điều phối sản xuất không chat với khách).
+3. **Chờ & phản hồi** — ngoài giờ / Sale không trực tuyến: hiển thị thời gian phản hồi dự kiến; tin nhắn được giữ trong hội thoại, khách nhận thông báo khi Sale trả lời. Trong giờ: agent nhận thông báo, mở hội thoại thấy ngữ cảnh + hồ sơ khách + lịch sử. Người phụ trách trả lời trễ SLA (kể cả khi đi vắng mà quên lập người thay) → người giám sát chat được cảnh báo và chuyển hội thoại; Sales Manager có thể đổi luôn người phụ trách (BR-09).
+
+   **Khi người phụ trách đổi** *(✅ 2026-11-28)* — Sales Manager đổi người phụ trách khách (đổi lẻ, chuyển hàng loạt, duyệt yêu cầu đổi Sale — [18](../18-customer-information/README.md) §4.5, §4.7): mọi hội thoại **đang mở** của khách chuyển sang người mới, kèm **ghi chú nội bộ** "Chuyển từ A sang B: lý do"; khách nhận **một tin hệ thống** "Từ nay anh/chị được [B] hỗ trợ" (Manager tắt được khi đổi nội bộ) (BR-14).
+
+   **Khi tài khoản Sale bị khoá / vô hiệu hoá** *(✅ 2026-11-28)* — hội thoại đang mở của người đó **về hàng chờ**, đánh dấu **ưu tiên cao**; Sales Manager được báo kèm số hội thoại cần giao; khách của người đó sang "Cần giao người phụ trách" ([18](../18-customer-information/README.md) BR-18). Một Sale nhận hội thoại thì thành người phụ trách của khách (BR-13).
+
+> ⚠️ Giả định: giờ làm việc và mục tiêu FRT do người giám sát chat cấu hình. Xem [open-questions F3](../../open-questions/README.md).
 
 ### 4.2. Tư vấn & yêu cầu báo giá từ bản thiết kế
 
@@ -132,9 +145,9 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
 | `New` | Vừa tạo, chưa gán agent | → `Assigned`, → `Queued` | Hệ thống |
-| `Queued` | Chờ agent rảnh / ngoài giờ / chờ người giám sát phân công | → `Assigned` | Hệ thống / Người giám sát chat |
-| `Assigned` | Đã gán agent, chưa trả lời | → `Active` | Hệ thống / Agent |
-| `Active` | Đang trao đổi | → `Waiting on Customer`, → `Waiting on Internal`, → `Escalated`, → `Resolved` | Agent |
+| `Queued` | Khách chưa có người phụ trách, hoặc agent cũ bị khoá tài khoản (ưu tiên cao); chờ người giám sát phân công hoặc một Sale nhận (BR-13) | → `Assigned` | Người giám sát chat / Sales Manager (phân công); Sale (nhận) |
+| `Assigned` | Đã gán agent, chưa trả lời | → `Active`, → `Queued` (agent bị khoá tài khoản) | Hệ thống / Agent |
+| `Active` | Đang trao đổi | → `Waiting on Customer`, → `Waiting on Internal`, → `Escalated`, → `Resolved`, → `Queued` (agent bị khoá tài khoản) | Agent; Hệ thống (khi khoá tài khoản) |
 | `Waiting on Customer` | Chờ khách phản hồi (ví dụ chờ khách sửa và gửi duyệt lại thiết kế, chấp nhận báo giá, gửi hợp đồng đã ký, duyệt mẫu in) | → `Active`, → `Auto-Closed` (quá hạn im lặng) | Hệ thống |
 | `Waiting on Internal` | Chờ bộ phận khác (Kế toán, Quản lý kho, Quản lý kinh doanh) | → `Active` | Agent |
 | `Escalated` | Đã chuyển người giám sát chat | → `Active`, → `Resolved` | Người giám sát chat |
@@ -142,6 +155,8 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 | `Reopened` | Khách nhắn lại sau khi đã giải quyết | → `Active` | Hệ thống |
 | `Auto-Closed` | Đóng do khách im lặng quá hạn | → `Reopened` (khách nhắn lại trong thời hạn), → `Closed` | Hệ thống |
 | `Closed` | Đóng vĩnh viễn (hết thời hạn mở lại) | *(cuối)* | Hệ thống |
+
+> ✅ 2026-11-28: tài khoản agent bị khoá / vô hiệu hoá thì mọi hội thoại đang mở của agent đó (kể cả đang `Waiting on Customer` / `Waiting on Internal` / `Reopened`) về `Queued`, ưu tiên cao (§4.1 bước 3). Đổi người phụ trách khách thì hội thoại đang mở **giữ trạng thái**, chỉ đổi agent.
 
 ```mermaid
 stateDiagram-v2
@@ -152,8 +167,10 @@ stateDiagram-v2
     [*] --> New: Khách / Sale mở hội thoại
     New --> Assigned: Định tuyến được agent
     New --> Queued: Chưa có agent
-    Queued --> Assigned: Agent rảnh / giám sát phân công
+    Queued --> Assigned: Giám sát phân công / Sale nhận
     Assigned --> Active: Agent trả lời
+    Assigned --> Queued: Agent bị khoá tài khoản
+    Active --> Queued: Agent bị khoá tài khoản
     Active --> WaitingOnCustomer: Chờ khách
     Active --> WaitingOnInternal: Chờ nội bộ
     Active --> Escalated: Vượt thẩm quyền
@@ -188,6 +205,9 @@ stateDiagram-v2
 - **BR-09:** SLA phản hồi (FRT) & thời gian giải quyết được đo và cảnh báo; hội thoại quá hạn nổi bật trong hàng đợi.
 - **BR-10:** **Thẻ duyệt mẫu in chỉ do hệ thống sinh** từ vòng mẫu in đang chờ khách của Đơn sản xuất `Sample Pending` thuộc đúng khách ([17](../17-order-management/README.md)). Chỉ khách (chủ sở hữu) bấm **Duyệt** / **Yêu cầu in lại**; agent **không** duyệt thay khách dựa trên tin nhắn chữ. Yêu cầu in lại bắt buộc ghi chú.
 - **BR-11:** **Thẻ yêu cầu báo giá chỉ do hệ thống sinh** khi khách (chủ sở hữu) bấm "Yêu cầu báo giá" trên bản thiết kế `Approved`, hoặc "Gửi duyệt và yêu cầu báo giá" trên bản `Draft` đã qua tự kiểm, hoặc "Yêu cầu báo giá cả dự án" / "Gửi duyệt cả bộ" kèm yêu cầu báo giá trên một dự án thiết kế — khi đó thẻ có **nhiều dòng**, mỗi dòng một bản `Pending Review`, bị trả lại (`Draft`) hoặc `Approved` ([13](../13-catalog/README.md) BR-16, [12](../12-product-design/README.md) BR-25). Thẻ hiện **trạng thái hiện tại** của bản thiết kế (thẻ nhiều dòng: từng dòng, kèm lý do trả lại và "đã duyệt x/y"); agent chỉ **Lập báo giá** từ thẻ khi bản đã `Approved` (SKU riêng đã sinh) — thẻ nhiều dòng thì khi **mọi dòng** đã `Approved`, và hệ thống báo Sale lúc đó. Số thùng trên thẻ là gợi ý; ngày giao mong muốn điền vào ngày giao khách yêu cầu của báo giá ([14](../14-cart-and-order/README.md) BR-22). Yêu cầu báo giá không phải báo giá, không giữ hàng.
+- **BR-12:** **Một khách, một đầu mối; chỉ người lo khách được chủ động chat** *(✅ Đã chốt 2026-11-28 — chế độ chặt)*. Hội thoại của khách đã có người phụ trách đang làm luôn giao cho **người phụ trách**, hoặc **người thay** trong lịch nghỉ phép ([18](../18-customer-information/README.md) BR-17), bất kể ngữ cảnh là chứng từ do ai gửi. Chỉ người phụ trách, người thay, Sales Manager (và System Admin) được **chủ động mở** hội thoại với khách đó; Sale khác bị chặn kèm thông báo "Khách này do [A] phụ trách. Nhờ A hoặc Sales Manager", nhưng vẫn **xem** được hội thoại ([18](../18-customer-information/README.md) BR-21). Chỉ agent đang được giao hội thoại trả lời khách.
+- **BR-13:** **Nhận khách từ hàng chờ** *(✅ Đã chốt 2026-11-28)*. Chỉ hội thoại của khách **chưa có người phụ trách đang làm** (`UNASSIGNED` / `NEEDS_ASSIGNMENT`) mới vào hàng chờ và mới **nhận** được. **Nhân viên Sale** nhận → **thành người phụ trách** của khách (Sales Manager / System Admin không nhận để giữ khách mà phân công — [18](../18-customer-information/README.md) BR-26) (lý do "Nhận từ hàng chờ", ghi lịch sử phụ trách) và **Sales Manager được báo**; Manager đổi lại được. Hội thoại của khách đã có chủ không có trong hàng chờ; gọi nhận trực tiếp cũng bị từ chối — Sale không dùng "Nhận" để lấy khách của người khác. Quy tắc "nhận thì thành người phụ trách" bật mặc định, **tắt được bằng cấu hình**; khi tắt, chỉ Sales Manager giao người phụ trách.
+- **BR-14:** **Hội thoại đi theo người phụ trách** *(✅ Đã chốt 2026-11-28)*. Đổi người phụ trách khách → mọi hội thoại đang mở của khách chuyển sang người mới, kèm ghi chú nội bộ "Chuyển từ A sang B: lý do", khách nhận tin hệ thống "Từ nay anh/chị được [B] hỗ trợ" trừ khi Manager tắt cho lần đổi nội bộ. Tài khoản Sale bị khoá / vô hiệu hoá → hội thoại đang mở của người đó về hàng chờ, ưu tiên cao, Sales Manager được báo. Khách viết lại sau khi hội thoại cũ đã đóng hẳn → hội thoại mới giao cho người phụ trách **hiện tại**, không phải agent của hội thoại cũ. **Khách không tự chọn Sale trong chat**: muốn đổi người hỗ trợ thì gửi yêu cầu, Sales Manager quyết ([18](../18-customer-information/README.md) §4.7).
 
 ### Edge case
 
@@ -196,7 +216,19 @@ stateDiagram-v2
 | Khách rời trang giữa chừng | Lưu hội thoại; khách nhận thông báo khi Sale trả lời; mở lại thấy lịch sử |
 | Nhiều agent cùng mở một hội thoại | Chỉ agent đang phụ trách được trả lời; người khác ở chế độ xem |
 | Khách mở nhiều hội thoại cho cùng một việc | Cho phép gộp; giữ một hội thoại chính, tham chiếu chéo |
-| Agent nghỉ giữa hội thoại đang mở | Định tuyến lại sang agent khác; chuyển toàn bộ ngữ cảnh & ghi chú |
+| Agent nghỉ phép, đã có lịch người thay | Trong lịch, hội thoại của khách được định tuyến tới người thay, nhãn "Bạn đang lo thay cho A"; hết lịch tự về lại người phụ trách ([18](../18-customer-information/README.md) BR-17) *(✅ Chốt lại 2026-11-28)*. Lịch thay bắt đầu hay kết thúc **không chuyển hội thoại đang mở** nào: lịch chỉ áp cho định tuyến hội thoại **mới** và người nhận thông báo; cần thì Sales Manager chuyển hội thoại đang mở bằng tay *(✅ Đã chốt 2026-11-28 — [open-questions F9](../../open-questions/README.md))* |
+| Agent nghỉ phép mà quên lập người thay | Hội thoại vẫn về người phụ trách; trả lời trễ SLA thì người giám sát chat được cảnh báo và chuyển tay (BR-09); Manager lập lịch thay hoặc đổi người phụ trách |
+| Agent nghỉ việc / bị khoá tài khoản giữa hội thoại đang mở | Hội thoại về hàng chờ, ưu tiên cao, toàn bộ ngữ cảnh & ghi chú giữ nguyên; Sales Manager được báo; khách sang "Cần giao người phụ trách"; Sale nhận hội thoại thì thành người phụ trách (BR-13, BR-14) *(✅ Chốt lại 2026-11-28 — thay "định tuyến lại sang agent khác")* |
+| Khách đổi Sale (Manager đổi người phụ trách, chuyển hàng loạt, hoặc duyệt yêu cầu đổi Sale của khách) | Hội thoại đang mở chuyển sang người mới kèm ghi chú nội bộ "Chuyển từ A sang B: lý do"; khách nhận tin hệ thống "Từ nay anh/chị được [B] hỗ trợ" (tắt được khi đổi nội bộ) (BR-14) *(✅ 2026-11-28)* |
+| Khách nhắn "cho tôi đổi Sale khác" trong chat | Agent không đổi được; hướng dẫn khách gửi **"Yêu cầu đổi người hỗ trợ"** trên trang tài khoản, Sales Manager quyết ([18](../18-customer-information/README.md) §4.7) |
+| Khách quen nhắn chung chung (không gắn chứng từ) | Về người phụ trách (BR-12) |
+| Khách hỏi về báo giá do Sale khác gửi (người thay gửi, hoặc Sale cũ trước khi khách được chuyển) | Vẫn về người phụ trách: một khách một đầu mối; người gửi vẫn ghi trên báo giá (BR-12) |
+| Khách mới, Sales Manager tạo hồ sơ mà chưa chọn Sale | Lần nhắn đầu vào hàng chờ; Manager giao hoặc một Sale nhận (BR-13) |
+| Sale bấm "Nhận" hội thoại của khách đã có chủ (gọi thẳng, vượt giao diện) | Bị từ chối: chỉ khách chưa có người phụ trách mới nhận được (BR-13) |
+| Sale khác chủ động mở chat với khách đã có chủ | Bị chặn, kèm tên người phụ trách; Sale đó vẫn xem được hội thoại (BR-12) |
+| Người phụ trách chưa trả lời, khách hối | Cảnh báo SLA tới người giám sát chat (BR-09); chuyển hội thoại, Manager có thể đổi luôn người phụ trách |
+| Khách viết lại sau khi hội thoại đã đóng hẳn | Hội thoại mới, giao người phụ trách **hiện tại** (BR-14) |
+| Khách bị chặn / đóng | Không chat được nên không định tuyến; khách vẫn giữ người phụ trách ([18](../18-customer-information/README.md) BR-13) |
 | Khách gửi file quá lớn / định dạng lạ | Từ chối theo giới hạn dung lượng & loại file của chat; hướng dẫn gửi lại |
 | Khách gửi logo / file qua chat nhờ Sale thiết kế hộ | Agent hướng dẫn khách bấm "Thiết kế" trên quy cách và tự thiết kế trên app ([13](../13-catalog/README.md), [12](../12-product-design/README.md)); không thiết kế hộ (BR-05) |
 | Agent muốn lập báo giá từ thẻ khi bản thiết kế còn `Pending Review` | Không lập được (BR-11); thẻ hiện "chờ duyệt thiết kế"; agent có thể nhờ Điều phối sản xuất xem sớm (`Waiting on Internal`; *✅ Chốt lại 2026-11-20*) |
@@ -227,5 +259,5 @@ stateDiagram-v2
 | [15 · Thanh toán theo hợp đồng & Công nợ](../15-payment/README.md) | Thẻ thông tin chuyển khoản theo đợt; nhắc đợt đến hạn / quá hạn và công nợ phải thu |
 | [21 · E-invoice](../21-e-invoice/README.md) | Thẻ hoá đơn (hoá đơn đã phát hành của từng lần giao, tải XML / PDF); chat không phát hành hay sửa hoá đơn |
 | [17 · Order Management](../17-order-management/README.md) | Tra cứu đơn và trạng thái giao; tiến độ Đơn sản xuất; **thẻ duyệt mẫu in** (vòng mẫu, kết quả Duyệt / Yêu cầu in lại); tạo yêu cầu đổi / huỷ / trả; đổi thiết kế của đơn theo quy trình thay đổi đơn |
-| [18 · Customer Information](../18-customer-information/README.md) | Hồ sơ khách, lịch sử tương tác & mua hàng; lưu vết hội thoại |
+| [18 · Customer Information](../18-customer-information/README.md) | Hồ sơ khách, lịch sử tương tác & mua hàng; lưu vết hội thoại. **Sale phụ trách khách**, người thay và quy tắc "ai lo khách này hôm nay" quyết định định tuyến (§4.1); nhận hội thoại từ hàng chờ làm Sale thành người phụ trách; đổi người phụ trách / khoá tài khoản Sale kéo hội thoại theo; yêu cầu đổi Sale của khách đi qua 18 §4.7 |
 | [09 · Shipping](../../warehouse/09-shipping/README.md) | Xử lý khiếu nại giao hàng, đơn trễ |

@@ -44,7 +44,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 | **Nhãn giao hàng** — in cho từng thùng đã kiểm, dán lên thùng cạnh nhãn LPN | Quét khi xếp xe, bàn giao |
 | **Shipment** `Ready to Dispatch` — các thùng đã dán nhãn của lần hoàn tất, mã `<mã đơn>-S<n>` | 09 Shipping |
 | **Cảnh báo đợt `BEFORE_DELIVERY` chưa thu** khi hoàn tất | Nhân viên kho, Quản lý kho, Sale |
-| **Thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) về đợt `BEFORE_DELIVERY` chưa thu, gửi khi hoàn tất | Mọi Quản lý kho của kho xuất; Sale phụ trách đơn |
+| **Thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) về đợt `BEFORE_DELIVERY` chưa thu, gửi khi hoàn tất | Mọi Quản lý kho của kho xuất; Sale phụ trách khách của đơn (quy tắc chung — [18](../../ecommerce/18-customer-information/README.md) BR-20, *2026-11-28*) |
 | Cập nhật đơn: `Packed` (đã kiểm đủ thùng & dán nhãn) / `Partially Fulfilled` | 17 Order Management |
 
 ---
@@ -85,7 +85,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
    Các thùng `Labeled` của lần hoàn tất gom thành **một shipment** `Ready to Dispatch`:
    - đủ thùng → phiên `Completed`, đơn `Packed`;
    - một phần → phiên vẫn `In Progress`, đơn `Partially Fulfilled`. Phần còn lại kiểm tiếp khi thùng được lấy bổ sung ([07](../07-picking/README.md) §4.3).
-9. **Cảnh báo thanh toán** — nếu hợp đồng của đơn còn **đợt `BEFORE_DELIVERY` chưa thu đủ** ([15](../../ecommerce/15-payment/README.md)), kết quả hoàn tất kèm **cảnh báo số tiền** (không chặn). Đồng thời hệ thống gửi **thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) cho **Quản lý kho của kho xuất** và **Sale phụ trách đơn** *(✅ Đã chốt 2026-11-19)*. Bàn giao sẽ bị chặn tới khi đợt đó đã thu ([09](../09-shipping/README.md)).
+9. **Cảnh báo thanh toán** — nếu hợp đồng của đơn còn **đợt `BEFORE_DELIVERY` chưa thu đủ** ([15](../../ecommerce/15-payment/README.md)), kết quả hoàn tất kèm **cảnh báo số tiền** (không chặn). Đồng thời hệ thống gửi **thông báo trong ứng dụng** (hộp thông báo — [00 §6](../../00-system-overview/README.md)) cho **Quản lý kho của kho xuất** và **Sale phụ trách khách** của đơn *(✅ Đã chốt 2026-11-19; người nhận phía Sale theo quy tắc chung từ 2026-11-28 — [00 §6](../../00-system-overview/README.md))*. Bàn giao sẽ bị chặn tới khi đợt đó đã thu ([09](../09-shipping/README.md)).
 10. Shipment nằm tại khu xuất hàng (`DISPATCH`), chờ bàn giao → [Shipping](../09-shipping/README.md). **Mọi đơn giao nguyên chuyến**, nên shipment đi tiếp vào kế hoạch xếp hàng lên xe (Load Planning) ở [09](../09-shipping/README.md) *(✅ Đã chốt 2026-11-05: bỏ gửi kiện qua hãng)*.
 
 ---
