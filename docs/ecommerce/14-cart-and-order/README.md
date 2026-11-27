@@ -359,7 +359,7 @@ stateDiagram-v2
 | Mọi Sale thấy thẻ yêu cầu báo giá của khách đã có chủ | Xem được; nút **Lập báo giá** chỉ bật cho người phụ trách / người thay (BR-25) |
 | Khách chưa có người phụ trách gửi yêu cầu báo giá | Yêu cầu vào hàng chờ của Sales Manager; Manager giao người phụ trách, Sale đó lập báo giá (§4.1 bước 1) |
 | Người phụ trách nghỉ phép, khách cần báo giá gấp | Người thay lập và gửi được (BR-25); không có lịch thay thì Sales Manager lập lịch thay hoặc đổi người phụ trách ([18](../18-customer-information/README.md) §4.5) |
-| Manager lập hộ báo giá, khách hỏi lại trong chat | Hội thoại vẫn về người phụ trách: một khách một đầu mối; người gửi vẫn ghi trên báo giá ([16](../16-sales-chat/README.md) BR-12) |
+| Người thay gửi báo giá, khách hỏi lại trong chat sau khi lịch thay đã hết | Hội thoại mới về người phụ trách: một khách một đầu mối; người gửi vẫn ghi trên báo giá ([16](../16-sales-chat/README.md) BR-12) |
 | Khách được chuyển khi có báo giá chờ khách phản hồi | Thông báo khách chấp nhận / yêu cầu sửa đi tới người mới; báo giá vẫn ghi người gửi cũ; người mới sửa / gửi lại được (§4.4 bước 20) |
 | Khách được chuyển khi hợp đồng chờ ký hoặc đơn đang chạy | Theo dõi (chưa ký sau 3 ngày, chưa thu sau 3 ngày, chọn kho…) đi tới người mới; doanh số đơn đã ký vẫn thuộc người cũ theo Sale phụ trách lúc lập (BR-26) |
 | Khách được chuyển khi báo giá đang chờ duyệt giá | Manager duyệt như cũ; kết quả báo cho Sale đã gửi duyệt và người phụ trách mới (§4.4 bước 20) |
