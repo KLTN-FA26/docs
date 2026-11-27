@@ -223,7 +223,7 @@ stateDiagram-v2
 | Khách nhắn "cho tôi đổi Sale khác" trong chat | Agent không đổi được; hướng dẫn khách gửi **"Yêu cầu đổi người hỗ trợ"** trên trang tài khoản, Sales Manager quyết ([18](../18-customer-information/README.md) §4.7) |
 | Khách quen nhắn chung chung (không gắn chứng từ) | Về người phụ trách (BR-12) |
 | Khách hỏi về báo giá do Sale khác gửi (người thay gửi, hoặc Sale cũ trước khi khách được chuyển) | Vẫn về người phụ trách: một khách một đầu mối; người gửi vẫn ghi trên báo giá (BR-12) |
-| Khách mới, Sales Manager tạo hồ sơ mà chưa chọn Sale | Lần nhắn đầu vào hàng chờ; Manager giao hoặc một Sale nhận (BR-13) |
+| Khách chưa có người phụ trách (khách cũ chưa có chứng từ nào lúc điền dữ liệu ban đầu — hồ sơ tạo mới luôn có người phụ trách, [18](../18-customer-information/README.md) BR-14 *✅ Đã chốt 2026-11-28*) | Lần nhắn đầu vào hàng chờ; Manager giao hoặc một Sale nhận (BR-13) |
 | Sale bấm "Nhận" hội thoại của khách đã có chủ (gọi thẳng, vượt giao diện) | Bị từ chối: chỉ khách chưa có người phụ trách mới nhận được (BR-13) |
 | Sale khác chủ động mở chat với khách đã có chủ | Bị chặn, kèm tên người phụ trách; Sale đó vẫn xem được hội thoại (BR-12) |
 | Người phụ trách chưa trả lời, khách hối | Cảnh báo SLA tới người giám sát chat (BR-09); chuyển hội thoại, Manager có thể đổi luôn người phụ trách |
