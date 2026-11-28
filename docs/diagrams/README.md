@@ -250,7 +250,7 @@ flowchart TD
     SHORT -->|"Không thấy / hư hỏng"| SHORT_HOLD["Báo thiếu: dòng Short, đơn On Hold INVENTORY<br/>tự mở kiểm kê mù thùng đó"]
     SHORT_HOLD --> REALLOC{"Quản lý kho phân bổ lại được đủ số thùng thiếu<br/>từ thùng khác của SKU tại kho xuất?"}
     REALLOC -->|"Được — tự gỡ treo"| PICK
-    REALLOC -->|"Không"| SHORT_DECIDE(["Quản lý kho báo Sale, Sale quyết:<br/>chờ sản xuất — Điều phối sản xuất lập Đơn sản xuất / thoả thuận lại số thùng /<br/>giao một phần rồi đóng phần còn lại / huỷ"])
+    REALLOC -->|"Không"| SHORT_DECIDE(["Quản lý kho báo Sale, Sale gửi thẻ Đơn thiếu N thùng trong chat<br/>khách chọn: chờ sản xuất — Điều phối sản xuất lập Đơn sản xuất / thoả thuận lại số thùng /<br/>giao một phần rồi đóng phần còn lại / huỷ — Sale bấm Thực hiện"])
     SHORT -->|"Lấy được"| DEST{"Đích lấy hàng?"}
 
     DEST -->|STAGING| STAGED["Dòng Staged: thùng chuyển nguyên sang khu STAGING, sổ MOVE<br/>chưa trừ tồn, phân bổ vẫn Held, giữ riêng cho đơn<br/>Task: Staged"]

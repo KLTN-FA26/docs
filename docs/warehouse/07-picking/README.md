@@ -39,7 +39,7 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
 |-------|---------|
 | **Nhân viên kho (Picker)** | Bắt đầu task được giao; tại mỗi dòng: quét vị trí, quét **mã LPN** của thùng; **báo thiếu (short pick)** khi không lấy được thùng; hoàn tất phần lấy hàng; mang thùng tới đích (`DISPATCH` / `STAGING`) và từ khu chờ xuất sang khu xuất hàng. Cất lại thùng của đơn bị huỷ (put-back). |
 | **Quản lý kho (Warehouse Manager)** — của kho xuất | Xem danh sách đơn chờ release / chờ tạo task, **release đơn, tạo task, chọn đích lấy hàng và giao người**, đổi người / đổi đích khi task chưa bắt đầu. **Phân bổ lại** dòng bị thiếu. **Phân bổ bổ sung** khi phần hàng còn thiếu của đơn đã về kho. **Cho chuyển cả tác vụ từ khu chờ xuất sang khu xuất hàng.** Theo dõi mọi task trong kho. Có đủ quyền thao tác như nhân viên kho (làm thay khi cần). |
-| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi không đủ thùng (chờ sản xuất phần thiếu, thoả thuận lại số thùng, giao một phần, huỷ) theo [17](../../ecommerce/17-order-management/README.md). Không thao tác trên task. |
+| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi không đủ thùng (chờ sản xuất phần thiếu, thoả thuận lại số thùng, giao một phần, huỷ) theo [17](../../ecommerce/17-order-management/README.md) — *(✅ 2026-11-28)* gửi **thẻ "Đơn thiếu N thùng"** để khách chọn, rồi **Thực hiện** hướng khách chọn ([17](../../ecommerce/17-order-management/README.md) §4.14). Không thao tác trên task. |
 | **Điều phối sản xuất (Production Coordinator)** *(thêm 2026-11-07)* | Khi Sale chọn chờ sản xuất phần thiếu: lập Đơn sản xuất (theo số thùng, kho nhận = kho xuất) theo [17](../../ecommerce/17-order-management/README.md). Không thao tác trên task. |
 | **Hệ thống** | Lập dòng lấy hàng từ các thùng đã phân bổ cho đơn. Trừ tồn khi quét (đích `DISPATCH`) hoặc chuyển thùng sang khu chờ xuất (đích `STAGING`). Treo đơn khi thiếu hàng, tự mở kiểm kê mù ([20](../20-inventory-control/README.md)), gỡ treo khi đã phân bổ lại xong. Đưa thùng của đơn huỷ vào hàng chờ cất lại. |
 
@@ -132,6 +132,8 @@ Picking là **bước mở đầu luồng Fulfillment**: Picking → [Kiểm th�
     - khi đơn không còn dòng thiếu nào, hệ thống **tự gỡ treo** `INVENTORY`.
 11. **Không phân bổ lại được** (kho xuất không đủ thùng) — đơn ở lại trạng thái treo. Quản lý kho báo Sale; Sale quyết theo [17](../../ecommerce/17-order-management/README.md): chờ sản xuất phần thiếu (Điều phối sản xuất lập Đơn sản xuất theo số thùng, kho nhận = kho xuất) và chờ hàng, thoả thuận lại số thùng với khách, giao một phần rồi đóng phần còn lại, hoặc huỷ dòng / đơn.
 
+    *(✅ Đã chốt 2026-11-28)* Sale gửi **thẻ "Đơn thiếu N thùng"** trong chat để **khách bấm chọn** một trong bốn hướng; lựa chọn là bằng chứng, **Sale bấm Thực hiện** ([17](../../ecommerce/17-order-management/README.md) §4.14, BR-33). Với hướng **chờ sản xuất** và **giao một phần rồi đóng phần còn lại**, các dòng `Short` của đợt được **huỷ** (khoản giữ trên thùng thiếu được nhả; thùng vẫn bị chặn tới khi chênh lệch kiểm kê được duyệt — BR-09) và đơn được gỡ treo: task đi tiếp tới `Picked` / `Staged` với các thùng đã có; chờ sản xuất thì khi hàng về, Quản lý kho phân bổ bổ sung vào cùng task (§4.3 bước 7).
+
 ### 4.5. Huỷ đơn & cất lại hàng (Put-back)
 
 12. Đơn bị huỷ khi task đã bắt đầu → task `Cancelled` và được đánh dấu **cần cất lại**.
@@ -180,8 +182,8 @@ stateDiagram-v2
 | `Open` | Chờ lấy thùng | → `Picked`, → `Staged`, → `Short`, → `Cancelled` (đơn bị huỷ — dòng chưa lấy bị huỷ cùng đơn) | Picker; Hệ thống (huỷ đơn) |
 | `Staged` | Thùng đã về khu chờ xuất; tồn chưa trừ, vẫn gắn đơn | → `Picked` (chuyển cả tác vụ sang khu xuất hàng), → `Short` (báo thiếu thùng ở khu chờ; hoặc kiểm kê thấy thiếu thùng — [20](../20-inventory-control/README.md) §4.9), → `Put Back` (task bị huỷ) | Picker; Quản lý kho; Hệ thống (kiểm kê thấy thiếu) |
 | `Picked` | Đã lấy thùng; tồn đã trừ | → `Put Back` (task bị huỷ; hoặc thùng bị loại ở trạm kiểm thùng — [08](../08-packing/README.md) §4.2 bước 4) | Picker; Hệ thống (từ `Staged`); Nhân viên kho (loại thùng ở trạm kiểm) |
-| `Short` | Không lấy được thùng; chưa trừ tồn | → `Cancelled` (đã phân bổ lại sang dòng mới) | Picker báo; Quản lý kho phân bổ lại |
-| `Cancelled` | Bị thay bằng dòng phân bổ lại; hoặc dòng `Open` bị huỷ cùng đơn | *(cuối)* | Hệ thống |
+| `Short` | Không lấy được thùng; chưa trừ tồn | → `Cancelled` (đã phân bổ lại sang dòng mới; hoặc Sale thực hiện hướng chờ sản xuất / giao một phần rồi đóng phần còn lại trên thẻ thiếu thùng — [17](../../ecommerce/17-order-management/README.md) §4.14) | Picker báo; Quản lý kho phân bổ lại; Hệ thống (khi Sale thực hiện) |
+| `Cancelled` | Bị thay bằng dòng phân bổ lại; dòng `Short` bị huỷ theo hướng Sale thực hiện trên thẻ thiếu thùng; hoặc dòng `Open` bị huỷ cùng đơn | *(cuối)* | Hệ thống |
 | `Put Back` | Thùng đã cất lại bin | *(cuối)* | Nhân viên / Quản lý kho |
 
 > `Staged` / `Picked` là trạng thái của **dòng lấy hàng**, không phải trạng thái tồn. Thùng ở khu chờ xuất vẫn là tồn `Available` mang khoản phân bổ của đơn; thùng đã `Picked` **rời khỏi tồn**, khoản phân bổ chuyển sang `Consumed` ([20](../20-inventory-control/README.md) §5.6).
@@ -217,7 +219,7 @@ stateDiagram-v2
 |------------|-------------|
 | Vị trí báo có thùng nhưng thực tế không thấy | Báo thiếu → đơn treo → kiểm kê mù thùng đó → Quản lý kho phân bổ lại thùng khác của kho xuất |
 | Thùng hư hỏng phát hiện khi lấy | Báo thiếu thùng đó; Quản lý kho cách ly nguyên thùng sang khu `QUARANTINE` ([20 §4.8](../20-inventory-control/README.md)); phân bổ lại thùng khác |
-| Kho xuất không còn đủ số thùng cho dòng | Đơn ở lại treo `INVENTORY`; Quản lý kho báo Sale; Sale quyết: chờ sản xuất số thùng thiếu (Điều phối sản xuất lập Đơn sản xuất, kho nhận = kho xuất) / thoả thuận lại số thùng với khách / giao một phần + đóng phần còn lại / huỷ ([17](../../ecommerce/17-order-management/README.md)) |
+| Kho xuất không còn đủ số thùng cho dòng | Đơn ở lại treo `INVENTORY`; Quản lý kho báo Sale; Sale gửi thẻ "Đơn thiếu N thùng" ([17](../../ecommerce/17-order-management/README.md) §4.14), khách chọn, Sale thực hiện: chờ sản xuất số thùng thiếu (Điều phối sản xuất lập Đơn sản xuất, kho nhận = kho xuất) / thoả thuận lại số thùng với khách / giao một phần + đóng phần còn lại / huỷ ([17](../../ecommerce/17-order-management/README.md)) |
 | Kho khác còn thùng dư của cùng SKU (SKU riêng của khách) | Không dùng cho đơn này; không chuyển hàng giữa các kho. Phần thiếu xử lý như dòng trên |
 | Khách huỷ đơn khi đang lấy | Task `Cancelled`; thùng đã lấy vào hàng chờ cất lại, cất nguyên thùng |
 | Đơn `Awaiting Stock` (thiếu một phần, chờ Đơn sản xuất) | Quản lý kho chọn: lấy trước các thùng đã có về khu chờ xuất và giữ cho đơn; hoặc (Sale cho phép giao một phần) lấy sang `DISPATCH` để giao trước; hoặc chờ đủ hàng mới tạo task |
