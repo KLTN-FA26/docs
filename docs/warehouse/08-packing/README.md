@@ -67,8 +67,9 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
    - Quét lại thùng đã kiểm không ghi thêm.
    - Số cái trong thùng là số cái chuẩn / thùng của SKU; **không mở thùng để đếm**.
 4. **Thùng hư hỏng bên ngoài** (móp, rách, ướt) → nhân viên **loại thùng** khỏi đơn → thùng `Removed`. Thùng vào hàng chờ cất lại của [07](../07-picking/README.md) §4.5 và được cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md) §4.8). Phần thiếu của dòng đơn xử lý như thiếu hàng ([07](../07-picking/README.md) §4.4) hoặc giao một phần.
+   - **Lịch sử đơn:** mỗi lần kho loại thùng, lịch sử đơn có thêm một dòng *"Kho loại thùng LPN… (hư hỏng) – giao một phần"* (đơn đã cho giao một phần) hoặc *"… – đơn treo, chờ Sale quyết"* (đơn bị treo), kèm ghi chú của kho; nhân viên thấy, khách không thấy *(Quyết định 28/11/2026, WF4-F2C)*.
    - **Đơn chưa cho giao một phần:** loại thùng **treo đơn lý do `INVENTORY`** ngay lúc loại ([07](../07-picking/README.md) §4.4 bước 9); quản lý kho phân bổ lại thùng thay thế thì đơn tự gỡ treo. Khi Sale **cho phép giao một phần** mà đơn đang treo **chỉ vì thùng bị loại** (không còn dòng lấy hàng thiếu / báo thiếu, không treo vì lý do nào khác), hệ thống **tự gỡ treo** — ghi vào lịch sử đơn, đơn về đúng trạng thái trước khi treo — để dán nhãn và hoàn tất một phần tiếp được *(Quyết định 28/11/2026, WF4-F2)*. Đơn treo vì lý do khác, hoặc còn dòng thiếu, thì giữ nguyên treo.
-   - **Đơn đã cho giao một phần:** loại thùng **không treo đơn** — chỉ ghi lại việc loại (người loại, lúc nào, ghi chú, trên thùng và trong nhật ký thao tác); kho dán nhãn và hoàn tất một phần ngay, phần thiếu giao sau *(Quyết định 28/11/2026, WF4-F2B)*.
+   - **Đơn đã cho giao một phần:** loại thùng **không treo đơn** — chỉ ghi lại việc loại (người loại, lúc nào, ghi chú — trên thùng, trong nhật ký thao tác và thành một dòng của lịch sử đơn); kho dán nhãn và hoàn tất một phần ngay, phần thiếu giao sau *(Quyết định 28/11/2026, WF4-F2B)*.
 
 ### 4.3. Dán nhãn giao hàng
 
