@@ -199,13 +199,16 @@ Payment quyết định các mốc tiền của đơn:
     - Các đợt chưa `Paid` của đơn → `Cancelled`.
     - Tổng tiền đã thu của các đợt của đơn **trả phí huỷ trước** (nếu có phí).
     - Phần thừa → **số tiền phải hoàn** (§4.5). Phần phí còn thiếu → **khoản phí huỷ**, đến hạn ngay ngày huỷ, do khách trả (vòng đời như đợt, bắt đầu từ `Due`; thu bằng phiếu thu).
+    - *(✅ 2026-11-28, D46)* Huỷ theo **thẻ "Đơn thiếu N thùng"** ([17](../17-order-management/README.md) §4.14) mà phí có **Bên chịu phí = Công ty**: khách **không** trả phí — tiền đã thu hoàn toàn bộ như huỷ không phí, không có khoản phí huỷ, không vào công nợ phải thu; số phí (kèm lý do, chi tiết) ghi nhận là **chi phí của công ty** để Kế toán xử lý. **Bên chịu phí = Khách**: như trên.
+
+    > ⚠️ Giả định: Kế toán xem khoản chi phí công ty chịu ở **phần tiền của đơn** (kết quả huỷ) với nhãn "Phí do công ty chịu"; chưa có báo cáo / xuất Excel riêng. Xem [open-questions D50](../../open-questions/README.md).
 19. **Đóng phần còn lại** của đơn giao một phần: hệ thống **giảm số còn phải thu** của các đợt chưa trả đủ theo giá trị phần bị đóng (= số thùng bị đóng × số cái / thùng × đơn giá / cái — [14](../14-cart-and-order/README.md) BR-08 — cộng tiền thuế VAT tương ứng của dòng; **đợt gắn với đợt giao bị đóng trước**, rồi đợt muộn nhất trước — `AFTER_DELIVERY` trước), để khách không bao giờ trả nhiều hơn giá trị hàng đã nhận cộng phí (nếu có). Đã thu vượt phần phải giữ → số tiền phải hoàn.
 
     > ✅ Đã chốt 2026-11-05: **dòng phí khuôn / bản in** không thuộc "phần bị đóng" — đóng phần còn lại chỉ giảm theo giá trị hàng chưa giao, phí khuôn / bản in vẫn phải thu đủ (khuôn / bản in đã làm). Xem [open-questions](../../open-questions/README.md).
 
     > ⚠️ Giả định: vì các đợt chia trên tổng có thuế ([14](../14-cart-and-order/README.md) BR-21), giá trị phần bị đóng được giảm **cả tiền thuế VAT** của phần hàng đó; **dòng phí vận chuyển** cũng không thuộc "phần bị đóng" (như phí khuôn / bản in). Xem [open-questions D32](../../open-questions/README.md).
 
-    > ✅ Đã chốt 2026-11-28: hướng khách chọn trên **thẻ "Đơn thiếu N thùng"** ([17](../17-order-management/README.md) §4.14) dùng đúng hai quy tắc trên — **huỷ đơn** theo bước 18, **giao một phần rồi đóng phần còn lại** theo bước 19; số tiền trên thẻ tính theo cùng cách. ⚠️ Giả định: **thoả thuận lại số thùng** giảm số phải thu như bước 19 cho riêng số thùng bỏ — xem [open-questions D45](../../open-questions/README.md).
+    > ✅ Đã chốt 2026-11-28: hướng khách chọn trên **thẻ "Đơn thiếu N thùng"** ([17](../17-order-management/README.md) §4.14) dùng đúng hai quy tắc trên — **huỷ đơn** theo bước 18, **giao một phần rồi đóng phần còn lại** theo bước 19; số tiền trên thẻ tính theo cùng cách. **Thoả thuận lại số thùng** (chỉ bỏ số thùng thiếu của đợt đang xuất, không phụ lục) giảm số phải thu như bước 19 cho riêng số thùng bỏ, không phí (*✅ 2026-11-28* — [open-questions D45](../../open-questions/README.md)).
 
     > ✅ Đã chốt 2026-11-05: giảm số phải thu khi đóng phần còn lại được hệ thống tự điều chỉnh trên các đợt, còn phụ lục / thanh lý hợp đồng tương ứng làm ngoài hệ thống; đợt chưa trả của đơn huỷ chuyển trạng thái `Cancelled` (bổ sung ngoài danh sách trạng thái đợt đã chốt). Xem [open-questions](../../open-questions/README.md).
 
