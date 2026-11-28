@@ -166,6 +166,17 @@ Giải thích các thuật ngữ nghiệp vụ dùng trong tài liệu StockFlow
 | **Rotatable / Cho phép xoay** | Cờ trên Inventory Item của SKU (mặc định cho phép) cho biết thùng được xoay theo 6 hướng khi xếp lên xe hay phải giữ nguyên hướng đặt; khi cất hàng, thùng cho phép xoay được **xoay ngang** (đổi D và R) để kiểm vừa bin ([06 §4.4](../warehouse/06-warehouse-map-slotting/README.md)). Lấy theo SKU / quy cách thùng, không ghi đè tại kho ([08 BR-07](../warehouse/08-packing/README.md), [09 BR-17](../warehouse/09-shipping/README.md)). |
 | **Intra-warehouse Transfer / Chuyển nội bộ kho** | Di chuyển **nguyên thùng LPN** giữa các vị trí **trong cùng một kho** bằng tay *(Đã chốt 2026-11-04 — thuộc phạm vi hiện tại)*: quét 1..n thùng và vị trí đích, ghi ngay, mỗi thùng một dòng sổ `MOVE`; chỉ thùng tự do (không giữ cho đơn); không di chuyển thủ công vào khu chờ xuất; vị trí đích khác kho → từ chối (không có chuyển kho). Dùng cả để dời thùng từ khu `OVERFLOW` lên bin ([11](../warehouse/11-intra-warehouse-transfer/README.md)). |
 
+### Nhãn hiển thị trên giao diện (UI labels) *(Quyết định 26/11/2026)*
+
+Tên gọi **hiển thị cho người dùng trên giao diện**; thuật ngữ tiếng Anh ở các bảng trên là tên nghiệp vụ / kỹ thuật và không đổi.
+
+| Khái niệm | Nhãn trên giao diện |
+|-----------|---------------------|
+| Release (Quản lý kho release đơn để lấy hàng) | **Lệnh xuất kho**; nút bấm: **Xuất kho** |
+| Task (task lấy hàng) | **Nhiệm vụ lấy hàng** |
+| Bin | **Ô kệ** |
+| Shipment | **Lô giao** |
+
 ---
 
 ## 3a. Thuật ngữ mẫu, thiết kế & SKU theo mẫu của khách (Design)
