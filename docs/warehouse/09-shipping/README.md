@@ -6,7 +6,7 @@ Bàn giao các **shipment** đã [kiểm thùng & dán nhãn giao hàng](../08-p
 
 **Kiện (package)** trong module này là **thùng thành phẩm LPN** do đơn vị sản xuất đóng sẵn ([08](../08-packing/README.md) BR-02): mã kiện là mã LPN; kích thước, khối lượng, cờ cho phép xoay lấy từ **quy cách thùng** của SKU ([01](../01-product-creation/README.md)). Kho không đóng lại hàng.
 
-**Đơn vị vận chuyển là bên thứ ba và nằm ngoài hệ thống.** Với hãng thông thường, đặt xe làm **ngoài hệ thống**; riêng hãng có kiểu kết nối **tích hợp API đặt xe** thì hệ thống **gọi API của hãng để đặt xe và huỷ đặt xe** (§4.1). Hỏi trạng thái chủ động vẫn là phạm vi sau. Hệ thống **nhận** các sự kiện hãng đẩy về qua **webhook** (mã vận đơn, biển số, tài xế, mốc hành trình, kết quả giao) với hãng được cấu hình có webhook; hãng không có webhook thì nhân viên nhập mã vận đơn và ghi kết quả giao bằng tay. Từ lúc bàn giao tới lúc có kết quả giao, kiện do hãng chịu trách nhiệm.
+**Đơn vị vận chuyển là bên thứ ba và nằm ngoài hệ thống.** Với hãng thông thường, đặt xe làm **ngoài hệ thống**; riêng hãng có kiểu kết nối **tích hợp API đặt xe** thì hệ thống **gọi API của hãng để đặt xe và huỷ đặt xe** (§4.1). Hỏi trạng thái chủ động vẫn là phạm vi sau. Hệ thống **nhận** các sự kiện hãng đẩy về qua **webhook** (mã vận đơn, thông tin xe / tài xế nếu hãng cung cấp, mốc hành trình, kết quả giao) với hãng được cấu hình có webhook; hãng không có webhook thì nhân viên nhập mã vận đơn và ghi kết quả giao bằng tay. Riêng callback Ahamove hiện có tên tài xế nhưng chưa có nguồn được xác nhận cho số điện thoại, biển số hoặc POD (§4.5). Từ lúc bàn giao tới lúc có kết quả giao, kiện do hãng chịu trách nhiệm.
 
 > ✅ Đã chốt 2026-11-05: chỉ còn **giao nguyên chuyến** (bỏ hình thức gửi kiện qua hãng); thêm **cấu hình kết nối hãng**, **mã chuyến nội bộ**, **mã vận đơn theo chuyến**, **nhận trạng thái giao qua webhook** và **mốc hành trình**. Thay quyết định cũ "không tích hợp API hãng, không lấy mã vận đơn, không theo dõi hành trình" ([open-questions](../../open-questions/README.md) E1, E4).
 >
@@ -20,7 +20,7 @@ Bàn giao các **shipment** đã [kiểm thùng & dán nhãn giao hàng](../08-p
 |------|--------|-------------|
 | Lập kế hoạch xếp xe | **Dispatch Staff** / Quản lý kho | Lập kế hoạch xếp hàng 3D từ các shipment ở khu xuất hàng, chốt kế hoạch; mỗi xe sinh một chuyến bàn giao có **mã chuyến nội bộ** (§4.2) |
 | Chọn hãng & đặt xe | **Dispatch Staff** / Quản lý kho | Đặt xe với hãng (`Active`) theo kế hoạch đã chốt (ngoài hệ thống), **gửi hãng mã chuyến nội bộ** (in trên phiếu đặt xe), ghi nhận đặt xe trong hệ thống (§4.1, §4.2). Hãng **tích hợp API đặt xe**: ghi nhận đặt xe xong thì **hệ thống tự tạo đơn ở hãng** |
-| Có mã vận đơn | **Hãng** (webhook) / Dispatch Staff, Quản lý kho | Hãng đẩy mã vận đơn, biển số, tài xế qua webhook; hoặc nhân viên **nhập hàng loạt từ file** / **nhập tay** từng chuyến (§4.4). Hãng tích hợp API đặt xe: mã vận đơn = mã đơn hãng trả về khi tạo đơn; biển số, tài xế về qua webhook khi tài xế nhận đơn |
+| Có mã vận đơn | **Hãng** (webhook) / Dispatch Staff, Quản lý kho | Hãng webhook theo chuyến có thể đẩy mã vận đơn, biển số, tài xế; hoặc nhân viên **nhập hàng loạt từ file** / **nhập tay** từng chuyến (§4.4). Hãng tích hợp API đặt xe: mã vận đơn = mã đơn hãng trả về khi tạo đơn; Ahamove có thể gửi tên tài xế khi nhận đơn, còn số điện thoại và biển số cần nhập tay nếu chưa có nguồn xác nhận |
 | Bàn giao tại kho | **Dispatch Staff** ↔ tài xế / đại diện hãng | Quét từng kiện lên xe, ký biên bản bàn giao. **Bị chặn nếu chuyến chưa có mã vận đơn** (BR-23) hoặc **đợt thanh toán `BEFORE_DELIVERY` của hợp đồng chưa thu** (BR-04) |
 | Vận chuyển & giao cho khách | **Đơn vị vận chuyển** (ngoài hệ thống) | Chở tới địa chỉ giao trên đơn, giao cho người nhận của khách; không thu tiền của khách. Hãng có webhook báo mốc hành trình & kết quả giao về hệ thống |
 | Ghi nhận kết quả | **Hệ thống** (webhook) / **Quản lý kho** (của kho xuất) | Hệ thống tự cập nhật giao thành công / thất bại / hoàn hàng từ webhook (§4.5); Quản lý kho ghi tay khi hãng không có webhook / webhook chưa về, và sửa tay kèm lý do khi hãng báo sai (§4.3); hàng hoàn nhập lại kho qua [03](../03-receipt/README.md) (phiếu loại **Hàng hoàn**) |
@@ -193,7 +193,7 @@ Mục đích: từ danh sách kiện cần giao, hệ thống tính **cần lo�
    - **Hãng tích hợp API đặt xe** *(✅ 2026-11-06)* — không đặt ngoài hệ thống. Dispatch Staff chọn hãng, nhập **giờ hẹn lấy hàng**, xác nhận thứ tự điểm giao → hệ thống **tạo đơn ở hãng**:
      - điểm 0 = kho xuất; điểm 1..n = địa chỉ giao của từng shipment trên xe (người nhận, điện thoại, **mã shipment** làm mã tham chiếu của điểm), theo thứ tự Dispatch Staff xác nhận;
      - mã dịch vụ theo loại xe của chuyến và thành phố của kho; mã chuyến nội bộ ghi vào ghi chú đơn; không thu hộ, doanh nghiệp trả cước;
-     - tạo thành công → mã đơn ở hãng là **mã vận đơn** của chuyến, chuyến `Vehicle Booked`; **tài xế** (tên, điện thoại) về qua webhook khi tài xế nhận đơn — hãng hiện có (Ahamove) **không gửi biển số**, nên biển số nhập khi **ký bàn giao** (bước 8);
+     - tạo thành công → mã đơn ở hãng là **mã vận đơn** của chuyến, chuyến `Vehicle Booked`; khi Ahamove báo `ACCEPTED`, lấy tên tài xế từ `supplier_name` nếu có. `supplier_id` là mã do hãng cấp, **chưa được xác nhận là số điện thoại**; mẫu callback không có biển số. Dispatch Staff / Quản lý kho nhập tay số điện thoại (nếu cần) và biển số trước khi ký bàn giao (bước 8);
      - tạo lỗi (sai khu vực, sai dịch vụ, hãng không phản hồi…) → chuyến giữ `Planned`, báo lỗi kèm lý do để Dispatch Staff sửa hoặc chọn hãng khác (BR-29).
    - Huỷ đặt xe / mở lại kế hoạch / huỷ có kiểm soát chuyến đã đặt qua API → hệ thống **huỷ đơn ở hãng**; hãng chỉ cho huỷ khi tài xế **chưa lấy hàng**, huỷ lỗi thì báo Dispatch Staff xử lý trực tiếp với hãng (BR-29).
 
@@ -384,7 +384,7 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
 
 1. **Nhận sự kiện** — hãng gửi sự kiện tới địa chỉ webhook của hệ thống.
    - Webhook theo chuyến: mỗi sự kiện mang **mã chuyến nội bộ**, loại sự kiện, thời điểm hãng báo, chữ ký; tuỳ loại có thêm mã vận đơn / biển số / tài xế, mã shipment, lý do thất bại, POD.
-   - Hãng tích hợp API đặt xe: sự kiện mức **đơn** (mã đơn ở hãng, trạng thái, trạng thái phụ, thời điểm nhận / lấy hàng / hoàn tất, thông tin tài xế) hoặc mức **điểm giao** (mã đơn kèm số thứ tự điểm, mã shipment của điểm, trạng thái điểm, **thời điểm hoàn tất / thất bại của điểm**, lý do thất bại, POD nếu có).
+   - Hãng tích hợp API đặt xe: sự kiện mức **đơn** (mã đơn ở hãng, trạng thái, trạng thái phụ, thời điểm nhận / lấy hàng / hoàn tất, `supplier_name` nếu có và `supplier_id` là mã chưa xác nhận là số điện thoại) hoặc mức **điểm giao** (mã đơn kèm số thứ tự điểm, mã shipment của điểm, trạng thái điểm, **thời điểm hoàn tất / thất bại của điểm**, lý do thất bại). Mẫu callback Ahamove có `pod_info` nhưng chưa mô tả cấu trúc / ý nghĩa, nên **không tự gắn POD từ trường này**; POD vẫn do Quản lý kho tải lên khi có chứng từ (§4.3).
 2. **Lưu nhật ký** — **mọi** sự kiện đều được lưu: thời điểm hãng báo, thời điểm hệ thống nhận, nội dung, kết quả xử lý.
    - Ngoại lệ **vì an toàn**: sự kiện **bị từ chối xác thực** chỉ lưu **bản tóm tắt** (kích thước, mã băm, vài ký tự đầu), không lưu nguyên nội dung; sự kiện mang **mã hãng không tồn tại** thì **không lưu gì**. Nhờ vậy người gọi ẩn danh không thể làm đầy nhật ký bằng nội dung tuỳ ý hay bằng cách gửi mã hãng bịa.
 3. **Xác thực** — webhook theo chuyến: **chữ ký** bằng khoá bí mật của hãng; hãng tích hợp API đặt xe: **thông tin xác thực trong header** đã cấu hình. Sai → **danh sách lỗi**, không áp dụng.
@@ -414,13 +414,15 @@ Mỗi chuyến (một xe) có **một mã vận đơn** của hãng, kèm biển
 
    | Hãng báo | Hệ thống |
    |-------------|----------|
-   | Đơn: tài xế nhận đơn (kèm thông tin tài xế) | Điền **tài xế (tên, điện thoại)** vào chuyến (§4.4). Ahamove **không gửi biển số** khi tài xế nhận đơn, nên biển số nhập khi **ký bàn giao** (§4.2 bước 8) |
-   | Tài xế huỷ sau khi nhận → đơn quay lại tìm tài xế | Xoá biển số / tài xế cũ khỏi chuyến (giữ lịch sử), chờ tài xế mới |
+   | Đơn: tài xế nhận đơn (`ACCEPTED`, có thể có `supplier_name`) | Điền **tên tài xế** vào chuyến khi có; không dùng `supplier_id` làm số điện thoại. Mẫu callback Ahamove không có biển số; số điện thoại (nếu cần) và biển số được nhập tay trước khi **ký bàn giao** (§4.2 bước 8) |
+   | Tài xế huỷ sau khi nhận → đơn quay lại tìm tài xế | Xoá tên / số điện thoại tài xế cũ khỏi chuyến (giữ lịch sử), chờ tài xế mới; kiểm lại biển số đã nhập tay trước khi ký bàn giao |
    | Đơn: tài xế tới kho / đang chạy | Mốc hành trình **đã lấy hàng** / **đang giao** (chuyến phải đã ký bàn giao — `Dispatched`) |
    | Điểm giao hoàn tất | Shipment của điểm → `Delivered`; **thời điểm hoàn tất của điểm** là thời điểm hãng báo giao thành công (ngày lập hoá đơn — [21](../../ecommerce/21-e-invoice/README.md) §4.1) |
    | Điểm giao thất bại (kèm lý do) | Shipment của điểm → `Delivery Failed`; lý do ánh xạ theo bảng của hãng |
    | Đơn hoàn tất, đang hoàn / đã hoàn hàng | Mốc hành trình hoàn hàng; khi **đã hoàn** → các shipment `Delivery Failed` của chuyến → `Returned`, kho nhập lại qua phiếu Hàng hoàn |
    | Đơn bị huỷ (trước khi lấy hàng) | Chuyến chưa ký bàn giao → về `Planned`, xoá thông tin đặt xe (giữ lịch sử), báo Dispatch Staff đặt lại; chuyến đã ký bàn giao → danh sách lỗi. Chuyến đang `Loading` đã quét kiện: về `Planned` **giữ nguyên sơ đồ xếp**, số kiện đã xếp về 0; các kiện đã quét phải **quét dỡ về `DISPATCH`** trước khi đặt lại xe *(✅ Đã chốt 2026-11-19)* |
+
+   Nguồn đối chiếu Ahamove: [Webhook & mẫu callback](https://developers.ahamove.com/docs/webhook), [dòng trạng thái đơn hàng](https://developers.ahamove.com/docs/order-status-flow). Callback dùng thông tin xác thực trong header, không có chữ ký từng sự kiện; `supplier_id` và `pod_info` chưa đủ cơ sở để suy ra số điện thoại và POD. Cần xác nhận trực tiếp với Ahamove hoặc trên staging trước khi bổ sung các ánh xạ đó.
 
    > ✅ Đã chốt 2026-11-06 (đã thử trên môi trường thử nghiệm của hãng): trạng thái **hoàn tất** của điểm giao nghĩa là **giao thành công** cho người nhận; thời điểm hoàn tất của điểm là thời điểm hãng báo giao thành công. Xem [open-questions E25](../../open-questions/README.md).
 
