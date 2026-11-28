@@ -20,7 +20,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
 |-------|---------|
 | **Nhân viên kho (kiểm thùng)** | Bắt đầu phiên kiểm thùng, quét LPN từng thùng, loại thùng hư hỏng, in & dán nhãn giao hàng, in lại nhãn hỏng, hoàn tất phiên. **Chỉ người bắt đầu phiên** được thao tác tiếp. |
 | **Quản lý kho (Warehouse Manager)** — của kho xuất | **Cho chuyển cả tác vụ** của đơn từ khu chờ xuất sang khu xuất hàng ([07](../07-picking/README.md) §4.3); xử lý khi thiếu thùng (phân bổ lại — [07](../07-picking/README.md) §4.4); thao tác thay nhân viên trên mọi phiên; cách ly thùng hư hỏng ([20](../20-inventory-control/README.md) §4.8); nhận cảnh báo đợt thanh toán `BEFORE_DELIVERY` chưa thu, kèm **thông báo trong ứng dụng** khi hoàn tất kiểm thùng (§4.4 bước 9). |
-| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi thiếu thùng mà không phân bổ lại được; treo đơn lý do `ADDRESS` khi địa chỉ giao không hợp lệ; nhắc khách thanh toán đợt `BEFORE_DELIVERY` ([17](../../ecommerce/17-order-management/README.md)); nhận **thông báo trong ứng dụng** khi đơn hoàn tất kiểm thùng mà còn đợt `BEFORE_DELIVERY` chưa thu (§4.4 bước 9). |
+| **Nhân viên Sale (Sales Staff)** | Cho phép giao một phần; quyết định với khách khi thiếu thùng mà không phân bổ lại được — gửi thẻ "Đơn thiếu N thùng", khách chọn, Sale thực hiện ([17](../../ecommerce/17-order-management/README.md) §4.14); treo đơn lý do `ADDRESS` khi địa chỉ giao không hợp lệ; nhắc khách thanh toán đợt `BEFORE_DELIVERY` ([17](../../ecommerce/17-order-management/README.md)); nhận **thông báo trong ứng dụng** khi đơn hoàn tất kiểm thùng mà còn đợt `BEFORE_DELIVERY` chưa thu (§4.4 bước 9). |
 | **Hệ thống** | Chỉ mở phiên khi đã lấy hàng xong. Lấy kích thước, khối lượng, cờ cho phép xoay của thùng từ quy cách thùng của SKU. Tính khối lượng quy đổi. Gom thùng thành shipment. **Khoá huỷ đơn, đổi địa chỉ giao** khi thùng đầu tiên của đơn được dán nhãn ([17](../../ecommerce/17-order-management/README.md)). Cảnh báo đợt `BEFORE_DELIVERY` chưa thu; gửi **thông báo trong ứng dụng** cho Quản lý kho của kho xuất và Sale phụ trách đơn (§4.4 bước 9). |
 
 ---
@@ -66,7 +66,7 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
    - Thùng không thuộc đơn này, hoặc LPN không đọc được → từ chối, báo Quản lý kho.
    - Quét lại thùng đã kiểm không ghi thêm.
    - Số cái trong thùng là số cái chuẩn / thùng của SKU; **không mở thùng để đếm**.
-4. **Thùng hư hỏng bên ngoài** (móp, rách, ướt) → nhân viên **loại thùng** khỏi đơn → thùng `Removed`. Thùng vào hàng chờ cất lại của [07](../07-picking/README.md) §4.5 và được cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md) §4.8). Phần thiếu của dòng đơn xử lý như thiếu hàng ([07](../07-picking/README.md) §4.4) hoặc giao một phần.
+4. **Thùng hư hỏng bên ngoài** (móp, rách, ướt) → nhân viên **loại thùng** khỏi đơn → thùng `Removed`. Thùng vào hàng chờ cất lại của [07](../07-picking/README.md) §4.5 và được cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md) §4.8). Phần thiếu của dòng đơn xử lý như thiếu hàng ([07](../07-picking/README.md) §4.4) hoặc giao một phần; không phân bổ lại được thì khách chọn hướng trên thẻ "Đơn thiếu N thùng" ([17](../../ecommerce/17-order-management/README.md) §4.14) *(✅ 2026-11-28)*.
 
 ### 4.3. Dán nhãn giao hàng
 
