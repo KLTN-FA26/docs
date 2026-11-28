@@ -208,7 +208,7 @@ Payment quyết định các mốc tiền của đơn:
 
     > ⚠️ Giả định: vì các đợt chia trên tổng có thuế ([14](../14-cart-and-order/README.md) BR-21), giá trị phần bị đóng được giảm **cả tiền thuế VAT** của phần hàng đó; **dòng phí vận chuyển** cũng không thuộc "phần bị đóng" (như phí khuôn / bản in). Xem [open-questions D32](../../open-questions/README.md).
 
-    > ✅ Đã chốt 2026-11-28: hướng khách chọn trên **thẻ "Đơn thiếu N thùng"** ([17](../17-order-management/README.md) §4.14) dùng đúng hai quy tắc trên — **huỷ đơn** theo bước 18, **giao một phần rồi đóng phần còn lại** theo bước 19; số tiền trên thẻ tính theo cùng cách. **Thoả thuận lại số thùng** (chỉ bỏ số thùng thiếu của đợt đang xuất, không phụ lục) giảm số phải thu như bước 19 cho riêng số thùng bỏ, không phí (*✅ 2026-11-28* — [open-questions D45](../../open-questions/README.md)).
+    > ✅ Đã chốt 2026-11-28: hướng khách chọn trên **thẻ "Đơn thiếu N thùng"** ([17](../17-order-management/README.md) §4.14) dùng đúng hai quy tắc trên — **huỷ đơn** theo bước 18, **giao một phần rồi đóng phần còn lại** theo bước 19; số tiền trên thẻ tính theo cùng cách. **Giảm số thùng** (chỉ bỏ số thùng thiếu của đợt đang xuất, không phụ lục) giảm số phải thu như bước 19 cho riêng số thùng bỏ, không phí (*✅ 2026-11-28* — [open-questions D45](../../open-questions/README.md)).
 
     > ✅ Đã chốt 2026-11-05: giảm số phải thu khi đóng phần còn lại được hệ thống tự điều chỉnh trên các đợt, còn phụ lục / thanh lý hợp đồng tương ứng làm ngoài hệ thống; đợt chưa trả của đơn huỷ chuyển trạng thái `Cancelled` (bổ sung ngoài danh sách trạng thái đợt đã chốt). Xem [open-questions](../../open-questions/README.md).
 

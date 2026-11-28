@@ -10,7 +10,7 @@
 >
 > ✅ Đã chốt 2026-11-28 (Sale phụ trách khách — chế độ chặt; đóng [open-questions F5](../../open-questions/README.md)): hội thoại định tuyến theo **Sale phụ trách khách** lưu trên hồ sơ ([18](../18-customer-information/README.md) §4.5) — người phụ trách, hoặc **người thay** khi người phụ trách nghỉ phép; khách chưa có người phụ trách thì vào **hàng chờ**. **Một khách, một đầu mối**: bỏ bước "Sale phụ trách chứng từ ngữ cảnh" (người gửi báo giá / hợp đồng) và bước "Sale đã chăm sóc khách gần nhất". Sale **nhận** hội thoại của khách chưa có người phụ trách thì thành người phụ trách; hội thoại của khách đã có chủ không nhận được. Chỉ người phụ trách, người thay, Sales Manager được **chủ động mở** hội thoại với khách đã có chủ. Đổi người phụ trách thì hội thoại đang mở đi theo; tài khoản Sale bị khoá thì hội thoại của họ về hàng chờ (§4.1, BR-12 – BR-14).
 >
-> ✅ Đã chốt 2026-11-28 (thiếu thùng): thêm **thẻ "Đơn thiếu N thùng"** — khi đơn thiếu thùng sau khi release mà kho xuất không phân bổ lại được, Sale gửi thẻ do hệ thống lập từ đơn; **khách bấm chọn một trong bốn hướng** (chờ sản xuất phần thiếu, thoả thuận lại số thùng, giao một phần rồi đóng phần còn lại, huỷ đơn); lựa chọn là **bằng chứng**, Sale bấm **Thực hiện** ([17](../17-order-management/README.md) §4.14; §4.7, BR-15).
+> ✅ Đã chốt 2026-11-28 (thiếu thùng): thêm **thẻ "Đơn thiếu N thùng"** — khi đơn thiếu thùng sau khi release mà kho xuất không phân bổ lại được, Sale gửi thẻ do hệ thống lập từ đơn; **khách bấm chọn một trong bốn hướng** (chờ sản xuất phần thiếu, giảm số thùng, giao một phần rồi đóng phần còn lại, huỷ đơn); lựa chọn là **bằng chứng**, Sale bấm **Thực hiện** ([17](../17-order-management/README.md) §4.14; §4.7, BR-15).
 
 ## 1. Mục đích (Purpose)
 
