@@ -538,11 +538,25 @@ flowchart TD
     ACCEPT --> ORDER["Sale tạo đơn từ báo giá<br/>chốt số thùng, số cái / thùng, đơn giá / cái, dòng phí khuôn / bản in<br/>Đơn: Draft — báo giá Converted"]
 
     ORDER --> CONTRACT["Sale lập hợp đồng mua bán — Draft<br/>các bên, dòng hàng và giá, dòng phí khuôn / bản in<br/>điều khoản giao: một địa chỉ, lịch giao — các đợt giao, cửa sổ giao, số thùng từng SKU<br/>số lần in mẫu miễn phí — mặc định từ cấu hình chung<br/>lịch thanh toán: ON_SIGNING / BEFORE_DELIVERY / AFTER_DELIVERY<br/>đợt trước / sau giao gắn được một đợt giao"]
-    CONTRACT --> SEND["Gửi hợp đồng — Sent<br/>Đơn: Pending Contract<br/>cảnh báo nếu vượt hạn mức / quá hạn"]
-    SEND --> SIGN{"Khách ký?<br/>ngoài hệ thống"}
-    SIGN -->|"Từ chối / cần sửa"| C_CANCEL["Huỷ hợp đồng, có lý do<br/>đơn về Draft để lập hợp đồng thay thế, hoặc huỷ đơn"]
+    CONTRACT --> TERMS{"Có Điều khoản khác hoặc<br/>phạt / dung sai / bảo hành khác chuẩn?"}
+    TERMS -->|Có| REVIEW["Quản lý kinh doanh duyệt điều khoản<br/>vẫn Draft, khoá sửa / gửi khi chờ"]
+    REVIEW -->|"Từ chối có lý do / Sale rút lại"| CONTRACT
+    REVIEW -->|Duyệt| CREDIT_REVIEW
+    TERMS -->|Không| CREDIT_REVIEW["Kiểm công nợ trước khi gửi<br/>không đạt: chờ Kế toán duyệt"]
+    CREDIT_REVIEW -->|"Đạt / Kế toán duyệt"| SEND["Gửi hợp đồng — Sent<br/>Đơn: Pending Contract<br/>hạn ký mặc định 7 ngày"]
+    CREDIT_REVIEW -->|"Kế toán từ chối / Sale rút lại"| CONTRACT
+    SEND --> SIGN{"Khách phản hồi trên cổng"}
+    SIGN -->|"Yêu cầu chỉnh sửa, có lý do"| REVISION["Draft, bản sửa +1<br/>giữ PDF bản gửi, đơn vẫn Pending Contract"]
+    REVISION --> CONTRACT
+    SIGN -->|"Từ chối ký"| C_CANCEL["Sale huỷ hợp đồng, có lý do<br/>đơn về Draft để lập thay thế, hoặc huỷ đơn"]
     C_CANCEL -.-> CONTRACT
-    SIGN -->|"Đã ký"| SIGNED["Sale tải file hợp đồng đã ký → hợp đồng Signed<br/>sinh các đợt thanh toán — Not Due"]
+    SIGN -->|"OTP email, họ tên / chức danh, đồng ý ký điện tử; hoặc tải PDF đã ký"| CUSTOMER_SIGNED["Customer Signed — Khách đã ký, chờ công ty ký<br/>đơn vẫn Pending Contract, chưa sinh đợt thanh toán"]
+    SEND -.-> DEADLINE["Quá hạn: chặn khách ký, báo Sale<br/>Sale gia hạn khi Sent, không tự huỷ"]
+    CUSTOMER_SIGNED --> COMPANY_SIGN["Người được uỷ quyền, có quyền ký phía công ty<br/>khác người lập / gửi; ký trong trang quản trị bằng chứng thư TEST<br/>hoặc tải bản đã ký số bên ngoài để hệ thống kiểm tra"]
+    COMPANY_SIGN --> SIGNED["Signed — hai bên đã ký<br/>PDF và trang chứng nhận, mã xác minh / QR<br/>sinh các đợt thanh toán — Not Due"]
+    CUSTOMER_SIGNED -->|"Sale huỷ trước khi công ty ký, có lý do"| C_CANCEL
+    SEND -->|"Sale ghi nhận file hai bên đã ký, kiểm tra file"| SIGNED
+    CUSTOMER_SIGNED -->|"Sale ghi nhận file hai bên đã ký, kiểm tra file"| SIGNED
 
     SIGNED --> CREDIT{"Có đợt AFTER_DELIVERY và khách<br/>quá hạn / vượt hạn mức?"}
     CREDIT -->|Có| HOLD["Đơn: On Hold — tín dụng<br/>Kế toán duyệt / từ chối"]
@@ -670,15 +684,25 @@ Chi tiết: [14 · §5.2 Hợp đồng mua bán](../ecommerce/14-cart-and-order/
 
 **Hợp đồng mua bán (Sales Contract):**
 
+> ✅ Đã chốt 2026-11-28: khách ký trước, công ty ký sau; OTP là bằng chứng đồng ý, không phải chữ ký số. PDF thử in rõ chứng thư TEST không do tổ chức chứng thực được cấp phép cấp. File tải lên được kiểm tra, nội dung khác bản gửi ký thì từ chối; scan được nhận qua khách tải lên / Sale ghi nhận và đánh dấu "không có chữ ký số"; lựa chọn công ty tải bản đã ký số yêu cầu chữ ký số hợp lệ. Chi tiết và giới hạn pháp lý xem [14 §4.3](../ecommerce/14-cart-and-order/README.md).
+
 ```mermaid
 stateDiagram-v2
+    state "Customer Signed" as CustomerSigned
     [*] --> Draft: Sale lập cho đơn Draft
-    Draft --> Sent: Gửi khách (đơn → Pending Contract)
-    Sent --> Signed: Tải file hợp đồng đã ký
+    Draft --> Sent: Đủ duyệt điều khoản, kiểm công nợ, gửi khách
+    Sent --> Draft: Khách yêu cầu chỉnh sửa có lý do, bản sửa +1
+    Sent --> CustomerSigned: Khách ký OTP hoặc tải PDF đã ký
+    CustomerSigned --> Signed: Công ty ký (khác người lập và gửi)
+    Sent --> Signed: Sale ghi nhận file hai bên đã ký
+    CustomerSigned --> Signed: Sale ghi nhận file hai bên đã ký
     Signed --> Completed: Đơn hoàn tất, mọi đợt đã thu
+    Signed --> Liquidated: Không giao được hàng nào, tiền đã xử lý xong
     Draft --> Cancelled
-    Sent --> Cancelled: Khách từ chối / cần sửa / huỷ đơn
+    Sent --> Cancelled: Huỷ kèm lý do
+    CustomerSigned --> Cancelled: Huỷ trước khi công ty ký, kèm lý do
     Completed --> [*]
+    Liquidated --> [*]
     Cancelled --> [*]
 ```
 
