@@ -112,7 +112,7 @@ Chat **gắn ngữ cảnh (context-aware)**: mỗi hội thoại có thể tham 
 ### 4.3. Báo giá, đơn & hợp đồng
 
 7. Agent lập **báo giá** ([14](../14-cart-and-order/README.md)) và gửi **thẻ báo giá** vào hội thoại. Khách bấm **Chấp nhận** hoặc **Yêu cầu sửa** ngay trên thẻ — cùng thao tác như trên trang báo giá ở cổng.
-8. Từ báo giá đã chấp nhận, agent tạo **đơn hàng** và **hợp đồng mua bán** ([14](../14-cart-and-order/README.md)), gửi **thẻ hợp đồng** (file hợp đồng, lịch các đợt thanh toán) cho khách. Khách có thể gửi lại file hợp đồng đã ký (bản scan hoặc PDF có chữ ký số) qua chat; agent tải file đó lên hợp đồng ở [14](../14-cart-and-order/README.md).
+8. Từ báo giá đã chấp nhận, agent tạo **đơn hàng** và **hợp đồng mua bán** ([14](../14-cart-and-order/README.md)), gửi **thẻ hợp đồng** (file hợp đồng, lịch các đợt thanh toán) cho khách. *(✅ Đã chốt 2026-11-28)* Thẻ phản ánh trạng thái hợp đồng, gồm **`Customer Signed` — Khách đã ký, chờ công ty ký**, và dẫn tới hợp đồng trên cổng: khách **Yêu cầu chỉnh sửa** kèm lý do khi `Sent`, hoặc ký bằng OTP email / tải PDF đã ký lên; công ty ký sau ở trang quản trị mới → `Signed`. Khách vẫn có thể gửi file **hai bên đã ký** (bản scan hoặc PDF có chữ ký số) qua chat; agent ghi nhận file đó lên hợp đồng, hệ thống kiểm tra và lưu kết quả. Chat không thay bước xác minh OTP hay quyền ký phía công ty ([14](../14-cart-and-order/README.md) BR-27 – BR-32).
 
 > ✅ Đã chốt 2026-11-05: "khách chấp nhận báo giá qua chat" nghĩa là khách bấm **Chấp nhận** trên thẻ báo giá trong hội thoại. Agent **không** tự đánh dấu chấp nhận thay khách dựa trên tin nhắn chữ. Xem [open-questions](../../open-questions/README.md).
 

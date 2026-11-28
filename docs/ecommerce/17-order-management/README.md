@@ -448,7 +448,7 @@ Báo cáo khác: bảng sức chứa kho ([06](../../warehouse/06-warehouse-map-
 | Trạng thái | Ý nghĩa | Chuyển tiếp cho phép | Ai thực hiện |
 |------------|---------|----------------------|--------------|
 | `Draft` | Sale vừa tạo đơn từ báo giá, đang lập hợp đồng | → `Pending Contract`, → `Cancelled` | Sale |
-| `Pending Contract` | Hợp đồng đã gửi, chờ ký | → `Pending Payment`, → `Confirmed`, → `On Hold` (tín dụng), → `Draft` (huỷ hợp đồng để lập lại), → `Cancelled` | Sale / Hệ thống |
+| `Pending Contract` | Hợp đồng đã gửi, chờ khách / công ty ký; khách ký → `Customer Signed` vẫn giữ đơn ở đây. Khách yêu cầu chỉnh sửa từ `Sent` đưa hợp đồng về nháp bản sửa mới, đơn vẫn ở đây ([14](../14-cart-and-order/README.md) §4.3; ✅ Đã chốt 2026-11-28) | → `Pending Payment`, → `Confirmed`, → `On Hold` (tín dụng), → `Draft` (huỷ hợp đồng để lập lại), → `Cancelled` | Người ký công ty / Sale (ghi nhận file hai bên đã ký, huỷ) / Hệ thống |
 | `Pending Payment` | Hợp đồng đã ký, chờ đợt `ON_SIGNING` | → `Confirmed`, → `Cancelled` | Hệ thống ([15](../15-payment/README.md)) / Sale |
 | `Confirmed` | Hợp đồng đã ký, đủ điều kiện theo hợp đồng; Sale chọn kho xuất, hệ thống kiểm tồn & giữ hàng tại kho xuất; Đơn sản xuất (nếu thiếu) đang lập (chưa gửi) | → `Ready to Fulfill`, → `Awaiting Stock`, → `On Hold`, → `Cancelled` | Sale / Hệ thống |
 | `Awaiting Stock` | Thiếu thành phẩm; có Đơn sản xuất đang mở (đã gửi) | → `Ready to Fulfill`, → `Partially Fulfilled` (giao trước phần có sẵn), → `On Hold`, → `Cancelled` | Hệ thống (nhận đủ hàng) / Sale |
@@ -672,7 +672,7 @@ stateDiagram-v2
 ### Business rules
 
 - **BR-01:** Trạng thái đơn là **hợp nhất** từ các module thực thi. Chỉ chuyển theo bảng §5.1 (cả ứng dụng lẫn cơ sở dữ liệu cùng chặn).
-- **BR-02:** Đơn chỉ được chọn kho xuất, giữ hàng và chuyển cho kho khi `Confirmed`: hợp đồng `Signed`, mọi đợt `ON_SIGNING` đã thu đủ, không bị treo tín dụng.
+- **BR-02:** Đơn chỉ được chọn kho xuất, giữ hàng và chuyển cho kho khi `Confirmed`: hợp đồng `Signed`, mọi đợt `ON_SIGNING` đã thu đủ, không bị treo tín dụng. *(✅ Đã chốt 2026-11-28)* `Customer Signed` mới là khách đã ký, chờ công ty ký; chưa xác nhận đơn, chưa sinh đợt thanh toán. Công ty ký sau hoặc Sale ghi nhận file hai bên đã ký mới đưa hợp đồng tới `Signed` ([14](../14-cart-and-order/README.md) BR-14, BR-15).
 - **BR-03:** Không release cho kho khi đơn `On Hold` hoặc chưa giữ đủ thùng cho phần sẽ xuất. Release do Quản lý kho của kho xuất thực hiện.
 - **BR-04:** Đơn `Awaiting Stock` phải luôn có ít nhất một **Đơn sản xuất** đang mở đã gửi (`Sent` / `Accepted` / `Sample Pending` / `In Production` / `Partially Received`) cho phần thiếu **của đợt giao kế tiếp**.
 - **BR-05:** **Đơn sản xuất chỉ phát sinh từ đơn bán**, do **Điều phối sản xuất lập** (quyền "Lập Đơn sản xuất" — [00 §2.3](../../00-system-overview/README.md)) cho phần thiếu sau khi đã kiểm tồn SKU riêng tại kho xuất (hàng dư, hàng trả). Đầu đơn có đơn bán liên quan, **đúng một đợt giao** của lịch giao (một đợt có thể có nhiều Đơn sản xuất), khách, đơn vị sản xuất (từ danh mục), **kho nhận = kho xuất của đơn bán**, ngày cần hàng, người lập, người gửi. Dòng là SKU riêng của khách của đơn, **số thùng** nguyên ≥ 1 (kèm số cái / thùng, tổng số cái, quy cách thùng), yêu cầu đóng thùng / dán nhãn, và bắt buộc đính kèm **design snapshot và file in PDF/X** hệ thống xuất khi bản thiết kế được duyệt ([12](../12-product-design/README.md)). Đơn sản xuất **bù** (BR-31) cũng gắn đơn bán và theo cùng quy tắc.

@@ -77,7 +77,7 @@ Payment quyết định các mốc tiền của đơn:
 
 ### 4.1. Sinh đợt & đến hạn
 
-1. **Sinh đợt** — khi hợp đồng `Signed` ([14](../14-cart-and-order/README.md)), hệ thống tạo các **đợt thanh toán** theo lịch, tất cả ở `Not Due`.
+1. **Sinh đợt** — khi hợp đồng `Signed` ([14](../14-cart-and-order/README.md)), hệ thống tạo các **đợt thanh toán** theo lịch, tất cả ở `Not Due`. *(✅ Đã chốt 2026-11-28)* Khách ký trước chỉ → `Customer Signed`, **chưa sinh đợt**; chỉ khi công ty ký sau, hoặc Sale ghi nhận file hai bên đã ký, hợp đồng mới `Signed` và xét điều kiện xác nhận đơn.
 2. **Đến hạn (`Due`)** theo mốc:
 
    | Mốc | Chuyển `Due` khi | Hạn trả (để tính quá hạn) |
@@ -134,6 +134,8 @@ Payment quyết định các mốc tiền của đơn:
 
    Kiểm **hai lần**: lúc Sale **gửi hợp đồng** và lúc hợp đồng **`Signed`**. Hợp đồng không có đợt `AFTER_DELIVERY` thì không kiểm.
 
+   *(✅ Đã chốt 2026-11-28)* Hợp đồng có điều khoản khác chuẩn phải **được duyệt điều khoản trước** rồi mới kiểm công nợ; hai lượt duyệt độc lập ([14](../14-cart-and-order/README.md) BR-28).
+
    **Duyệt công nợ trước khi gửi** *(✅ Đã chốt 2026-11-26, QĐ-B — thay "lúc gửi chỉ cảnh báo")*: lúc Sale bấm **Gửi**, kiểm ra `OVERDUE` / `OVER_LIMIT` thì hợp đồng **không tới khách** mà **chờ Kế toán duyệt** (BR-11):
    - hợp đồng vẫn `Draft` (khách không thấy), không xuất bản PDF; hợp đồng **khoá sửa và khoá gửi**; hệ thống **lưu lại số liệu lúc gửi** — hạn mức, dư nợ, phần trả sau giao của hợp đồng, số tiền đang quá hạn — gắn với **phiên bản hợp đồng** Sale đã gửi, để sau này xem lại vì sao đã duyệt; Kế toán (người giữ quyền duyệt tín dụng) được **báo trong ứng dụng**, và được **nhắc lại** khi hợp đồng chờ quá **24 giờ**;
    - **Kế toán duyệt** (bắt buộc ghi chú) → hệ thống kiểm lại như khi gửi (khách `Active`, cửa sổ giao chưa qua, khách còn hạn mức công nợ được duyệt — BR-12) rồi **gửi khách ngay** → hợp đồng `Sent`, người gửi là Sale đã gửi duyệt; Sale được báo;
@@ -141,7 +143,7 @@ Payment quyết định các mốc tiền của đơn:
    - **Sale rút lại** khi đang chờ → về nháp; **huỷ hợp đồng / huỷ đơn** khi đang chờ → lượt duyệt kết thúc;
    - người duyệt / từ chối phải **khác** người gửi duyệt (bốn mắt).
 
-   **Lúc ký** kiểm lại: không đạt → đơn **`On Hold` lý do tín dụng** (bước 10). Riêng hợp đồng **đã được Kế toán duyệt trước khi gửi**: kiểm lúc ký vẫn không đạt nhưng **không xấu hơn lúc duyệt** — không có khoản quá hạn mới, số quá hạn không tăng, dư nợ + phần trả sau giao không vượt con số đã duyệt — thì **cho qua**, không treo; kết quả kiểm được ghi kèm lượt duyệt trước khi gửi. Xấu hơn thì treo như mọi hợp đồng khác *(✅ Đã chốt 2026-11-26)*.
+   **Lúc hợp đồng chuyển `Signed`** kiểm lại: không đạt → đơn **`On Hold` lý do tín dụng** (bước 10). Mốc này là khi **công ty đã ký**, không phải lúc khách mới ký → `Customer Signed` *(✅ Đã chốt 2026-11-28)*. Riêng hợp đồng **đã được Kế toán duyệt trước khi gửi**: kiểm lúc ký vẫn không đạt nhưng **không xấu hơn lúc duyệt** — không có khoản quá hạn mới, số quá hạn không tăng, dư nợ + phần trả sau giao không vượt con số đã duyệt — thì **cho qua**, không treo; kết quả kiểm được ghi kèm lượt duyệt trước khi gửi. Xấu hơn thì treo như mọi hợp đồng khác *(✅ Đã chốt 2026-11-26)*.
 
    Đơn treo vì tín dụng *(✅ Đã chốt 2026-11-25)*: Kế toán (người giữ quyền duyệt đơn treo tín dụng) nhận **thông báo trong ứng dụng** một lần cho mỗi lần treo và thấy ô **"Đơn chờ duyệt tín dụng"** trên dashboard; **khách được báo** trên trang đơn: đơn đang chờ xác nhận công nợ, nếu không được xác nhận thì khoản đã trả được hoàn toàn bộ.
 10. **Đơn treo vì tín dụng** — kế toán quyết định:
