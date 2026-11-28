@@ -67,6 +67,9 @@ Module đảm bảo: **đúng đơn – đúng SKU – đủ số thùng – m�
    - Quét lại thùng đã kiểm không ghi thêm.
    - Số cái trong thùng là số cái chuẩn / thùng của SKU; **không mở thùng để đếm**.
 4. **Thùng hư hỏng bên ngoài** (móp, rách, ướt) → nhân viên **loại thùng** khỏi đơn → thùng `Removed`. Thùng vào hàng chờ cất lại của [07](../07-picking/README.md) §4.5 và được cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md) §4.8). Phần thiếu của dòng đơn xử lý như thiếu hàng ([07](../07-picking/README.md) §4.4) hoặc giao một phần.
+   - **Lịch sử đơn:** mỗi lần kho loại thùng, lịch sử đơn có thêm một dòng *"Kho loại thùng LPN… (hư hỏng) – giao một phần"* (đơn đã cho giao một phần) hoặc *"… – đơn treo, chờ Sale quyết"* (đơn bị treo), kèm ghi chú của kho; nhân viên thấy, khách không thấy *(Quyết định 28/11/2026, WF4-F2C)*.
+   - **Đơn chưa cho giao một phần:** loại thùng **treo đơn lý do `INVENTORY`** ngay lúc loại ([07](../07-picking/README.md) §4.4 bước 9); quản lý kho phân bổ lại thùng thay thế thì đơn tự gỡ treo. Khi Sale **cho phép giao một phần** mà đơn đang treo **chỉ vì thùng bị loại** (không còn dòng lấy hàng thiếu / báo thiếu, không treo vì lý do nào khác), hệ thống **tự gỡ treo** — ghi vào lịch sử đơn, đơn về đúng trạng thái trước khi treo — để dán nhãn và hoàn tất một phần tiếp được *(Quyết định 28/11/2026, WF4-F2)*. Đơn treo vì lý do khác, hoặc còn dòng thiếu, thì giữ nguyên treo.
+   - **Đơn đã cho giao một phần:** loại thùng **không treo đơn** — chỉ ghi lại việc loại (người loại, lúc nào, ghi chú — trên thùng, trong nhật ký thao tác và thành một dòng của lịch sử đơn); kho dán nhãn và hoàn tất một phần ngay, phần thiếu giao sau *(Quyết định 28/11/2026, WF4-F2B)*.
 
 ### 4.3. Dán nhãn giao hàng
 
@@ -161,7 +164,7 @@ stateDiagram-v2
 | Tình huống | Hướng xử lý |
 |------------|-------------|
 | Thiếu thùng so với dòng đơn (lấy sót, dòng lấy hàng `Short`) | Không hoàn tất đủ được. Đơn cho phép giao một phần → hoàn tất một phần kèm ghi chú; nếu không → xử lý thiếu ở [07](../07-picking/README.md) |
-| Thùng hư hỏng bên ngoài khi kiểm | Loại thùng (`Removed`); cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md)); xử lý như thiếu hàng |
+| Thùng hư hỏng bên ngoài khi kiểm | Loại thùng (`Removed`); cất nguyên thùng vào khu `QUARANTINE` ([20](../20-inventory-control/README.md)); xử lý như thiếu hàng. Đơn chưa cho giao một phần: đơn treo `INVENTORY`, Sale cho phép giao một phần thì tự gỡ treo; đơn đã cho giao một phần: không treo, chỉ ghi việc loại (§4.2 bước 4) |
 | Quét thùng không thuộc đơn / LPN lạ | Hệ thống từ chối; báo Quản lý kho kiểm lại phần lấy hàng ([07](../07-picking/README.md)) và tồn ([20](../20-inventory-control/README.md)) |
 | Nhãn LPN rách, không quét được | Quản lý kho in lại nhãn LPN theo mã ([03](../03-receipt/README.md)), rồi quét kiểm |
 | Nhân viên khác muốn làm tiếp phiên của người đã bắt đầu | Bị chặn; Quản lý kho làm thay hoặc phân công lại |
@@ -170,6 +173,7 @@ stateDiagram-v2
 | Kích thước thực của thùng khác quy cách khai báo | Quản lý kho sửa quy cách thùng ở [01](../01-product-creation/README.md); thùng đã kiểm dùng quy cách mới khi in lại nhãn / lập kế hoạch xe |
 | Đơn còn chờ hàng từ Đơn sản xuất (`Awaiting Stock`) | Chỉ kiểm & giao trước phần đã có khi Sale cho phép giao một phần; nếu không, Quản lý kho giữ thùng ở khu chờ xuất hoặc chờ đủ hàng ([07](../07-picking/README.md)) |
 | Địa chỉ giao không hợp lệ | Phát hiện trước khi dán nhãn: Sale treo đơn lý do `ADDRESS` ([17](../../ecommerce/17-order-management/README.md)), liên hệ khách sửa rồi gỡ treo. Đã dán nhãn: không đổi được; xử lý theo kết quả giao ([09](../09-shipping/README.md)) |
+| Đơn đang treo (On Hold, mọi lý do) khi kiểm thùng | Vẫn **bắt đầu phiên và quét kiểm** được; chỉ **chặn dán nhãn giao hàng và hoàn tất kiểm thùng** cho tới khi Sale gỡ treo ([17](../../ecommerce/17-order-management/README.md) §4.9). Hàng chờ kiểm thùng vẫn hiện đơn treo, kèm **lý do treo** và người gỡ treo (Sale) — không ẩn đơn *(Quyết định 25/11/2026, WF4-K2)* |
 | Hợp đồng còn đợt `BEFORE_DELIVERY` chưa thu | Hoàn tất vẫn được, kèm cảnh báo; bàn giao bị chặn tới khi đợt đó đã thu |
 
 ---
